@@ -1,0 +1,501 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0D5B2B99DA1170B36CA1D8EB /* Presidents.json in Resources */ = {isa = PBXBuildFile; fileRef = 280DED98A9EB164B59D79408 /* Presidents.json */; };
+		3348E5D78FFE7DFDD4B88751 /* PresidentDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6569C41737BBC5A21D989A6 /* PresidentDetailViewModel.swift */; };
+		3CEF6D2916FEE942185CFDD3 /* ImageDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A87741BA1E36D06FDDEF14 /* ImageDocument.swift */; };
+		42E25F814FD147A78232120B /* President.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD40AFFA6902133B2E45149 /* President.swift */; };
+		4711A42957A64B3096CE816E /* PresidentialArchiveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00EBE388751C98D46E84AB9 /* PresidentialArchiveApp.swift */; };
+		4E7F3029AB46564D3167AA48 /* Presidents.json in Resources */ = {isa = PBXBuildFile; fileRef = 280DED98A9EB164B59D79408 /* Presidents.json */; };
+		51BBB9D3682E9EAC4068D01E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4594B2788A7B8F60F7863A /* ContentView.swift */; };
+		5DB95F465E4F87BC5A59F8AE /* PresidentDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6569C41737BBC5A21D989A6 /* PresidentDetailViewModel.swift */; };
+		60BF090869DC5360417AE201 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4594B2788A7B8F60F7863A /* ContentView.swift */; };
+		83E0EFE9A86ED5093F67DF1D /* PresidentsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 728785928D75D1FCB287B95B /* PresidentsRepository.swift */; };
+		9219A15062E00E987B9B2787 /* PresidentialArchiveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E00EBE388751C98D46E84AB9 /* PresidentialArchiveApp.swift */; };
+		9AAE3BB41D1D5FBC9ECBEEBA /* ImageDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A87741BA1E36D06FDDEF14 /* ImageDocument.swift */; };
+		C2892FCD3B9576404645CF82 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BB31C7CB82CEA7C9B499D82 /* Assets.xcassets */; };
+		CF440DA0F2C90CDD8AD58996 /* WikipediaSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FEA58E753FD7F2E98E2414A /* WikipediaSummary.swift */; };
+		D25047C35218BC7CB74B4247 /* PresidentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EBB699E485D43045E2115B /* PresidentDetailView.swift */; };
+		DE86C81736B586E655187D06 /* PresidentsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 728785928D75D1FCB287B95B /* PresidentsRepository.swift */; };
+		E4470DFC6444170CBAC1F83C /* WikipediaService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B8240E7FA2588546D1B2753 /* WikipediaService.swift */; };
+		E96D658CEFB4E581F2C6F7D4 /* President.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD40AFFA6902133B2E45149 /* President.swift */; };
+		EAD149808C91BD76F8CC7286 /* WikipediaSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FEA58E753FD7F2E98E2414A /* WikipediaSummary.swift */; };
+		EE3198FA1014A010D4DC653F /* PresidentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EBB699E485D43045E2115B /* PresidentDetailView.swift */; };
+		F0A14A572FE4010C36E7BDA5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BB31C7CB82CEA7C9B499D82 /* Assets.xcassets */; };
+		F924207310A1B48D5FF6C22D /* WikipediaService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B8240E7FA2588546D1B2753 /* WikipediaService.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0EA1332643BED037814455FF /* PresidentialArchive-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PresidentialArchive-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0FD40AFFA6902133B2E45149 /* President.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = President.swift; sourceTree = "<group>"; };
+		18A87741BA1E36D06FDDEF14 /* ImageDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDocument.swift; sourceTree = "<group>"; };
+		1B8240E7FA2588546D1B2753 /* WikipediaService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikipediaService.swift; sourceTree = "<group>"; };
+		1BB31C7CB82CEA7C9B499D82 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		280DED98A9EB164B59D79408 /* Presidents.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Presidents.json; sourceTree = "<group>"; };
+		4FEA58E753FD7F2E98E2414A /* WikipediaSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikipediaSummary.swift; sourceTree = "<group>"; };
+		728785928D75D1FCB287B95B /* PresidentsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresidentsRepository.swift; sourceTree = "<group>"; };
+		8A4594B2788A7B8F60F7863A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A8EBB699E485D43045E2115B /* PresidentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresidentDetailView.swift; sourceTree = "<group>"; };
+		C6569C41737BBC5A21D989A6 /* PresidentDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresidentDetailViewModel.swift; sourceTree = "<group>"; };
+		E00EBE388751C98D46E84AB9 /* PresidentialArchiveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresidentialArchiveApp.swift; sourceTree = "<group>"; };
+		F95A937970FEA91245D2EA8D /* PresidentialArchive-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "PresidentialArchive-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FFF2DF7161C39711F3B39C8F /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		20466BCA470C2BAE316F3230 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0FD40AFFA6902133B2E45149 /* President.swift */,
+				4FEA58E753FD7F2E98E2414A /* WikipediaSummary.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		32F02F06628979BE287E6334 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				A9F4921871D911A175C24BE4 /* PresidentialArchive */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		5E7EA8E4948076C9BB9B4877 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				728785928D75D1FCB287B95B /* PresidentsRepository.swift */,
+				1B8240E7FA2588546D1B2753 /* WikipediaService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		71D1F93925A7A6C8FB61BA8D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1BB31C7CB82CEA7C9B499D82 /* Assets.xcassets */,
+				280DED98A9EB164B59D79408 /* Presidents.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A5CACACAD28C420BE9F30C01 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				18A87741BA1E36D06FDDEF14 /* ImageDocument.swift */,
+				FFF2DF7161C39711F3B39C8F /* macOS.entitlements */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		A9F4921871D911A175C24BE4 /* PresidentialArchive */ = {
+			isa = PBXGroup;
+			children = (
+				8A4594B2788A7B8F60F7863A /* ContentView.swift */,
+				A8EBB699E485D43045E2115B /* PresidentDetailView.swift */,
+				C6569C41737BBC5A21D989A6 /* PresidentDetailViewModel.swift */,
+				E00EBE388751C98D46E84AB9 /* PresidentialArchiveApp.swift */,
+				20466BCA470C2BAE316F3230 /* Models */,
+				71D1F93925A7A6C8FB61BA8D /* Resources */,
+				5E7EA8E4948076C9BB9B4877 /* Services */,
+				A5CACACAD28C420BE9F30C01 /* Support */,
+			);
+			path = PresidentialArchive;
+			sourceTree = "<group>";
+		};
+		D7760E30836632F77FBA0E11 = {
+			isa = PBXGroup;
+			children = (
+				32F02F06628979BE287E6334 /* Sources */,
+				E62074C69A751464471E7956 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E62074C69A751464471E7956 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F95A937970FEA91245D2EA8D /* PresidentialArchive-iOS.app */,
+				0EA1332643BED037814455FF /* PresidentialArchive-macOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		431097502E4DC3B4B496037C /* PresidentialArchive-macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 48EC371C2C371D26847D71F6 /* Build configuration list for PBXNativeTarget "PresidentialArchive-macOS" */;
+			buildPhases = (
+				7A36631F150CE01AC0631FF6 /* Sources */,
+				9B666C537FC9BA9DF38E9BAA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "PresidentialArchive-macOS";
+			packageProductDependencies = (
+			);
+			productName = "PresidentialArchive-macOS";
+			productReference = 0EA1332643BED037814455FF /* PresidentialArchive-macOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		787151C98135F6046D9F1C69 /* PresidentialArchive-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 58C370D6476E0D2F60CF5EFF /* Build configuration list for PBXNativeTarget "PresidentialArchive-iOS" */;
+			buildPhases = (
+				8AEB312B0E4BC21AC89AFED7 /* Sources */,
+				35CE6A5F69F861D528C7806B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "PresidentialArchive-iOS";
+			packageProductDependencies = (
+			);
+			productName = "PresidentialArchive-iOS";
+			productReference = F95A937970FEA91245D2EA8D /* PresidentialArchive-iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		609250528A668F35597FD6FD /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = B7E4BFDD44DD37FC50C40FEC /* Build configuration list for PBXProject "PresidentialArchive" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = D7760E30836632F77FBA0E11;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = E62074C69A751464471E7956 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				787151C98135F6046D9F1C69 /* PresidentialArchive-iOS */,
+				431097502E4DC3B4B496037C /* PresidentialArchive-macOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		35CE6A5F69F861D528C7806B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C2892FCD3B9576404645CF82 /* Assets.xcassets in Resources */,
+				0D5B2B99DA1170B36CA1D8EB /* Presidents.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9B666C537FC9BA9DF38E9BAA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0A14A572FE4010C36E7BDA5 /* Assets.xcassets in Resources */,
+				4E7F3029AB46564D3167AA48 /* Presidents.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7A36631F150CE01AC0631FF6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51BBB9D3682E9EAC4068D01E /* ContentView.swift in Sources */,
+				3CEF6D2916FEE942185CFDD3 /* ImageDocument.swift in Sources */,
+				42E25F814FD147A78232120B /* President.swift in Sources */,
+				D25047C35218BC7CB74B4247 /* PresidentDetailView.swift in Sources */,
+				3348E5D78FFE7DFDD4B88751 /* PresidentDetailViewModel.swift in Sources */,
+				4711A42957A64B3096CE816E /* PresidentialArchiveApp.swift in Sources */,
+				DE86C81736B586E655187D06 /* PresidentsRepository.swift in Sources */,
+				E4470DFC6444170CBAC1F83C /* WikipediaService.swift in Sources */,
+				EAD149808C91BD76F8CC7286 /* WikipediaSummary.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8AEB312B0E4BC21AC89AFED7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				60BF090869DC5360417AE201 /* ContentView.swift in Sources */,
+				9AAE3BB41D1D5FBC9ECBEEBA /* ImageDocument.swift in Sources */,
+				E96D658CEFB4E581F2C6F7D4 /* President.swift in Sources */,
+				EE3198FA1014A010D4DC653F /* PresidentDetailView.swift in Sources */,
+				5DB95F465E4F87BC5A59F8AE /* PresidentDetailViewModel.swift in Sources */,
+				9219A15062E00E987B9B2787 /* PresidentialArchiveApp.swift in Sources */,
+				83E0EFE9A86ED5093F67DF1D /* PresidentsRepository.swift in Sources */,
+				F924207310A1B48D5FF6C22D /* WikipediaService.swift in Sources */,
+				CF440DA0F2C90CDD8AD58996 /* WikipediaSummary.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		169FC1F27A7C86F4DF669143 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Presidential Archive";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.molab.presidentialarchive.ios;
+				PRODUCT_NAME = PresidentialArchive;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		72DDE6E4243C36A815703194 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Presidential Archive";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.molab.presidentialarchive.ios;
+				PRODUCT_NAME = PresidentialArchive;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		763C9555016E7A817A243FBA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/PresidentialArchive/Support/macOS.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Presidential Archive";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.molab.presidentialarchive.macos;
+				PRODUCT_NAME = PresidentialArchive;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		A08AC1AD0273AF112C6D7FC0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/PresidentialArchive/Support/macOS.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Presidential Archive";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.molab.presidentialarchive.macos;
+				PRODUCT_NAME = PresidentialArchive;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		C427304E9CF60D283DE0561F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		F9A8CD52702E250089EA0CF5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		48EC371C2C371D26847D71F6 /* Build configuration list for PBXNativeTarget "PresidentialArchive-macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				763C9555016E7A817A243FBA /* Debug */,
+				A08AC1AD0273AF112C6D7FC0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		58C370D6476E0D2F60CF5EFF /* Build configuration list for PBXNativeTarget "PresidentialArchive-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				72DDE6E4243C36A815703194 /* Debug */,
+				169FC1F27A7C86F4DF669143 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B7E4BFDD44DD37FC50C40FEC /* Build configuration list for PBXProject "PresidentialArchive" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C427304E9CF60D283DE0561F /* Debug */,
+				F9A8CD52702E250089EA0CF5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 609250528A668F35597FD6FD /* Project object */;
+}
