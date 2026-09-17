@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "Presidents.json",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

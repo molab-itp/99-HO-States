@@ -1,0 +1,3 @@
+swift command line tool to down load us presidential info from wikipedia prepare summay json 
+for asse folder in v2/US-Headers/US-Headers.xcodeproj
+- download thumbnails and add to v2/US-Headers/US-Headers/Assets.xcassets

@@ -1,0 +1,425 @@
+[
+  {
+    "extract" : "George Washington was a Founding Father and the first president of the United States, serving from 1789 to 1797. As commander of the Continental Army, Washington led Patriot forces to victory in the American Revolutionary War against the British Empire. He is commonly known as the Father of His Country for his role in bringing about American independence.",
+    "imageName" : "01 George Washington",
+    "name" : "George Washington",
+    "order" : 1,
+    "party" : "Unaffiliated",
+    "term" : "1789–1797",
+    "wikipediaTitle" : "George Washington"
+  },
+  {
+    "extract" : "John Adams was a Founding Father and the second president of the United States from 1797 to 1801. Before his presidency, he was a leader of the American Revolution that achieved independence from Great Britain. During the latter part of the Revolutionary War and in the early years of the new nation, he served the Continental Congress of the United States as a senior diplomat in Europe. Adams was the first vice president of the United States, serving from 1789 to 1797. He was a dedicated diarist and regularly corresponded with contemporaries, including his wife and advisor Abigail Adams and his friend and rival Thomas Jefferson.",
+    "imageName" : "02 John Adams",
+    "name" : "John Adams",
+    "order" : 2,
+    "party" : "Federalist",
+    "term" : "1797–1801",
+    "wikipediaTitle" : "John Adams"
+  },
+  {
+    "extract" : "Thomas Jefferson was a Founding Father and the third president of the United States, serving from 1801 to 1809. From 1797 to 1801, he served as the second vice president under John Adams. A prolific writer and philosopher, Jefferson was the primary author of the Declaration of Independence. His political philosophy, defined by republicanism, individual liberty, agrarianism, and limited government, formed the basis for Jeffersonian democracy. While he remains celebrated as an icon of American political values, Jefferson is also controversial for having enslaved more than 600 people.",
+    "imageName" : "03 Thomas Jefferson",
+    "name" : "Thomas Jefferson",
+    "order" : 3,
+    "party" : "Democratic-Republican",
+    "term" : "1801–1809",
+    "wikipediaTitle" : "Thomas Jefferson"
+  },
+  {
+    "extract" : "James Madison was a Founding Father and the fourth president of the United States from 1809 to 1817. Before his presidency, Madison was a statesman and diplomat. Madison was popularly acclaimed as the \"Father of the Constitution\" for his pivotal role in drafting and promoting the Constitution of the United States and the Bill of Rights.",
+    "imageName" : "04 James Madison",
+    "name" : "James Madison",
+    "order" : 4,
+    "party" : "Democratic-Republican",
+    "term" : "1809–1817",
+    "wikipediaTitle" : "James Madison"
+  },
+  {
+    "extract" : "James Monroe was a Founding Father and the fifth president of the United States, serving from 1817 to 1825. He was the last Founding Father to serve as president, as well as the last president of the Virginia dynasty. A member of the Democratic-Republican Party, Monroe's presidency coincided with the Era of Good Feelings, in which the First Party System era of American politics concluded. He issued the Monroe Doctrine, a policy aimed at limiting European colonialism in the Americas.",
+    "imageName" : "05 James Monroe",
+    "name" : "James Monroe",
+    "order" : 5,
+    "party" : "Democratic-Republican",
+    "term" : "1817–1825",
+    "wikipediaTitle" : "James Monroe"
+  },
+  {
+    "extract" : "John Quincy Adams was the sixth president of the United States, serving from 1825 to 1829. He previously served as the eighth United States secretary of state from 1817 to 1825; minister to Great Britain, Prussia, and Russia; and senator for Massachusetts. After his presidency, Adams uniquely returned to Congress as a member of the lower house until his death in 1848. He was the eldest son of John Adams, the second president, and First Lady Abigail Adams. Among his children were Charles Francis Adams Sr. Initially a Federalist like his father, Adams spent his presidency as a member of the Democratic-Republican Party, and later, in the mid-1830s, became affiliated with the Whig Party.",
+    "imageName" : "06 John Quincy Adams",
+    "name" : "John Quincy Adams",
+    "order" : 6,
+    "party" : "Democratic-Republican",
+    "term" : "1825–1829",
+    "wikipediaTitle" : "John Quincy Adams"
+  },
+  {
+    "extract" : "Andrew Jackson was the seventh president of the United States from 1829 to 1837. He rose to fame as a U.S. Army general and served in both houses of the U.S. Congress. His political philosophy, which dominated his presidency, became the basis for the rise of Jacksonian democracy. His legacy is controversial: being praised as an advocate for white working Americans and preserving the union of states, and criticized for his racist policies, particularly towards Native Americans.",
+    "imageName" : "07 Andrew Jackson",
+    "name" : "Andrew Jackson",
+    "order" : 7,
+    "party" : "Democratic",
+    "term" : "1829–1837",
+    "wikipediaTitle" : "Andrew Jackson"
+  },
+  {
+    "extract" : "Martin Van Buren was the eighth president of the United States, serving from 1837 to 1841. Van Buren co-founded the Democratic Party with Andrew Jackson and became Jackson's vice president from 1833 to 1837.",
+    "imageName" : "08 Martin Van Buren",
+    "name" : "Martin Van Buren",
+    "order" : 8,
+    "party" : "Democratic",
+    "term" : "1837–1841",
+    "wikipediaTitle" : "Martin Van Buren"
+  },
+  {
+    "extract" : "William Henry Harrison was the ninth president of the United States from March to April 1841. He died 31 days into his term, making him the shortest serving president and the first president to die in office. Immediately after his death, Vice President John Tyler took over, ending the constitutional crisis that had been triggered by the question of presidential succession in the U.S. Constitution.",
+    "imageName" : "09 William Henry Harrison",
+    "name" : "William Henry Harrison",
+    "order" : 9,
+    "party" : "Whig",
+    "term" : "1841",
+    "wikipediaTitle" : "William Henry Harrison"
+  },
+  {
+    "extract" : "John Tyler was the tenth president of the United States, serving from 1841 to 1845, after briefly holding office as the tenth vice president in 1841. He was elected vice president on the 1840 Whig ticket with William Henry Harrison, succeeding to the presidency following Harrison's death 31 days after assuming office as president. Tyler was a stalwart supporter and advocate of states' rights, including regarding slavery, and he adopted nationalistic policies as president only when they did not infringe on the states' powers. His unexpected rise to the presidency posed a threat to the presidential ambitions of Senator Henry Clay and other Whig politicians and left Tyler estranged from both major political parties at the time: the Whigs and the Democrats.",
+    "imageName" : "10 John Tyler",
+    "name" : "John Tyler",
+    "order" : 10,
+    "party" : "Whig",
+    "term" : "1841–1845",
+    "wikipediaTitle" : "John Tyler"
+  },
+  {
+    "extract" : "James Knox Polk was the 11th president of the United States, serving from 1845 to 1849. A protégé of Andrew Jackson and a member of the Democratic Party, he was an advocate of American expansionism and Jacksonian democracy. Polk saw Texas join the Union in his first year in office; the annexation of the formerly independent republic, which had declared independence from Mexico, was one of the precipitating causes that soon led the U.S. into the Mexican–American War. The settlement of that war expanded American territory to the Pacific Ocean. During his term, the dispute with the United Kingdom over the Oregon Territory was resolved as well, creating the present U.S.-Canadian border.",
+    "imageName" : "11 James K. Polk",
+    "name" : "James K. Polk",
+    "order" : 11,
+    "party" : "Democratic",
+    "term" : "1845–1849",
+    "wikipediaTitle" : "James K. Polk"
+  },
+  {
+    "extract" : "Zachary Taylor was the 12th president of the United States, serving from 1849 until his death in 1850. Before his presidency, Taylor was a career officer in the United States Army, rising to the rank of major general and becoming a national hero for his victories in the Mexican–American War. As a result, he won election to the White House despite his vague political beliefs. His top priority as president was to preserve the Union. He died 16 months into his term from a stomach disease. Taylor had the third-shortest presidential term in U.S. history.",
+    "imageName" : "12 Zachary Taylor",
+    "name" : "Zachary Taylor",
+    "order" : 12,
+    "party" : "Whig",
+    "term" : "1849–1850",
+    "wikipediaTitle" : "Zachary Taylor"
+  },
+  {
+    "extract" : "Millard Fillmore was the 13th president of the United States, serving from 1850 to 1853. He was the last president to be a member of the Whig Party while in the White House, and the last to be neither a Democrat nor a Republican. A former member of the U.S. House of Representatives, Fillmore was elected vice president in 1848, and succeeded to the presidency when Zachary Taylor died in 1850. Fillmore was instrumental in passing the Compromise of 1850, which led to a brief truce in the battle over the expansion of slavery.",
+    "imageName" : "13 Millard Fillmore",
+    "name" : "Millard Fillmore",
+    "order" : 13,
+    "party" : "Whig",
+    "term" : "1850–1853",
+    "wikipediaTitle" : "Millard Fillmore"
+  },
+  {
+    "extract" : "Franklin Pierce was the 14th president of the United States, serving from 1853 to 1857. A northern Democrat who believed that the abolitionist movement was a fundamental threat to national unity, he alienated anti-slavery groups by signing the Kansas–Nebraska Act and enforcing the Fugitive Slave Act. Conflict between North and South continued after Pierce's presidency, and, following Abraham Lincoln's victory in the 1860 presidential election, the Southern states seceded, resulting in the American Civil War.",
+    "imageName" : "14 Franklin Pierce",
+    "name" : "Franklin Pierce",
+    "order" : 14,
+    "party" : "Democratic",
+    "term" : "1853–1857",
+    "wikipediaTitle" : "Franklin Pierce"
+  },
+  {
+    "extract" : "James Buchanan Jr. was the 15th president of the United States, serving from 1857 to 1861. A Democrat from Pennsylvania, he upheld a pro-slavery interpretation of the U.S. Constitution that did little to reverse the sectional crisis between the North and South. In his final months in office, seven Southern states seceded, forming the Confederacy. On April 12, 1861, Confederate forces attacked Fort Sumter, starting the American Civil War.",
+    "imageName" : "15 James Buchanan",
+    "name" : "James Buchanan",
+    "order" : 15,
+    "party" : "Democratic",
+    "term" : "1857–1861",
+    "wikipediaTitle" : "James Buchanan"
+  },
+  {
+    "extract" : "Abraham Lincoln was the 16th president of the United States, serving from 1861 until his assassination in 1865. He led the United States through the American Civil War, defeating the Confederacy and playing a major role in the abolition of slavery.",
+    "imageName" : "16 Abraham Lincoln",
+    "name" : "Abraham Lincoln",
+    "order" : 16,
+    "party" : "Republican",
+    "term" : "1861–1865",
+    "wikipediaTitle" : "Abraham Lincoln"
+  },
+  {
+    "extract" : "Andrew Johnson was the 17th president of the United States, serving from 1865 to 1869. The 16th vice president, he assumed the presidency following the assassination of Abraham Lincoln. Johnson was a War Democrat who ran with Lincoln on the National Union Party ticket in the 1864 presidential election, coming to office as the American Civil War concluded. Johnson favored quick restoration of the seceded states to the Union without protection for the newly freed people who were formerly enslaved, as well as pardoning ex-Confederates. This led to conflict with the Republican Party-dominated U.S. Congress, culminating in his impeachment by the House of Representatives in 1868. He was acquitted in the Senate by one vote.",
+    "imageName" : "17 Andrew Johnson",
+    "name" : "Andrew Johnson",
+    "order" : 17,
+    "party" : "Democratic",
+    "term" : "1865–1869",
+    "wikipediaTitle" : "Andrew Johnson"
+  },
+  {
+    "extract" : "Ulysses S. Grant was the 18th president of the United States, serving from 1869 to 1877, and was the Commanding General of the Union Army, leading it to victory in the American Civil War in 1865.",
+    "imageName" : "18 Ulysses S. Grant",
+    "name" : "Ulysses S. Grant",
+    "order" : 18,
+    "party" : "Republican",
+    "term" : "1869–1877",
+    "wikipediaTitle" : "Ulysses S. Grant"
+  },
+  {
+    "extract" : "Rutherford Birchard Hayes was the 19th president of the United States, serving from 1877 to 1881. He served as Cincinnati's city solicitor from 1858 to 1861 and was known as a staunch abolitionist who defended refugee slaves in court proceedings. At the start of the Civil War, Hayes left a fledgling political career to join the Union army. He was wounded five times, most seriously at the Battle of South Mountain in 1862. Hayes earned a reputation for bravery in combat, rising in the ranks to serve as brevet major general. After the war, he was a prominent member of the \"Half-Breed\" faction of the Republican Party. Hayes served in Congress from 1865 to 1867 and was elected governor of Ohio, serving two consecutive terms from 1868 to 1872 and half of a third two-year term from 1876 to 1877 before his swearing-in as president.",
+    "imageName" : "19 Rutherford B. Hayes",
+    "name" : "Rutherford B. Hayes",
+    "order" : 19,
+    "party" : "Republican",
+    "term" : "1877–1881",
+    "wikipediaTitle" : "Rutherford B. Hayes"
+  },
+  {
+    "extract" : "James Abram Garfield was the 20th president of the United States, serving from March 1881 until his death in September that year after being shot in July. A preacher, lawyer, and Civil War general, Garfield served nine terms in the United States House of Representatives and is the only sitting member of the House to be elected president. Before he ran for president, the Ohio General Assembly had elected him to the U.S. Senate, a position he declined upon becoming president-elect.",
+    "imageName" : "20 James A. Garfield",
+    "name" : "James A. Garfield",
+    "order" : 20,
+    "party" : "Republican",
+    "term" : "1881",
+    "wikipediaTitle" : "James A. Garfield"
+  },
+  {
+    "extract" : "Chester Alan Arthur was the 21st president of the United States, serving from 1881 to 1885. A Republican from New York, he served as the 20th vice president under President James A. Garfield in 1881, assuming the presidency after Garfield's assassination. Arthur's administration saw the largest expansion of the U.S. Navy, the end of the so-called \"spoils system\", and the implementation of harsher restrictions for migrants entering from abroad.",
+    "imageName" : "21 Chester A. Arthur",
+    "name" : "Chester A. Arthur",
+    "order" : 21,
+    "party" : "Republican",
+    "term" : "1881–1885",
+    "wikipediaTitle" : "Chester A. Arthur"
+  },
+  {
+    "extract" : "Stephen Grover Cleveland was the 22nd and 24th president of the United States, serving from 1885 to 1889 and from 1893 to 1897. He was the first Democrat elected president after the American Civil War and the first U.S. president to serve nonconsecutive terms.",
+    "imageName" : "22 Grover Cleveland",
+    "name" : "Grover Cleveland",
+    "order" : 22,
+    "party" : "Democratic",
+    "term" : "1885–1889",
+    "wikipediaTitle" : "Grover Cleveland"
+  },
+  {
+    "extract" : "Benjamin Harrison was the 23rd president of the United States, serving from 1889 to 1893. He was a member of the Harrison family of Virginia—a grandson of the ninth president, William Henry Harrison, and a great-grandson of Benjamin Harrison V, a Founding Father. A Union army veteran and a Republican, he defeated Democratic Party incumbent Grover Cleveland to win the presidency in the 1888 United States presidential election by winning the Electoral College while losing the popular vote. He was defeated by Cleveland in the 1892 United States presidential election, becoming the first president to be succeeded in office by his predecessor.",
+    "imageName" : "23 Benjamin Harrison",
+    "name" : "Benjamin Harrison",
+    "order" : 23,
+    "party" : "Republican",
+    "term" : "1889–1893",
+    "wikipediaTitle" : "Benjamin Harrison"
+  },
+  {
+    "extract" : "Stephen Grover Cleveland was the 22nd and 24th president of the United States, serving from 1885 to 1889 and from 1893 to 1897. He was the first Democrat elected president after the American Civil War and the first U.S. president to serve nonconsecutive terms.",
+    "imageName" : "24 Grover Cleveland",
+    "name" : "Grover Cleveland",
+    "order" : 24,
+    "party" : "Democratic",
+    "term" : "1893–1897",
+    "wikipediaTitle" : "Grover Cleveland"
+  },
+  {
+    "extract" : "William McKinley was the 25th president of the United States, serving from 1897 until his assassination in 1901. A member of the Republican Party, he led a realignment that made Republicans largely dominant in the industrial states and nationwide for decades. McKinley successfully led the U.S. in the Spanish–American War and oversaw a period of American expansionism, with the annexations of Hawaii, Puerto Rico, Guam, the Philippines, and American Samoa.",
+    "imageName" : "25 William McKinley",
+    "name" : "William McKinley",
+    "order" : 25,
+    "party" : "Republican",
+    "term" : "1897–1901",
+    "wikipediaTitle" : "William McKinley"
+  },
+  {
+    "extract" : "Theodore Roosevelt Jr. was the 26th president of the United States, serving from 1901 to 1909. Previously serving for six months as vice president under William McKinley, Roosevelt became president after McKinley's assassination in 1901. He was 42 years old upon his first inauguration, making him the youngest person to hold the office.",
+    "imageName" : "26 Theodore Roosevelt",
+    "name" : "Theodore Roosevelt",
+    "order" : 26,
+    "party" : "Republican",
+    "term" : "1901–1909",
+    "wikipediaTitle" : "Theodore Roosevelt"
+  },
+  {
+    "extract" : "William Howard Taft was the 27th president of the United States from 1909 to 1913 and the tenth chief justice of the United States from 1921 to 1930. He is the only person to have held both offices.",
+    "imageName" : "27 William Howard Taft",
+    "name" : "William Howard Taft",
+    "order" : 27,
+    "party" : "Republican",
+    "term" : "1909–1913",
+    "wikipediaTitle" : "William Howard Taft"
+  },
+  {
+    "extract" : "Thomas Woodrow Wilson was the 28th president of the United States, serving from 1913 to 1921. He was the only Democrat to serve as president during the Progressive Era, when Republicans dominated the presidency and legislative branches. As president, Wilson made significant economic reforms and led the United States through World War I. He was the leading architect of the League of Nations, and his stance on foreign policy came to be known as Wilsonian idealism.",
+    "imageName" : "28 Woodrow Wilson",
+    "name" : "Woodrow Wilson",
+    "order" : 28,
+    "party" : "Democratic",
+    "term" : "1913–1921",
+    "wikipediaTitle" : "Woodrow Wilson"
+  },
+  {
+    "extract" : "Warren Gamaliel Harding was the 29th president of the United States, serving from 1921 until his death in 1923. A member of the Republican Party, he was one of the most popular presidents at the time of his death. After that, a number of scandals were exposed that greatly damaged his reputation.",
+    "imageName" : "29 Warren G. Harding",
+    "name" : "Warren G. Harding",
+    "order" : 29,
+    "party" : "Republican",
+    "term" : "1921–1923",
+    "wikipediaTitle" : "Warren G. Harding"
+  },
+  {
+    "extract" : "Calvin Coolidge was the 30th president of the United States, serving from 1923 to 1929. A Republican lawyer from Massachusetts, he served from 1921 to 1923 as the 29th vice president, under President Warren G. Harding, and from 1919 to 1921 as the 48th governor of Massachusetts. Coolidge gained a reputation as a small-government conservative, with a taciturn personality and dry sense of humor that earned him the nickname \"Silent Cal\".",
+    "imageName" : "30 Calvin Coolidge",
+    "name" : "Calvin Coolidge",
+    "order" : 30,
+    "party" : "Republican",
+    "term" : "1923–1929",
+    "wikipediaTitle" : "Calvin Coolidge"
+  },
+  {
+    "extract" : "Herbert Clark Hoover was the 31st president of the United States, serving from 1929 to 1933. Hoover's term as president was dominated by the Great Depression, which his attempts to alleviate proved unpopular with the American people. As a result, he lost reelection to Franklin D. Roosevelt in the 1932 United States presidential election.",
+    "imageName" : "31 Herbert Hoover",
+    "name" : "Herbert Hoover",
+    "order" : 31,
+    "party" : "Republican",
+    "term" : "1929–1933",
+    "wikipediaTitle" : "Herbert Hoover"
+  },
+  {
+    "extract" : "Franklin Delano Roosevelt, also known as FDR, was the 32nd president of the United States, serving from 1933 until his death in 1945. He is the longest-serving US president and the only one to have served more than two terms. His first two terms centered on combating the Great Depression, while his third and fourth focused on US involvement in World War II. A member of the Democratic Party, Roosevelt served in the New York State Senate from 1911 to 1913 and as the 44th governor of New York from 1929 to 1932.",
+    "imageName" : "32 Franklin D. Roosevelt",
+    "name" : "Franklin D. Roosevelt",
+    "order" : 32,
+    "party" : "Democratic",
+    "term" : "1933–1945",
+    "wikipediaTitle" : "Franklin D. Roosevelt"
+  },
+  {
+    "extract" : "Harry S. Truman was the 33rd president of the United States, serving from 1945 to 1953. As the 34th vice president in 1945, he assumed the presidency upon the death of Franklin D. Roosevelt in April. Truman set up the Marshall Plan to rebuild the badly damaged economy of Western Europe. He established the Truman Doctrine and supported the founding of NATO to contain the expansion of Soviet communism. A member of the Democratic Party, he proposed numerous New Deal coalition liberal domestic reforms, but few were enacted by the conservative coalition that dominated the United States Congress.",
+    "imageName" : "33 Harry S. Truman",
+    "name" : "Harry S. Truman",
+    "order" : 33,
+    "party" : "Democratic",
+    "term" : "1945–1953",
+    "wikipediaTitle" : "Harry S. Truman"
+  },
+  {
+    "extract" : "Dwight David \"Ike\" Eisenhower was the 34th president of the United States, serving from 1953 to 1961. In his previous military career, he commanded the Allied Expeditionary Force during World War II, including in Operation Torch in North Africa and Operation Overlord on D-Day in Normandy. For his distinguished service in the U.S. Army, Eisenhower was honored with the five-star rank of General of the Army.",
+    "imageName" : "34 Dwight D. Eisenhower",
+    "name" : "Dwight D. Eisenhower",
+    "order" : 34,
+    "party" : "Republican",
+    "term" : "1953–1961",
+    "wikipediaTitle" : "Dwight D. Eisenhower"
+  },
+  {
+    "extract" : "John Fitzgerald Kennedy, also known as JFK, was the 35th president of the United States, serving from 1961 until his assassination in 1963. He was the youngest person elected president, at 43 years, and the first Catholic president. Kennedy served at the height of the Cold War, and the majority of his foreign policy concerned relations with the Soviet Union and Cuba. A member of the Democratic Party, Kennedy represented Massachusetts in both houses of the United States Congress before his presidency.",
+    "imageName" : "35 John F. Kennedy",
+    "name" : "John F. Kennedy",
+    "order" : 35,
+    "party" : "Democratic",
+    "term" : "1961–1963",
+    "wikipediaTitle" : "John F. Kennedy"
+  },
+  {
+    "extract" : "Lyndon Baines Johnson, also known as LBJ, was the 36th president of the United States from 1963 to 1969. Johnson was vice president under John F. Kennedy from 1961 until Kennedy's assassination in 1963, when he assumed the presidency. Before becoming vice president, he served in both houses of the U.S. Congress, representing Texas as a member of the Democratic Party.",
+    "imageName" : "36 Lyndon B. Johnson",
+    "name" : "Lyndon B. Johnson",
+    "order" : 36,
+    "party" : "Democratic",
+    "term" : "1963–1969",
+    "wikipediaTitle" : "Lyndon B. Johnson"
+  },
+  {
+    "extract" : "Richard Milhous Nixon was the 37th president of the United States, serving from 1969 until his resignation in 1974. A member of the Republican Party, he represented California in both houses of the United States Congress before serving as the 36th vice president under President Dwight D. Eisenhower from 1953 to 1961. His presidency saw the reduction of U.S. involvement in the Vietnam War, détente with the Soviet Union and China, the Apollo 11 Moon landing, and the establishment of the Environmental Protection Agency and Occupational Safety and Health Administration. Nixon's second term ended early when he became the only U.S. president to resign from office, as a result of the Watergate scandal.",
+    "imageName" : "37 Richard Nixon",
+    "name" : "Richard Nixon",
+    "order" : 37,
+    "party" : "Republican",
+    "term" : "1969–1974",
+    "wikipediaTitle" : "Richard Nixon"
+  },
+  {
+    "extract" : "Gerald Rudolph Ford Jr. was the 38th president of the United States, serving from 1974 to 1977. He assumed the presidency after the resignation of Richard Nixon, under whom he served as the 40th vice president from 1973 to 1974 after the resignation of Spiro Agnew. A member of the Republican Party, Ford previously served in the United States House of Representatives from 1949 to 1973.",
+    "imageName" : "38 Gerald Ford",
+    "name" : "Gerald Ford",
+    "order" : 38,
+    "party" : "Republican",
+    "term" : "1974–1977",
+    "wikipediaTitle" : "Gerald Ford"
+  },
+  {
+    "extract" : "James Earl Carter Jr. was an American politician and humanitarian who served as the 39th president of the United States from 1977 to 1981. A member of the Democratic Party, Carter served as the 76th governor of Georgia from 1971 to 1975 and in the Georgia State Senate from 1963 to 1967. He lived longer than any other president in U.S. history, reaching age 100.",
+    "imageName" : "39 Jimmy Carter",
+    "name" : "Jimmy Carter",
+    "order" : 39,
+    "party" : "Democratic",
+    "term" : "1977–1981",
+    "wikipediaTitle" : "Jimmy Carter"
+  },
+  {
+    "extract" : "Ronald Wilson Reagan was an American politician and actor who served as the 40th president of the United States from 1981 to 1989. A member of the Republican Party, he became an important figure in the American conservative movement. The period encompassing his presidency is known as the Reagan era.",
+    "imageName" : "40 Ronald Reagan",
+    "name" : "Ronald Reagan",
+    "order" : 40,
+    "party" : "Republican",
+    "term" : "1981–1989",
+    "wikipediaTitle" : "Ronald Reagan"
+  },
+  {
+    "extract" : "George Herbert Walker Bush was the 41st president of the United States, serving from 1989 to 1993. A member of the Republican Party, he served as the 43rd vice president under Ronald Reagan. His son, George W. Bush, served as the 43rd president.",
+    "imageName" : "41 George H. W. Bush",
+    "name" : "George H. W. Bush",
+    "order" : 41,
+    "party" : "Republican",
+    "term" : "1989–1993",
+    "wikipediaTitle" : "George H. W. Bush"
+  },
+  {
+    "extract" : "William Jefferson Clinton is an American politician and lawyer who served as the 42nd president of the United States from 1993 to 2001. A member of the Democratic Party, he previously served as the attorney general of Arkansas from 1977 to 1979, the governor of Arkansas from 1979 to 1981, and governor again from 1983 to 1992. His centrist Third Way political philosophy became known as Clintonism, which defined his presidency and the succeeding decades of Democratic Party into the 21st century.",
+    "imageName" : "42 Bill Clinton",
+    "name" : "Bill Clinton",
+    "order" : 42,
+    "party" : "Democratic",
+    "term" : "1993–2001",
+    "wikipediaTitle" : "Bill Clinton"
+  },
+  {
+    "extract" : "George Walker Bush is an American politician, businessman, and retired United States Air Force officer who served as the 43rd president of the United States from 2001 to 2009. A member of the Republican Party, he served as the 46th governor of Texas from 1995 to 2000. He is the eldest son of George H. W. Bush, the 41st president of the United States.",
+    "imageName" : "43 George W. Bush",
+    "name" : "George W. Bush",
+    "order" : 43,
+    "party" : "Republican",
+    "term" : "2001–2009",
+    "wikipediaTitle" : "George W. Bush"
+  },
+  {
+    "extract" : "Barack Hussein Obama II is an American politician who served as the 44th president of the United States from 2009 to 2017. A member of the Democratic Party, he was the first African American to serve as president. Obama represented Illinois in the United States Senate from 2005 to 2008 and served as an Illinois state senator from 1997 to 2004.",
+    "imageName" : "44 Barack Obama",
+    "name" : "Barack Obama",
+    "order" : 44,
+    "party" : "Democratic",
+    "term" : "2009–2017",
+    "wikipediaTitle" : "Barack Obama"
+  },
+  {
+    "extract" : "Donald John Trump is an American politician, media personality, and businessman who is the 47th president of the United States. A member of the Republican Party, he served as the 45th president from 2017 to 2021.",
+    "imageName" : "45 Donald Trump",
+    "name" : "Donald Trump",
+    "order" : 45,
+    "party" : "Republican",
+    "term" : "2017–2021",
+    "wikipediaTitle" : "Donald Trump"
+  },
+  {
+    "extract" : "Joseph Robinette Biden Jr. is an American retired politician who was the 46th president of the United States from 2021 to 2025. A member of the Democratic Party, he represented Delaware in the United States Senate from 1973 to 2009 and also served as the 47th vice president under President Barack Obama from 2009 to 2017.",
+    "imageName" : "46 Joe Biden",
+    "name" : "Joe Biden",
+    "order" : 46,
+    "party" : "Democratic",
+    "term" : "2021–2025",
+    "wikipediaTitle" : "Joe Biden"
+  },
+  {
+    "extract" : "Donald John Trump is an American politician, media personality, and businessman who is the 47th president of the United States. A member of the Republican Party, he served as the 45th president from 2017 to 2021.",
+    "imageName" : "47 Donald Trump",
+    "name" : "Donald Trump",
+    "order" : 47,
+    "party" : "Republican",
+    "term" : "2025–present",
+    "wikipediaTitle" : "Donald Trump"
+  }
+]
