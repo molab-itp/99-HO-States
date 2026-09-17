@@ -38,3 +38,6 @@ that jumps to next random president
 v2.11
 Start Slideshow jumps to random president 
 but fails to jump to next random president after 5 seconds
+v2.12
+SlideShow still fails to advance
+add count down in tenth of seconds display in nav title

@@ -3,9 +3,11 @@ import SwiftUI
 struct HomeView: View {
     private let presidents = PresidentsRepository.loadAll()
     private let sourceURL = URL(string: "https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States")!
+    private let slideshowIntervalTenths = 50 // 5.0 seconds
     @State private var path = NavigationPath()
-    @State private var slideshowTask: Task<Void, Never>?
-    private var isSlideshowRunning: Bool { slideshowTask != nil }
+    @State private var slideshowTimer: Timer?
+    @State private var slideshowRemainingTenths = 0
+    private var isSlideshowRunning: Bool { slideshowTimer != nil }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -72,7 +74,11 @@ struct HomeView: View {
                 }
             }
             .navigationDestination(for: President.self) { president in
-                PresidentDetailView(presidents: presidents, selected: president)
+                PresidentDetailView(
+                    presidents: presidents,
+                    selected: president,
+                    slideshowCountdownTenths: isSlideshowRunning ? slideshowRemainingTenths : nil
+                )
             }
         }
         .onChange(of: path) { _, newPath in
@@ -99,20 +105,28 @@ struct HomeView: View {
 
     private func startSlideshow() {
         goToRandomPresident()
-        slideshowTask = Task {
-            while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 5_000_000_000)
-                guard !Task.isCancelled else { return }
-                await MainActor.run {
-                    goToRandomPresident()
-                }
+        slideshowRemainingTenths = slideshowIntervalTenths
+        let timer = Timer(timeInterval: 0.1, repeats: true) { _ in
+            Task { @MainActor in
+                tickSlideshow()
             }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        slideshowTimer = timer
+    }
+
+    private func tickSlideshow() {
+        slideshowRemainingTenths -= 1
+        if slideshowRemainingTenths <= 0 {
+            goToRandomPresident()
+            slideshowRemainingTenths = slideshowIntervalTenths
         }
     }
 
     private func stopSlideshow() {
-        slideshowTask?.cancel()
-        slideshowTask = nil
+        slideshowTimer?.invalidate()
+        slideshowTimer = nil
+        slideshowRemainingTenths = 0
     }
 }
 

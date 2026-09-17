@@ -4,15 +4,22 @@ let delaySecs:UInt64 = 2;
 
 struct PresidentDetailView: View {
     let presidents: [President]
+    let slideshowCountdownTenths: Int?
     @State private var index: Int
     @State private var detailsVisible = false
 
-    init(presidents: [President], selected: President) {
+    init(presidents: [President], selected: President, slideshowCountdownTenths: Int? = nil) {
         self.presidents = presidents
+        self.slideshowCountdownTenths = slideshowCountdownTenths
         _index = State(initialValue: presidents.firstIndex(of: selected) ?? 0)
     }
 
     private var president: President { presidents[index] }
+
+    private var navigationTitleText: String {
+        guard let tenths = slideshowCountdownTenths else { return "#\(president.order)" }
+        return String(format: "#%d · %.1fs", president.order, Double(tenths) / 10)
+    }
 
     var body: some View {
         ScrollView {
@@ -39,7 +46,7 @@ struct PresidentDetailView: View {
                 detailsVisible = true
             }
         }
-        .navigationTitle("#\(president.order)")
+        .navigationTitle(navigationTitleText)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .bottomBar) {
