@@ -56,3 +56,5 @@ there is still slight jiggle in president number + timer view
 try making entire text mono spaced
 !!@ still some jiggle
 usage
+v3.0
+convert swift app in folder v2 to plain javascript app and store in new folder v3

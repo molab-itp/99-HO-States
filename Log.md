@@ -214,3 +214,47 @@ callback, so tapping any detail-view navigation button cancels an active slidesh
   path stays the same, give the destination view `.id(value.id)` (or similar) if it owns `@State`
   seeded from an initializer argument — otherwise that `@State` silently goes stale on future
   updates.
+
+# --
+
+2026-09-17 (v3: plain-JS port)
+
+## Request
+
+Convert the Swift app in `v2` to a plain JavaScript app, stored in a new `v3` folder.
+
+## What was built
+
+- `v3/tools/migrate.js` — one-time Node script that reads `v2/US-Headers/US-Headers/Resources/Presidents.json`,
+  copies each president's thumbnail/large portrait out of the `Assets.xcassets` imagesets into
+  `v3/images/<order>-thumb.<ext>` / `<order>-large.<ext>`, and writes `v3/data/presidents.json`
+  with plain relative image paths (order, name, term, party, wikipediaTitle, extract, thumbnail,
+  large). Run once to produce all 47 entries + 94 images (jpg/jpeg preserved as-is).
+- `v3/index.html`, `v3/styles.css`, `v3/app.js` — dependency-free static SPA, no build step:
+  - Hash-based router: `#/` (home), `#/list`, `#/president/<order>`.
+  - **Home**: List/Random/Slideshow buttons + Wikipedia source link (mirrors `HomeView.swift`).
+  - **List**: circular thumbnails + name/term rows (mirrors `ContentView.swift`).
+  - **Detail**: portrait shows immediately; name/term/party/extract fade in 2s later via a CSS
+    `.visible` class toggle; Previous/Random/Next toolbar (mirrors `PresidentDetailView.swift`).
+  - **Slideshow**: jumps to a random president immediately, then every 5s via `setInterval(…, 100)`
+    ticking a tenths-of-a-second counter; nav title shows a zero-padded, monospaced countdown
+    (`#16 · 03.2s`); "soft" navigations (slideshow ticks, Previous/Next/Random) use
+    `history.replaceState` + manual re-render so they don't grow the back stack, while entering the
+    detail view from Home/List uses a real hash push. Manual Previous/Next/Random and navigating
+    back to `#/` both stop the slideshow — same behavior as the Swift version.
+
+## Verification
+
+- Validated `data/presidents.json` with `python3 -m json.tool` and `app.js` with `node -c`.
+- Served the folder with `python3 -m http.server` and smoke-tested all static assets (200s for
+  `index.html`, `app.js`, `styles.css`, `data/presidents.json`, sample images).
+- Used the integrated browser to click through Home → List → Detail, confirmed the 2s text
+  fade-in, started the slideshow and observed it auto-advance (e.g. `#18` → `#05`) with a live
+  countdown title, then confirmed clicking **Next** stopped the slideshow (title reverted to plain
+  `#14`, no further auto-advance after waiting).
+
+## Follow-up notes
+
+- `v3/tools/migrate.js` is a one-time/rerunnable migration tool, not part of the served app; rerun
+  it after regenerating `v2`'s assets (e.g. via `GenerateAssets`) to refresh `v3/data` and
+  `v3/images`.
