@@ -17,7 +17,8 @@ struct PresidentSummary: Codable {
     let party: String
     let wikipediaTitle: String
     let extract: String
-    let imageName: String
+    let thumbnailImageName: String?
+    let largeImageName: String?
 }
 
 struct WikipediaImage: Codable {
@@ -126,8 +127,16 @@ func downloadImage(from urlString: String) async throws -> Data {
 
 // MARK: - Filesystem helpers
 
-func imageSetName(for president: President) -> String {
+func baseImageSetName(for president: President) -> String {
     String(format: "%02d %@", president.order, president.name)
+}
+
+func thumbnailImageSetName(for president: President) -> String {
+    baseImageSetName(for: president)
+}
+
+func largeImageSetName(for president: President) -> String {
+    "\(baseImageSetName(for: president)) Large"
 }
 
 func writeImageSet(named name: String, imageData: Data, fileExtension: String, in assetsURL: URL) throws {
@@ -187,20 +196,40 @@ print("Writing assets to \(assetsURL.path)")
 
 var summaries: [PresidentSummary] = []
 
+func fileExtension(for urlString: String) -> String {
+    let ext = URL(string: urlString)?.pathExtension ?? ""
+    return ext.isEmpty ? "jpg" : ext
+}
+
 for president in presidents {
-    let setName = imageSetName(for: president)
-    print("Fetching \(president.wikipediaTitle) (\(setName))...")
+    let baseName = baseImageSetName(for: president)
+    print("Fetching \(president.wikipediaTitle) (\(baseName))...")
     do {
         let summary = try await fetchSummary(for: president.wikipediaTitle)
 
-        if let image = summary.originalimage ?? summary.thumbnail {
-            let imageData = try await downloadImage(from: image.source)
-            let ext = URL(string: image.source)?.pathExtension.isEmpty == false
-                ? URL(string: image.source)!.pathExtension
-                : "jpg"
-            try writeImageSet(named: setName, imageData: imageData, fileExtension: ext, in: assetsURL)
+        var thumbnailName: String?
+        var largeName: String?
+        var thumbnailData: Data?
+
+        if let thumbnail = summary.thumbnail {
+            thumbnailData = try await downloadImage(from: thumbnail.source)
+            let setName = thumbnailImageSetName(for: president)
+            try writeImageSet(named: setName, imageData: thumbnailData!, fileExtension: fileExtension(for: thumbnail.source), in: assetsURL)
+            thumbnailName = setName
         } else {
-            print("  warning: no image available for \(president.wikipediaTitle)")
+            print("  warning: no thumbnail available for \(president.wikipediaTitle)")
+        }
+
+        if let original = summary.originalimage {
+            // Reuse the thumbnail download if Wikipedia returned the same image for both sizes.
+            let originalData = (original.source == summary.thumbnail?.source) ? thumbnailData : try await downloadImage(from: original.source)
+            if let originalData {
+                let setName = largeImageSetName(for: president)
+                try writeImageSet(named: setName, imageData: originalData, fileExtension: fileExtension(for: original.source), in: assetsURL)
+                largeName = setName
+            }
+        } else {
+            print("  warning: no large image available for \(president.wikipediaTitle)")
         }
 
         summaries.append(PresidentSummary(
@@ -210,7 +239,8 @@ for president in presidents {
             party: president.party,
             wikipediaTitle: president.wikipediaTitle,
             extract: summary.extract,
-            imageName: setName
+            thumbnailImageName: thumbnailName,
+            largeImageName: largeName
         ))
     } catch {
         print("  error: failed to fetch \(president.wikipediaTitle): \(error)")
