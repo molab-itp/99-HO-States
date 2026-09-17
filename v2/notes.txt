@@ -46,7 +46,13 @@ SlideShow still fails to advance
 v2.14
 success! 
 stop slide show when an buttons on detail view is pressed
+!!@ usage at %50
 v2.15
 append chat to file Log.md
 format president number and count down timer is fixed width font
-and leading 0 on two digits so numbers don siggle
+and leading 0 on two digits so numbers dont jiggle
+v2.16
+there is still slight jiggle in president number + timer view
+try making entire text mono spaced
+!!@ still some jiggle
+usage

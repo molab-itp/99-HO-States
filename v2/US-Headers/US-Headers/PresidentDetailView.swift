@@ -18,9 +18,15 @@ struct PresidentDetailView: View {
 
     private var president: President { presidents[index] }
 
-    private var navigationTitleText: String {
-        guard let tenths = slideshowCountdownTenths else { return "#\(president.order)" }
-        return String(format: "#%d · %.1fs", president.order, Double(tenths) / 10)
+    // Fixed-width (leading-zero, fully monospaced) title so the number/countdown don't jiggle
+    // side-to-side as their digits change every tenth of a second.
+    private var navigationTitleView: Text {
+        let orderText = String(format: "%02d", president.order)
+        guard let tenths = slideshowCountdownTenths else {
+            return Text("#\(orderText)").font(.system(.body, design: .monospaced))
+        }
+        let secondsText = String(format: "%04.1f", Double(tenths) / 10)
+        return Text("#\(orderText) · \(secondsText)s").font(.system(.body, design: .monospaced))
     }
 
     var body: some View {
@@ -48,7 +54,7 @@ struct PresidentDetailView: View {
                 detailsVisible = true
             }
         }
-        .navigationTitle(navigationTitleText)
+        .navigationTitle(navigationTitleView)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .bottomBar) {
