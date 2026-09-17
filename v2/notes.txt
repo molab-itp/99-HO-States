@@ -19,3 +19,7 @@ images are correct here https://en.wikipedia.org/wiki/List_of_presidents_of_the_
 v2.6
 in v2/US-Headers/US-Headers/PresidentDetailView.swift
 have details fade in after 5 seconds
+v2.7
+correct 2/US-Headers/US-Headers/PresidentDetailView.swift
+the image should show up immediately
+only the text below to appear after the delay

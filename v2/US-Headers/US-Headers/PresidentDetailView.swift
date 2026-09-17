@@ -16,16 +16,18 @@ struct PresidentDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 headerImage
-                Text(president.name)
-                    .font(.largeTitle.bold())
-                Text("\(president.term) · \(president.party)")
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
-                Text(president.extract)
-                    .font(.body)
+                VStack(alignment: .leading, spacing: 16) {
+                    Text(president.name)
+                        .font(.largeTitle.bold())
+                    Text("\(president.term) · \(president.party)")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                    Text(president.extract)
+                        .font(.body)
+                }
+                .opacity(detailsVisible ? 1 : 0)
             }
             .padding()
-            .opacity(detailsVisible ? 1 : 0)
         }
         .task(id: index) {
             detailsVisible = false
