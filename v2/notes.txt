@@ -16,3 +16,6 @@ v2.5
 image for Grover Cleveland #22 is incorrect (same as 24)
 image for Trump #45 is incorrect (same as 47)
 images are correct here https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States
+v2.6
+in v2/US-Headers/US-Headers/PresidentDetailView.swift
+have details fade in after 5 seconds

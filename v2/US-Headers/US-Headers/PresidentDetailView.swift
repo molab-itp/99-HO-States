@@ -3,6 +3,7 @@ import SwiftUI
 struct PresidentDetailView: View {
     let presidents: [President]
     @State private var index: Int
+    @State private var detailsVisible = false
 
     init(presidents: [President], selected: President) {
         self.presidents = presidents
@@ -24,6 +25,15 @@ struct PresidentDetailView: View {
                     .font(.body)
             }
             .padding()
+            .opacity(detailsVisible ? 1 : 0)
+        }
+        .task(id: index) {
+            detailsVisible = false
+            try? await Task.sleep(nanoseconds: 5_000_000_000)
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeIn(duration: 0.5)) {
+                detailsVisible = true
+            }
         }
         .navigationTitle("#\(president.order)")
         .navigationBarTitleDisplayMode(.inline)
