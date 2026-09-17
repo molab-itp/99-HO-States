@@ -156,21 +156,9 @@ func writeImageSet(named name: String, imageData: Data, fileExtension: String, i
     try contentsData.write(to: imageSetURL.appendingPathComponent("Contents.json"))
 }
 
-func writeDataSet(named name: String, jsonData: Data, in assetsURL: URL) throws {
-    let dataSetURL = assetsURL.appendingPathComponent("\(name).dataset")
-    try FileManager.default.createDirectory(at: dataSetURL, withIntermediateDirectories: true)
-
-    let filename = "\(name).json"
-    try jsonData.write(to: dataSetURL.appendingPathComponent(filename))
-
-    let contents: [String: Any] = [
-        "data": [
-            ["filename": filename, "idiom": "universal"]
-        ],
-        "info": ["author": "xcode", "version": 1],
-    ]
-    let contentsData = try JSONSerialization.data(withJSONObject: contents, options: [.prettyPrinted, .sortedKeys])
-    try contentsData.write(to: dataSetURL.appendingPathComponent("Contents.json"))
+func writeResourceJSON(named filename: String, jsonData: Data, in resourcesURL: URL) throws {
+    try FileManager.default.createDirectory(at: resourcesURL, withIntermediateDirectories: true)
+    try jsonData.write(to: resourcesURL.appendingPathComponent(filename))
 }
 
 // MARK: - Main
@@ -192,7 +180,18 @@ let assetsURL: URL = {
     return defaultAssetsURL
 }()
 
+// Plain JSON resource bundled alongside the app sources (not inside the asset catalog) so it can
+// be loaded with Bundle.main.url(forResource:withExtension:).
+let resourcesURL = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .appendingPathComponent("US-Headers/US-Headers/Resources")
+
 print("Writing assets to \(assetsURL.path)")
+print("Writing summary JSON to \(resourcesURL.path)")
 
 var summaries: [PresidentSummary] = []
 
@@ -253,6 +252,6 @@ for president in presidents {
 let encoder = JSONEncoder()
 encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 let summaryData = try encoder.encode(summaries)
-try writeDataSet(named: "Presidents", jsonData: summaryData, in: assetsURL)
+try writeResourceJSON(named: "Presidents.json", jsonData: summaryData, in: resourcesURL)
 
 print("Done. Wrote \(summaries.count) president summaries and image sets.")

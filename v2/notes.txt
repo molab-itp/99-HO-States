@@ -4,3 +4,9 @@ for asse folder in v2/US-Headers/US-Headers.xcodeproj
 - download thumbnails and add to v2/US-Headers/US-Headers/Assets.xcassets
 v2.2
 update v2/Tools/GenerateAssets to include both thumbnail and larger image assets
+v2.3
+update v2/Tools/GenerateAssets to include json of presidential summary info
+for v2/US-Headers/US-Headers.xcodeproj
+v2.4
+add swiftui code to v2/US-Headers/US-Headers.xcodeproj
+to display 
