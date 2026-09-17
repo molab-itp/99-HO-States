@@ -162,3 +162,55 @@ starting screen, and a slideshow feature — then fix a bug in the slideshow.
 
 - `xcodebuild -project US-Headers.xcodeproj -scheme US-Headers -destination 'generic/platform=iOS Simulator' -sdk iphonesimulator build`
   → **BUILD SUCCEEDED** after each change (fade-in, preview, HomeView/slideshow, and the bug fix).
+
+# --
+
+2026-09-17 (v2 session, continued again)
+
+## Request
+
+Slideshow still wasn't advancing after the previous fix; add a countdown (in tenths of a second)
+to the detail view's nav title; once it finally worked, stop the slideshow whenever a
+Previous/Next/Random button is tapped on the detail view.
+
+## Attempt: switch to a Timer
+
+Replaced the async `Task`-based tick loop in `HomeView` with a Foundation `Timer` (0.1s interval,
+added to the run loop in `.common` mode so it keeps firing during scrolling), decrementing a
+`slideshowRemainingTenths` counter and jumping when it hits zero. `PresidentDetailView` gained an
+optional `slideshowCountdownTenths: Int?` shown in its nav title as `#<order> · <seconds>.<tenth>s`
+when the slideshow is active. This built fine but **still didn't advance** — the countdown ticked
+down but the displayed president never changed.
+
+## Actual root cause found
+
+Not a timing bug at all: `NavigationStack` reuses the same `PresidentDetailView` instance (and its
+`@State private var index`) whenever only the _value_ at an existing stack position changes —
+`init`'s `State(initialValue:)` only applies the very first time that view identity is created.
+So each slideshow tick correctly replaced `path`'s president and the countdown text updated (a
+plain, non-`@State` property refreshed every render), but `index` — and therefore the president
+actually shown — never budged.
+
+**Fix:** added `.id(president.id)` to the `PresidentDetailView` inside `HomeView`'s
+`navigationDestination(for: President.self)`, forcing SwiftUI to create a brand-new view (and
+fresh `@State index`) whenever the president differs, including repeated swaps at the same stack
+position during the slideshow. Confirmed working by the user ("success!").
+
+## Stop slideshow on manual navigation
+
+Added `onManualNavigation: (() -> Void)?` to `PresidentDetailView`, invoked at the top of
+`goToPrevious()`/`goToNext()`/`goToRandom()`. `HomeView` passes its `stopSlideshow` method as that
+callback, so tapping any detail-view navigation button cancels an active slideshow.
+
+## Verification
+
+- `xcodebuild -project US-Headers.xcodeproj -scheme US-Headers -destination 'generic/platform=iOS Simulator' -sdk iphonesimulator build`
+  → **BUILD SUCCEEDED** after the Timer attempt, the `.id(president.id)` fix, and the
+  `onManualNavigation` wiring.
+
+## Follow-up notes
+
+- Lesson: when a `NavigationStack` destination's displayed value changes while its position in the
+  path stays the same, give the destination view `.id(value.id)` (or similar) if it owns `@State`
+  seeded from an initializer argument — otherwise that `@State` silently goes stale on future
+  updates.

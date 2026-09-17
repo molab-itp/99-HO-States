@@ -5,12 +5,14 @@ let delaySecs:UInt64 = 2;
 struct PresidentDetailView: View {
     let presidents: [President]
     let slideshowCountdownTenths: Int?
+    var onManualNavigation: (() -> Void)? = nil
     @State private var index: Int
     @State private var detailsVisible = false
 
-    init(presidents: [President], selected: President, slideshowCountdownTenths: Int? = nil) {
+    init(presidents: [President], selected: President, slideshowCountdownTenths: Int? = nil, onManualNavigation: (() -> Void)? = nil) {
         self.presidents = presidents
         self.slideshowCountdownTenths = slideshowCountdownTenths
+        self.onManualNavigation = onManualNavigation
         _index = State(initialValue: presidents.firstIndex(of: selected) ?? 0)
     }
 
@@ -99,16 +101,19 @@ struct PresidentDetailView: View {
 
     private func goToPrevious() {
         guard index > 0 else { return }
+        onManualNavigation?()
         index -= 1
     }
 
     private func goToNext() {
         guard index < presidents.count - 1 else { return }
+        onManualNavigation?()
         index += 1
     }
 
     private func goToRandom() {
         guard presidents.count > 1 else { return }
+        onManualNavigation?()
         var newIndex = Int.random(in: 0..<presidents.count)
         while newIndex == index {
             newIndex = Int.random(in: 0..<presidents.count)
