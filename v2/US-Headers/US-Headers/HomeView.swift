@@ -4,6 +4,8 @@ struct HomeView: View {
     private let presidents = PresidentsRepository.loadAll()
     private let sourceURL = URL(string: "https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States")!
     @State private var path = NavigationPath()
+    @State private var slideshowTask: Task<Void, Never>?
+    private var isSlideshowRunning: Bool { slideshowTask != nil }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -39,6 +41,17 @@ struct HomeView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
+
+                    Button {
+                        toggleSlideshow()
+                    } label: {
+                        Label(
+                            isSlideshowRunning ? "Stop Slideshow" : "Start Slideshow",
+                            systemImage: isSlideshowRunning ? "stop.circle" : "play.circle"
+                        )
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
                 }
                 .controlSize(.large)
                 .padding(.horizontal, 32)
@@ -62,11 +75,44 @@ struct HomeView: View {
                 PresidentDetailView(presidents: presidents, selected: president)
             }
         }
+        .onChange(of: path) { _, newPath in
+            if newPath.isEmpty {
+                stopSlideshow()
+            }
+        }
     }
 
     private func goToRandomPresident() {
         guard let president = presidents.randomElement() else { return }
-        path.append(president)
+        var newPath = NavigationPath()
+        newPath.append(president)
+        path = newPath
+    }
+
+    private func toggleSlideshow() {
+        if isSlideshowRunning {
+            stopSlideshow()
+        } else {
+            startSlideshow()
+        }
+    }
+
+    private func startSlideshow() {
+        goToRandomPresident()
+        slideshowTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+                guard !Task.isCancelled else { return }
+                await MainActor.run {
+                    goToRandomPresident()
+                }
+            }
+        }
+    }
+
+    private func stopSlideshow() {
+        slideshowTask?.cancel()
+        slideshowTask = nil
     }
 }
 

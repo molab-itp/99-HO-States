@@ -31,4 +31,10 @@ create new starting screen with
 button to access list of presidents
 button pick a random president detail
 link to source of info and images
-
+v2.10
+in v2/US-Headers/US-Headers
+add button in HomeView that starts a 5 second loop
+that jumps to next random president
+v2.11
+Start Slideshow jumps to random president 
+but fails to jump to next random president after 5 seconds
