@@ -9,4 +9,6 @@ update v2/Tools/GenerateAssets to include json of presidential summary info
 for v2/US-Headers/US-Headers.xcodeproj
 v2.4
 add swiftui code to v2/US-Headers/US-Headers.xcodeproj
-to display 
+to display presidential summary as list with thumbnails 
+and detail view with next previous button
+and random button to jump to random entry details view

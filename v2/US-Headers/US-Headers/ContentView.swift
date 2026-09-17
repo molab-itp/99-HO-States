@@ -8,14 +8,53 @@
 import SwiftUI
 
 struct ContentView: View {
+    private let presidents = PresidentsRepository.loadAll()
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            List(presidents) { president in
+                NavigationLink(value: president) {
+                    PresidentRow(president: president)
+                }
+            }
+            .navigationTitle("US Presidents")
+            .navigationDestination(for: President.self) { president in
+                PresidentDetailView(presidents: presidents, selected: president)
+            }
         }
-        .padding()
+    }
+}
+
+private struct PresidentRow: View {
+    let president: President
+
+    var body: some View {
+        HStack(spacing: 12) {
+            thumbnail
+                .frame(width: 44, height: 44)
+                .clipShape(Circle())
+            VStack(alignment: .leading) {
+                Text(president.name)
+                    .font(.headline)
+                Text(president.term)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var thumbnail: some View {
+        if let name = president.thumbnailImageName, let image = imageIfAvailable(name) {
+            image
+                .resizable()
+                .scaledToFill()
+        } else {
+            Image(systemName: "person.crop.circle")
+                .resizable()
+                .scaledToFit()
+                .foregroundStyle(.secondary)
+        }
     }
 }
 
