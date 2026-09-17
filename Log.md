@@ -115,3 +115,50 @@ incorrect portraits for the two nonconsecutive presidents.
   fragile if the package is moved — first attempt was off by one directory level and briefly
   wrote a stray `v2/Tools/US-Headers` folder (cleaned up).
 - Re-run `swift run GenerateAssets` from `v2/Tools/GenerateAssets` any time to refresh data/images.
+
+# --
+
+2026-09-17 (v2 session, continued)
+
+## Request
+
+Polish `v2/US-Headers`: delayed detail reveal in `PresidentDetailView`, a preview, a proper
+starting screen, and a slideshow feature — then fix a bug in the slideshow.
+
+## What was built
+
+- `PresidentDetailView.swift`
+  - Detail text (name, term/party, bio extract) now starts hidden and fades in (`easeIn`, 0.5s)
+    5 seconds after the president shown changes, via `.task(id: index)`; the portrait image is
+    outside that opacity group so it still appears immediately.
+  - Added a `#Preview` that loads `PresidentsRepository.loadAll()` and wraps the view in a
+    `NavigationStack` (required for its title/toolbar to render in the preview).
+- `HomeView.swift` (new) — app's starting screen:
+  - Owns the root `NavigationStack` (with a bound `NavigationPath`) and declares the shared
+    `navigationDestination` for both `HomeDestination.list` (→ `ContentView`) and `President`
+    (→ `PresidentDetailView`).
+  - **List of Presidents** button, **Random President** button, and a **Source: Wikipedia**
+    `Link` to the presidents list page.
+  - **Start/Stop Slideshow** button: jumps to a random president immediately, then a repeating
+    background `Task` swaps in a new random president every 5 seconds; toggling/back navigation
+    cancels the loop.
+- `ContentView.swift` — no longer owns its own `NavigationStack`/`navigationDestination`; it's now
+  a plain pushed screen (`presidents` passed in) since `HomeView` owns the stack.
+- `US_HeadersApp.swift` — launches `HomeView` instead of `ContentView`.
+
+## Bug fix: slideshow stopped after one jump
+
+- Symptom: tapping **Start Slideshow** jumped to a random president once but never advanced again
+  after 5 seconds.
+- Root cause: the tick handler did `path.removeLast()` then `goToRandomPresident()` (which
+  appended). The `removeLast()` briefly made `path` empty, which fired
+  `.onChange(of: path) { if newPath.isEmpty { stopSlideshow() } }` and self-cancelled the very
+  task that was running the loop — so only the first jump ever happened.
+- Fix: `goToRandomPresident()` now builds a fresh `NavigationPath` containing just the new
+  president and assigns it to `path` in one atomic step, so `path` never passes through an empty
+  state during a slideshow tick.
+
+## Verification
+
+- `xcodebuild -project US-Headers.xcodeproj -scheme US-Headers -destination 'generic/platform=iOS Simulator' -sdk iphonesimulator build`
+  → **BUILD SUCCEEDED** after each change (fade-in, preview, HomeView/slideshow, and the bug fix).
