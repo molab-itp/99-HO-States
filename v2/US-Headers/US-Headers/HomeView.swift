@@ -79,6 +79,10 @@ struct HomeView: View {
                     selected: president,
                     slideshowCountdownTenths: isSlideshowRunning ? slideshowRemainingTenths : nil
                 )
+                // Forces a fresh view (and fresh @State index) each time the slideshow swaps in a
+                // different president at the same navigation stack position; otherwise SwiftUI
+                // reuses the existing PresidentDetailView instance and its stale `index`.
+                .id(president.id)
             }
         }
         .onChange(of: path) { _, newPath in

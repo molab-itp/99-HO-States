@@ -41,3 +41,5 @@ but fails to jump to next random president after 5 seconds
 v2.12
 SlideShow still fails to advance
 add count down in tenth of seconds display in nav title
+v2.13
+SlideShow still fails to advance
