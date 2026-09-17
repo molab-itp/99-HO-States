@@ -8,6 +8,10 @@ struct President: Codable {
     let term: String
     let party: String
     let wikipediaTitle: String
+    /// Wikimedia Commons filename to use instead of the Wikipedia article's canonical portrait.
+    /// Needed for presidents with nonconsecutive terms (Cleveland, Trump) whose article page
+    /// only exposes one portrait via the page/summary endpoint regardless of which term this row represents.
+    var commonsFile: String? = nil
 }
 
 struct PresidentSummary: Codable {
@@ -64,9 +68,9 @@ let presidents: [President] = [
     President(order: 19, name: "Rutherford B. Hayes", term: "1877–1881", party: "Republican", wikipediaTitle: "Rutherford B. Hayes"),
     President(order: 20, name: "James A. Garfield", term: "1881", party: "Republican", wikipediaTitle: "James A. Garfield"),
     President(order: 21, name: "Chester A. Arthur", term: "1881–1885", party: "Republican", wikipediaTitle: "Chester A. Arthur"),
-    President(order: 22, name: "Grover Cleveland", term: "1885–1889", party: "Democratic", wikipediaTitle: "Grover Cleveland"),
+    President(order: 22, name: "Grover Cleveland", term: "1885–1889", party: "Democratic", wikipediaTitle: "Grover Cleveland", commonsFile: "Grover Cleveland by Charles Milton Bell color change (3x4 cropped b).jpg"),
     President(order: 23, name: "Benjamin Harrison", term: "1889–1893", party: "Republican", wikipediaTitle: "Benjamin Harrison"),
-    President(order: 24, name: "Grover Cleveland", term: "1893–1897", party: "Democratic", wikipediaTitle: "Grover Cleveland"),
+    President(order: 24, name: "Grover Cleveland", term: "1893–1897", party: "Democratic", wikipediaTitle: "Grover Cleveland", commonsFile: "StephenGroverCleveland.jpg"),
     President(order: 25, name: "William McKinley", term: "1897–1901", party: "Republican", wikipediaTitle: "William McKinley"),
     President(order: 26, name: "Theodore Roosevelt", term: "1901–1909", party: "Republican", wikipediaTitle: "Theodore Roosevelt"),
     President(order: 27, name: "William Howard Taft", term: "1909–1913", party: "Republican", wikipediaTitle: "William Howard Taft"),
@@ -87,9 +91,9 @@ let presidents: [President] = [
     President(order: 42, name: "Bill Clinton", term: "1993–2001", party: "Democratic", wikipediaTitle: "Bill Clinton"),
     President(order: 43, name: "George W. Bush", term: "2001–2009", party: "Republican", wikipediaTitle: "George W. Bush"),
     President(order: 44, name: "Barack Obama", term: "2009–2017", party: "Democratic", wikipediaTitle: "Barack Obama"),
-    President(order: 45, name: "Donald Trump", term: "2017–2021", party: "Republican", wikipediaTitle: "Donald Trump"),
+    President(order: 45, name: "Donald Trump", term: "2017–2021", party: "Republican", wikipediaTitle: "Donald Trump", commonsFile: "Donald Trump official portrait (3x4a).jpg"),
     President(order: 46, name: "Joe Biden", term: "2021–2025", party: "Democratic", wikipediaTitle: "Joe Biden"),
-    President(order: 47, name: "Donald Trump", term: "2025–present", party: "Republican", wikipediaTitle: "Donald Trump"),
+    President(order: 47, name: "Donald Trump", term: "2025–present", party: "Republican", wikipediaTitle: "Donald Trump", commonsFile: "Official Presidential Portrait of President Donald J. Trump (2025).jpg"),
 ]
 
 // MARK: - Networking
@@ -123,6 +127,14 @@ func downloadImage(from urlString: String) async throws -> Data {
         throw GeneratorError.badResponse
     }
     return data
+}
+
+/// Builds a Wikimedia Commons "Special:FilePath" URL that redirects to a scaled rendition of the file.
+func commonsFilePathURL(filename: String, width: Int) -> String? {
+    guard let encodedName = filename.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+        return nil
+    }
+    return "https://commons.wikimedia.org/wiki/Special:FilePath/\(encodedName)?width=\(width)"
 }
 
 // MARK: - Filesystem helpers
@@ -210,25 +222,41 @@ for president in presidents {
         var largeName: String?
         var thumbnailData: Data?
 
-        if let thumbnail = summary.thumbnail {
-            thumbnailData = try await downloadImage(from: thumbnail.source)
-            let setName = thumbnailImageSetName(for: president)
-            try writeImageSet(named: setName, imageData: thumbnailData!, fileExtension: fileExtension(for: thumbnail.source), in: assetsURL)
-            thumbnailName = setName
-        } else {
-            print("  warning: no thumbnail available for \(president.wikipediaTitle)")
-        }
-
-        if let original = summary.originalimage {
-            // Reuse the thumbnail download if Wikipedia returned the same image for both sizes.
-            let originalData = (original.source == summary.thumbnail?.source) ? thumbnailData : try await downloadImage(from: original.source)
-            if let originalData {
+        if let commonsFile = president.commonsFile {
+            // Use the term-specific Commons portrait rather than the article's canonical image.
+            if let thumbURL = commonsFilePathURL(filename: commonsFile, width: 320) {
+                thumbnailData = try await downloadImage(from: thumbURL)
+                let setName = thumbnailImageSetName(for: president)
+                try writeImageSet(named: setName, imageData: thumbnailData!, fileExtension: fileExtension(for: commonsFile), in: assetsURL)
+                thumbnailName = setName
+            }
+            if let largeURL = commonsFilePathURL(filename: commonsFile, width: 1200) {
+                let largeData = try await downloadImage(from: largeURL)
                 let setName = largeImageSetName(for: president)
-                try writeImageSet(named: setName, imageData: originalData, fileExtension: fileExtension(for: original.source), in: assetsURL)
+                try writeImageSet(named: setName, imageData: largeData, fileExtension: fileExtension(for: commonsFile), in: assetsURL)
                 largeName = setName
             }
         } else {
-            print("  warning: no large image available for \(president.wikipediaTitle)")
+            if let thumbnail = summary.thumbnail {
+                thumbnailData = try await downloadImage(from: thumbnail.source)
+                let setName = thumbnailImageSetName(for: president)
+                try writeImageSet(named: setName, imageData: thumbnailData!, fileExtension: fileExtension(for: thumbnail.source), in: assetsURL)
+                thumbnailName = setName
+            } else {
+                print("  warning: no thumbnail available for \(president.wikipediaTitle)")
+            }
+
+            if let original = summary.originalimage {
+                // Reuse the thumbnail download if Wikipedia returned the same image for both sizes.
+                let originalData = (original.source == summary.thumbnail?.source) ? thumbnailData : try await downloadImage(from: original.source)
+                if let originalData {
+                    let setName = largeImageSetName(for: president)
+                    try writeImageSet(named: setName, imageData: originalData, fileExtension: fileExtension(for: original.source), in: assetsURL)
+                    largeName = setName
+                }
+            } else {
+                print("  warning: no large image available for \(president.wikipediaTitle)")
+            }
         }
 
         summaries.append(PresidentSummary(
