@@ -23,3 +23,5 @@ v2.7
 correct 2/US-Headers/US-Headers/PresidentDetailView.swift
 the image should show up immediately
 only the text below to appear after the delay
+v2.8
+add preview to v2/US-Headers/US-Headers/PresidentDetailView.swift

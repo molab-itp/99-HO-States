@@ -1,5 +1,7 @@
 import SwiftUI
 
+let delaySecs:UInt64 = 2;
+
 struct PresidentDetailView: View {
     let presidents: [President]
     @State private var index: Int
@@ -31,7 +33,7 @@ struct PresidentDetailView: View {
         }
         .task(id: index) {
             detailsVisible = false
-            try? await Task.sleep(nanoseconds: 5_000_000_000)
+            try? await Task.sleep(nanoseconds: delaySecs * 1_000_000_000)
             guard !Task.isCancelled else { return }
             withAnimation(.easeIn(duration: 0.5)) {
                 detailsVisible = true
@@ -105,5 +107,12 @@ struct PresidentDetailView: View {
             newIndex = Int.random(in: 0..<presidents.count)
         }
         index = newIndex
+    }
+}
+
+#Preview {
+    let presidents = PresidentsRepository.loadAll()
+    NavigationStack {
+        PresidentDetailView(presidents: presidents, selected: presidents[0])
     }
 }
