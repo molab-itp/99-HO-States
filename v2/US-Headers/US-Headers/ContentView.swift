@@ -7,21 +7,18 @@
 
 import SwiftUI
 
+/// The scrollable list of all presidents. Presented inside a `NavigationStack` owned by
+/// `HomeView`, which also declares the shared `navigationDestination(for: President.self)`.
 struct ContentView: View {
-    private let presidents = PresidentsRepository.loadAll()
+    let presidents: [President]
 
     var body: some View {
-        NavigationStack {
-            List(presidents) { president in
-                NavigationLink(value: president) {
-                    PresidentRow(president: president)
-                }
-            }
-            .navigationTitle("US Presidents")
-            .navigationDestination(for: President.self) { president in
-                PresidentDetailView(presidents: presidents, selected: president)
+        List(presidents) { president in
+            NavigationLink(value: president) {
+                PresidentRow(president: president)
             }
         }
+        .navigationTitle("US Presidents")
     }
 }
 
@@ -59,5 +56,11 @@ private struct PresidentRow: View {
 }
 
 #Preview {
-    ContentView()
+    let presidents = PresidentsRepository.loadAll()
+    NavigationStack {
+        ContentView(presidents: presidents)
+            .navigationDestination(for: President.self) { president in
+                PresidentDetailView(presidents: presidents, selected: president)
+            }
+    }
 }

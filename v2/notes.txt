@@ -25,3 +25,10 @@ the image should show up immediately
 only the text below to appear after the delay
 v2.8
 add preview to v2/US-Headers/US-Headers/PresidentDetailView.swift
+v2.9
+in v2/US-Headers/US-Headers
+create new starting screen with 
+button to access list of presidents
+button pick a random president detail
+link to source of info and images
+
