@@ -67,3 +67,9 @@ v2.18
 error: Only unstyled text can be used with navigationTitle(_:) in v2/US-Headers/US-Headers/PresidentDetailView.swift
 v2.19 Create an AppModel that creates an initial shuffled array of president indexes that is used in random president selection. Random button should select the next from this array
 v2.20 when in slideshow mode an button press in v2/US-Headers/US-Headers/PresidentDetailView.swift should stop the slideshow in place usual of button action
+v2.19 
+in v2/US-Headers
+create a progress bar above the image to show how many 
+presidents have already been show. the bar should alternate
+between red, white, and blue. Include outline so white is distingwishable
+2026-09-18 17:41:00 

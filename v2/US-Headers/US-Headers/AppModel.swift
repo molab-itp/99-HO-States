@@ -14,6 +14,10 @@ final class AppModel {
     private var shuffledIndexes: [Int]
     private var nextDrawPosition = 0
 
+    /// IDs of presidents whose detail view has been shown, used to drive the progress bar in
+    /// `PresidentDetailView`. A `Set` so repeat views (e.g. during a slideshow) don't double-count.
+    private(set) var viewedPresidentIDs: Set<President.ID> = []
+
     init(presidents: [President] = PresidentsRepository.loadAll()) {
         self.presidents = presidents
         self.shuffledIndexes = presidents.indices.shuffled()
@@ -38,5 +42,9 @@ final class AppModel {
         let president = presidents[shuffledIndexes[nextDrawPosition]]
         nextDrawPosition += 1
         return president
+    }
+
+    func markViewed(_ president: President) {
+        viewedPresidentIDs.insert(president.id)
     }
 }
