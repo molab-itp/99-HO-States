@@ -3,6 +3,7 @@ import SwiftUI
 let delaySecs:UInt64 = 2;
 
 struct PresidentDetailView: View {
+    @Environment(AppModel.self) private var appModel
     let presidents: [President]
     let slideshowCountdownTenths: Int?
     var onManualNavigation: (() -> Void)? = nil
@@ -130,12 +131,9 @@ struct PresidentDetailView: View {
     }
 
     private func goToRandom() {
-        guard presidents.count > 1 else { return }
+        guard let next = appModel.nextRandomPresident(),
+              let newIndex = presidents.firstIndex(of: next) else { return }
         onManualNavigation?()
-        var newIndex = Int.random(in: 0..<presidents.count)
-        while newIndex == index {
-            newIndex = Int.random(in: 0..<presidents.count)
-        }
         index = newIndex
     }
 }
@@ -145,4 +143,5 @@ struct PresidentDetailView: View {
     NavigationStack {
         PresidentDetailView(presidents: presidents, selected: presidents[0])
     }
+    .environment(AppModel(presidents: presidents))
 }

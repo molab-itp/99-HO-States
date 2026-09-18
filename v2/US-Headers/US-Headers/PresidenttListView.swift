@@ -63,4 +63,5 @@ private struct PresidentRow: View {
                 PresidentDetailView(presidents: presidents, selected: president)
             }
     }
+    .environment(AppModel(presidents: presidents))
 }

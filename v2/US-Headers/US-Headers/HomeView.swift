@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    private let presidents = PresidentsRepository.loadAll()
+    @Environment(AppModel.self) private var appModel
     private let sourceURL = URL(string: "https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States")!
     private let slideshowIntervalTenths = 50 // 5.0 seconds
     @State private var path = NavigationPath()
@@ -71,12 +71,12 @@ struct HomeView: View {
             .navigationDestination(for: HomeDestination.self) { destination in
                 switch destination {
                 case .list:
-                    PresidenttListView(presidents: presidents)
+                    PresidenttListView(presidents: appModel.presidents)
                 }
             }
             .navigationDestination(for: President.self) { president in
                 PresidentDetailView(
-                    presidents: presidents,
+                    presidents: appModel.presidents,
                     selected: president,
                     slideshowCountdownTenths: isSlideshowRunning ? slideshowRemainingTenths : nil,
                     onManualNavigation: stopSlideshow
@@ -95,7 +95,7 @@ struct HomeView: View {
     }
 
     private func goToRandomPresident() {
-        guard let president = presidents.randomElement() else { return }
+        guard let president = appModel.nextRandomPresident() else { return }
         var newPath = NavigationPath()
         newPath.append(president)
         path = newPath
@@ -142,4 +142,5 @@ private enum HomeDestination: Hashable {
 
 #Preview {
     HomeView()
+        .environment(AppModel())
 }
