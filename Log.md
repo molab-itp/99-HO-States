@@ -305,3 +305,49 @@ president's Wikipedia article, and surface that link in
 
 - `Resources/Presidents.json` still has `articleURL: null` for every entry until `GenerateAssets`
   is re-run against the network; the `wikipediaArticleURL` fallback covers the UI in the meantime.
+
+# --
+
+2026-09-18 (v2 session: AppModel + slideshow button behavior) — v2.18–v2.20
+
+## Request
+
+1. Create an `AppModel` that builds an initial shuffled array of president indexes, used for
+   random president selection; the Random button should draw the next entry from that array.
+2. While the slideshow is running, a bottom-toolbar button press in `PresidentDetailView.swift`
+   should just stop the slideshow in place instead of performing its usual action.
+
+## What was built
+
+- `AppModel.swift` (new) — `@Observable` class owning the loaded `presidents` array plus a
+  shuffled permutation of its indices (`shuffledIndexes`). `nextRandomPresident()` walks that
+  shuffle in order via `nextDrawPosition`, reshuffling (and swapping the first two entries if the
+  new shuffle's first pick would repeat the just-served president) once the shuffle is exhausted —
+  so random draws cycle through everyone before any repeat, instead of independent
+  `Int.random`/`randomElement()` calls each time.
+- `US_HeadersApp.swift` — now owns `@State private var appModel = AppModel()` and injects it via
+  `.environment(appModel)` on `HomeView`.
+- `HomeView.swift` — reads `@Environment(AppModel.self)` instead of loading its own `presidents`
+  array; **Random President** button and the slideshow's auto-advance both now call
+  `appModel.nextRandomPresident()`.
+- `PresidentDetailView.swift` — reads `@Environment(AppModel.self)`; its **Random** toolbar button
+  now calls `appModel.nextRandomPresident()` and looks up the returned president's index, dropping
+  the old retry-`while newIndex == index` loop.
+- `PresidenttListView.swift`, and the `#Preview`s in all three views — updated to supply an
+  `AppModel` via `.environment(...)` since `PresidentDetailView` now requires one from the
+  environment.
+- `PresidentDetailView.swift` (slideshow button behavior) — added `isSlideshowActive` (true
+  whenever `slideshowCountdownTenths != nil`) and `handleToolbarButton(_:)`: while the slideshow is
+  active, any of Previous/Random/Next now just calls `onManualNavigation?()` (stopping the
+  slideshow) and returns, leaving the currently shown president in place, instead of also
+  navigating; once stopped, the buttons resume their normal behavior. `goToPrevious`/`goToNext`/
+  `goToRandom` no longer call `onManualNavigation?()` themselves. Relaxed the Previous/Next
+  `.disabled` conditions to `!isSlideshowActive && ...` so they stay tappable (to stop the
+  slideshow) even at the first/last president while it's running.
+
+## Verification
+
+- `xcodebuild -project US-Headers.xcodeproj -scheme US-Headers -destination 'generic/platform=iOS Simulator' -quiet build`
+  → **exit 0** after the `AppModel` refactor and again after the slideshow button-behavior change
+  (via `DEVELOPER_DIR=/Applications/Xcode_26.6.app/Contents/Developer xcodebuild ...`, since only
+  Command Line Tools were selected by default).

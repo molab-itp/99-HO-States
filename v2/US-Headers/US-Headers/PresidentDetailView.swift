@@ -72,16 +72,16 @@ struct PresidentDetailView: View {
 
             ToolbarItemGroup(placement: .bottomBar) {
                 Button {
-                    goToPrevious()
+                    handleToolbarButton(goToPrevious)
                 } label: {
                     Label("Previous", systemImage: "chevron.left")
                 }
-                .disabled(index == 0)
+                .disabled(!isSlideshowActive && index == 0)
 
                 Spacer()
 
                 Button {
-                    goToRandom()
+                    handleToolbarButton(goToRandom)
                 } label: {
                     Label("Random", systemImage: "shuffle")
                 }
@@ -89,11 +89,11 @@ struct PresidentDetailView: View {
                 Spacer()
 
                 Button {
-                    goToNext()
+                    handleToolbarButton(goToNext)
                 } label: {
                     Label("Next", systemImage: "chevron.right")
                 }
-                .disabled(index == presidents.count - 1)
+                .disabled(!isSlideshowActive && index == presidents.count - 1)
             }
         }
     }
@@ -118,22 +118,32 @@ struct PresidentDetailView: View {
         }
     }
 
+    private var isSlideshowActive: Bool { slideshowCountdownTenths != nil }
+
+    /// While the slideshow is running, any of the three toolbar buttons should just stop it in
+    /// place (leaving the currently shown president as-is) instead of performing its usual
+    /// navigation; once stopped, the buttons resume their normal Previous/Random/Next behavior.
+    private func handleToolbarButton(_ action: () -> Void) {
+        guard !isSlideshowActive else {
+            onManualNavigation?()
+            return
+        }
+        action()
+    }
+
     private func goToPrevious() {
         guard index > 0 else { return }
-        onManualNavigation?()
         index -= 1
     }
 
     private func goToNext() {
         guard index < presidents.count - 1 else { return }
-        onManualNavigation?()
         index += 1
     }
 
     private func goToRandom() {
         guard let next = appModel.nextRandomPresident(),
               let newIndex = presidents.firstIndex(of: next) else { return }
-        onManualNavigation?()
         index = newIndex
     }
 }
