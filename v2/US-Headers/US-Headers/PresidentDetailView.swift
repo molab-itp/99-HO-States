@@ -158,7 +158,7 @@ private struct ViewedProgressBar: View {
     let total: Int
     let viewedCount: Int
 
-    private static let colors: [Color] = [.red, .white, .blue]
+    private static let colors: [Color] = [.red, .green, .yellow]
     private let segmentSpacing: CGFloat = 2
 
     var body: some View {
