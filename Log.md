@@ -258,3 +258,50 @@ Convert the Swift app in `v2` to a plain JavaScript app, stored in a new `v3` fo
 - `v3/tools/migrate.js` is a one-time/rerunnable migration tool, not part of the served app; rerun
   it after regenerating `v2`'s assets (e.g. via `GenerateAssets`) to refresh `v3/data` and
   `v3/images`.
+
+# --
+
+2026-09-18 (v2 session: article link)
+
+## Request
+
+Update `v2/Tools/GenerateAssets/Sources/GenerateAssets/main.swift` to include a link to each
+president's Wikipedia article, and surface that link in
+`v2/US-Headers/US-Headers/PresidentDetailView.swift`.
+
+## What was built
+
+- `main.swift` — added `WikipediaPageURL`/`WikipediaContentURLs` (decoding the summary API's
+  `content_urls.desktop.page`, with explicit `CodingKeys` for the snake_case JSON key) and a new
+  `articleURL: String?` field on `PresidentSummary`, populated from
+  `summary.contentUrls?.desktop.page` and written into `Resources/Presidents.json`.
+- `Models/President.swift` — added matching `articleURL: String?` (optional, so older
+  `Presidents.json` files without the field still decode) plus a computed
+  `wikipediaArticleURL: URL?` that uses the generated URL when present, otherwise falls back to
+  constructing `https://en.wikipedia.org/wiki/<Title>` from `wikipediaTitle` so the link works even
+  before `GenerateAssets` is re-run.
+- `PresidentDetailView.swift` — added a "Read on Wikipedia" `Link` below the bio extract.
+
+## Bug fix: `navigationTitle(_:)` build error
+
+- Symptom: `error: Only unstyled text can be used with navigationTitle(_:)`.
+- Root cause: `navigationTitleView` (the fixed-width monospaced `#NN · secondss` title, added in an
+  earlier session) applied `.font(.system(.body, design: .monospaced))` to the `Text` passed into
+  `.navigationTitle(_:)`; that API only accepts an unstyled `Text`.
+- Fix: dropped `.navigationTitle(navigationTitleView)` and instead render
+  `navigationTitleView` (now `some View`, unchanged internals) via a
+  `ToolbarItem(placement: .principal)`, which has no such restriction and keeps the no-jiggle
+  monospaced behavior for the countdown digits.
+
+## Verification
+
+- Pointed `xcodebuild` at the installed `Xcode_26.6.app` via `DEVELOPER_DIR` (only Command Line
+  Tools were active by default, no full Xcode selected).
+- `swift build` in `v2/Tools/GenerateAssets` → **Build complete**.
+- `xcodebuild -project US-Headers.xcodeproj -scheme US-Headers -destination 'generic/platform=iOS Simulator' -quiet build`
+  → **exit 0**, both before and after the `navigationTitle` fix.
+
+## Follow-up notes
+
+- `Resources/Presidents.json` still has `articleURL: null` for every entry until `GenerateAssets`
+  is re-run against the network; the `wikipediaArticleURL` fallback covers the UI in the meantime.
