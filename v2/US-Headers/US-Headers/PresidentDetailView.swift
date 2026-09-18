@@ -3,6 +3,7 @@ import SwiftUI
 let delaySecs:UInt64 = 2;
 
 struct PresidentDetailView: View {
+    @Environment(AppModel.self) private var appModel
     let presidents: [President]
     let slideshowCountdownTenths: Int?
     var onManualNavigation: (() -> Void)? = nil
@@ -20,7 +21,10 @@ struct PresidentDetailView: View {
 
     // Fixed-width (leading-zero, fully monospaced) title so the number/countdown don't jiggle
     // side-to-side as their digits change every tenth of a second.
-    private var navigationTitleView: Text {
+    //
+    // navigationTitle(_:) only accepts unstyled Text, so this styled title is rendered via a
+    // principal toolbar item instead (see `.toolbar` below).
+    private var navigationTitleView: some View {
         let orderText = String(format: "%02d", president.order)
         guard let tenths = slideshowCountdownTenths else {
             return Text("#\(orderText)").font(.system(.body, design: .monospaced))
@@ -41,6 +45,12 @@ struct PresidentDetailView: View {
                         .foregroundStyle(.secondary)
                     Text(president.extract)
                         .font(.body)
+                    if let articleURL = president.wikipediaArticleURL {
+                        Link(destination: articleURL) {
+                            Label("Read on Wikipedia", systemImage: "book")
+                        }
+                        .font(.callout)
+                    }
                 }
                 .opacity(detailsVisible ? 1 : 0)
             }
@@ -54,21 +64,24 @@ struct PresidentDetailView: View {
                 detailsVisible = true
             }
         }
-        .navigationTitle(navigationTitleView)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                navigationTitleView
+            }
+
             ToolbarItemGroup(placement: .bottomBar) {
                 Button {
-                    goToPrevious()
+                    handleToolbarButton(goToPrevious)
                 } label: {
                     Label("Previous", systemImage: "chevron.left")
                 }
-                .disabled(index == 0)
+                .disabled(!isSlideshowActive && index == 0)
 
                 Spacer()
 
                 Button {
-                    goToRandom()
+                    handleToolbarButton(goToRandom)
                 } label: {
                     Label("Random", systemImage: "shuffle")
                 }
@@ -76,11 +89,11 @@ struct PresidentDetailView: View {
                 Spacer()
 
                 Button {
-                    goToNext()
+                    handleToolbarButton(goToNext)
                 } label: {
                     Label("Next", systemImage: "chevron.right")
                 }
-                .disabled(index == presidents.count - 1)
+                .disabled(!isSlideshowActive && index == presidents.count - 1)
             }
         }
     }
@@ -105,25 +118,32 @@ struct PresidentDetailView: View {
         }
     }
 
+    private var isSlideshowActive: Bool { slideshowCountdownTenths != nil }
+
+    /// While the slideshow is running, any of the three toolbar buttons should just stop it in
+    /// place (leaving the currently shown president as-is) instead of performing its usual
+    /// navigation; once stopped, the buttons resume their normal Previous/Random/Next behavior.
+    private func handleToolbarButton(_ action: () -> Void) {
+        guard !isSlideshowActive else {
+            onManualNavigation?()
+            return
+        }
+        action()
+    }
+
     private func goToPrevious() {
         guard index > 0 else { return }
-        onManualNavigation?()
         index -= 1
     }
 
     private func goToNext() {
         guard index < presidents.count - 1 else { return }
-        onManualNavigation?()
         index += 1
     }
 
     private func goToRandom() {
-        guard presidents.count > 1 else { return }
-        onManualNavigation?()
-        var newIndex = Int.random(in: 0..<presidents.count)
-        while newIndex == index {
-            newIndex = Int.random(in: 0..<presidents.count)
-        }
+        guard let next = appModel.nextRandomPresident(),
+              let newIndex = presidents.firstIndex(of: next) else { return }
         index = newIndex
     }
 }
@@ -133,4 +153,5 @@ struct PresidentDetailView: View {
     NavigationStack {
         PresidentDetailView(presidents: presidents, selected: presidents[0])
     }
+    .environment(AppModel(presidents: presidents))
 }

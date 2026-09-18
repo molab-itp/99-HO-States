@@ -23,6 +23,7 @@ struct PresidentSummary: Codable {
     let extract: String
     let thumbnailImageName: String?
     let largeImageName: String?
+    let articleURL: String?
 }
 
 struct WikipediaImage: Codable {
@@ -31,11 +32,25 @@ struct WikipediaImage: Codable {
     let height: Int
 }
 
+struct WikipediaPageURL: Codable {
+    let page: String
+}
+
+struct WikipediaContentURLs: Codable {
+    let desktop: WikipediaPageURL
+}
+
 struct WikipediaSummary: Codable {
     let title: String
     let extract: String
     let thumbnail: WikipediaImage?
     let originalimage: WikipediaImage?
+    let contentUrls: WikipediaContentURLs?
+
+    private enum CodingKeys: String, CodingKey {
+        case title, extract, thumbnail, originalimage
+        case contentUrls = "content_urls"
+    }
 }
 
 enum GeneratorError: Error {
@@ -267,7 +282,8 @@ for president in presidents {
             wikipediaTitle: president.wikipediaTitle,
             extract: summary.extract,
             thumbnailImageName: thumbnailName,
-            largeImageName: largeName
+            largeImageName: largeName,
+            articleURL: summary.contentUrls?.desktop.page
         ))
     } catch {
         print("  error: failed to fetch \(president.wikipediaTitle): \(error)")
