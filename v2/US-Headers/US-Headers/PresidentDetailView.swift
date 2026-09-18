@@ -41,6 +41,12 @@ struct PresidentDetailView: View {
                         .foregroundStyle(.secondary)
                     Text(president.extract)
                         .font(.body)
+                    if let articleURL = president.wikipediaArticleURL {
+                        Link(destination: articleURL) {
+                            Label("Read on Wikipedia", systemImage: "book")
+                        }
+                        .font(.callout)
+                    }
                 }
                 .opacity(detailsVisible ? 1 : 0)
             }

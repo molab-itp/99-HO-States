@@ -34,7 +34,8 @@ struct HomeView: View {
                         Label("List of Presidents", systemImage: "list.bullet")
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.borderedProminent)
+//                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.bordered)
 
                     Button {
                         goToRandomPresident()
@@ -70,7 +71,7 @@ struct HomeView: View {
             .navigationDestination(for: HomeDestination.self) { destination in
                 switch destination {
                 case .list:
-                    ContentView(presidents: presidents)
+                    PresidenttListView(presidents: presidents)
                 }
             }
             .navigationDestination(for: President.self) { president in
