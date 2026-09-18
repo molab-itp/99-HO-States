@@ -8,6 +8,9 @@ struct HomeView: View {
     @State private var slideshowTimer: Timer?
     @State private var slideshowRemainingTenths = 0
     private var isSlideshowRunning: Bool { slideshowTimer != nil }
+    private var remainingCount: Int {
+        appModel.presidents.count - appModel.viewedPresidentIDs.count
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -64,6 +67,15 @@ struct HomeView: View {
                         .font(.footnote)
                 }
                 .padding(.top, 8)
+              VStack(spacing: 4) {
+                Text("\(remainingCount) left to see")
+                  .font(.callout.weight(.medium))
+                Button("Reset Visit Count", role: .destructive) {
+                  appModel.resetViewed()
+                }
+                .font(.footnote)
+              }
+              
 
                 Spacer()
             }

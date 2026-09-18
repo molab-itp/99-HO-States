@@ -47,4 +47,8 @@ final class AppModel {
     func markViewed(_ president: President) {
         viewedPresidentIDs.insert(president.id)
     }
+
+    func resetViewed() {
+        viewedPresidentIDs.removeAll()
+    }
 }
