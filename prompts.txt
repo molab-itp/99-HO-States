@@ -58,3 +58,4 @@ try making entire text mono spaced
 usage
 v3.0
 convert swift app in folder v2 to plain javascript app and store in new folder v3
+-- was using Chat co-polit, not claude
