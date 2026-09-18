@@ -20,7 +20,10 @@ struct PresidentDetailView: View {
 
     // Fixed-width (leading-zero, fully monospaced) title so the number/countdown don't jiggle
     // side-to-side as their digits change every tenth of a second.
-    private var navigationTitleView: Text {
+    //
+    // navigationTitle(_:) only accepts unstyled Text, so this styled title is rendered via a
+    // principal toolbar item instead (see `.toolbar` below).
+    private var navigationTitleView: some View {
         let orderText = String(format: "%02d", president.order)
         guard let tenths = slideshowCountdownTenths else {
             return Text("#\(orderText)").font(.system(.body, design: .monospaced))
@@ -60,9 +63,12 @@ struct PresidentDetailView: View {
                 detailsVisible = true
             }
         }
-        .navigationTitle(navigationTitleView)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                navigationTitleView
+            }
+
             ToolbarItemGroup(placement: .bottomBar) {
                 Button {
                     goToPrevious()

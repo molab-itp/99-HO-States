@@ -58,3 +58,9 @@ try making entire text mono spaced
 usage
 v3.0
 convert swift app in folder v2 to plain javascript app and store in new folder v3
+v2.17
+Update v2/Tools/GenerateAssets/Sources/GenerateAssets/main.swift
+to include a link to the presidential article
+and include that link in v2/US-Headers/US-Headers/PresidentDetailView.swift
+v2.18
+error: Only unstyled text can be used with navigationTitle(_:) in v2/US-Headers/US-Headers/PresidentDetailView.swift
