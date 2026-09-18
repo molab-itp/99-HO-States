@@ -44,8 +44,14 @@ final class AppModel {
         return president
     }
 
-    func markViewed(_ president: President) {
+    /// Records `president` as viewed. When `resetIfComplete` is set (the slideshow passes
+    /// `true`) and every president has now been shown, clears the tracking back to empty so a
+    /// long-running slideshow's progress bar starts a fresh lap instead of sitting at full.
+    func markViewed(_ president: President, resetIfComplete: Bool = false) {
         viewedPresidentIDs.insert(president.id)
+        if resetIfComplete, viewedPresidentIDs.count >= presidents.count {
+            viewedPresidentIDs.removeAll()
+        }
     }
 
     func resetViewed() {

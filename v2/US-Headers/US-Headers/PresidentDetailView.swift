@@ -58,7 +58,7 @@ struct PresidentDetailView: View {
             .padding()
         }
         .task(id: index) {
-            appModel.markViewed(president)
+            appModel.markViewed(president, resetIfComplete: isSlideshowActive)
             detailsVisible = false
             try? await Task.sleep(nanoseconds: delaySecs * 1_000_000_000)
             guard !Task.isCancelled else { return }

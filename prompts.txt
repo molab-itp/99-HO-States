@@ -77,4 +77,7 @@ v2.20
 in v2/US-Headers
 on HomeScreen display number of screens left to be seen
 and add button to reset visit count
+v2.21
+when in slideshow more and all screens have been displayed
+reset to 0 tracking 
 
