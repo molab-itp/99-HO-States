@@ -31,7 +31,7 @@ private struct PresidentRow: View {
                 .frame(width: 44, height: 44)
                 .clipShape(Circle())
             VStack(alignment: .leading) {
-                Text(president.name)
+                Text("#\(String(format: "%02d", president.order)) \(president.name)")
                     .font(.headline)
                 Text(president.term)
                     .font(.subheadline)

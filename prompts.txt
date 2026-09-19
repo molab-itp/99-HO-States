@@ -80,4 +80,20 @@ and add button to reset visit count
 v2.21
 when in slideshow more and all screens have been displayed
 reset to 0 tracking 
+v2.21
+in v2/HO-States-US/HO-States-US/PresidenttListView.swift
+display president number along with name
+Usage 2% reset in 29m
+v4.22
+Create a new top level folder v4 
+in it create a html/javascript version
+of v2/HO-States-US/HO-States-US.xcodeproj
+that matches as best possible using react UI framework 
+best for the web but friendly to react-native
+2026-09-19 10:54:06
+2026-09-19 11:03:24
+>> to test
+cd v4 && npm run dev
+v4.23
+setup headless-browser tool chromium-cli/Playwright
 
