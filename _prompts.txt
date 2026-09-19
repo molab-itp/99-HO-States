@@ -141,3 +141,13 @@ item Text president.name
 v4.33
 hand coded president.order president.name
 display in PresidentDetailView
+
+v2.34
+in v2/HO-States-US/HO-States-US AppModel
+add variable cycleCount to count the number of times 
+list is shuffled
+
+display cycleCount flush right in navigationTitleView
+
+https://developer.apple.com/documentation/swiftui/toolbaritemplacement
+buildInfo

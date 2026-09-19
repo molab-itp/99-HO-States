@@ -14,13 +14,27 @@ final class AppModel {
     private var shuffledIndexes: [Int]
     private var nextDrawPosition = 0
 
+    /// Number of times `presidents.indices` has been shuffled (the initial deal plus every
+    /// reshuffle once a shuffle is exhausted), so callers can tell how many full random cycles
+    /// have been dealt.
+    private(set) var cycleCount = 0
+
     /// IDs of presidents whose detail view has been shown, used to drive the progress bar in
     /// `PresidentDetailView`. A `Set` so repeat views (e.g. during a slideshow) don't double-count.
     private(set) var viewedPresidentIDs: Set<President.ID> = []
 
+    var buildInfo:String {
+        "[\(cycleCount)|\(Self.bundleVersion())]"
+    }
+    
+    static func bundleVersion() -> String {
+        return String(describing: Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion")!)
+    }
+
     init(presidents: [President] = PresidentsRepository.loadAll()) {
         self.presidents = presidents
         self.shuffledIndexes = presidents.indices.shuffled()
+        self.cycleCount = 1
     }
 
     /// Returns the next president in the current shuffle order, reshuffling first if the
@@ -37,6 +51,7 @@ final class AppModel {
                 shuffledIndexes.swapAt(0, 1)
             }
             nextDrawPosition = 0
+            cycleCount += 1
         }
 
         let president = presidents[shuffledIndexes[nextDrawPosition]]
