@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAppModel } from '../state/AppModelContext.jsx';
 import { useSlideshow } from '../state/SlideshowContext.jsx';
 import { wikipediaArticleURL } from '../data/wikipedia.js';
+import { assetUrl } from '../data/assetUrl.js';
 import NavBar from '../components/NavBar.jsx';
 import ViewedProgressBar from '../components/ViewedProgressBar.jsx';
 
@@ -77,7 +78,7 @@ export default function PresidentDetailScreen({ selected }) {
         <ViewedProgressBar total={presidents.length} viewedCount={viewedIDs.size} />
 
         {imageSrc ? (
-          <img className="detail-image" src={`/${imageSrc}`} alt={president.name} />
+          <img className="detail-image" src={assetUrl(imageSrc)} alt={president.name} />
         ) : (
           <div className="detail-image-placeholder" aria-hidden="true">
             👤

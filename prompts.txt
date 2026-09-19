@@ -96,4 +96,6 @@ best for the web but friendly to react-native
 cd v4 && npm run dev
 v4.23
 setup headless-browser tool chromium-cli/Playwright
+v4.24
+setup for deploy to github pages in sub folder labeled v4, plan to deploy versions in other sub directories
 

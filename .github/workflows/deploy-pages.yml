@@ -1,0 +1,64 @@
+name: Deploy Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'v4/**'
+      - 'pages/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: v4/package-lock.json
+
+      - name: Build v4
+        working-directory: v4
+        run: |
+          npm ci
+          npm run build
+
+      # Each deployed version gets its own subfolder under the site root, so multiple versions
+      # can be live at once (https://molab-itp.github.io/99-HO-States/v4/, .../v3/, ...). To add
+      # another one: give it a build step (or none, if it's already static like v3) and a
+      # `cp -r <version>/<output> _site/<version>/` line below, then add a link in pages/index.html.
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp pages/index.html _site/index.html
+          mkdir -p _site/v4
+          cp -r v4/dist/. _site/v4/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

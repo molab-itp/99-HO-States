@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { assetUrl } from '../data/assetUrl.js';
 
 /** Port of PresidentRow's `thumbnail`: falls back to a generic person glyph if the image 404s. */
 export default function PresidentThumb({ president }) {
@@ -16,7 +17,7 @@ export default function PresidentThumb({ president }) {
   return (
     <img
       className="president-thumb"
-      src={`/${src}`}
+      src={assetUrl(src)}
       alt=""
       loading="lazy"
       onError={() => setFailed(true)}
