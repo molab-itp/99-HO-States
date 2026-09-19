@@ -114,6 +114,7 @@ screen shot of filure in github.com action
 v4.30
 deploy succeeded
 https://molab-itp.github.io/99-HO-States/v4/
+
 v4.31
 
 copied v4 --> v05
@@ -130,3 +131,13 @@ use for reference https://github.com/twostraws/Ignite
 2026-09-19 14:20:59
 >> next prompt 
 append this chat to Log.md with time in date time stamp
+
+v4.32
+in swiftui folder v2
+update to show president in number 
+in v2/HO-States-US/HO-States-US/PresidentDetailView.swift
+item Text president.name
+
+v4.33
+hand coded president.order president.name
+display in PresidentDetailView

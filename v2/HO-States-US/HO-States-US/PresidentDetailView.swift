@@ -39,8 +39,7 @@ struct PresidentDetailView: View {
                 ViewedProgressBar(total: presidents.count, viewedCount: appModel.viewedPresidentIDs.count)
                 headerImage
                 VStack(alignment: .leading, spacing: 16) {
-                    Text(president.name)
-                        .font(.largeTitle.bold())
+                    Text("#\(president.order) \(president.name)").font(.system(.body, design: .monospaced))
                     Text("\(president.term) · \(president.party)")
                         .font(.headline)
                         .foregroundStyle(.secondary)
