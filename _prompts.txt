@@ -114,3 +114,19 @@ screen shot of filure in github.com action
 v4.30
 deploy succeeded
 https://molab-itp.github.io/99-HO-States/v4/
+v4.31
+
+copied v4 --> v05
+v05 % npm install
+npm run dev
+https://ignitesamples.hackingwithswift.com/
+https://github.com/twostraws/Ignite
+
+for app in folder v05
+update css to be more like SwiftUI style
+use for reference https://github.com/twostraws/Ignite
+
+2026-09-19 14:16:03
+2026-09-19 14:20:59
+>> next prompt 
+append this chat to Log.md with time in date time stamp

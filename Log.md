@@ -571,3 +571,72 @@ this session; later, confirm once GitHub Pages was enabled that the site actuall
   pass/fail status — it's JS-rendered and the tool has given contradictory answers on identical
   URLs in the same session. `curl` the deployed artifact/site directly, or use an authenticated
   `gh run view`/`gh api`, instead.
+
+# --
+
+2026-09-19 14:20:23
+2026-09-19 (v05: SwiftUI-style CSS pass, referencing Ignite)
+
+## Request
+
+In the `v05` folder (an already-existing, untracked copy of `v4`'s React app, made outside this
+conversation), update the CSS to look more like SwiftUI, using
+[twostraws/Ignite](https://github.com/twostraws/Ignite) as reference.
+
+## Research: what Ignite actually offered as reference
+
+- Ignite is a Swift DSL for generating static sites (`Text("...").font(.title1)`-style API) but
+  its actual rendered output is built on **Bootstrap 5** under the hood
+  (`Sources/Ignite/Resources/css/bootstrap.min.css`, `bootstrap-icons`, `bootstrap.bundle.min.js`
+  — confirmed via the GitHub API tree listing, not just the README). Its `DefaultLightTheme`/
+  `DefaultDarkTheme` resolve every token to `.default`, i.e. plain Bootstrap variables — there's no
+  distinctive "SwiftUI-flavored" default palette or spacing scale to lift concrete values from.
+- Concluded the useful reference wasn't Ignite's visual output but the underlying ask: make the app
+  actually match real SwiftUI/iOS HIG rendering conventions, most of which the previous CSS (a
+  straight carryover from `v3`'s plain-JS styling) got subtly wrong.
+
+## What was built (in `v05` only — `v4` untouched)
+
+- `src/index.css` — full rewrite around iOS system-color tokens (`label`/`secondaryLabel`/
+  `tertiaryLabel`, `separator`, grouped background, `systemFill`-style press states) with proper
+  light/dark adaptation, kept the app's existing red tint (its `AccentColor` asset was never
+  actually set to a value in `v2`, so the red was always an aesthetic choice, not a value to
+  "correct") but brightened it for dark mode the way an adaptive `Color` asset would.
+- Fixed two concrete inaccuracies against the real SwiftUI source, not just aesthetic guesses:
+  - **List screen**: SwiftUI's `List` defaults to **inset-grouped** (rounded card on a secondary
+    grouped background) on iOS unless `.listStyle(.plain)` is set — `PresidenttListView.swift`
+    never sets one, so the previous edge-to-edge flat list was the less accurate rendering. Wrapped
+    the list in a rounded/shadowed card (`.list-group`/`.president-list` in `PresidentListScreen.jsx`)
+    on a `--grouped-bg` page background, and added trailing disclosure chevrons (`›`) that
+    `NavigationLink` rows show automatically.
+  - **Buttons**: SwiftUI's `.bordered` style (used on all three Home buttons in `HomeView.swift`)
+    actually renders as a tinted, _filled_, continuously-rounded control on iOS — not an outline,
+    which is what the old `.btn-bordered` class drew. Fixed.
+  - **Toolbar chevrons**: swapped the Previous/Next `←`/`→` text arrows for real `‹`/`›` chevrons,
+    matching the Swift source's actual SF Symbols (`chevron.left`/`chevron.right`).
+- Nav bar and bottom toolbar now use `backdrop-filter: saturate(180%) blur(20px)` over a
+  semi-transparent background plus a hairline separator, matching `UINavigationBar`/`UIToolbar`'s
+  standard translucent appearance instead of a flat opaque bar.
+- `:active` press states (background fill / scale-down) replace web-style `:hover` as the primary
+  interaction feedback, closer to how iOS controls respond to touch.
+- Minor JSX changes to support the above: `PresidentListScreen.jsx` (list-card wrapper + chevron
+  span), `NavBar.jsx` (chevron back button), `PresidentDetailScreen.jsx` (chevron toolbar buttons).
+
+## Verification
+
+- `npm run build` in `v05` — succeeds.
+- `npm run smoke` (Playwright script already present in `v05`, copied over with the rest of the
+  folder) — full click-through, **zero console errors**.
+- Manually screenshotted all three screens in both `colorScheme: 'light'` and `'dark'` via a
+  one-off Playwright script and visually reviewed each image (not just trusted the exit code) —
+  confirmed the grouped list card, blurred bars, tinted buttons, and dark-mode tint adaptation all
+  render correctly in both themes.
+
+## Follow-up notes
+
+- Only `v05` was changed; `v4` still has the old flat/outlined styling. If the user wants this
+  design carried back into `v4` (the one actually wired up for GitHub Pages deployment), that's a
+  separate follow-up, not done automatically here.
+- `v05/vite.config.js`'s `base` is still copied verbatim from `v4` (`/99-HO-States/v4/`) — fine for
+  local dev/smoke testing (base is `/` in dev), but would need correcting to `/99-HO-States/v05/`
+  before `v05` is ever added to the GitHub Pages deploy workflow.
