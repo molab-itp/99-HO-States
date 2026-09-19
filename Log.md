@@ -351,3 +351,103 @@ president's Wikipedia article, and surface that link in
   → **exit 0** after the `AppModel` refactor and again after the slideshow button-behavior change
   (via `DEVELOPER_DIR=/Applications/Xcode_26.6.app/Contents/Developer xcodebuild ...`, since only
   Command Line Tools were selected by default).
+
+# --
+
+2026-09-19 (v4: React port + headless browser tooling)
+
+## Request
+
+1. In `v2/HO-States-US/HO-States-US/PresidenttListView.swift`, display each president's number
+   along with their name in the list row.
+2. Create a new top-level `v4` folder containing an HTML/JavaScript version of
+   `v2/HO-States-US/HO-States-US.xcodeproj`, matching it as closely as possible using React, built
+   for the web but structured to stay friendly to a future React Native port.
+3. Set up a headless-browser tool (`chromium-cli`/Playwright) so UI changes can actually be
+   verified instead of just built.
+
+## What was built
+
+### PresidenttListView number
+
+- `PresidentRow` now renders `"#\(String(format: "%02d", president.order)) \(president.name)"` as
+  the headline, matching the leading-zero monospaced `#NN` format already used in
+  `PresidentDetailView`'s nav title.
+
+### `v4` — React port
+
+Reused (not re-extracted) the portrait images and generated JSON that `v3/tools/migrate.js` had
+already copied byte-for-byte out of `v2`'s asset catalog, rather than duplicating another ~117MB
+out of `Assets.xcassets`.
+
+- `src/state/AppModelContext.jsx` — direct port of `AppModel.swift`: shuffled-bag random draws
+  (`nextRandomPresident`, reshuffling without repeating the last-served entry) and a `viewedIDs`
+  `Set` driving the progress bar / "N left to see" count.
+- `src/navigation/NavigationContext.jsx` — a minimal in-memory stack navigator standing in for
+  `NavigationStack`/`NavigationPath` (`pushList`, `pushDetail`, `replaceWithDetail`, `pop`), with
+  no `react-router`/URL coupling so it could back a React Native stack navigator later. Each push
+  carries a unique `navKey`, used as the React `key` on the destination screen — the equivalent of
+  SwiftUI's `.id(president.id)` trick for forcing a fresh `PresidentDetailScreen` instance (and
+  `index` state) on every new push, including the slideshow.
+- `src/state/SlideshowContext.jsx` — port of `HomeView`'s `Timer`-based slideshow loop (5s /
+  100ms-tick countdown), lifted to a context (rather than living on the Home screen component like
+  the Swift version) because the navigator here only mounts the topmost screen, unlike SwiftUI
+  keeping `HomeView` mounted underneath whatever it pushes — this is what keeps the timer alive
+  across screen changes instead. Stops itself when the nav path goes empty, mirroring
+  `.onChange(of: path)`.
+- `src/screens/{Home,PresidentList,PresidentDetail}Screen.jsx` — one per SwiftUI view of the same
+  shape, including the 2s delayed fade-in reveal, Previous/Random/Next toolbar (disabled at
+  boundaries unless the slideshow is active, in which case any of the three just stops it in
+  place), the "Read on Wikipedia" link, and the segmented red/green/yellow viewed-progress bar.
+- `src/components/{NavBar,ViewedProgressBar,PresidentThumb}.jsx` — small shared pieces; `NavBar`
+  stands in for SwiftUI's automatic inline nav bar (back button + centered title).
+- Plain Vite + React (JS, no TypeScript, no `react-router`) — `package.json`, `vite.config.js`,
+  `index.html`, `src/main.jsx`, `src/App.jsx`, `src/index.css`.
+- `README.md` documenting the structure and the "what would change to port to React Native" split.
+
+One deliberate deviation: since only the topmost screen is mounted, the list screen's scroll
+position resets on `List → Detail → Back`, unlike SwiftUI keeping it alive underneath.
+
+### Headless browser tooling
+
+`chromium-cli` (referenced by the bundled `run` skill) isn't installed in this environment, so
+used the real Playwright package instead:
+
+- Installed `playwright` as a `v4` devDependency and ran `npx playwright install chromium`.
+- `v4/scripts/smoke.mjs` (`npm run smoke`) — boots the Vite dev server in-process via Vite's JS
+  API, drives headless Chromium through Home → List (asserts `#NN Name` rows) → open a detail row
+  → wait for the 2s reveal → Previous/Random/Next → Back → Back to Home → Random President →
+  Start Slideshow → stop it via a toolbar button → Reset Visit Count (asserts the "N left to see"
+  text actually changes) — screenshotting every step into `v4/playwright/screenshots/` (gitignored)
+  and failing on any console error or any network request returning 4xx/5xx.
+- `.claude/skills/run-v4/SKILL.md` (new) — captures the setup and, importantly, three UX behaviors
+  the first smoke-test run flagged as failures that turned out to be correct, faithful ports of the
+  Swift app's actual behavior (documented as "don't fix these"):
+  - Back from a detail screen reached via the list pops to List first, then Home (nav stack is
+    `[list, detail]` there), not straight to Home.
+  - Starting the slideshow immediately navigates to a detail screen, so Home's "Stop Slideshow"
+    button is unreachable until you leave it — matches `HomeView`'s pushed `PresidentDetailView`
+    covering Home in the original app.
+  - A screenshot taken immediately after navigating to a detail screen shows a blank image/text
+    area — that's the pre-reveal state, not a broken image.
+
+## Verification
+
+- `npm install` / `npm run build` in `v4` — build succeeds, `dist/images/` contains all 94
+  portraits.
+- `npm run smoke` — full click-through passes with **zero console errors and zero failed network
+  requests**; visually reviewed the resulting screenshots (Home, List with `#NN Name` rows, a
+  fully-revealed detail screen, the slideshow countdown title `#10 · 05.0s`) and confirmed each
+  matches the intended design.
+- No headless-browser tool was available on the very first pass (before installing Playwright), so
+  that initial `v4` build was instead verified via `npm run build`, a running dev server smoke-
+  tested with `curl`, and a line-by-line comparison against the Swift source.
+
+## Follow-up notes
+
+- `v4/README.md` and `.claude/skills/run-v4/SKILL.md` are the two places documenting the
+  React-Native-porting seams and the "known, correct" UX quirks respectively — check both before
+  assuming a future `v4` smoke-test failure is a real regression.
+- Re-run `v3/tools/migrate.js` after regenerating `v2`'s assets, then re-copy `v3/images` →
+  `v4/public/images` and `v3/data/presidents.json` → `v4/src/data/presidents.json`, to refresh
+  `v4`'s data/portraits.
