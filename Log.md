@@ -514,3 +514,60 @@ subdirectories (e.g. `v3`) can be added to the same deployed site later.
   session gave `v4`: check whether it builds any asset URLs as runtime strings rather than static
   imports, and if so route them through something like `assetUrl.js` before assuming a subfolder
   deploy "just works".
+
+# --
+
+2026-09-19 12:29:18 (v4: GitHub Pages deploy, debugging the first run)
+
+## Request
+
+Diagnose and resolve GitHub Actions build errors on the `Deploy Pages` workflow set up earlier
+this session; later, confirm once GitHub Pages was enabled that the site actually deploys.
+
+## What happened
+
+- User pasted three log lines from the failed `build` job:
+  1. `configure-pages` threw `HttpError: Not Found` calling the Pages "get site" API, with
+     "Please verify that the repository has Pages enabled and configured to build using GitHub
+     Actions."
+  2. A Node.js 20 deprecation notice (actions forced onto Node 24 by the runner).
+  3. An `ubuntu-latest` migration-to-Ubuntu-26 notice (effective 2026-10-19).
+- Diagnosis: only #1 was a real failure. Creating a repository's Pages site for the first time is
+  an administrative action; the workflow's default `GITHUB_TOKEN` has no `administration` scope
+  available to it at all (it's not one of the grantable `permissions:` keys), so
+  `actions/configure-pages`'s auto-`enablement` can't create the site on its own — this needed the
+  one manual step flagged when the workflow was first written (Settings → Pages → Source: GitHub
+  Actions). #2 and #3 are informational only, no action needed.
+- Explained both a UI fix (Settings → Pages) and a `gh api -X POST repos/molab-itp/99-HO-States/pages -f build_type=workflow`
+  CLI alternative, noting `gh` isn't authenticated in this sandbox so that command would need to be
+  run by the user.
+- User enabled it via the UI and shared a screenshot confirming **Source: GitHub Actions** is now
+  set (custom domain shown as `molab-itp.github.io`, confirming this is a project page under
+  `/99-HO-States/`, matching the `vite.config.js` base path already configured).
+- Checked whether it was actually deploying yet, rather than assuming the UI change alone fixed the
+  already-failed run:
+  - `git log`/`git status` showed the workflow and `v4` changes were already committed and pushed
+    (as `v4.22`–`v4.25`) by the user outside this conversation — this session hadn't committed any
+    of that itself.
+  - `WebFetch` against the GitHub Actions run-list page gave inconsistent, likely-hallucinated
+    answers between two successive calls (one vague, one confidently claiming success) — GitHub's
+    Actions UI is JS-rendered and not reliable to read via a markdown-conversion fetch, so treated
+    neither answer as trustworthy.
+  - Checked the actual deployed URLs directly instead: `curl -s -o /dev/null -w '%{http_code}'` on
+    `https://molab-itp.github.io/99-HO-States/`, `.../v4/`, and `.../v4/images/01-thumb.jpg` — all
+    **404**, meaning no successful deploy has landed yet (enabling the Pages source doesn't
+    retroactively fix the run that already failed before it existed).
+
+## Follow-up notes
+
+- Two ways to get a fresh run now that Pages is enabled: **Actions → Deploy Pages → (failed run) →
+  Re-run all jobs**, or push a new commit touching `v4/**`/`pages/**`/the workflow file (the
+  push trigger is path-filtered). Neither was done yet as of this entry — no `gh` auth available
+  here to trigger or poll it directly.
+- Once a run succeeds, re-verify by `curl`ing the live URLs directly (as above) rather than trusting
+  a green checkmark alone — that's the check that will actually catch a wrong `base` path or a
+  missing asset.
+- Lesson: don't trust `WebFetch` summaries of GitHub's Actions run-list/run-detail pages for
+  pass/fail status — it's JS-rendered and the tool has given contradictory answers on identical
+  URLs in the same session. `curl` the deployed artifact/site directly, or use an authenticated
+  `gh run view`/`gh api`, instead.
