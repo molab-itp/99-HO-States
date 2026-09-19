@@ -451,3 +451,66 @@ used the real Playwright package instead:
 - Re-run `v3/tools/migrate.js` after regenerating `v2`'s assets, then re-copy `v3/images` →
   `v4/public/images` and `v3/data/presidents.json` → `v4/src/data/presidents.json`, to refresh
   `v4`'s data/portraits.
+
+# --
+
+2026-09-19 12:20:12
+2026-09-19 (v4: GitHub Pages deploy, continued)
+
+## Request
+
+Set up deployment of `v4` to GitHub Pages under a `v4` subfolder, structured so other version
+subdirectories (e.g. `v3`) can be added to the same deployed site later.
+
+## What was built
+
+- `.github/workflows/deploy-pages.yml` (new) — builds `v4` (`npm ci && npm run build`), assembles
+  a `_site/` with `pages/index.html` at the root and `v4/dist` copied into `_site/v4/`, then
+  deploys via `actions/configure-pages` + `actions/upload-pages-artifact` + `actions/deploy-pages`
+  (no `gh-pages` branch). Triggers on push to `main` scoped to `v4/**`/`pages/**` paths, plus
+  `workflow_dispatch`. Adding another version later is one more build step + one
+  `cp -r <version>/<output> _site/<version>/` line, called out in a comment at that spot.
+- `pages/index.html` (new) — small landing page at the site root linking to each deployed version
+  (currently just `v4`), styled to match the app itself.
+- `v4/vite.config.js` — `base` is now `/99-HO-States/v4/` for production builds (repo
+  `molab-itp/99-HO-States` is an org project page, not a `*.github.io` user/root page, so the site
+  lives under `/99-HO-States/`), overridable via `VITE_BASE_PATH`; stays `/` for `npm run dev`.
+
+## Bug found and fixed: images 404 under a subfolder base
+
+- Vite's `base` config rewrites statically-analyzable asset references (imports, and the
+  `<script>`/`<link>` tags it processes in `index.html`) but **not** runtime-built strings — and
+  `PresidentThumb.jsx`/`PresidentDetailScreen.jsx` built image `src`s as plain template strings
+  (`` `/${src}` ``) straight from `presidents.json`'s `thumbnail`/`large` fields. Under a subfolder
+  base those would have resolved against the domain root and 404'd, even though the JS/CSS bundle
+  itself loaded fine.
+- Fix: added `v4/src/data/assetUrl.js` (`` `${import.meta.env.BASE_URL}${relativePath}` ``) and
+  routed both image `src`s through it.
+- Only caught this by actually building with the real base and testing the output, not just by
+  reading the config — a plain `npm run build`/`npm run dev` check alone wouldn't have surfaced it
+  since dev's base is `/` and nothing in the build step itself errors on a wrong asset path.
+
+## Verification
+
+- `npm run build` in `v4` → confirmed `dist/index.html`'s `<script>`/`<link>` tags carry the
+  `/99-HO-States/v4/` prefix.
+- Reconstructed the real deployed layout locally (`_root/99-HO-States/index.html` +
+  `_root/99-HO-States/v4/` = copied `dist/`), served it with `python3 -m http.server`, and `curl`'d
+  the root page, the `v4` index, its JS/CSS bundle, and a sample image — all **200**.
+- Drove that same local reconstruction with Playwright/Chromium (Home → List → open a detail row,
+  waited for the 2s reveal): **zero console errors, zero failed network requests**, and visually
+  confirmed via screenshot that the portrait actually rendered (not just that the request
+  succeeded).
+- Re-checked `npm run dev` still serves unprefixed (`base: '/'`) afterward, so local development is
+  unaffected.
+
+## Follow-up notes
+
+- GitHub Pages still needs a one-time manual switch in the repo's Settings → Pages → Build and
+  deployment → Source: **GitHub Actions** before this workflow's `deploy` job will succeed; not
+  scriptable here (no authenticated `gh`/admin token in this environment), and a repo-settings
+  change to make unilaterally regardless.
+- If `v3` (or any future version) is added to the deployed site, it needs the same treatment this
+  session gave `v4`: check whether it builds any asset URLs as runtime strings rather than static
+  imports, and if so route them through something like `assetUrl.js` before assuming a subfolder
+  deploy "just works".
