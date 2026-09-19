@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct US_HeadersApp: App {
+struct HO_States_US_App: App {
     @State private var appModel = AppModel()
 
     var body: some Scene {
