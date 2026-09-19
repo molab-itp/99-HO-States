@@ -100,4 +100,17 @@ v4.24
 setup for deploy to github pages in sub folder labeled v4, plan to deploy versions in other sub directories
 v4.25
 GitHub Pages needs to be switched to "Source: GitHub Actions"
-
+v4.26
+build
+HttpError: Not Found - https://docs.github.com/rest/pages/pages#get-a-apiname-pages-site
+HttpError: /home/runner/work/_actions/actions/configure-pages/v5/node_modules/@octokit/request/dist-node/index.js#L124
+Get Pages site failed. Please verify that the repository has Pages enabled and configured to build using GitHub Actions, or consider exploring the `enablement` parameter for this action. Error: Not Found - https://docs.github.com/rest/pages/pages#get-a-apiname-pages-site
+build
+Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/configure-pages@v5, actions/setup-node@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+build
+"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748"
+v4.27
+screen shot of filure in github.com action
+v4.30
+deploy succeeded
+https://molab-itp.github.io/99-HO-States/v4/
