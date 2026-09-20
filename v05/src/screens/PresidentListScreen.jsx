@@ -2,6 +2,7 @@ import { useAppModel } from '../state/AppModelContext.jsx';
 import { useNavigation } from '../navigation/NavigationContext.jsx';
 import NavBar from '../components/NavBar.jsx';
 import PresidentThumb from '../components/PresidentThumb.jsx';
+import Icon from '../components/Icon.jsx';
 
 /** Port of PresidenttListView.swift. */
 export default function PresidentListScreen() {
@@ -23,9 +24,7 @@ export default function PresidentListScreen() {
                   </span>
                   <span className="term">{president.term}</span>
                 </span>
-                <span className="chevron" aria-hidden="true">
-                  ›
-                </span>
+                <Icon name="chevron-right" size={14} className="chevron" />
               </button>
             </li>
           ))}

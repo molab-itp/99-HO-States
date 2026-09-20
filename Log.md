@@ -640,3 +640,157 @@ conversation), update the CSS to look more like SwiftUI, using
 - `v05/vite.config.js`'s `base` is still copied verbatim from `v4` (`/99-HO-States/v4/`) — fine for
   local dev/smoke testing (base is `/` in dev), but would need correcting to `/99-HO-States/v05/`
   before `v05` is ever added to the GitHub Pages deploy workflow.
+
+# --
+
+2026-09-19 20:55:30 (v2: cycleCount/buildInfo; v05: ported + SF-Symbol-style icons; Pages: v05 added)
+
+## Request
+
+Four follow-ups in one session: (1) show the president's number in `PresidentDetailView.swift`'s
+name `Text`; (2) add a `cycleCount` to `AppModel` counting shuffles, then display it flush right in
+`navigationTitleView`; (3) port `v2`'s resulting changes into `v05` (a copy of `v4`); (4) update the
+GitHub Pages workflow to also build and publish `v05` alongside `v4`; (5) replace `v05`'s emoji/
+Unicode-character icons with real SVGs closer to SF Symbols.
+
+## v2 (SwiftUI) changes
+
+- `PresidentDetailView.swift`: the name `Text` now reads `"#\(president.order) \(president.name)"`
+  — first as `.font(.largeTitle.bold())`, matching the `#NN` prefix already added earlier to the
+  list row and nav title; the user later restyled it themselves (seen via a file-changed notice)
+  to `.font(.system(.body, design: .monospaced))` with an unpadded order number — treated as the
+  authoritative current state and ported as-is into `v05`, not reverted.
+- `AppModel.swift`: added `private(set) var cycleCount` — starts at 1 in `init`, increments each
+  time `nextRandomPresident()` exhausts the current shuffle and redeals. Verified via
+  `xcodebuild ... build` (exit 0).
+- `navigationTitleView`: attempted to show `cycleCount` flush right via an `HStack` + `Spacer()` +
+  `.frame(maxWidth: .infinity)` on the principal toolbar item (the standard SwiftUI idiom for
+  pinning content to a nav bar's trailing edge). Could not visually confirm in the Simulator — no
+  tap/touch-injection tool exists in this sandbox (`simctl` has no such subcommand, and driving the
+  Simulator window via AppleScript failed, likely blocked by accessibility permissions) — so this
+  was verified only by build success plus reasoning about the idiom, not by looking at the
+  rendered bar. The user's own subsequent edit (found via a later file-changed notice) abandoned
+  the flush-right layout in favor of a simpler inline append, and replaced the raw `cycleCount`
+  display with a new `AppModel.buildInfo` computed property: `"[\(cycleCount)|\(bundleVersion)]"`
+  where `bundleVersion` reads `CFBundleVersion` from the app's Info.plist. Ported *that* final
+  state into `v05`, not the intermediate flush-right version.
+
+## v05: ported the v2 delta
+
+Used `git diff 4683902 HEAD -- v2` to pin down the exact delta between what `v4`/`v05` already
+reflected and `v2`'s current state, rather than re-deriving it from memory:
+
+- `src/state/AppModelContext.jsx`: added `cycleCount` (React state, so it re-renders the title) and
+  `buildInfo`, using this app's own `package.json` version as the web analog of `CFBundleVersion`.
+- `src/screens/PresidentDetailScreen.jsx`: nav title appends `buildInfo` inline (matching the
+  user's simplified version, not the abandoned flush-right one); name heading changed from a large
+  bold title to monospace `#{order} {name}` (new `.name-mono` CSS class), unpadded order number.
+- Did not port the Swift file's commented-out `topBarTrailing` experiment — dead code, not part of
+  the app's actual behavior.
+- Verified: `npm run build` + `npm run smoke` (zero console errors) plus visual review of
+  screenshots — nav title reads `#01 [1|0.1.0]`, name heading reads `#1 George Washington` in
+  monospace, slideshow title reads `#31 · 05.0s [1|0.1.0]`.
+
+## GitHub Pages: added v05 alongside v4
+
+- `.github/workflows/deploy-pages.yml`: added `v05/**` to the push-trigger path filter, a
+  `Build v05` step, and a `cp -r v05/dist/. _site/v05/` in the assemble step; `setup-node`'s
+  `cache-dependency-path` now lists both lockfiles.
+- `pages/index.html`: added a `v05` link/card on the landing page.
+- Caught and fixed two pre-existing problems along the way, not part of the original ask but
+  blocking it: `v05/vite.config.js`'s `base` was still `/99-HO-States/v4/`, copied verbatim when
+  `v05` was duplicated from `v4` (flagged in the prior session's log entry, now actually fixed to
+  `/99-HO-States/v05/`); and `v4/node_modules` had gone missing entirely (`npm run build` failed
+  with `vite: command not found`), so `npm install` was re-run there before verifying.
+- Verified for real: built both apps, reconstructed the actual `/99-HO-States/{v4,v05}/` local
+  layout via `python3 -m http.server`, confirmed `v05`'s built HTML now references
+  `/99-HO-States/v05/...`, and drove both through Chromium under their real subfolder paths — zero
+  console/network errors on both, screenshot-confirmed.
+
+## v05: SF-Symbol-style SVG icons
+
+- User asked whether an SVG version of Apple's SF Symbols library exists for this. Researched
+  before implementing: Apple's SF Symbols app can export any glyph as SVG, but the SF Symbols
+  license only covers use in software built for Apple platforms — not a generic web app — so that
+  path was ruled out as not actually safe to use here, even for a personal/school project.
+  Recommended Bootstrap Icons (MIT-licensed SVGs, visually close thin/rounded style, and notably
+  what Ignite itself bundles) as the clean alternative; user confirmed.
+- `src/components/Icon.jsx` (new): 10 icons hand-picked from Bootstrap Icons and mapped to the SF
+  Symbol each stands in for (`bank` ↔ `building.columns.fill`, `list-ul` ↔ `list.bullet`,
+  `shuffle`, `play/stop-circle-fill`, `link-45deg` ↔ `link`, `chevron-left`/`-right`,
+  `person-circle` ↔ `person.crop.circle`, `book`), fetched from `raw.githubusercontent.com/twbs/
+  icons` and inlined as path data (`fill="currentColor"` so each inherits tint/secondary/disabled
+  color from its container, same as a `.foregroundStyle`d SF Symbol).
+- Replaced every emoji and the earlier plain-text `‹`/`›` stand-ins across `HomeScreen`, `NavBar`,
+  `PresidentListScreen`, `PresidentThumb`, and `PresidentDetailScreen`; removed the CSS that only
+  existed to size those text glyphs (`.nav-back-chevron`, `.toolbar-chevron`, stray `font-size`s).
+- Incidental correctness fix this produced: the Home screen's building icon now actually renders in
+  the app's tint color, matching `Image(systemName:).foregroundStyle(.tint)` in the Swift source —
+  the emoji it replaced couldn't do that (fixed emoji color, ignores CSS `color`).
+- Verified: `npm run build` + `npm run smoke` (zero console errors), plus a full-page screenshot at
+  a taller viewport to check the below-the-fold "Read on Wikipedia" book icon and the
+  disabled-state gray on "Previous" at the first president.
+
+## Follow-up notes
+
+- No headless-browser/UI-automation tool exists in this sandbox for driving the iOS Simulator
+  (only `xcodebuild`/`simctl`, no tap injection) — native SwiftUI layout changes here can only be
+  build-verified, not visually confirmed, unlike the web ports which have Playwright.
+- `v4` was not touched by the icon swap or the `v2` port — it still has emoji icons and the older
+  detail-view text. Carrying either forward into `v4` is a separate, not-yet-requested follow-up.
+
+# --
+
+2026-09-19 21:19:32 (v05: icon-only nav controls, per-screen tint colors)
+
+## Request
+
+Two follow-ups to the SF-Symbol-style icon work, both scoped to `v05`: (1) in
+`PresidentDetailScreen.jsx`, make Next/Previous/the back button icon-only (drop their text), and
+drop the word from the Random button too; in `HomeScreen.jsx`, change the bank icon and buttons'
+tint to match SwiftUI's light blue. (2) A follow-up correction: the *other* icons — the nav bar
+back button, and the detail screen's Next/Random/Previous — should match SwiftUI's black, not the
+app's red/blue tint.
+
+## What was built
+
+- `PresidentDetailScreen.jsx`: Previous/Random/Next buttons are now icon-only (chevron-left,
+  shuffle, chevron-right at 19–20px) with an `aria-label` each (Previous/Random/Next) for
+  accessibility, since the visible words are gone.
+- `NavBar.jsx`: the back button (shared by List and Detail screens) is now icon-only too — just
+  the chevron, `aria-label="Back"`.
+- `index.css`:
+  - Added `.toolbar-btn-icon` (centered, fixed 44px square tap target) and shrank
+    `.nav-back`/`.nav-spacer` from 76px to 44px to match, now that there's no text to size around.
+  - Scoped `--tint`/`--tint-fill`/`--tint-fill-pressed` overrides on the `.home` selector to
+    SwiftUI's real default system blue (`#007AFF` light / `#0A84FF` dark) — reasoned from `v2`'s
+    `AccentColor` asset being unset, so an unstyled default tint is what Home's icon/buttons
+    should show, without touching `.btn-text-destructive` (Reset Visit Count stays red) or any
+    other screen.
+  - Then, per the user's direct correction (they'd observed the real `v2` app's actual rendering,
+    which this session couldn't verify itself — no Simulator UI-automation tool here, see prior
+    entry's follow-up note): changed `.nav-back` and `.toolbar-btn`'s `color` from `var(--tint)` to
+    `var(--label)` — the back chevron and detail toolbar icons render in plain black/white in the
+    real app, not tinted, unlike Home's buttons. Treated as ground truth over any first-principles
+    reasoning about SwiftUI's tint-inheritance rules.
+- `scripts/smoke.mjs`: updated the Previous/Random/Next/Back click selectors from
+  `button:has-text(...)` to `button[aria-label=...]`, since the text those selectors matched on no
+  longer exists.
+
+## Verification
+
+- `npm run build` + `npm run smoke` after each change — succeeds, **zero console errors** both
+  times.
+- Visually reviewed screenshots after each change: Home screen shows the bank icon and all three
+  buttons in system blue with "Reset Visit Count" still red (unaffected); the detail screen shows
+  icon-only Previous (correctly grayed/disabled at president #1)/Random/Next in black, and the list
+  screen's back chevron is also black, confirming the shared `NavBar` picked up the change
+  everywhere it's used.
+
+## Follow-up notes
+
+- `v05` no longer has a single app-wide tint — Home is blue, the back button and detail toolbar are
+  black, and the Wikipedia link / list disclosure chevron / detail image still use the original red
+  tint / tertiary gray respectively (not mentioned in either request, left untouched). Worth
+  double-checking against the real `v2` app if more elements turn out to need re-coloring, since
+  this session still has no way to visually verify `v2` itself.

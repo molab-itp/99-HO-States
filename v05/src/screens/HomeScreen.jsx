@@ -1,6 +1,7 @@
 import { useAppModel } from '../state/AppModelContext.jsx';
 import { useNavigation } from '../navigation/NavigationContext.jsx';
 import { useSlideshow } from '../state/SlideshowContext.jsx';
+import Icon from '../components/Icon.jsx';
 
 const WIKIPEDIA_SOURCE_URL = 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States';
 
@@ -13,26 +14,30 @@ export default function HomeScreen() {
 
   return (
     <div className="home">
-      <div className="icon" aria-hidden="true">
-        🏛️
+      <div className="icon">
+        <Icon name="bank" size={64} />
       </div>
       <h1>US Presidents</h1>
       <p className="subtitle">Browse portraits and biographies of every US president.</p>
 
       <div className="actions">
         <button className="btn btn-bordered" onClick={pushList}>
-          📋 List of Presidents
+          <Icon name="list-ul" />
+          List of Presidents
         </button>
         <button className="btn btn-bordered" onClick={() => replaceWithDetail(nextRandomPresident())}>
-          🔀 Random President
+          <Icon name="shuffle" />
+          Random President
         </button>
         <button className="btn btn-bordered" onClick={slideshow.toggle}>
-          {slideshow.isRunning ? '⏹ Stop Slideshow' : '▶️ Start Slideshow'}
+          <Icon name={slideshow.isRunning ? 'stop-circle-fill' : 'play-circle-fill'} />
+          {slideshow.isRunning ? 'Stop Slideshow' : 'Start Slideshow'}
         </button>
       </div>
 
       <a className="source-link" href={WIKIPEDIA_SOURCE_URL} target="_blank" rel="noopener noreferrer">
-        🔗 Source: Wikipedia
+        <Icon name="link-45deg" size={14} />
+        Source: Wikipedia
       </a>
 
       <div className="visited">
