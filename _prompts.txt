@@ -188,4 +188,4 @@ info.plist needs key
 holding up TestFlight distribution
 INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 
-append this chat to Log.md with time in date time stamp
+append this chat to Log.md with date and time stamp
