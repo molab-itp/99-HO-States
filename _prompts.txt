@@ -100,4 +100,62 @@ v4.24
 setup for deploy to github pages in sub folder labeled v4, plan to deploy versions in other sub directories
 v4.25
 GitHub Pages needs to be switched to "Source: GitHub Actions"
+v4.26
+build
+HttpError: Not Found - https://docs.github.com/rest/pages/pages#get-a-apiname-pages-site
+HttpError: /home/runner/work/_actions/actions/configure-pages/v5/node_modules/@octokit/request/dist-node/index.js#L124
+Get Pages site failed. Please verify that the repository has Pages enabled and configured to build using GitHub Actions, or consider exploring the `enablement` parameter for this action. Error: Not Found - https://docs.github.com/rest/pages/pages#get-a-apiname-pages-site
+build
+Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/configure-pages@v5, actions/setup-node@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+build
+"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748"
+v4.27
+screen shot of filure in github.com action
+v4.30
+deploy succeeded
+https://molab-itp.github.io/99-HO-States/v4/
 
+v4.31
+
+copied v4 --> v05
+v05 % npm install
+npm run dev
+https://ignitesamples.hackingwithswift.com/
+https://github.com/twostraws/Ignite
+
+for app in folder v05
+update css to be more like SwiftUI style
+use for reference https://github.com/twostraws/Ignite
+
+2026-09-19 14:16:03
+2026-09-19 14:20:59
+>> next prompt 
+append this chat to Log.md with time in date time stamp
+
+v4.32
+in swiftui folder v2
+update to show president in number 
+in v2/HO-States-US/HO-States-US/PresidentDetailView.swift
+item Text president.name
+
+v4.33
+hand coded president.order president.name
+display in PresidentDetailView
+
+v2.34
+in v2/HO-States-US/HO-States-US AppModel
+add variable cycleCount to count the number of times 
+list is shuffled
+
+display cycleCount flush right in navigationTitleView
+
+https://developer.apple.com/documentation/swiftui/toolbaritemplacement
+buildInfo
+
+v4.35
+web app in v05 is a copy of 
+web app in v4 folder
+update v05 with recent updates to swiftui app in v2
+
+v05.36
+update github workflow to build v05 and make available as line on github pages along with v4

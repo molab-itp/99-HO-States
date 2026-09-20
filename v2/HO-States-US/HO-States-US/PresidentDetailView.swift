@@ -27,10 +27,16 @@ struct PresidentDetailView: View {
     private var navigationTitleView: some View {
         let orderText = String(format: "%02d", president.order)
         guard let tenths = slideshowCountdownTenths else {
-            return Text("#\(orderText)").font(.system(.body, design: .monospaced))
+            return HStack {
+                Text("#\(orderText) \(appModel.buildInfo)").font(.system(.body, design: .monospaced))
+            }
+            .frame(maxWidth: .infinity)
         }
         let secondsText = String(format: "%04.1f", Double(tenths) / 10)
-        return Text("#\(orderText) · \(secondsText)s").font(.system(.body, design: .monospaced))
+        return HStack {
+            Text("#\(orderText) · \(secondsText)s \(appModel.buildInfo)").font(.system(.body, design: .monospaced))
+        }
+        .frame(maxWidth: .infinity)
     }
 
     var body: some View {
@@ -39,8 +45,7 @@ struct PresidentDetailView: View {
                 ViewedProgressBar(total: presidents.count, viewedCount: appModel.viewedPresidentIDs.count)
                 headerImage
                 VStack(alignment: .leading, spacing: 16) {
-                    Text(president.name)
-                        .font(.largeTitle.bold())
+                    Text("#\(president.order) \(president.name)").font(.system(.body, design: .monospaced))
                     Text("\(president.term) · \(president.party)")
                         .font(.headline)
                         .foregroundStyle(.secondary)
@@ -71,7 +76,10 @@ struct PresidentDetailView: View {
             ToolbarItem(placement: .principal) {
                 navigationTitleView
             }
-
+//            ToolbarItem(placement: .topBarTrailing) {
+////                ToolbarItem(placement: .topBarTrailing) {
+//                Text("(\(appModel.cycleCount))").font(.system(.body, design: .monospaced))
+//            }
             ToolbarItemGroup(placement: .bottomBar) {
                 Button {
                     handleToolbarButton(goToPrevious)

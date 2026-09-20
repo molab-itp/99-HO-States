@@ -1,0 +1,501 @@
+/* Design tokens follow Apple's Human Interface Guidelines system-color/typography conventions
+   (systemBackground, secondarySystemGroupedBackground, systemGray5, label/secondaryLabel,
+   separator) rather than inventing a bespoke palette — the goal is a page that reads as a real
+   SwiftUI screen, not a themed web app. --tint keeps this app's existing red accent (v3/v4's
+   choice; the app's own AccentColor asset was never set to a specific value) but adapts it for
+   dark mode the way a SwiftUI Color asset with light/dark variants would. */
+:root {
+  color-scheme: light dark;
+
+  --tint: #b3212e;
+  --tint-fill: rgba(179, 33, 46, 0.13);
+  --tint-fill-pressed: rgba(179, 33, 46, 0.22);
+  --destructive: #d0342c;
+
+  --bg: #ffffff;
+  --grouped-bg: #f2f2f7;
+  --card-bg: #ffffff;
+  --bar-bg: rgba(255, 255, 255, 0.78);
+
+  --label: #000000;
+  --secondary-label: #6e6e73;
+  --tertiary-label: #c7c7cc;
+
+  --separator: rgba(60, 60, 67, 0.29);
+  --fill-pressed: rgba(60, 60, 67, 0.08);
+  --thumb-bg: rgba(120, 120, 128, 0.16);
+
+  --shadow-card: 0 1px 1.5px rgba(0, 0, 0, 0.06);
+
+  --radius-lg: 14px;
+  --radius-md: 12px;
+  --radius-sm: 10px;
+
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Roboto,
+    sans-serif;
+  --font-mono: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tint: #ff6b62;
+    --tint-fill: rgba(255, 107, 98, 0.16);
+    --tint-fill-pressed: rgba(255, 107, 98, 0.26);
+    --destructive: #ff6961;
+
+    --bg: #000000;
+    --grouped-bg: #1c1c1e;
+    --card-bg: #1c1c1e;
+    --bar-bg: rgba(15, 15, 17, 0.78);
+
+    --label: #ffffff;
+    --secondary-label: #98989f;
+    --tertiary-label: #48484a;
+
+    --separator: rgba(84, 84, 88, 0.65);
+    --fill-pressed: rgba(120, 120, 128, 0.24);
+    --thumb-bg: rgba(120, 120, 128, 0.24);
+
+    --shadow-card: 0 1px 1.5px rgba(0, 0, 0, 0.5);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--label);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+.app-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.screen-scroll {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.list-screen {
+  background: var(--grouped-bg);
+}
+
+/* Nav bar — translucent + blurred like UINavigationBar's standard appearance, hairline
+   separator, centered inline title, leading chevron back button. */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 8px;
+  border-bottom: 0.5px solid var(--separator);
+  position: sticky;
+  top: 0;
+  background: var(--bar-bg);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  z-index: 10;
+}
+
+.nav-bar .nav-title {
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  text-align: center;
+  flex: 1;
+}
+
+.nav-bar .nav-title-mono {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.nav-back {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--tint);
+  font-size: 17px;
+  cursor: pointer;
+  padding: 6px 10px 6px 4px;
+  min-width: 76px;
+  border-radius: var(--radius-sm);
+  text-align: left;
+}
+
+.nav-back:active {
+  background: var(--fill-pressed);
+}
+
+.nav-back-chevron {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  margin-right: 2px;
+  transform: scaleY(1.15);
+}
+
+.nav-spacer {
+  min-width: 76px;
+}
+
+/* Home screen — matches the plain (no nav bar) root view; buttons use SwiftUI's `.bordered`
+   style, which on iOS renders as a tinted, filled, continuously-rounded control, not an
+   outline. */
+.home {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px;
+  gap: 22px;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.home .icon {
+  font-size: 68px;
+  line-height: 1;
+}
+
+.home h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.home p.subtitle {
+  margin: 0;
+  color: var(--secondary-label);
+  font-size: 15px;
+  line-height: 1.4;
+  max-width: 300px;
+}
+
+.home .actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 20px;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 17px;
+  font-weight: 590;
+  cursor: pointer;
+  width: 100%;
+  transition: transform 0.12s ease;
+}
+
+.btn-bordered {
+  background: var(--tint-fill);
+  color: var(--tint);
+}
+
+.btn-bordered:active {
+  background: var(--tint-fill-pressed);
+  transform: scale(0.97);
+}
+
+.source-link {
+  color: var(--secondary-label);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.source-link:active {
+  opacity: 0.5;
+}
+
+.visited {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.visited-count {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--secondary-label);
+}
+
+.btn-text-destructive {
+  background: none;
+  border: none;
+  color: var(--destructive);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.btn-text-destructive:active {
+  background: var(--fill-pressed);
+}
+
+/* List screen — SwiftUI's default `List` on iOS renders inset-grouped (rounded card of rows on
+   a secondary-grouped background), not edge-to-edge, unless `.listStyle(.plain)` is set — the
+   Swift source never sets one, so this matches its real default appearance. */
+.list-group {
+  padding: 12px 16px 32px;
+}
+
+.president-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--card-bg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.president-list li {
+  border-bottom: 0.5px solid var(--separator);
+}
+
+.president-list li:last-child {
+  border-bottom: none;
+}
+
+.president-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  min-height: 60px;
+  text-decoration: none;
+  color: var(--label);
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 16px;
+}
+
+.president-row:active {
+  background: var(--fill-pressed);
+}
+
+.president-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--thumb-bg);
+}
+
+.president-thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--secondary-label);
+}
+
+.president-row .names {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.president-row .names .name {
+  font-weight: 590;
+  font-size: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.president-row .names .term {
+  font-size: 13px;
+  color: var(--secondary-label);
+  margin-top: 1px;
+}
+
+.president-row .chevron {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--tertiary-label);
+  flex-shrink: 0;
+}
+
+/* Detail screen */
+.detail {
+  padding: 16px;
+  flex: 1;
+  background: var(--bg);
+}
+
+.progress-bar {
+  display: flex;
+  gap: 2px;
+  height: 5px;
+  margin-bottom: 16px;
+}
+
+.progress-segment {
+  flex: 1;
+  border-radius: 2.5px;
+  background: var(--fill-pressed);
+  transition: background 0.3s ease;
+}
+
+.detail-image {
+  width: 100%;
+  border-radius: var(--radius-md);
+  display: block;
+  background: var(--thumb-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.detail-image-placeholder {
+  width: 100%;
+  height: 220px;
+  border-radius: var(--radius-md);
+  background: var(--thumb-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  color: var(--secondary-label);
+}
+
+.detail-text {
+  margin-top: 18px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+}
+
+.detail-text.visible {
+  opacity: 1;
+}
+
+.detail-text h1 {
+  margin: 0 0 6px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Matches PresidentDetailView.swift's current name Text: `.font(.system(.body, design:
+   .monospaced))` instead of a large bold title. */
+.detail-text h1.name-mono {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
+.detail-text .subtitle {
+  margin: 0 0 16px;
+  color: var(--secondary-label);
+  font-size: 17px;
+  font-weight: 590;
+}
+
+.detail-text p {
+  margin: 0 0 16px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--label);
+}
+
+.wiki-link {
+  display: inline-block;
+  color: var(--tint);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 4px 0;
+}
+
+.wiki-link:active {
+  opacity: 0.5;
+}
+
+/* Bottom toolbar — same translucent-blur treatment as the nav bar, matching a standard
+   UIToolbar. */
+.detail-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 8px;
+  border-top: 0.5px solid var(--separator);
+  position: sticky;
+  bottom: 0;
+  background: var(--bar-bg);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.toolbar-btn {
+  background: none;
+  border: none;
+  color: var(--tint);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+}
+
+.toolbar-btn:active:not(:disabled) {
+  background: var(--fill-pressed);
+}
+
+.toolbar-btn:disabled {
+  color: var(--tertiary-label);
+  cursor: default;
+}
+
+.toolbar-chevron {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1;
+  transform: scaleY(1.1);
+}
