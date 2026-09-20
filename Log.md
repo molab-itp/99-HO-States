@@ -838,3 +838,35 @@ TestFlight"), this is App Store Connect/TestFlight submission prep for `v2`:
   `presidents.json`/`public/images` were generated earlier by `v3/tools/migrate.js` and don't need
   regenerating just for this (paths/filenames inside the catalog changed, not the images or the
   generated `Presidents.json` data itself).
+
+# --
+
+2026-09-20 13:55:56 (v2: App Store Connect encryption-compliance prompt)
+
+## Request
+
+User shared a screenshot of App Store Connect's "App Encryption Documentation" modal (shown during
+build submission), asking how to fix it.
+
+## What changed
+
+- Confirmed no `Info.plist` file exists on disk for `v2/HO-States-US` — the target uses
+  `GENERATE_INFOPLIST_FILE = YES`, so Xcode builds it at compile time from `INFOPLIST_KEY_*` build
+  settings in `project.pbxproj`. Neither that target nor `v1/PresidentialArchive` (also checked)
+  declared an encryption-compliance key, which is why App Store Connect asks on every submission.
+- Added `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;` to both the Debug and Release
+  `XCBuildConfiguration` blocks of the `HO-States-US` app target in
+  `v2/HO-States-US/HO-States-US.xcodeproj/project.pbxproj` (picked `v2` over `v1` since its
+  `project.pbxproj` was the more recently modified of the two, and it's the project with the
+  in-flight TestFlight prep from the previous log entry).
+- Told the user the current modal's pre-selected answer ("None of the algorithms mentioned
+  above") is already correct for an app that only uses standard HTTPS/TLS, so they can just click
+  Save for this build; the pbxproj change is to stop the prompt recurring on future
+  archive/upload cycles.
+
+## Follow-up notes
+
+- `v1/PresidentialArchive.xcodeproj` was not changed — same missing key is present there too, but
+  the user didn't confirm it's actively shipped. Flagged that it can get the same fix on request.
+- Not verified in Xcode/App Store Connect itself this session (no build/upload tooling available
+  here) — confirm on the next archive that the compliance question no longer appears.
