@@ -419,6 +419,15 @@ input {
   letter-spacing: -0.02em;
 }
 
+/* Matches PresidentDetailView.swift's current name Text: `.font(.system(.body, design:
+   .monospaced))` instead of a large bold title. */
+.detail-text h1.name-mono {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
 .detail-text .subtitle {
   margin: 0 0 16px;
   color: var(--secondary-label);

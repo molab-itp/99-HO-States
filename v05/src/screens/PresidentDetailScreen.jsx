@@ -10,7 +10,7 @@ const DETAIL_REVEAL_DELAY_MS = 2000; // matches Swift's `delaySecs`
 
 /** Port of PresidentDetailView.swift. `selected` is the president this screen was pushed with. */
 export default function PresidentDetailScreen({ selected }) {
-  const { presidents, viewedIDs, markViewed, nextRandomPresident } = useAppModel();
+  const { presidents, viewedIDs, buildInfo, markViewed, nextRandomPresident } = useAppModel();
   const slideshow = useSlideshow();
   const isSlideshowActive = slideshow.isRunning;
 
@@ -65,8 +65,8 @@ export default function PresidentDetailScreen({ selected }) {
 
   const orderText = String(president.order).padStart(2, '0');
   const title = isSlideshowActive
-    ? `#${orderText} · ${(slideshow.remainingTenths / 10).toFixed(1).padStart(4, '0')}s`
-    : `#${orderText}`;
+    ? `#${orderText} · ${(slideshow.remainingTenths / 10).toFixed(1).padStart(4, '0')}s ${buildInfo}`
+    : `#${orderText} ${buildInfo}`;
 
   const imageSrc = president.large || president.thumbnail;
   const articleURL = wikipediaArticleURL(president);
@@ -86,7 +86,9 @@ export default function PresidentDetailScreen({ selected }) {
         )}
 
         <div className={detailsVisible ? 'detail-text visible' : 'detail-text'}>
-          <h1>{president.name}</h1>
+          <h1 className="name-mono">
+            #{president.order} {president.name}
+          </h1>
           <p className="subtitle">
             {president.term} · {president.party}
           </p>

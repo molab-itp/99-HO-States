@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'v4/**'
+      - 'v05/**'
       - 'pages/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
@@ -28,7 +29,9 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: v4/package-lock.json
+          cache-dependency-path: |
+            v4/package-lock.json
+            v05/package-lock.json
 
       - name: Build v4
         working-directory: v4
@@ -36,8 +39,14 @@ jobs:
           npm ci
           npm run build
 
+      - name: Build v05
+        working-directory: v05
+        run: |
+          npm ci
+          npm run build
+
       # Each deployed version gets its own subfolder under the site root, so multiple versions
-      # can be live at once (https://molab-itp.github.io/99-HO-States/v4/, .../v3/, ...). To add
+      # can be live at once (https://molab-itp.github.io/99-HO-States/v4/, .../v05/, ...). To add
       # another one: give it a build step (or none, if it's already static like v3) and a
       # `cp -r <version>/<output> _site/<version>/` line below, then add a link in pages/index.html.
       - name: Assemble site
@@ -46,6 +55,8 @@ jobs:
           cp pages/index.html _site/index.html
           mkdir -p _site/v4
           cp -r v4/dist/. _site/v4/
+          mkdir -p _site/v05
+          cp -r v05/dist/. _site/v05/
 
       - uses: actions/configure-pages@v5
 

@@ -151,3 +151,11 @@ display cycleCount flush right in navigationTitleView
 
 https://developer.apple.com/documentation/swiftui/toolbaritemplacement
 buildInfo
+
+v4.35
+web app in v05 is a copy of 
+web app in v4 folder
+update v05 with recent updates to swiftui app in v2
+
+v05.36
+update github workflow to build v05 and make available as line on github pages along with v4

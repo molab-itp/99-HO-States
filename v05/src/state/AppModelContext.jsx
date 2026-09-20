@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import presidents from '../data/presidents.js';
+import { version as appVersion } from '../../package.json';
 
 const AppModelContext = createContext(null);
 
@@ -23,6 +24,10 @@ export function AppModelProvider({ children }) {
   const drawPositionRef = useRef(0);
   const [viewedIDs, setViewedIDs] = useState(() => new Set());
 
+  // Number of times the shuffle has been (re)dealt — the initial deal plus every reshuffle once
+  // a shuffle is exhausted — so `buildInfo` can tell how many full random cycles have been dealt.
+  const [cycleCount, setCycleCount] = useState(1);
+
   const nextRandomPresident = useCallback(() => {
     if (presidents.length === 0) return null;
 
@@ -33,6 +38,7 @@ export function AppModelProvider({ children }) {
         [shuffleRef.current[0], shuffleRef.current[1]] = [shuffleRef.current[1], shuffleRef.current[0]];
       }
       drawPositionRef.current = 0;
+      setCycleCount((c) => c + 1);
     }
 
     const president = presidents[shuffleRef.current[drawPositionRef.current]];
@@ -53,9 +59,13 @@ export function AppModelProvider({ children }) {
 
   const resetViewed = useCallback(() => setViewedIDs(new Set()), []);
 
+  // Port of AppModel.swift's `buildInfo`: `[cycleCount|bundleVersion]`, using this app's own
+  // package.json version as the web analog of CFBundleVersion.
+  const buildInfo = `[${cycleCount}|${appVersion}]`;
+
   const value = useMemo(
-    () => ({ presidents, viewedIDs, nextRandomPresident, markViewed, resetViewed }),
-    [viewedIDs, nextRandomPresident, markViewed, resetViewed],
+    () => ({ presidents, viewedIDs, cycleCount, buildInfo, nextRandomPresident, markViewed, resetViewed }),
+    [viewedIDs, cycleCount, buildInfo, nextRandomPresident, markViewed, resetViewed],
   );
 
   return <AppModelContext.Provider value={value}>{children}</AppModelContext.Provider>;
