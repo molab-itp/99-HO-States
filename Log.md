@@ -794,3 +794,47 @@ app's red/blue tint.
   tint / tertiary gray respectively (not mentioned in either request, left untouched). Worth
   double-checking against the real `v2` app if more elements turn out to need re-coloring, since
   this session still has no way to visually verify `v2` itself.
+
+# --
+
+2026-09-19 23:50:51 (v2: App Store/TestFlight prep — user's own Xcode work, logged from git history)
+
+## Context
+
+User asked to append "this chat" to Log.md again shortly after the previous entry, but nothing new
+had happened in the conversation itself since then — `git log` showed three new commits
+(`3cfa265`..`83c9335` were already covered by the prior entry; `25983da` and `70a21de` were not)
+made directly in Xcode, outside this chat. Offered three options; user chose to have the new
+commits diffed and summarized here instead of a content-free duplicate entry.
+
+## What changed (commits `25983da` "v2.40", `70a21de` "1001")
+
+Per the user's own shorthand note added to `_prompts.txt` in the same commit ("prep for app store
+TestFlight"), this is App Store Connect/TestFlight submission prep for `v2`:
+
+- `PRODUCT_BUNDLE_IDENTIFIER` changed from `com.jht1900.US-Headers` to `com.jht1900.HO-States-US`
+  in `project.pbxproj` — the old identifier was a leftover from the project's original name before
+  it was renamed to HO-States-US.
+- `AppIcon.appiconset` got an actual 1024×1024 icon image (`2026-09-19-HOS-3x-1024.png`) wired into
+  its `Contents.json` — previously the icon slot existed but had no image assigned.
+- `CURRENT_PROJECT_VERSION` (the build number) bumped 1000 → 1001, in the separate `70a21de`
+  commit, timed right after `25983da` — consistent with a re-upload attempt after a first one
+  failed (see below).
+- Reorganized `Assets.xcassets`: all 94 president thumbnail/large imagesets moved from the catalog
+  root into a new `hos/` subgroup (each imageset's own files unchanged, just relocated + a new
+  `hos/Contents.json` group marker added) — tidies the catalog now that it also holds `AppIcon`/
+  `AccentColor` at the root.
+- Added `Log-screens/2026-09-19-HOS-3x-1024.png`, `2026-09-19-HOS-3x.png`, and
+  `2026-09-19-HO-States-US-xcode-upload-fail.png` to the repo — the last filename suggests an
+  App Store Connect upload attempt failed; no further detail available from git history alone.
+
+## Follow-up notes
+
+- This entry was reconstructed entirely from `git show`/`git log` on commits made outside this
+  conversation — treat it as a record of *what changed*, not *why* beyond the one-line note the
+  user left in `_prompts.txt`. If the TestFlight upload is still failing, that's not something this
+  session has visibility into.
+- The `hos/` asset-catalog reorganization and bundle-ID fix are `v2`-only; `v05`'s copied
+  `presidents.json`/`public/images` were generated earlier by `v3/tools/migrate.js` and don't need
+  regenerating just for this (paths/filenames inside the catalog changed, not the images or the
+  generated `Presidents.json` data itself).
