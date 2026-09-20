@@ -10,8 +10,7 @@ export default function NavBar({ title, monospace = false }) {
     <div className="nav-bar">
       {showBack ? (
         <button className="nav-back" onClick={pop} aria-label="Back">
-          <Icon name="chevron-left" size={15} />
-          Back
+          <Icon name="chevron-left" size={20} />
         </button>
       ) : (
         <span className="nav-spacer" />

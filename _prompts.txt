@@ -162,3 +162,14 @@ update github workflow to build v05 and make available as line on github pages a
 
 v05.37
 is there a svg version of apple sf symbol library to use to better match v05 to v2
+
+v05.38
+in v05/src/screens/PresidentDetailScreen.jsx 
+use sf symbol like icons for 
+next, previous buttons
+back button
+remove word from random button
+in v05/src/screens/HomeScreen.jsx
+change tin on bank icon and buttons to match SwiftUI light blue
+
+v05.39

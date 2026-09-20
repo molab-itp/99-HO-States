@@ -105,24 +105,27 @@ export default function PresidentDetailScreen({ selected }) {
 
       <div className="detail-toolbar">
         <button
-          className="toolbar-btn"
+          className="toolbar-btn toolbar-btn-icon"
+          aria-label="Previous"
           disabled={!isSlideshowActive && isFirst}
           onClick={() => handleToolbarButton(goToPrevious)}
         >
-          <Icon name="chevron-left" size={13} />
-          Previous
-        </button>
-        <button className="toolbar-btn" onClick={() => handleToolbarButton(goToRandom)}>
-          <Icon name="shuffle" size={15} />
-          Random
+          <Icon name="chevron-left" size={20} />
         </button>
         <button
-          className="toolbar-btn"
+          className="toolbar-btn toolbar-btn-icon"
+          aria-label="Random"
+          onClick={() => handleToolbarButton(goToRandom)}
+        >
+          <Icon name="shuffle" size={19} />
+        </button>
+        <button
+          className="toolbar-btn toolbar-btn-icon"
+          aria-label="Next"
           disabled={!isSlideshowActive && isLast}
           onClick={() => handleToolbarButton(goToNext)}
         >
-          Next
-          <Icon name="chevron-right" size={13} />
+          <Icon name="chevron-right" size={20} />
         </button>
       </div>
     </div>

@@ -137,15 +137,14 @@ input {
 .nav-back {
   display: flex;
   align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: var(--tint);
-  font-size: 17px;
   cursor: pointer;
-  padding: 6px 10px 6px 4px;
-  min-width: 76px;
+  width: 44px;
+  height: 36px;
   border-radius: var(--radius-sm);
-  text-align: left;
 }
 
 .nav-back:active {
@@ -153,13 +152,19 @@ input {
 }
 
 .nav-spacer {
-  min-width: 76px;
+  min-width: 44px;
 }
 
 /* Home screen — matches the plain (no nav bar) root view; buttons use SwiftUI's `.bordered`
    style, which on iOS renders as a tinted, filled, continuously-rounded control, not an
-   outline. */
+   outline. Scoped to SwiftUI's default system-blue tint (rather than the rest of the app's red)
+   since the Swift app's AccentColor asset is unset, and an unset AccentColor's real default tint
+   is system blue, not the red carried over from v3/v4's styling. */
 .home {
+  --tint: #007aff;
+  --tint-fill: rgba(0, 122, 255, 0.13);
+  --tint-fill-pressed: rgba(0, 122, 255, 0.22);
+
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -170,6 +175,14 @@ input {
   gap: 22px;
   min-height: 100vh;
   background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .home {
+    --tint: #0a84ff;
+    --tint-fill: rgba(10, 132, 255, 0.18);
+    --tint-fill-pressed: rgba(10, 132, 255, 0.28);
+  }
 }
 
 .home .icon {
@@ -484,4 +497,10 @@ input {
 .toolbar-btn:disabled {
   color: var(--tertiary-label);
   cursor: default;
+}
+
+.toolbar-btn-icon {
+  justify-content: center;
+  width: 44px;
+  padding: 8px;
 }

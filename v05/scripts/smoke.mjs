@@ -64,23 +64,23 @@ async function main() {
     await shot('detail-revealed');
 
     console.log('Next / Previous / Random toolbar...');
-    await page.click('button:has-text("Next")');
+    await page.click('button[aria-label="Next"]');
     await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
     await shot('detail-next');
-    await page.click('button:has-text("Previous")');
+    await page.click('button[aria-label="Previous"]');
     await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
     await shot('detail-previous');
-    await page.click('button:has-text("Random")');
+    await page.click('button[aria-label="Random"]');
     await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
     await shot('detail-random');
 
     console.log('Back to List (this detail was pushed from the list row)...');
-    await page.click('text=Back');
+    await page.click('button[aria-label="Back"]');
     await page.waitForSelector('.president-list');
     await shot('back-to-list');
 
     console.log('Back to Home...');
-    await page.click('text=Back');
+    await page.click('button[aria-label="Back"]');
     await page.waitForSelector('text=Random President');
     await shot('back-home');
 
@@ -88,7 +88,7 @@ async function main() {
     await page.click('text=Random President');
     await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
     await shot('home-random');
-    await page.click('text=Back');
+    await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
 
     // Starting the slideshow immediately navigates to a random president's detail screen (same
@@ -103,7 +103,7 @@ async function main() {
     await shot('slideshow-running');
 
     console.log('Stopping the slideshow via a toolbar button...');
-    await page.click('button:has-text("Random")');
+    await page.click('button[aria-label="Random"]');
     await page.waitForTimeout(200);
     const stoppedTitle = await page.locator('.nav-title-mono').textContent();
     if (stoppedTitle.includes('·')) {
@@ -111,7 +111,7 @@ async function main() {
     }
     await shot('slideshow-stopped');
 
-    await page.click('text=Back');
+    await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
 
     console.log('Reset Visit Count...');
