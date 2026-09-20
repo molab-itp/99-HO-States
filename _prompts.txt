@@ -159,3 +159,6 @@ update v05 with recent updates to swiftui app in v2
 
 v05.36
 update github workflow to build v05 and make available as line on github pages along with v4
+
+v05.37
+is there a svg version of apple sf symbol library to use to better match v05 to v2

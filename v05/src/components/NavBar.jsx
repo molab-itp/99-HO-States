@@ -1,4 +1,5 @@
 import { useNavigation } from '../navigation/NavigationContext.jsx';
+import Icon from './Icon.jsx';
 
 /** Standing in for SwiftUI's automatic inline navigation bar (back button + centered title). */
 export default function NavBar({ title, monospace = false }) {
@@ -9,9 +10,7 @@ export default function NavBar({ title, monospace = false }) {
     <div className="nav-bar">
       {showBack ? (
         <button className="nav-back" onClick={pop} aria-label="Back">
-          <span className="nav-back-chevron" aria-hidden="true">
-            ‹
-          </span>
+          <Icon name="chevron-left" size={15} />
           Back
         </button>
       ) : (

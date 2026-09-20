@@ -5,6 +5,7 @@ import { wikipediaArticleURL } from '../data/wikipedia.js';
 import { assetUrl } from '../data/assetUrl.js';
 import NavBar from '../components/NavBar.jsx';
 import ViewedProgressBar from '../components/ViewedProgressBar.jsx';
+import Icon from '../components/Icon.jsx';
 
 const DETAIL_REVEAL_DELAY_MS = 2000; // matches Swift's `delaySecs`
 
@@ -80,8 +81,8 @@ export default function PresidentDetailScreen({ selected }) {
         {imageSrc ? (
           <img className="detail-image" src={assetUrl(imageSrc)} alt={president.name} />
         ) : (
-          <div className="detail-image-placeholder" aria-hidden="true">
-            👤
+          <div className="detail-image-placeholder">
+            <Icon name="person-circle" size={64} />
           </div>
         )}
 
@@ -95,7 +96,8 @@ export default function PresidentDetailScreen({ selected }) {
           <p>{president.extract}</p>
           {articleURL && (
             <a className="wiki-link" href={articleURL} target="_blank" rel="noopener noreferrer">
-              📖 Read on Wikipedia
+              <Icon name="book" size={14} />
+              Read on Wikipedia
             </a>
           )}
         </div>
@@ -107,13 +109,12 @@ export default function PresidentDetailScreen({ selected }) {
           disabled={!isSlideshowActive && isFirst}
           onClick={() => handleToolbarButton(goToPrevious)}
         >
-          <span className="toolbar-chevron" aria-hidden="true">
-            ‹
-          </span>
+          <Icon name="chevron-left" size={13} />
           Previous
         </button>
         <button className="toolbar-btn" onClick={() => handleToolbarButton(goToRandom)}>
-          🔀 Random
+          <Icon name="shuffle" size={15} />
+          Random
         </button>
         <button
           className="toolbar-btn"
@@ -121,9 +122,7 @@ export default function PresidentDetailScreen({ selected }) {
           onClick={() => handleToolbarButton(goToNext)}
         >
           Next
-          <span className="toolbar-chevron" aria-hidden="true">
-            ›
-          </span>
+          <Icon name="chevron-right" size={13} />
         </button>
       </div>
     </div>
