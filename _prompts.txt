@@ -179,7 +179,6 @@ details next, random, previous buttons
 
 append this chat to Log.md with time in date time stamp
 
-v2.40
 prep for app store TestFlight
 com.jht1900.HO-States-US
 in app store
