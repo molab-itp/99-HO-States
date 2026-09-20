@@ -738,3 +738,59 @@ reflected and `v2`'s current state, rather than re-deriving it from memory:
   build-verified, not visually confirmed, unlike the web ports which have Playwright.
 - `v4` was not touched by the icon swap or the `v2` port — it still has emoji icons and the older
   detail-view text. Carrying either forward into `v4` is a separate, not-yet-requested follow-up.
+
+# --
+
+2026-09-19 21:19:32 (v05: icon-only nav controls, per-screen tint colors)
+
+## Request
+
+Two follow-ups to the SF-Symbol-style icon work, both scoped to `v05`: (1) in
+`PresidentDetailScreen.jsx`, make Next/Previous/the back button icon-only (drop their text), and
+drop the word from the Random button too; in `HomeScreen.jsx`, change the bank icon and buttons'
+tint to match SwiftUI's light blue. (2) A follow-up correction: the *other* icons — the nav bar
+back button, and the detail screen's Next/Random/Previous — should match SwiftUI's black, not the
+app's red/blue tint.
+
+## What was built
+
+- `PresidentDetailScreen.jsx`: Previous/Random/Next buttons are now icon-only (chevron-left,
+  shuffle, chevron-right at 19–20px) with an `aria-label` each (Previous/Random/Next) for
+  accessibility, since the visible words are gone.
+- `NavBar.jsx`: the back button (shared by List and Detail screens) is now icon-only too — just
+  the chevron, `aria-label="Back"`.
+- `index.css`:
+  - Added `.toolbar-btn-icon` (centered, fixed 44px square tap target) and shrank
+    `.nav-back`/`.nav-spacer` from 76px to 44px to match, now that there's no text to size around.
+  - Scoped `--tint`/`--tint-fill`/`--tint-fill-pressed` overrides on the `.home` selector to
+    SwiftUI's real default system blue (`#007AFF` light / `#0A84FF` dark) — reasoned from `v2`'s
+    `AccentColor` asset being unset, so an unstyled default tint is what Home's icon/buttons
+    should show, without touching `.btn-text-destructive` (Reset Visit Count stays red) or any
+    other screen.
+  - Then, per the user's direct correction (they'd observed the real `v2` app's actual rendering,
+    which this session couldn't verify itself — no Simulator UI-automation tool here, see prior
+    entry's follow-up note): changed `.nav-back` and `.toolbar-btn`'s `color` from `var(--tint)` to
+    `var(--label)` — the back chevron and detail toolbar icons render in plain black/white in the
+    real app, not tinted, unlike Home's buttons. Treated as ground truth over any first-principles
+    reasoning about SwiftUI's tint-inheritance rules.
+- `scripts/smoke.mjs`: updated the Previous/Random/Next/Back click selectors from
+  `button:has-text(...)` to `button[aria-label=...]`, since the text those selectors matched on no
+  longer exists.
+
+## Verification
+
+- `npm run build` + `npm run smoke` after each change — succeeds, **zero console errors** both
+  times.
+- Visually reviewed screenshots after each change: Home screen shows the bank icon and all three
+  buttons in system blue with "Reset Visit Count" still red (unaffected); the detail screen shows
+  icon-only Previous (correctly grayed/disabled at president #1)/Random/Next in black, and the list
+  screen's back chevron is also black, confirming the shared `NavBar` picked up the change
+  everywhere it's used.
+
+## Follow-up notes
+
+- `v05` no longer has a single app-wide tint — Home is blue, the back button and detail toolbar are
+  black, and the Wikipedia link / list disclosure chevron / detail image still use the original red
+  tint / tertiary gray respectively (not mentioned in either request, left untouched). Worth
+  double-checking against the real `v2` app if more elements turn out to need re-coloring, since
+  this session still has no way to visually verify `v2` itself.

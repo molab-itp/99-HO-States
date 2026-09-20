@@ -134,13 +134,15 @@ input {
   font-size: 16px;
 }
 
+/* Unlike Home's buttons, the back chevron and detail toolbar icons (below) render in the plain
+   label color in the real v2 app, not the tint — so they stay black/white rather than blue/red. */
 .nav-back {
   display: flex;
   align-items: center;
   justify-content: center;
   background: none;
   border: none;
-  color: var(--tint);
+  color: var(--label);
   cursor: pointer;
   width: 44px;
   height: 36px;
@@ -479,7 +481,7 @@ input {
 .toolbar-btn {
   background: none;
   border: none;
-  color: var(--tint);
+  color: var(--label);
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;

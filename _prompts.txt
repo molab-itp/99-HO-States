@@ -173,3 +173,6 @@ in v05/src/screens/HomeScreen.jsx
 change tin on bank icon and buttons to match SwiftUI light blue
 
 v05.39
+in v05 other icons should be match swiftui black
+eg. nav bar back button
+details next, random, previous buttons
