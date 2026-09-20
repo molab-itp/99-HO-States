@@ -176,3 +176,9 @@ v05.39
 in v05 other icons should be match swiftui black
 eg. nav bar back button
 details next, random, previous buttons
+
+append this chat to Log.md with time in date time stamp
+
+v2.40
+prep for app store TestFlight
+com.jht1900.HO-States-US
