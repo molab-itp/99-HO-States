@@ -76,7 +76,7 @@ export default function PresidentDetailScreen({ selected }) {
     <div className="screen-scroll">
       <NavBar title={title} monospace />
       <div className="detail">
-        <ViewedProgressBar total={presidents.length} viewedCount={viewedIDs.size} />
+        <ViewedProgressBar total={presidents.length} viewedIDs={viewedIDs} />
 
         {imageSrc ? (
           <img className="detail-image" src={assetUrl(imageSrc)} alt={president.name} />

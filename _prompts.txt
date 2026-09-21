@@ -176,3 +176,25 @@ v05.39
 in v05 other icons should be match swiftui black
 eg. nav bar back button
 details next, random, previous buttons
+
+prep for app store TestFlight
+com.jht1900.HO-States-US
+in app store
+
+v05.40
+
+Need to deal with "App Encryption Documentation"
+info.plist needs key
+holding up TestFlight distribution
+INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+
+v02.41
+USNA Heads
+
+v02.42
+ViewedProgressBar isViewed position colored if in viewedPresidentIDs
+
+v05.43
+Sync changes to SwiftUI app v2 with js react app v05
+
+append this chat to Log.md with date and time stamp

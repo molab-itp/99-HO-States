@@ -21,10 +21,10 @@ struct HomeView: View {
                     .font(.system(size: 72))
                     .foregroundStyle(.tint)
 
-                Text("US Presidents")
+                Text("USNA Heads")
                     .font(.largeTitle.bold())
 
-                Text("Browse portraits and biographies of every US president.")
+                Text("Browse portraits and biographies of every United States of North America Head of State.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -34,7 +34,7 @@ struct HomeView: View {
 
                 VStack(spacing: 16) {
                     NavigationLink(value: HomeDestination.list) {
-                        Label("List of Presidents", systemImage: "list.bullet")
+                        Label("List of Heads", systemImage: "list.bullet")
                             .frame(maxWidth: .infinity)
                     }
 //                    .buttonStyle(.borderedProminent)
@@ -43,7 +43,7 @@ struct HomeView: View {
                     Button {
                         goToRandomPresident()
                     } label: {
-                        Label("Random President", systemImage: "shuffle")
+                        Label("Random Head", systemImage: "shuffle")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)

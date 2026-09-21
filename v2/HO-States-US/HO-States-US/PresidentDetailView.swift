@@ -42,7 +42,9 @@ struct PresidentDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                ViewedProgressBar(total: presidents.count, viewedCount: appModel.viewedPresidentIDs.count)
+//                ViewedProgressBar(total: presidents.count, viewedCount: appModel.viewedPresidentIDs.count)
+                ViewedProgressBar(total: presidents.count,
+                                  viewedPresidentIDs: appModel.viewedPresidentIDs)
                 headerImage
                 VStack(alignment: .leading, spacing: 16) {
                     Text("#\(president.order) \(president.name)").font(.system(.body, design: .monospaced))
@@ -164,8 +166,8 @@ struct PresidentDetailView: View {
 /// otherwise disappear against the background.
 private struct ViewedProgressBar: View {
     let total: Int
-    let viewedCount: Int
-
+    var viewedPresidentIDs: Set<President.ID>
+    
     private static let colors: [Color] = [.red, .green, .yellow]
     private let segmentSpacing: CGFloat = 2
 
@@ -173,7 +175,8 @@ private struct ViewedProgressBar: View {
         HStack(spacing: segmentSpacing) {
             ForEach(0..<max(total, 1), id: \.self) { position in
                 let color = Self.colors[position % Self.colors.count]
-                let isViewed = position < viewedCount
+//                let isViewed = position < viewedCount
+                let isViewed = viewedPresidentIDs.contains(position+1)
                 RoundedRectangle(cornerRadius: 1.5)
                     .fill(isViewed ? color : Color.secondary.opacity(0.15))
                     .overlay(
@@ -184,8 +187,8 @@ private struct ViewedProgressBar: View {
         }
         .frame(height: 6)
         .accessibilityElement()
-        .accessibilityLabel("Presidents viewed")
-        .accessibilityValue("\(viewedCount) of \(total)")
+        .accessibilityLabel("Heads viewed")
+        .accessibilityValue("\(viewedPresidentIDs.count) of \(total)")
     }
 }
 

@@ -31,7 +31,7 @@ export function NavigationProvider({ children }) {
   }, []);
 
   // Mirrors HomeView.goToRandomPresident(): replaces the *entire* path with a single detail
-  // entry, used by both the Home "Random President" button and the slideshow.
+  // entry, used by both the Home "Random Head" button and the slideshow.
   const replaceWithDetail = useCallback((president) => {
     if (!president) return;
     setPath([{ type: 'detail', president, navKey: nextNavKey() }]);

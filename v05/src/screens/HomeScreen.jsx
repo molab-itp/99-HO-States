@@ -17,17 +17,17 @@ export default function HomeScreen() {
       <div className="icon">
         <Icon name="bank" size={64} />
       </div>
-      <h1>US Presidents</h1>
-      <p className="subtitle">Browse portraits and biographies of every US president.</p>
+      <h1>USNA Heads</h1>
+      <p className="subtitle">Browse portraits and biographies of every United States of North America Head of State.</p>
 
       <div className="actions">
         <button className="btn btn-bordered" onClick={pushList}>
           <Icon name="list-ul" />
-          List of Presidents
+          List of Heads
         </button>
         <button className="btn btn-bordered" onClick={() => replaceWithDetail(nextRandomPresident())}>
           <Icon name="shuffle" />
-          Random President
+          Random Head
         </button>
         <button className="btn btn-bordered" onClick={slideshow.toggle}>
           <Icon name={slideshow.isRunning ? 'stop-circle-fill' : 'play-circle-fill'} />

@@ -18,7 +18,7 @@ struct PresidenttListView: View {
                 PresidentRow(president: president)
             }
         }
-        .navigationTitle("US Presidents")
+        .navigationTitle("USNA Heads")
     }
 }
 

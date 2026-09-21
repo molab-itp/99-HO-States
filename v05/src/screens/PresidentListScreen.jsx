@@ -11,7 +11,7 @@ export default function PresidentListScreen() {
 
   return (
     <div className="screen-scroll list-screen">
-      <NavBar title="US Presidents" />
+      <NavBar title="USNA Heads" />
       <div className="list-group">
         <ul className="president-list">
           {presidents.map((president) => (

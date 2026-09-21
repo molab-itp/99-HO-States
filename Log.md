@@ -794,3 +794,122 @@ app's red/blue tint.
   tint / tertiary gray respectively (not mentioned in either request, left untouched). Worth
   double-checking against the real `v2` app if more elements turn out to need re-coloring, since
   this session still has no way to visually verify `v2` itself.
+
+# --
+
+2026-09-19 23:50:51 (v2: App Store/TestFlight prep — user's own Xcode work, logged from git history)
+
+## Context
+
+User asked to append "this chat" to Log.md again shortly after the previous entry, but nothing new
+had happened in the conversation itself since then — `git log` showed three new commits
+(`3cfa265`..`83c9335` were already covered by the prior entry; `25983da` and `70a21de` were not)
+made directly in Xcode, outside this chat. Offered three options; user chose to have the new
+commits diffed and summarized here instead of a content-free duplicate entry.
+
+## What changed (commits `25983da` "v2.40", `70a21de` "1001")
+
+Per the user's own shorthand note added to `_prompts.txt` in the same commit ("prep for app store
+TestFlight"), this is App Store Connect/TestFlight submission prep for `v2`:
+
+- `PRODUCT_BUNDLE_IDENTIFIER` changed from `com.jht1900.US-Headers` to `com.jht1900.HO-States-US`
+  in `project.pbxproj` — the old identifier was a leftover from the project's original name before
+  it was renamed to HO-States-US.
+- `AppIcon.appiconset` got an actual 1024×1024 icon image (`2026-09-19-HOS-3x-1024.png`) wired into
+  its `Contents.json` — previously the icon slot existed but had no image assigned.
+- `CURRENT_PROJECT_VERSION` (the build number) bumped 1000 → 1001, in the separate `70a21de`
+  commit, timed right after `25983da` — consistent with a re-upload attempt after a first one
+  failed (see below).
+- Reorganized `Assets.xcassets`: all 94 president thumbnail/large imagesets moved from the catalog
+  root into a new `hos/` subgroup (each imageset's own files unchanged, just relocated + a new
+  `hos/Contents.json` group marker added) — tidies the catalog now that it also holds `AppIcon`/
+  `AccentColor` at the root.
+- Added `Log-screens/2026-09-19-HOS-3x-1024.png`, `2026-09-19-HOS-3x.png`, and
+  `2026-09-19-HO-States-US-xcode-upload-fail.png` to the repo — the last filename suggests an
+  App Store Connect upload attempt failed; no further detail available from git history alone.
+
+## Follow-up notes
+
+- This entry was reconstructed entirely from `git show`/`git log` on commits made outside this
+  conversation — treat it as a record of *what changed*, not *why* beyond the one-line note the
+  user left in `_prompts.txt`. If the TestFlight upload is still failing, that's not something this
+  session has visibility into.
+- The `hos/` asset-catalog reorganization and bundle-ID fix are `v2`-only; `v05`'s copied
+  `presidents.json`/`public/images` were generated earlier by `v3/tools/migrate.js` and don't need
+  regenerating just for this (paths/filenames inside the catalog changed, not the images or the
+  generated `Presidents.json` data itself).
+
+# --
+
+2026-09-20 13:55:56 (v2: App Store Connect encryption-compliance prompt)
+
+## Request
+
+User shared a screenshot of App Store Connect's "App Encryption Documentation" modal (shown during
+build submission), asking how to fix it.
+
+## What changed
+
+- Confirmed no `Info.plist` file exists on disk for `v2/HO-States-US` — the target uses
+  `GENERATE_INFOPLIST_FILE = YES`, so Xcode builds it at compile time from `INFOPLIST_KEY_*` build
+  settings in `project.pbxproj`. Neither that target nor `v1/PresidentialArchive` (also checked)
+  declared an encryption-compliance key, which is why App Store Connect asks on every submission.
+- Added `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;` to both the Debug and Release
+  `XCBuildConfiguration` blocks of the `HO-States-US` app target in
+  `v2/HO-States-US/HO-States-US.xcodeproj/project.pbxproj` (picked `v2` over `v1` since its
+  `project.pbxproj` was the more recently modified of the two, and it's the project with the
+  in-flight TestFlight prep from the previous log entry).
+- Told the user the current modal's pre-selected answer ("None of the algorithms mentioned
+  above") is already correct for an app that only uses standard HTTPS/TLS, so they can just click
+  Save for this build; the pbxproj change is to stop the prompt recurring on future
+  archive/upload cycles.
+
+## Follow-up notes
+
+- `v1/PresidentialArchive.xcodeproj` was not changed — same missing key is present there too, but
+  the user didn't confirm it's actively shipped. Flagged that it can get the same fix on request.
+- Not verified in Xcode/App Store Connect itself this session (no build/upload tooling available
+  here) — confirm on the next archive that the compliance question no longer appears.
+
+# --
+
+2026-09-21 16:46:57 (v05.43: sync v2 → v05)
+
+## Request
+
+Sync recent changes made directly to the `v2` SwiftUI app (commits `b984753` "v02.41" and
+`eb899ef` "v02.42", made outside this chat) into the `v05` React port.
+
+## What changed
+
+Diffed the two v2 commits against v05 and ported both:
+
+- **Rebrand "US Presidents" → "USNA Heads"** (`v02.41`, `HomeView.swift` /
+  `PresidenttListView.swift`): updated `v05/src/screens/HomeScreen.jsx` (title, subtitle text,
+  "List of Heads"/"Random Head" button labels) and `v05/src/screens/PresidentListScreen.jsx`
+  (`NavBar` title), plus stray comments in `NavigationContext.jsx` still naming the old button
+  label.
+- **`ViewedProgressBar` fix** (`v02.42`, `PresidentDetailView.swift`): Swift changed the bar from
+  coloring the first N segments by `viewedCount` to coloring the segment at each president's own
+  `order` position if that ID is in `viewedPresidentIDs` — fixes segments being wrong when
+  presidents are viewed out of order (Random/Previous). Ported the same change to
+  `v05/src/components/ViewedProgressBar.jsx` (prop renamed `viewedCount` → `viewedIDs`, `isViewed =
+  viewedIDs.has(position + 1)`) and its call site in `PresidentDetailScreen.jsx`.
+- `v05/scripts/smoke.mjs` was asserting the old "US Presidents"/"List of Presidents"/"Random
+  President" text (and had a stale header comment calling itself the "v4" script) — updated to
+  match the renamed copy.
+
+## Verification
+
+- `npm run build` — succeeds.
+- `npm run smoke` — full flow (home → list → detail → toolbar nav → slideshow → reset) passes,
+  zero console errors.
+- Screenshots reviewed: Home shows "USNA Heads" title/subtitle and "List of Heads"/"Random Head"
+  buttons; detail view's progress bar correctly lights only the just-viewed president's own
+  segment.
+
+## Follow-up notes
+
+- Left `v05/index.html`'s `<title>US Presidents</title>` (browser tab title) untouched — it has no
+  Swift-side equivalent (no `Info.plist`/display-name change in the source commits), so it was
+  treated as out of scope for this sync rather than assumed.
