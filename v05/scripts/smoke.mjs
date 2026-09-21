@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Headless smoke test for the v4 React app: boots the Vite dev server in-process, drives it
+// Headless smoke test for the v05 React app: boots the Vite dev server in-process, drives it
 // with Playwright/Chromium through the main flows, and screenshots each step. Run with
 // `npm run smoke`. Exits non-zero (and prints them) if the page logs any console errors.
 import path from 'node:path';
@@ -46,11 +46,11 @@ async function main() {
   try {
     console.log('Home screen...');
     await page.goto(url);
-    await page.waitForSelector('text=US Presidents');
+    await page.waitForSelector('text=USNA Heads');
     await shot('home');
 
-    console.log('List of Presidents...');
-    await page.click('text=List of Presidents');
+    console.log('List of Heads...');
+    await page.click('text=List of Heads');
     await page.waitForSelector('.president-list');
     const firstRowName = await page.locator('.president-row .name').first().textContent();
     assertIncludes(firstRowName, '#01', 'first list row should show its number');
@@ -81,11 +81,11 @@ async function main() {
 
     console.log('Back to Home...');
     await page.click('button[aria-label="Back"]');
-    await page.waitForSelector('text=Random President');
+    await page.waitForSelector('text=Random Head');
     await shot('back-home');
 
-    console.log('Random President from Home...');
-    await page.click('text=Random President');
+    console.log('Random Head from Home...');
+    await page.click('text=Random Head');
     await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
     await shot('home-random');
     await page.click('button[aria-label="Back"]');

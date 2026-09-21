@@ -870,3 +870,46 @@ build submission), asking how to fix it.
   the user didn't confirm it's actively shipped. Flagged that it can get the same fix on request.
 - Not verified in Xcode/App Store Connect itself this session (no build/upload tooling available
   here) — confirm on the next archive that the compliance question no longer appears.
+
+# --
+
+2026-09-21 16:46:57 (v05.43: sync v2 → v05)
+
+## Request
+
+Sync recent changes made directly to the `v2` SwiftUI app (commits `b984753` "v02.41" and
+`eb899ef` "v02.42", made outside this chat) into the `v05` React port.
+
+## What changed
+
+Diffed the two v2 commits against v05 and ported both:
+
+- **Rebrand "US Presidents" → "USNA Heads"** (`v02.41`, `HomeView.swift` /
+  `PresidenttListView.swift`): updated `v05/src/screens/HomeScreen.jsx` (title, subtitle text,
+  "List of Heads"/"Random Head" button labels) and `v05/src/screens/PresidentListScreen.jsx`
+  (`NavBar` title), plus stray comments in `NavigationContext.jsx` still naming the old button
+  label.
+- **`ViewedProgressBar` fix** (`v02.42`, `PresidentDetailView.swift`): Swift changed the bar from
+  coloring the first N segments by `viewedCount` to coloring the segment at each president's own
+  `order` position if that ID is in `viewedPresidentIDs` — fixes segments being wrong when
+  presidents are viewed out of order (Random/Previous). Ported the same change to
+  `v05/src/components/ViewedProgressBar.jsx` (prop renamed `viewedCount` → `viewedIDs`, `isViewed =
+  viewedIDs.has(position + 1)`) and its call site in `PresidentDetailScreen.jsx`.
+- `v05/scripts/smoke.mjs` was asserting the old "US Presidents"/"List of Presidents"/"Random
+  President" text (and had a stale header comment calling itself the "v4" script) — updated to
+  match the renamed copy.
+
+## Verification
+
+- `npm run build` — succeeds.
+- `npm run smoke` — full flow (home → list → detail → toolbar nav → slideshow → reset) passes,
+  zero console errors.
+- Screenshots reviewed: Home shows "USNA Heads" title/subtitle and "List of Heads"/"Random Head"
+  buttons; detail view's progress bar correctly lights only the just-viewed president's own
+  segment.
+
+## Follow-up notes
+
+- Left `v05/index.html`'s `<title>US Presidents</title>` (browser tab title) untouched — it has no
+  Swift-side equivalent (no `Info.plist`/display-name change in the source commits), so it was
+  treated as out of scope for this sync rather than assumed.
