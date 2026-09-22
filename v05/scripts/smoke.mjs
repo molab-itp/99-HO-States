@@ -91,26 +91,48 @@ async function main() {
     await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
 
-    // Starting the slideshow immediately navigates to a random president's detail screen (same
-    // as the SwiftUI app: the pushed detail view covers Home), so "Stop Slideshow" isn't
-    // reachable until you're back on Home. While it runs, the nav title shows a countdown and
-    // any toolbar button (Previous/Random/Next) just stops it in place instead of navigating.
-    console.log('Slideshow start (navigates straight to a detail screen)...');
+    // Starting the slideshow immediately navigates to a detail screen (same as the SwiftUI app:
+    // the pushed detail view covers Home), so "Stop Slideshow" isn't reachable until you leave.
+    // Sequential (Random Mode off) starts from president #01. While it runs, the center toolbar
+    // button is Pause/Play (not Random) and never exits the slideshow; Next/Previous keep paging
+    // instead of stopping it.
+    console.log('Sequential slideshow start (Random Mode off)...');
     await page.click('button:has-text("Start Slideshow")');
     await page.waitForSelector('.nav-title-mono', { timeout: 4000 });
     const runningTitle = await page.locator('.nav-title-mono').textContent();
     assertIncludes(runningTitle, '·', 'slideshow-active title should show a countdown');
+    assertIncludes(runningTitle, '#01', 'sequential slideshow should start from the first president');
     await shot('slideshow-running');
 
-    console.log('Stopping the slideshow via a toolbar button...');
-    await page.click('button[aria-label="Random"]');
+    console.log('Next during slideshow (should advance, not stop it)...');
+    await page.click('button[aria-label="Next"]');
     await page.waitForTimeout(200);
-    const stoppedTitle = await page.locator('.nav-title-mono').textContent();
-    if (stoppedTitle.includes('·')) {
-      throw new Error(`expected slideshow to stop (title without countdown), got "${stoppedTitle}"`);
-    }
-    await shot('slideshow-stopped');
+    const afterNextTitle = await page.locator('.nav-title-mono').textContent();
+    assertIncludes(afterNextTitle, '·', 'slideshow should still be active after Next');
+    assertIncludes(afterNextTitle, '#02', 'sequential Next should move to the next president');
 
+    console.log('Pause / Play toggle...');
+    await page.click('button[aria-label="Pause"]');
+    await page.waitForSelector('button[aria-label="Play"]');
+    await shot('slideshow-paused');
+    await page.click('button[aria-label="Play"]');
+    await page.waitForSelector('button[aria-label="Pause"]');
+
+    console.log('Back stops the slideshow...');
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+
+    console.log('Random Mode slideshow...');
+    await page.click('text=Random Mode');
+    await page.click('button:has-text("Start Slideshow")');
+    await page.waitForSelector('.nav-title-mono', { timeout: 4000 });
+    await shot('slideshow-random-running');
+    await page.click('button[aria-label="Next"]');
+    await page.waitForTimeout(200);
+    await page.click('button[aria-label="Previous"]');
+    await page.waitForTimeout(200);
+    const randomStillActive = await page.locator('.nav-title-mono').textContent();
+    assertIncludes(randomStillActive, '·', 'random-mode slideshow should still be active after Next/Previous');
     await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
 

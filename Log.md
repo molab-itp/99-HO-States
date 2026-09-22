@@ -913,3 +913,130 @@ Diffed the two v2 commits against v05 and ported both:
 - Left `v05/index.html`'s `<title>US Presidents</title>` (browser tab title) untouched — it has no
   Swift-side equivalent (no `Info.plist`/display-name change in the source commits), so it was
   treated as out of scope for this sync rather than assumed.
+
+# --
+
+2026-09-21 21:44:54 (v2: Random Mode checkbox + pause/play slideshow controls)
+
+## Request
+
+On `v2/HO-States-US`'s `HomeView`, add a Random Mode checkbox. Start Slideshow should run
+sequentially when it's off and randomly when it's on. While a slideshow is running (either mode),
+the bottom-toolbar center button (previously "Random") should become Pause/Play instead of exiting
+the slideshow, and Previous/Next should keep stepping — sequentially or through the random
+sequence — instead of stopping it.
+
+## What was built
+
+- `HomeView.swift`: added an `isRandomMode` `Toggle` ("Random Mode", iOS renders it as a switch —
+  no native checkbox control on iOS). `Start Slideshow` now picks the starting president
+  sequentially (`presidents.first`) or randomly (`appModel.nextRandomPresident()`) based on the
+  toggle, and passes `isRandomMode`/`startSlideshow` to `PresidentDetailView` via a new
+  `pendingSlideshow: Bool?` state (set right before the push, cleared whenever `path` returns to
+  empty, so an ordinary list tap or the standalone "Random Head" button never lands in slideshow
+  mode by accident). Removed the timer/countdown state and `onManualNavigation` plumbing entirely
+  from this view — the slideshow no longer tears down and rebuilds the pushed view on every tick,
+  so there's no more need for `HomeView` to own or relay that state.
+- `PresidentDetailView.swift`: slideshow timer, countdown, and a new `isSlideshowPaused` flag now
+  live entirely in this view (started `onAppear` if `startSlideshow` was passed in, invalidated
+  `onDisappear`).
+  - Bottom-toolbar center button shows Pause/Play (not "Random") while a slideshow is active, and
+    toggles `isSlideshowPaused` instead of calling the old stop-slideshow callback; when no
+    slideshow is active it still behaves as the old manual "Random" jump button.
+  - Previous/Next no longer stop the slideshow. Sequential mode steps `index` ±1, wrapping at both
+    ends. Random mode steps through a new `randomHistory: [Int]` / `randomPosition` pair recorded
+    for this slideshow's random walk: Previous moves the pointer back through already-seen cards,
+    Next either replays forward through that history (if Previous had backed up earlier) or draws
+    a fresh card via `appModel.nextRandomPresident()` and appends it.
+  - Outside of a slideshow, Previous/Next/Random behave exactly as before (unaffected by the
+    random-mode flag, which only matters once a slideshow is active).
+
+## Verification
+
+- Only Command Line Tools are active in this environment (no full Xcode), so `xcodebuild`/`swiftc`
+  against the iOS SDK aren't available here — could not build or run the Simulator this session.
+  Verified by careful manual re-read of both files (control flow, `@State` init order, toolbar
+  button branches, disabled-state conditions) instead. Flagged to the user that an actual
+  Xcode build/Simulator run is still needed to confirm.
+
+## Follow-up notes
+
+- If this needs porting to `v4`/`v05` (the React ports) later, the equivalent change there is
+  moving `SlideshowContext`'s timer/tick logic to be sequential-or-random aware and adding a
+  random-walk history array, mirroring the `PresidentDetailView.swift` approach above — not yet
+  done, not asked for this session.
+
+# --
+
+2026-09-21 21:55:15 (v05: ported the Random Mode / pause-play slideshow changes; Node installed)
+
+## Request
+
+Port the `v2` Random Mode / pause-play slideshow changes (previous entry, above) into the `v05`
+React app, then install Node via Homebrew so the port could actually be built and smoke-tested
+instead of only reviewed by hand (no `node`/`npm` were on `PATH` in this environment beforehand).
+
+## What was built
+
+Followed the same architecture shift as the Swift change: the detail screen no longer gets torn
+down and rebuilt on every slideshow tick, so its own local state can own Previous/Next/pause
+instead of a shared context re-pushing a fresh screen each time.
+
+- `src/navigation/NavigationContext.jsx`: `replaceWithDetail(president, options)` now merges an
+  optional `options` object (`{ startSlideshow, isRandomMode }`) into the pushed path entry, read
+  once by the detail screen on mount.
+- `src/App.jsx`: passes `startSlideshow`/`isRandomMode` from the topmost path entry down to
+  `PresidentDetailScreen`; dropped `SlideshowProvider` (no longer needed).
+- `src/state/SlideshowContext.jsx`: deleted — its timer/tick loop moved into the detail screen
+  itself, mirroring `PresidentDetailView.swift` no longer needing `HomeView` to own the timer.
+- `src/screens/HomeScreen.jsx`: added a `Random Mode` checkbox (styled as an iOS-style switch, the
+  actual rendering of SwiftUI's `Toggle`, not a literal checkbox). `Start Slideshow` now starts
+  from `presidents[0]` (sequential) or a random draw, passing that choice through
+  `replaceWithDetail`'s new `options`.
+- `src/screens/PresidentDetailScreen.jsx`: rewritten to own `isSlideshowActive` (fixed for the
+  screen's lifetime from the `startSlideshow` prop), `isSlideshowPaused`, `remainingTenths`, and a
+  combined `{ index, history, position }` nav state updated atomically so a random-mode walk's
+  index and its history/position pointer never drift apart. The timer uses a "latest ref" pattern
+  (`tickRef.current` reassigned every render) so the one `setInterval` created on mount always
+  calls the current closure instead of a stale one. Center toolbar button renders Pause/Play (not
+  Random) while active, toggling `isSlideshowPaused`; Previous/Next page sequentially (wrapping) or
+  through the random-walk history depending on `isRandomMode`, same rules as the Swift version.
+- `src/components/Icon.jsx`: added `pause-circle-fill`, fetched from
+  `raw.githubusercontent.com/twbs/icons` like the rest of the icon set.
+- `src/index.css`: added `.toggle-row`/`.switch` styles for the new checkbox (hidden native
+  `<input type="checkbox">` driving a custom track/thumb via sibling selectors, so it stays
+  keyboard/screen-reader accessible).
+- `scripts/smoke.mjs`: updated to exercise a sequential slideshow (asserts it starts at `#01`,
+  Next advances to `#02` without stopping it), the Pause/Play toggle, and a random-mode slideshow
+  (Next then Previous, asserting it's still active throughout) — the old assertion that clicking
+  "Random" stopped the slideshow no longer applies since that button is Pause/Play now.
+
+## Node install
+
+- No `node`/`npm` were on `PATH` (confirmed: `which node npm` failed, no `nvm`/`volta`/`fnm`/`asdf`,
+  nothing under `/opt/homebrew/bin`). `brew install node` → Node v26.9.0 / npm 11.19.1, pulling in
+  several dependency upgrades (openssl@3, sqlite, readline, xz, ca-certificates, etc.) as a side
+  effect of the Homebrew dependency graph.
+
+## Verification
+
+- `npm install`, `npm run build` → succeeds (`dist/` produced, no errors).
+- `npx playwright install chromium` (needed since this was a fresh install) then `npm run smoke` →
+  full flow including List/Detail/Random Head, a sequential slideshow (Next advances it, Pause
+  freezes the countdown and flips to Play, Play resumes, Back stops it), and a random-mode
+  slideshow (Next/Previous keep it running) — **zero console errors, zero failed network
+  requests**.
+- Visually reviewed the resulting screenshots: Home shows the new switch in its off state;
+  sequential slideshow screenshot shows `#01 · 05.0s` with a filled Pause icon centered in the
+  toolbar; after Next+Pause the title reads `#02 · 04.8s` (frozen, not reset) with a Play icon;
+  the random-mode slideshow screenshot shows Previous correctly greyed out at the very start of
+  that walk (position 0, nothing earlier to go back to yet).
+
+## Follow-up notes
+
+- This session's Homebrew install upgraded several unrelated shared dependencies
+  (`openssl@3`, `sqlite`, `readline`, `xz`, `ca-certificates`) as part of installing `node` —
+  expected Homebrew behavior, not a targeted change, but worth knowing if anything else on this
+  machine pins to older versions of those.
+- `v4` still has neither this session's nor the prior session's slideshow changes — only `v2` and
+  `v05` are in sync as of this entry.

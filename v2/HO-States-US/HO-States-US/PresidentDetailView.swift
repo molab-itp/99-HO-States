@@ -5,16 +5,33 @@ let delaySecs:UInt64 = 2;
 struct PresidentDetailView: View {
     @Environment(AppModel.self) private var appModel
     let presidents: [President]
-    let slideshowCountdownTenths: Int?
-    var onManualNavigation: (() -> Void)? = nil
+    let isRandomMode: Bool
     @State private var index: Int
     @State private var detailsVisible = false
 
-    init(presidents: [President], selected: President, slideshowCountdownTenths: Int? = nil, onManualNavigation: (() -> Void)? = nil) {
+    private let slideshowIntervalTenths = 50 // 5.0 seconds
+    @State private var isSlideshowActive: Bool
+    @State private var isSlideshowPaused = false
+    @State private var slideshowTimer: Timer?
+    @State private var slideshowRemainingTenths = 0
+
+    // Indices visited during this slideshow's random walk (in random mode only), so Previous can
+    // step back through them and Next can replay forward instead of always drawing a fresh card.
+    @State private var randomHistory: [Int]
+    @State private var randomPosition = 0
+
+    init(
+        presidents: [President],
+        selected: President,
+        isRandomMode: Bool = false,
+        startSlideshow: Bool = false
+    ) {
         self.presidents = presidents
-        self.slideshowCountdownTenths = slideshowCountdownTenths
-        self.onManualNavigation = onManualNavigation
-        _index = State(initialValue: presidents.firstIndex(of: selected) ?? 0)
+        self.isRandomMode = isRandomMode
+        let startIndex = presidents.firstIndex(of: selected) ?? 0
+        _index = State(initialValue: startIndex)
+        _isSlideshowActive = State(initialValue: startSlideshow)
+        _randomHistory = State(initialValue: [startIndex])
     }
 
     private var president: President { presidents[index] }
@@ -26,13 +43,13 @@ struct PresidentDetailView: View {
     // principal toolbar item instead (see `.toolbar` below).
     private var navigationTitleView: some View {
         let orderText = String(format: "%02d", president.order)
-        guard let tenths = slideshowCountdownTenths else {
+        guard isSlideshowActive else {
             return HStack {
                 Text("#\(orderText) \(appModel.buildInfo)").font(.system(.body, design: .monospaced))
             }
             .frame(maxWidth: .infinity)
         }
-        let secondsText = String(format: "%04.1f", Double(tenths) / 10)
+        let secondsText = String(format: "%04.1f", Double(slideshowRemainingTenths) / 10)
         return HStack {
             Text("#\(orderText) · \(secondsText)s \(appModel.buildInfo)").font(.system(.body, design: .monospaced))
         }
@@ -73,6 +90,14 @@ struct PresidentDetailView: View {
                 detailsVisible = true
             }
         }
+        .onAppear {
+            if isSlideshowActive {
+                beginSlideshowTimer()
+            }
+        }
+        .onDisappear {
+            stopSlideshowTimer()
+        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -84,28 +109,39 @@ struct PresidentDetailView: View {
 //            }
             ToolbarItemGroup(placement: .bottomBar) {
                 Button {
-                    handleToolbarButton(goToPrevious)
+                    goToPrevious()
                 } label: {
                     Label("Previous", systemImage: "chevron.left")
                 }
-                .disabled(!isSlideshowActive && index == 0)
+                .disabled(isPreviousDisabled)
 
                 Spacer()
 
                 Button {
-                    handleToolbarButton(goToRandom)
+                    if isSlideshowActive {
+                        toggleSlideshowPause()
+                    } else {
+                        goToRandom()
+                    }
                 } label: {
-                    Label("Random", systemImage: "shuffle")
+                    if isSlideshowActive {
+                        Label(
+                            isSlideshowPaused ? "Play" : "Pause",
+                            systemImage: isSlideshowPaused ? "play.circle" : "pause.circle"
+                        )
+                    } else {
+                        Label("Random", systemImage: "shuffle")
+                    }
                 }
 
                 Spacer()
 
                 Button {
-                    handleToolbarButton(goToNext)
+                    goToNext()
                 } label: {
                     Label("Next", systemImage: "chevron.right")
                 }
-                .disabled(!isSlideshowActive && index == presidents.count - 1)
+                .disabled(isNextDisabled)
             }
         }
     }
@@ -130,33 +166,102 @@ struct PresidentDetailView: View {
         }
     }
 
-    private var isSlideshowActive: Bool { slideshowCountdownTenths != nil }
-
-    /// While the slideshow is running, any of the three toolbar buttons should just stop it in
-    /// place (leaving the currently shown president as-is) instead of performing its usual
-    /// navigation; once stopped, the buttons resume their normal Previous/Random/Next behavior.
-    private func handleToolbarButton(_ action: () -> Void) {
-        guard !isSlideshowActive else {
-            onManualNavigation?()
-            return
+    private var isPreviousDisabled: Bool {
+        if isSlideshowActive {
+            return isRandomMode && randomPosition == 0
         }
-        action()
+        return index == 0
+    }
+
+    private var isNextDisabled: Bool {
+        if isSlideshowActive {
+            return false
+        }
+        return index == presidents.count - 1
     }
 
     private func goToPrevious() {
-        guard index > 0 else { return }
-        index -= 1
+        if isSlideshowActive {
+            if isRandomMode {
+                guard randomPosition > 0 else { return }
+                randomPosition -= 1
+                index = randomHistory[randomPosition]
+            } else {
+                index = index == 0 ? presidents.count - 1 : index - 1
+            }
+            restartSlideshowCountdown()
+        } else {
+            guard index > 0 else { return }
+            index -= 1
+        }
     }
 
     private func goToNext() {
-        guard index < presidents.count - 1 else { return }
-        index += 1
+        if isSlideshowActive {
+            advanceSlideshow()
+            restartSlideshowCountdown()
+        } else {
+            guard index < presidents.count - 1 else { return }
+            index += 1
+        }
     }
 
     private func goToRandom() {
         guard let next = appModel.nextRandomPresident(),
               let newIndex = presidents.firstIndex(of: next) else { return }
         index = newIndex
+    }
+
+    /// Advances one slideshow step forward: sequentially (wrapping past the last president) when
+    /// random mode is off, or by replaying the next already-visited card (if Previous had backed
+    /// up earlier in this walk) or drawing a fresh one when random mode is on.
+    private func advanceSlideshow() {
+        if isRandomMode {
+            if randomPosition < randomHistory.count - 1 {
+                randomPosition += 1
+                index = randomHistory[randomPosition]
+            } else if let next = appModel.nextRandomPresident(),
+                      let newIndex = presidents.firstIndex(of: next) {
+                randomHistory.append(newIndex)
+                randomPosition = randomHistory.count - 1
+                index = newIndex
+            }
+        } else {
+            index = index == presidents.count - 1 ? 0 : index + 1
+        }
+    }
+
+    private func beginSlideshowTimer() {
+        slideshowRemainingTenths = slideshowIntervalTenths
+        let timer = Timer(timeInterval: 0.1, repeats: true) { _ in
+            Task { @MainActor in
+                tickSlideshow()
+            }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        slideshowTimer = timer
+    }
+
+    private func tickSlideshow() {
+        guard !isSlideshowPaused else { return }
+        slideshowRemainingTenths -= 1
+        if slideshowRemainingTenths <= 0 {
+            advanceSlideshow()
+            restartSlideshowCountdown()
+        }
+    }
+
+    private func restartSlideshowCountdown() {
+        slideshowRemainingTenths = slideshowIntervalTenths
+    }
+
+    private func toggleSlideshowPause() {
+        isSlideshowPaused.toggle()
+    }
+
+    private func stopSlideshowTimer() {
+        slideshowTimer?.invalidate()
+        slideshowTimer = nil
     }
 }
 
@@ -167,7 +272,7 @@ struct PresidentDetailView: View {
 private struct ViewedProgressBar: View {
     let total: Int
     var viewedPresidentIDs: Set<President.ID>
-    
+
     private static let colors: [Color] = [.red, .green, .yellow]
     private let segmentSpacing: CGFloat = 2
 

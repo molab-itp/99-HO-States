@@ -3,11 +3,12 @@ import SwiftUI
 struct HomeView: View {
     @Environment(AppModel.self) private var appModel
     private let sourceURL = URL(string: "https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States")!
-    private let slideshowIntervalTenths = 50 // 5.0 seconds
     @State private var path = NavigationPath()
-    @State private var slideshowTimer: Timer?
-    @State private var slideshowRemainingTenths = 0
-    private var isSlideshowRunning: Bool { slideshowTimer != nil }
+    @State private var isRandomMode = false
+    // Set right before pushing a president to kick off a slideshow (carrying whether it should
+    // run in random mode), and cleared whenever navigation returns to Home, so that an ordinary
+    // list tap or the "Random Head" button never accidentally lands in slideshow mode.
+    @State private var pendingSlideshow: Bool?
     private var remainingCount: Int {
         appModel.presidents.count - appModel.viewedPresidentIDs.count
     }
@@ -48,14 +49,15 @@ struct HomeView: View {
                     }
                     .buttonStyle(.bordered)
 
+                    Toggle(isOn: $isRandomMode) {
+                        Label("Random Mode", systemImage: "shuffle")
+                    }
+
                     Button {
-                        toggleSlideshow()
+                        startSlideshow()
                     } label: {
-                        Label(
-                            isSlideshowRunning ? "Stop Slideshow" : "Start Slideshow",
-                            systemImage: isSlideshowRunning ? "stop.circle" : "play.circle"
-                        )
-                        .frame(maxWidth: .infinity)
+                        Label("Start Slideshow", systemImage: "play.circle")
+                            .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
                 }
@@ -75,7 +77,7 @@ struct HomeView: View {
                 }
                 .font(.footnote)
               }
-              
+
 
                 Spacer()
             }
@@ -90,61 +92,36 @@ struct HomeView: View {
                 PresidentDetailView(
                     presidents: appModel.presidents,
                     selected: president,
-                    slideshowCountdownTenths: isSlideshowRunning ? slideshowRemainingTenths : nil,
-                    onManualNavigation: stopSlideshow
+                    isRandomMode: pendingSlideshow ?? false,
+                    startSlideshow: pendingSlideshow != nil
                 )
-                // Forces a fresh view (and fresh @State index) each time the slideshow swaps in a
-                // different president at the same navigation stack position; otherwise SwiftUI
-                // reuses the existing PresidentDetailView instance and its stale `index`.
+                // Forces a fresh view (and fresh @State index) each time a new president is
+                // pushed at the same navigation stack position.
                 .id(president.id)
             }
         }
         .onChange(of: path) { _, newPath in
             if newPath.isEmpty {
-                stopSlideshow()
+                pendingSlideshow = nil
             }
         }
     }
 
     private func goToRandomPresident() {
+        pendingSlideshow = nil
         guard let president = appModel.nextRandomPresident() else { return }
         var newPath = NavigationPath()
         newPath.append(president)
         path = newPath
     }
 
-    private func toggleSlideshow() {
-        if isSlideshowRunning {
-            stopSlideshow()
-        } else {
-            startSlideshow()
-        }
-    }
-
     private func startSlideshow() {
-        goToRandomPresident()
-        slideshowRemainingTenths = slideshowIntervalTenths
-        let timer = Timer(timeInterval: 0.1, repeats: true) { _ in
-            Task { @MainActor in
-                tickSlideshow()
-            }
-        }
-        RunLoop.main.add(timer, forMode: .common)
-        slideshowTimer = timer
-    }
-
-    private func tickSlideshow() {
-        slideshowRemainingTenths -= 1
-        if slideshowRemainingTenths <= 0 {
-            goToRandomPresident()
-            slideshowRemainingTenths = slideshowIntervalTenths
-        }
-    }
-
-    private func stopSlideshow() {
-        slideshowTimer?.invalidate()
-        slideshowTimer = nil
-        slideshowRemainingTenths = 0
+        pendingSlideshow = isRandomMode
+        let president = isRandomMode ? appModel.nextRandomPresident() : appModel.presidents.first
+        guard let president else { return }
+        var newPath = NavigationPath()
+        newPath.append(president)
+        path = newPath
     }
 }
 

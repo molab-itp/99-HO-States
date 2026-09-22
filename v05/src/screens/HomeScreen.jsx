@@ -1,6 +1,6 @@
+import { useState } from 'react';
 import { useAppModel } from '../state/AppModelContext.jsx';
 import { useNavigation } from '../navigation/NavigationContext.jsx';
-import { useSlideshow } from '../state/SlideshowContext.jsx';
 import Icon from '../components/Icon.jsx';
 
 const WIKIPEDIA_SOURCE_URL = 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States';
@@ -8,9 +8,18 @@ const WIKIPEDIA_SOURCE_URL = 'https://en.wikipedia.org/wiki/List_of_presidents_o
 export default function HomeScreen() {
   const { presidents, viewedIDs, nextRandomPresident, resetViewed } = useAppModel();
   const { pushList, replaceWithDetail } = useNavigation();
-  const slideshow = useSlideshow();
+  const [isRandomMode, setIsRandomMode] = useState(false);
 
   const remainingCount = presidents.length - viewedIDs.size;
+
+  // Sequential slideshows start from the first president; random ones draw like every other
+  // random control does. Home is unreachable again until the slideshow is left (its detail
+  // screen covers it, same as the SwiftUI app), so there's no "Stop Slideshow" state to show here.
+  function startSlideshow() {
+    const president = isRandomMode ? nextRandomPresident() : presidents[0];
+    if (!president) return;
+    replaceWithDetail(president, { startSlideshow: true, isRandomMode });
+  }
 
   return (
     <div className="home">
@@ -29,9 +38,21 @@ export default function HomeScreen() {
           <Icon name="shuffle" />
           Random Head
         </button>
-        <button className="btn btn-bordered" onClick={slideshow.toggle}>
-          <Icon name={slideshow.isRunning ? 'stop-circle-fill' : 'play-circle-fill'} />
-          {slideshow.isRunning ? 'Stop Slideshow' : 'Start Slideshow'}
+        <label className="toggle-row">
+          <span>Random Mode</span>
+          <span className="switch">
+            <input
+              type="checkbox"
+              checked={isRandomMode}
+              onChange={(e) => setIsRandomMode(e.target.checked)}
+            />
+            <span className="switch-track" />
+            <span className="switch-thumb" />
+          </span>
+        </label>
+        <button className="btn btn-bordered" onClick={startSlideshow}>
+          <Icon name="play-circle-fill" />
+          Start Slideshow
         </button>
       </div>
 
