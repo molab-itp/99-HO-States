@@ -1246,3 +1246,22 @@ real stop/restart resume assertion. `npm run build` + `npm run smoke` both pass,
 errors.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-09-22 04:57:32 (v05: fix — slideshow auto-advanced by 2 instead of 1)
+
+Root cause: `PresidentDetailScreen`'s `setRemainingTenths` functional updater also called
+`setNav(...)` as a side effect from inside itself. React 18 `<StrictMode>` (which this app uses)
+intentionally double-invokes functional state updaters to catch exactly that impurity, so the
+advance fired twice per natural 5s tick (confirmed empirically with a timed diagnostic script:
+`#01 → #03 → #05`). No Swift/`v2` equivalent — SwiftUI has no analogous double-invoke behavior.
+
+Fix: split the tick into two effects — the interval's updater is now pure (clamped decrement
+only), and a separate `useEffect` keyed on `remainingTenths` fires the advance exactly once when
+it hits zero. Re-ran the timed diagnostic to confirm `#01 → #02 → #03`. Also strengthened
+`scripts/smoke.mjs` with a real ~5s timed wait asserting a single advance — the old test only
+clicked "Next" manually, which doesn't exercise this path, so it never caught this.
+
+**Cost**: ~20 minutes (mostly the empirical timed diagnostic, needed since the bug wasn't visible
+from code inspection alone).

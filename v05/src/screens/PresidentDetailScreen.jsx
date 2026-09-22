@@ -87,18 +87,15 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
   }
 
   // Auto-advance timer: only runs while a slideshow is active, uses a ref for the tick body so
-  // the interval (set up once) always calls the latest closure instead of a stale one.
+  // the interval (set up once) always calls the latest closure instead of a stale one. The
+  // updater is kept pure (just clamped decrement, no side effects) — React 18 StrictMode
+  // intentionally double-invokes functional state updaters to catch impure ones, and an earlier
+  // version of this that called `setNav(...)` from inside here had that side effect fire twice
+  // per tick, advancing the slideshow by 2 presidents instead of 1.
   const tickRef = useRef(() => {});
   tickRef.current = () => {
     if (isSlideshowPaused) return;
-    setRemainingTenths((prev) => {
-      const next = prev - 1;
-      if (next <= 0) {
-        setNav((prevNav) => advanceForward(prevNav));
-        return SLIDESHOW_INTERVAL_TENTHS;
-      }
-      return next;
-    });
+    setRemainingTenths((prev) => Math.max(0, prev - 1));
   };
 
   useEffect(() => {
@@ -106,6 +103,16 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
     const id = setInterval(() => tickRef.current(), 100);
     return () => clearInterval(id);
   }, [isSlideshowActive]);
+
+  // Advances exactly once each time the countdown reaches zero. A plain `useEffect` keyed on the
+  // resulting value only reacts to genuine changes (unlike a functional updater, which StrictMode
+  // double-invokes), so this can't double-fire the way the inline version above did.
+  useEffect(() => {
+    if (!isSlideshowActive || remainingTenths > 0) return;
+    setNav((prevNav) => advanceForward(prevNav));
+    setRemainingTenths(SLIDESHOW_INTERVAL_TENTHS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remainingTenths, isSlideshowActive]);
 
   function goToPrevious() {
     if (isSlideshowActive) {

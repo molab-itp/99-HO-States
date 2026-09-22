@@ -111,12 +111,26 @@ async function main() {
     assertIncludes(runningTitle, '#01', 'sequential slideshow should start from the first president after a reset');
     await shot('slideshow-running');
 
+    // Regression check for a real bug: the auto-advance previously fired via a `setRemainingTenths`
+    // updater that also called `setNav(...)` as a side effect. React 18 StrictMode intentionally
+    // double-invokes functional state updaters to catch exactly that impurity, so the advance fired
+    // twice per natural tick (#01 -> #03, not #01 -> #02). A manual button click doesn't exercise
+    // this path — only waiting out a real ~5s tick does.
+    console.log('Waiting out one natural ~5s tick (must advance by exactly 1, not 2)...');
+    await page.waitForFunction(
+      () => document.querySelector('.nav-title-mono')?.textContent?.startsWith('#02'),
+      { timeout: 6000 },
+    );
+    await page.waitForTimeout(150);
+    const autoAdvancedTitle = await page.locator('.nav-title-mono').textContent();
+    assertIncludes(autoAdvancedTitle, '#02', 'one natural slideshow tick should advance by exactly 1 president');
+
     console.log('Next during slideshow (should advance, not stop it)...');
     await page.click('button[aria-label="Next"]');
     await page.waitForTimeout(200);
     const afterNextTitle = await page.locator('.nav-title-mono').textContent();
     assertIncludes(afterNextTitle, '·', 'slideshow should still be active after Next');
-    assertIncludes(afterNextTitle, '#02', 'sequential Next should move to the next president');
+    assertIncludes(afterNextTitle, '#03', 'sequential Next should move to the next president');
 
     console.log('Pause / Play toggle...');
     await page.click('button[aria-label="Pause"]');
@@ -125,15 +139,15 @@ async function main() {
     await page.click('button[aria-label="Play"]');
     await page.waitForSelector('button[aria-label="Pause"]');
 
-    console.log('Back stops the sequential slideshow at #02...');
+    console.log('Back stops the sequential slideshow at #03...');
     await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
 
-    console.log('Restarting the sequential slideshow should resume at #02, not restart at #01...');
+    console.log('Restarting the sequential slideshow should resume at #03, not restart at #01...');
     await page.click('button:has-text("Start Slideshow")');
     await page.waitForSelector('.nav-title-mono', { timeout: 4000 });
     const resumedTitle = await page.locator('.nav-title-mono').textContent();
-    assertIncludes(resumedTitle, '#02', 'sequential slideshow should resume where it left off, not restart at #01');
+    assertIncludes(resumedTitle, '#03', 'sequential slideshow should resume where it left off, not restart at #01');
     await shot('slideshow-resumed');
     await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
