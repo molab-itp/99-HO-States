@@ -197,4 +197,18 @@ ViewedProgressBar isViewed position colored if in viewedPresidentIDs
 v05.43
 Sync changes to SwiftUI app v2 with js react app v05
 
+v02.44
+
+for v2/HO-States-US
+on HomeView and a checkbox for Random mode
+adjust logic so that slide show button
+starts a sequencial slide show if random mode is off
+and does random sequence if random mode is on
+when in in slide show is running (random or non-random)
+the random button in the botton center of lower nav 
+becomes a pause / play button and no longer exits slide show mode
+and the next and previous either go to next or previous sequancially
+or next or previous in the random sequence if in random mode
+2026-09-21 21:35:55
+
 append this chat to Log.md with date and time stamp

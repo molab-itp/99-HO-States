@@ -913,3 +913,55 @@ Diffed the two v2 commits against v05 and ported both:
 - Left `v05/index.html`'s `<title>US Presidents</title>` (browser tab title) untouched — it has no
   Swift-side equivalent (no `Info.plist`/display-name change in the source commits), so it was
   treated as out of scope for this sync rather than assumed.
+
+# --
+
+2026-09-21 21:44:54 (v2: Random Mode checkbox + pause/play slideshow controls)
+
+## Request
+
+On `v2/HO-States-US`'s `HomeView`, add a Random Mode checkbox. Start Slideshow should run
+sequentially when it's off and randomly when it's on. While a slideshow is running (either mode),
+the bottom-toolbar center button (previously "Random") should become Pause/Play instead of exiting
+the slideshow, and Previous/Next should keep stepping — sequentially or through the random
+sequence — instead of stopping it.
+
+## What was built
+
+- `HomeView.swift`: added an `isRandomMode` `Toggle` ("Random Mode", iOS renders it as a switch —
+  no native checkbox control on iOS). `Start Slideshow` now picks the starting president
+  sequentially (`presidents.first`) or randomly (`appModel.nextRandomPresident()`) based on the
+  toggle, and passes `isRandomMode`/`startSlideshow` to `PresidentDetailView` via a new
+  `pendingSlideshow: Bool?` state (set right before the push, cleared whenever `path` returns to
+  empty, so an ordinary list tap or the standalone "Random Head" button never lands in slideshow
+  mode by accident). Removed the timer/countdown state and `onManualNavigation` plumbing entirely
+  from this view — the slideshow no longer tears down and rebuilds the pushed view on every tick,
+  so there's no more need for `HomeView` to own or relay that state.
+- `PresidentDetailView.swift`: slideshow timer, countdown, and a new `isSlideshowPaused` flag now
+  live entirely in this view (started `onAppear` if `startSlideshow` was passed in, invalidated
+  `onDisappear`).
+  - Bottom-toolbar center button shows Pause/Play (not "Random") while a slideshow is active, and
+    toggles `isSlideshowPaused` instead of calling the old stop-slideshow callback; when no
+    slideshow is active it still behaves as the old manual "Random" jump button.
+  - Previous/Next no longer stop the slideshow. Sequential mode steps `index` ±1, wrapping at both
+    ends. Random mode steps through a new `randomHistory: [Int]` / `randomPosition` pair recorded
+    for this slideshow's random walk: Previous moves the pointer back through already-seen cards,
+    Next either replays forward through that history (if Previous had backed up earlier) or draws
+    a fresh card via `appModel.nextRandomPresident()` and appends it.
+  - Outside of a slideshow, Previous/Next/Random behave exactly as before (unaffected by the
+    random-mode flag, which only matters once a slideshow is active).
+
+## Verification
+
+- Only Command Line Tools are active in this environment (no full Xcode), so `xcodebuild`/`swiftc`
+  against the iOS SDK aren't available here — could not build or run the Simulator this session.
+  Verified by careful manual re-read of both files (control flow, `@State` init order, toolbar
+  button branches, disabled-state conditions) instead. Flagged to the user that an actual
+  Xcode build/Simulator run is still needed to confirm.
+
+## Follow-up notes
+
+- If this needs porting to `v4`/`v05` (the React ports) later, the equivalent change there is
+  moving `SlideshowContext`'s timer/tick logic to be sequential-or-random aware and adding a
+  random-walk history array, mirroring the `PresidentDetailView.swift` approach above — not yet
+  done, not asked for this session.
