@@ -6,7 +6,7 @@ import Icon from '../components/Icon.jsx';
 const WIKIPEDIA_SOURCE_URL = 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States';
 
 export default function HomeScreen() {
-  const { presidents, viewedIDs, nextRandomPresident, resetViewed, slideIndex } = useAppModel();
+  const { presidents, viewedIDs, nextRandomPresident, resetViewed, slideIndex, buildInfo } = useAppModel();
   const { pushList, replaceWithDetail } = useNavigation();
   const [isRandomMode, setIsRandomMode] = useState(false);
 
@@ -69,6 +69,8 @@ export default function HomeScreen() {
           Reset Visit Count
         </button>
       </div>
+
+      <p className="build-info">{buildInfo}</p>
     </div>
   );
 }

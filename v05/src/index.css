@@ -325,6 +325,13 @@ input {
   color: var(--secondary-label);
 }
 
+.build-info {
+  margin: 16px 0 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--secondary-label);
+}
+
 .btn-text-destructive {
   background: none;
   border: none;
