@@ -1373,3 +1373,21 @@ the second time and the remove-strip showed only the 2 active ones, removed Hear
 fall back to coordinates to hit the actual button.
 
 **Cost**: ~25 minutes.
+
+# --
+
+2026-09-22 17:59:40 (v2: reactions now allow repeats, "-" pops last-added instead of picking)
+
+Changed `AppModel.reactions` from `[President.ID: Set<PresidentReaction>]` to an ordered
+`[President.ID: [PresidentReaction]]` — `addReaction` appends (same kind can be added multiple
+times), `removeLastReaction` pops whatever was added most recently, replacing the old picker-based
+removal. `PresidentSummaryView` simplified to one picker (add-only, always shows all 4 since
+repeats are fine now); "-" is a plain button with no popup. JSON persistence now an ordered array,
+e.g. `{"1":["thumbsUp","heart","heart","heart"]}`.
+
+Verified live with `idb`: added Heart on top of an existing Thumbs up, pressed "-", confirmed it
+removed Heart (last-added) not Thumbs up (first) — proves order-based not type-based removal.
+Added Heart three times in a row, confirmed all three render as separate icons. Backgrounded,
+confirmed the JSON preserves order+duplicates, relaunched, confirmed exact reload.
+
+**Cost**: ~20 minutes.
