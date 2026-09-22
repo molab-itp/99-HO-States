@@ -292,6 +292,10 @@ or idb (Facebook's iOS automation tool) installed —
 happy to set either up if useful, 
 but that's a separate task from what was asked here.
 
+v02.58
+
+install idb (Facebook's iOS automation tool)
+
 # --
 append this chat to Log.md with date and time stamp
 with approximate time cost

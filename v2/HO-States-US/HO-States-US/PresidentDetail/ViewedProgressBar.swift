@@ -8,7 +8,7 @@ struct ViewedProgressBar: View {
     let total: Int
     var viewedPresidentIDs: Set<President.ID>
 
-    private static let colors: [Color] = [.black, .green, .red, .yellow]
+    private static let colors: [Color] = [.green, .red, .yellow, .black, .red, .yellow]
     private let segmentSpacing: CGFloat = 2
 
     var body: some View {
