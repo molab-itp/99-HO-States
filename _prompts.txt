@@ -296,6 +296,19 @@ v02.58
 
 install idb (Facebook's iOS automation tool)
 
+v02.59
+
+in v2 PresidentSummaryView.swift
+add reaction feedback button that pops up strip to select
+heart, thumbs up, thumbs down, question mark
+have this reaction persist in a JSON file along with the
+slide index and shuffle history
+have the in memory state write to the JSON file
+as little as possible, possible triggered
+by app going into background
+2026-09-22 17:06:06
+2026-09-22 17:16:41
+
 # --
 append this chat to Log.md with date and time stamp
 with approximate time cost

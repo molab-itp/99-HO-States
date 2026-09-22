@@ -1330,3 +1330,26 @@ stretch beyond what was actually asked. Net effect: still verifying `v2` changes
 + screenshots only, not scripted taps.
 
 **Cost**: ~10 minutes.
+
+# --
+
+2026-09-22 17:16:51 (installed idb; v2: reaction picker + JSON persistence, fully idb-verified)
+
+Installed real Simulator UI automation: `idb-companion` (Homebrew, `facebook/fb` tap, had to
+`brew trust` it) + `idb` CLI (via `pipx`, since this Python is externally-managed). Unlike plain
+`osascript`, `idb` exposes the actual SwiftUI accessibility tree — verified by tapping through
+Home → List → Detail by real element labels, confirming the earlier `PresidentDetail/` refactor
+and pinch-zoom feature both genuinely work (not just "compiles").
+
+Then built the requested feature: a reaction button in `PresidentSummaryView.swift` (heart/thumbs
+up/thumbs down/question mark, new `PresidentReaction` enum + `ReactionPickerStrip.swift`), backed
+by `AppModel.reactions`. Persistence: a `PersistedState` JSON (slideIndex + shuffle state +
+reactions) written only from `HO_States_US_App`'s `scenePhase` handler on `.background` — never
+from any mutator, so a slideshow tick or reaction pick doesn't touch disk.
+
+Verified the entire flow live with `idb`: tapped "Add Reaction" → strip appeared with all 4
+correctly-labeled options → tapped "Heart" → button updated, confirmed `AppState.json` did *not*
+exist yet → pressed Home → file appeared with exactly `{"reactions":{"1":"heart"},...}` → force-
+quit, relaunched, navigated back → reaction still read "Heart", loaded from disk.
+
+**Cost**: ~35 minutes (idb setup + install + full live verification).

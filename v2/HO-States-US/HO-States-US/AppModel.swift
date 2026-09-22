@@ -31,6 +31,10 @@ final class AppModel {
     /// restarted picks up from this index instead of always restarting at the first president.
     var slideIndex = 0
 
+    /// User-picked feedback per president (heart / thumbs up / thumbs down / question mark),
+    /// keyed by `President.id`. Set from `PresidentSummaryView`'s reaction strip.
+    private(set) var reactions: [President.ID: PresidentReaction] = [:]
+
     var buildInfo:String {
         "[\(cycleCount)|\(Self.bundleVersion())]"
     }
@@ -43,6 +47,17 @@ final class AppModel {
         self.presidents = presidents
         self.shuffledIndexes = presidents.indices.shuffled()
         self.cycleCount = 1
+        loadPersistedState()
+    }
+
+    func reaction(for president: President) -> PresidentReaction? {
+        reactions[president.id]
+    }
+
+    /// Passing `nil` clears an existing reaction (used when tapping the already-selected one
+    /// again in the picker strip).
+    func setReaction(_ reaction: PresidentReaction?, for president: President) {
+        reactions[president.id] = reaction
     }
 
     /// Returns the next president in the current shuffle order, wrapping back to its start once
@@ -82,5 +97,64 @@ final class AppModel {
         nextShuffleIndex = 0
         cycleCount += 1
         slideIndex = 0
+    }
+
+    // MARK: - Persistence
+    //
+    // Only `slideIndex`, the shuffle state (`shuffledIndexes`/`nextShuffleIndex`), and
+    // `reactions` survive across app launches — enough to resume browsing where the user left
+    // off and keep their feedback, without also persisting `viewedPresidentIDs`/`cycleCount`
+    // (not asked for, and would make "Reset Visit Count" behave inconsistently across launches).
+    //
+    // Deliberately *not* written on every mutation: `persistState()` is only ever called from
+    // `HO_States_US_App`'s `scenePhase` observer when the app backgrounds, so a slideshow ticking
+    // every 0.1s or a reaction pick doesn't each cause a disk write — only leaving the app does.
+
+    private struct PersistedState: Codable {
+        var slideIndex: Int
+        var shuffledIndexes: [Int]
+        var nextShuffleIndex: Int
+        /// String-keyed (rather than `[Int: PresidentReaction]`) so the written JSON is a normal
+        /// `{"1": "heart", ...}` object instead of `Codable`'s flattened-array encoding of
+        /// non-string-keyed dictionaries.
+        var reactions: [String: PresidentReaction]
+    }
+
+    private static func stateFileURL() -> URL {
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appendingPathComponent("AppState.json")
+    }
+
+    private func loadPersistedState() {
+        guard let data = try? Data(contentsOf: Self.stateFileURL()),
+              let state = try? JSONDecoder().decode(PersistedState.self, from: data) else {
+            return
+        }
+        // Guards against a stale file left over from a build with a different president count
+        // (e.g. after adding/removing entries in Presidents.json) producing an out-of-range index.
+        if state.shuffledIndexes.count == presidents.count {
+            shuffledIndexes = state.shuffledIndexes
+            nextShuffleIndex = state.nextShuffleIndex
+        }
+        if presidents.indices.contains(state.slideIndex) {
+            slideIndex = state.slideIndex
+        }
+        reactions = Dictionary(uniqueKeysWithValues: state.reactions.compactMap { key, value in
+            Int(key).map { ($0, value) }
+        })
+    }
+
+    /// Writes the current resumable state to disk. See the note above `PersistedState` — call
+    /// this sparingly; it's not meant to run on every state change.
+    func persistState() {
+        let state = PersistedState(
+            slideIndex: slideIndex,
+            shuffledIndexes: shuffledIndexes,
+            nextShuffleIndex: nextShuffleIndex,
+            reactions: Dictionary(uniqueKeysWithValues: reactions.map { (String($0.key), $0.value) })
+        )
+        guard let data = try? JSONEncoder().encode(state) else { return }
+        try? data.write(to: Self.stateFileURL(), options: .atomic)
     }
 }
