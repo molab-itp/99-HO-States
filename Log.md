@@ -1232,3 +1232,17 @@ the message/selection for the turn. User chose to keep the two entries made unde
 behavior rather than revert them.
 
 **Cost**: ~4 minutes; tokens not measurable in-session (see prior entries).
+
+# --
+
+2026-09-22 04:44:48 (v05: ported v2's shuffle rework + slideIndex persistence)
+
+Ported the three `v2` Swift changes since the last `v05` sync (`v02.47`–`v02.49`): shuffle logic
+now wraps instead of reshuffling on exhaustion (reshuffle only from `resetViewed()`), added
+persisted `slideIndex` to `AppModelContext` (kept in sync via a `useEffect` in
+`PresidentDetailScreen`, no Swift-style re-invocation hazard here), and Reset Visit Count now
+rewinds it to 0. Updated `scripts/smoke.mjs`'s stale "always starts at #01" assumption and added a
+real stop/restart resume assertion. `npm run build` + `npm run smoke` both pass, zero console
+errors.
+
+**Cost**: ~15 minutes.

@@ -239,7 +239,12 @@ v02.49
 
 Reset visit count should reset slide show to begining
 
+v05.50
+
+update v05 with changes to v2
+
+
 # --
 append this chat to Log.md with date and time stamp
-with approximate time cost and token cost
-
+with approximate time cost
+keep description short

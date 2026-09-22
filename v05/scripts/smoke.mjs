@@ -91,17 +91,24 @@ async function main() {
     await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
 
+    // `slideIndex` (which president a sequential slideshow resumes at) persists across the whole
+    // session — earlier steps above (list row, Next/Previous/Random, Random Head) already moved
+    // it around — so reset first to get a deterministic #01 start for this section.
+    console.log('Reset Visit Count (clean slate before the sequential slideshow test)...');
+    await page.click('text=Reset Visit Count');
+    await page.waitForTimeout(100);
+
     // Starting the slideshow immediately navigates to a detail screen (same as the SwiftUI app:
     // the pushed detail view covers Home), so "Stop Slideshow" isn't reachable until you leave.
-    // Sequential (Random Mode off) starts from president #01. While it runs, the center toolbar
-    // button is Pause/Play (not Random) and never exits the slideshow; Next/Previous keep paging
-    // instead of stopping it.
+    // Sequential (Random Mode off) starts from `slideIndex`, #01 right after the reset above.
+    // While it runs, the center toolbar button is Pause/Play (not Random) and never exits the
+    // slideshow; Next/Previous keep paging instead of stopping it.
     console.log('Sequential slideshow start (Random Mode off)...');
     await page.click('button:has-text("Start Slideshow")');
     await page.waitForSelector('.nav-title-mono', { timeout: 4000 });
     const runningTitle = await page.locator('.nav-title-mono').textContent();
     assertIncludes(runningTitle, '·', 'slideshow-active title should show a countdown');
-    assertIncludes(runningTitle, '#01', 'sequential slideshow should start from the first president');
+    assertIncludes(runningTitle, '#01', 'sequential slideshow should start from the first president after a reset');
     await shot('slideshow-running');
 
     console.log('Next during slideshow (should advance, not stop it)...');
@@ -118,7 +125,16 @@ async function main() {
     await page.click('button[aria-label="Play"]');
     await page.waitForSelector('button[aria-label="Pause"]');
 
-    console.log('Back stops the slideshow...');
+    console.log('Back stops the sequential slideshow at #02...');
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+
+    console.log('Restarting the sequential slideshow should resume at #02, not restart at #01...');
+    await page.click('button:has-text("Start Slideshow")');
+    await page.waitForSelector('.nav-title-mono', { timeout: 4000 });
+    const resumedTitle = await page.locator('.nav-title-mono').textContent();
+    assertIncludes(resumedTitle, '#02', 'sequential slideshow should resume where it left off, not restart at #01');
+    await shot('slideshow-resumed');
     await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
 

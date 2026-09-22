@@ -6,17 +6,19 @@ import Icon from '../components/Icon.jsx';
 const WIKIPEDIA_SOURCE_URL = 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States';
 
 export default function HomeScreen() {
-  const { presidents, viewedIDs, nextRandomPresident, resetViewed } = useAppModel();
+  const { presidents, viewedIDs, nextRandomPresident, resetViewed, slideIndex } = useAppModel();
   const { pushList, replaceWithDetail } = useNavigation();
   const [isRandomMode, setIsRandomMode] = useState(false);
 
   const remainingCount = presidents.length - viewedIDs.size;
 
-  // Sequential slideshows start from the first president; random ones draw like every other
-  // random control does. Home is unreachable again until the slideshow is left (its detail
-  // screen covers it, same as the SwiftUI app), so there's no "Stop Slideshow" state to show here.
+  // Random mode draws the next card from the shared shuffle (resuming wherever it left off);
+  // sequential mode resumes from wherever `slideIndex` was last left, falling back to the first
+  // president only if that index is somehow out of bounds. Home is unreachable again until the
+  // slideshow is left (its detail screen covers it, same as the SwiftUI app), so there's no "Stop
+  // Slideshow" state to show here.
   function startSlideshow() {
-    const president = isRandomMode ? nextRandomPresident() : presidents[0];
+    const president = isRandomMode ? nextRandomPresident() : presidents[slideIndex] ?? presidents[0];
     if (!president) return;
     replaceWithDetail(president, { startSlideshow: true, isRandomMode });
   }

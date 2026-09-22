@@ -17,7 +17,7 @@ const SLIDESHOW_INTERVAL_TENTHS = 50; // 5.0 seconds, matches PresidentDetailVie
  * every tick, so Previous/Next/pause can all act on the same instance's state.
  */
 export default function PresidentDetailScreen({ selected, startSlideshow = false, isRandomMode = false }) {
-  const { presidents, viewedIDs, buildInfo, markViewed, nextRandomPresident } = useAppModel();
+  const { presidents, viewedIDs, buildInfo, markViewed, nextRandomPresident, setSlideIndex } = useAppModel();
 
   const startIndex = (() => {
     const found = presidents.findIndex((p) => p.order === selected.order);
@@ -52,6 +52,13 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
+
+  // Mirrors `index` into `appModel.slideIndex` on every change (including the initial mount), so
+  // it persists across this screen being unmounted and remounted — e.g. a sequential slideshow
+  // that's stopped and later restarted resumes from here instead of always restarting at #1.
+  useEffect(() => {
+    setSlideIndex(index);
+  }, [index, setSlideIndex]);
 
   function advanceForward(prevNav) {
     if (isRandomMode) {

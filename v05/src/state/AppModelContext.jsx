@@ -21,51 +21,79 @@ function shuffledIndexes(count) {
  */
 export function AppModelProvider({ children }) {
   const shuffleRef = useRef(shuffledIndexes(presidents.length));
-  const drawPositionRef = useRef(0);
+  // Walks `shuffleRef` in order, wrapping back to 0 once every index has been served. The
+  // permutation itself is only ever redealt by `resetViewed()` (via `reshuffle()` below) — never
+  // here — so resuming a random-mode slideshow just continues walking the same order instead of
+  // starting a fresh one.
+  const nextShuffleIndexRef = useRef(0);
+  const viewedIDsRef = useRef(new Set());
   const [viewedIDs, setViewedIDs] = useState(() => new Set());
 
-  // Number of times the shuffle has been (re)dealt — the initial deal plus every reshuffle once
-  // a shuffle is exhausted — so `buildInfo` can tell how many full random cycles have been dealt.
+  // Number of times the shuffle has been (re)dealt — the initial deal plus every reshuffle from
+  // `resetViewed()` — so `buildInfo` can tell how many full random cycles have been dealt.
   const [cycleCount, setCycleCount] = useState(1);
+
+  // Which president `PresidentDetailScreen` is currently showing, as an index into `presidents`.
+  // Lives here (rather than only as local state on the screen) so it survives that screen being
+  // unmounted and remounted — e.g. a non-random slideshow that's stopped and later restarted
+  // picks up from this index instead of always restarting at the first president.
+  const [slideIndex, setSlideIndex] = useState(0);
 
   const nextRandomPresident = useCallback(() => {
     if (presidents.length === 0) return null;
 
-    if (drawPositionRef.current >= shuffleRef.current.length) {
-      const lastDrawnIndex = shuffleRef.current[shuffleRef.current.length - 1];
-      shuffleRef.current = shuffledIndexes(presidents.length);
-      if (presidents.length > 1 && shuffleRef.current[0] === lastDrawnIndex) {
-        [shuffleRef.current[0], shuffleRef.current[1]] = [shuffleRef.current[1], shuffleRef.current[0]];
-      }
-      drawPositionRef.current = 0;
-      setCycleCount((c) => c + 1);
+    if (nextShuffleIndexRef.current >= shuffleRef.current.length) {
+      nextShuffleIndexRef.current = 0;
     }
 
-    const president = presidents[shuffleRef.current[drawPositionRef.current]];
-    drawPositionRef.current += 1;
+    const president = presidents[shuffleRef.current[nextShuffleIndexRef.current]];
+    nextShuffleIndexRef.current += 1;
     return president;
   }, []);
 
-  const markViewed = useCallback((president, resetIfComplete = false) => {
-    setViewedIDs((prev) => {
-      const next = new Set(prev);
-      next.add(president.order);
-      if (resetIfComplete && next.size >= presidents.length) {
-        return new Set();
-      }
-      return next;
-    });
+  // Deals a fresh shuffle and rewinds the sequential slideshow back to the first president. This
+  // is the only place the random draw order is ever reshuffled — `nextRandomPresident()` just
+  // walks (and wraps within) whatever permutation was last dealt here.
+  const reshuffle = useCallback(() => {
+    shuffleRef.current = shuffledIndexes(presidents.length);
+    nextShuffleIndexRef.current = 0;
+    setCycleCount((c) => c + 1);
+    setSlideIndex(0);
   }, []);
 
-  const resetViewed = useCallback(() => setViewedIDs(new Set()), []);
+  const resetViewed = useCallback(() => {
+    viewedIDsRef.current = new Set();
+    setViewedIDs(new Set());
+    reshuffle();
+  }, [reshuffle]);
+
+  const markViewed = useCallback((president, resetIfComplete = false) => {
+    const next = new Set(viewedIDsRef.current);
+    next.add(president.order);
+    viewedIDsRef.current = next;
+    setViewedIDs(next);
+    if (resetIfComplete && next.size >= presidents.length) {
+      resetViewed();
+    }
+  }, [resetViewed]);
 
   // Port of AppModel.swift's `buildInfo`: `[cycleCount|bundleVersion]`, using this app's own
   // package.json version as the web analog of CFBundleVersion.
   const buildInfo = `[${cycleCount}|${appVersion}]`;
 
   const value = useMemo(
-    () => ({ presidents, viewedIDs, cycleCount, buildInfo, nextRandomPresident, markViewed, resetViewed }),
-    [viewedIDs, cycleCount, buildInfo, nextRandomPresident, markViewed, resetViewed],
+    () => ({
+      presidents,
+      viewedIDs,
+      cycleCount,
+      buildInfo,
+      slideIndex,
+      setSlideIndex,
+      nextRandomPresident,
+      markViewed,
+      resetViewed,
+    }),
+    [viewedIDs, cycleCount, buildInfo, slideIndex, nextRandomPresident, markViewed, resetViewed],
   );
 
   return <AppModelContext.Provider value={value}>{children}</AppModelContext.Provider>;
