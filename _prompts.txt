@@ -282,6 +282,16 @@ Create a folder PresidentDetail
 and in it re-factor PresidentDetailView
 into component views
 
+v02.57
+
+enable assistive-access permission for osascript/System Events
+
+If you want real tap-driven verification in the Simulator, 
+that needs either an XCUITest target added to the project 
+or idb (Facebook's iOS automation tool) installed — 
+happy to set either up if useful, 
+but that's a separate task from what was asked here.
+
 # --
 append this chat to Log.md with date and time stamp
 with approximate time cost

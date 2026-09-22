@@ -1314,3 +1314,19 @@ caveat as recent entries: no scripted taps in this environment, so the detail sc
 behavior post-split wasn't exercised interactively.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-09-22 09:31:17 (meta: enabled Accessibility permission for osascript — partial win)
+
+User granted VS Code Accessibility access (System Settings) after repeated "no assistive access"
+errors this session. Confirmed working for general System Events queries (frontmost-process
+query succeeded). Does *not* unlock Simulator UI automation, though: the device's on-screen app
+content isn't exposed as named accessibility elements via plain System Events (only hardware
+chrome — volume buttons, device labels — showed up); that bridging needs XCUITest or `idb`,
+neither set up here. Tried raw coordinate clicking (`click at {x, y}`) as a fallback — it hung
+indefinitely rather than working or erroring; killed it rather than dig further, since it was a
+stretch beyond what was actually asked. Net effect: still verifying `v2` changes via `xcodebuild`
++ screenshots only, not scripted taps.
+
+**Cost**: ~10 minutes.
