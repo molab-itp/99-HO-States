@@ -1219,3 +1219,16 @@ Moved persistence entirely into `PresidentDetailView`, off the fragile closure:
 - **Tokens**: not measurable from inside this session (see previous entry's note) — this turn was
   much smaller than the last one (one file, a two-line change, no long build-log tails needed
   beyond the final confirmation build), so call it a small fraction of that entry's estimate.
+
+# --
+
+2026-09-22 04:38:00 (meta: stopped auto-appending to Log.md from unselected _prompts.txt text)
+
+User asked why Log.md kept getting updated without being asked. Cause: after one turn where the
+IDE selection itself included an "append to Log.md" line, later turns had me `tail`-reading past
+the selection and picking up a trailing "append this chat..." block the user hadn't selected,
+treating it as a standing instruction. Agreed going forward to only log when that's actually in
+the message/selection for the turn. User chose to keep the two entries made under the old
+behavior rather than revert them.
+
+**Cost**: ~4 minutes; tokens not measurable in-session (see prior entries).
