@@ -1265,3 +1265,17 @@ clicked "Next" manually, which doesn't exercise this path, so it never caught th
 
 **Cost**: ~20 minutes (mostly the empirical timed diagnostic, needed since the bug wasn't visible
 from code inspection alone).
+
+# --
+
+2026-09-22 05:17:30 (v2: buildInfo on HomeView; v05: synced + app icon as web icon)
+
+Added `appModel.buildInfo` as small monospaced secondary text at the bottom of `v2`'s `HomeView`
+(below Reset Visit Count), confirmed via simulator screenshot. Synced that same addition to
+`v05`'s `HomeScreen.jsx`/`index.css` (`.build-info`) — the only `v2` change since the last sync.
+Also brought `v2`'s 1024×1024 `AppIcon.appiconset` source over as `v05`'s web icons: resized to
+`public/apple-touch-icon.png` (180×180, for iOS "Add to Home Screen") and `public/favicon.png`
+(32×32, browser tab), wired into `index.html`. Verified both build with the correct GitHub Pages
+subpath and serve 200 from the dev server; full smoke suite still passes.
+
+**Cost**: ~20 minutes.
