@@ -211,4 +211,8 @@ and the next and previous either go to next or previous sequancially
 or next or previous in the random sequence if in random mode
 2026-09-21 21:35:55
 
+v05.46
+
+in react web app v05 bring recent updates from SwiftUI v2
+
 append this chat to Log.md with date and time stamp

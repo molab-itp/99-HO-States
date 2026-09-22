@@ -965,3 +965,78 @@ sequence — instead of stopping it.
   moving `SlideshowContext`'s timer/tick logic to be sequential-or-random aware and adding a
   random-walk history array, mirroring the `PresidentDetailView.swift` approach above — not yet
   done, not asked for this session.
+
+# --
+
+2026-09-21 21:55:15 (v05: ported the Random Mode / pause-play slideshow changes; Node installed)
+
+## Request
+
+Port the `v2` Random Mode / pause-play slideshow changes (previous entry, above) into the `v05`
+React app, then install Node via Homebrew so the port could actually be built and smoke-tested
+instead of only reviewed by hand (no `node`/`npm` were on `PATH` in this environment beforehand).
+
+## What was built
+
+Followed the same architecture shift as the Swift change: the detail screen no longer gets torn
+down and rebuilt on every slideshow tick, so its own local state can own Previous/Next/pause
+instead of a shared context re-pushing a fresh screen each time.
+
+- `src/navigation/NavigationContext.jsx`: `replaceWithDetail(president, options)` now merges an
+  optional `options` object (`{ startSlideshow, isRandomMode }`) into the pushed path entry, read
+  once by the detail screen on mount.
+- `src/App.jsx`: passes `startSlideshow`/`isRandomMode` from the topmost path entry down to
+  `PresidentDetailScreen`; dropped `SlideshowProvider` (no longer needed).
+- `src/state/SlideshowContext.jsx`: deleted — its timer/tick loop moved into the detail screen
+  itself, mirroring `PresidentDetailView.swift` no longer needing `HomeView` to own the timer.
+- `src/screens/HomeScreen.jsx`: added a `Random Mode` checkbox (styled as an iOS-style switch, the
+  actual rendering of SwiftUI's `Toggle`, not a literal checkbox). `Start Slideshow` now starts
+  from `presidents[0]` (sequential) or a random draw, passing that choice through
+  `replaceWithDetail`'s new `options`.
+- `src/screens/PresidentDetailScreen.jsx`: rewritten to own `isSlideshowActive` (fixed for the
+  screen's lifetime from the `startSlideshow` prop), `isSlideshowPaused`, `remainingTenths`, and a
+  combined `{ index, history, position }` nav state updated atomically so a random-mode walk's
+  index and its history/position pointer never drift apart. The timer uses a "latest ref" pattern
+  (`tickRef.current` reassigned every render) so the one `setInterval` created on mount always
+  calls the current closure instead of a stale one. Center toolbar button renders Pause/Play (not
+  Random) while active, toggling `isSlideshowPaused`; Previous/Next page sequentially (wrapping) or
+  through the random-walk history depending on `isRandomMode`, same rules as the Swift version.
+- `src/components/Icon.jsx`: added `pause-circle-fill`, fetched from
+  `raw.githubusercontent.com/twbs/icons` like the rest of the icon set.
+- `src/index.css`: added `.toggle-row`/`.switch` styles for the new checkbox (hidden native
+  `<input type="checkbox">` driving a custom track/thumb via sibling selectors, so it stays
+  keyboard/screen-reader accessible).
+- `scripts/smoke.mjs`: updated to exercise a sequential slideshow (asserts it starts at `#01`,
+  Next advances to `#02` without stopping it), the Pause/Play toggle, and a random-mode slideshow
+  (Next then Previous, asserting it's still active throughout) — the old assertion that clicking
+  "Random" stopped the slideshow no longer applies since that button is Pause/Play now.
+
+## Node install
+
+- No `node`/`npm` were on `PATH` (confirmed: `which node npm` failed, no `nvm`/`volta`/`fnm`/`asdf`,
+  nothing under `/opt/homebrew/bin`). `brew install node` → Node v26.9.0 / npm 11.19.1, pulling in
+  several dependency upgrades (openssl@3, sqlite, readline, xz, ca-certificates, etc.) as a side
+  effect of the Homebrew dependency graph.
+
+## Verification
+
+- `npm install`, `npm run build` → succeeds (`dist/` produced, no errors).
+- `npx playwright install chromium` (needed since this was a fresh install) then `npm run smoke` →
+  full flow including List/Detail/Random Head, a sequential slideshow (Next advances it, Pause
+  freezes the countdown and flips to Play, Play resumes, Back stops it), and a random-mode
+  slideshow (Next/Previous keep it running) — **zero console errors, zero failed network
+  requests**.
+- Visually reviewed the resulting screenshots: Home shows the new switch in its off state;
+  sequential slideshow screenshot shows `#01 · 05.0s` with a filled Pause icon centered in the
+  toolbar; after Next+Pause the title reads `#02 · 04.8s` (frozen, not reset) with a Play icon;
+  the random-mode slideshow screenshot shows Previous correctly greyed out at the very start of
+  that walk (position 0, nothing earlier to go back to yet).
+
+## Follow-up notes
+
+- This session's Homebrew install upgraded several unrelated shared dependencies
+  (`openssl@3`, `sqlite`, `readline`, `xz`, `ca-certificates`) as part of installing `node` —
+  expected Homebrew behavior, not a targeted change, but worth knowing if anything else on this
+  machine pins to older versions of those.
+- `v4` still has neither this session's nor the prior session's slideshow changes — only `v2` and
+  `v05` are in sync as of this entry.

@@ -30,11 +30,14 @@ export function NavigationProvider({ children }) {
     setPath((prev) => [...prev, { type: 'detail', president, navKey: nextNavKey() }]);
   }, []);
 
-  // Mirrors HomeView.goToRandomPresident(): replaces the *entire* path with a single detail
-  // entry, used by both the Home "Random Head" button and the slideshow.
-  const replaceWithDetail = useCallback((president) => {
+  // Mirrors HomeView.goToRandomPresident() / startSlideshow(): replaces the *entire* path with a
+  // single detail entry, used by the Home "Random Head" button and by Start Slideshow. `options`
+  // (`{ startSlideshow, isRandomMode }`) is only set by Start Slideshow, and is read once by
+  // PresidentDetailScreen on mount to seed its own local slideshow state — it never triggers a
+  // re-push later, since the slideshow no longer swaps this path entry on every tick.
+  const replaceWithDetail = useCallback((president, options = {}) => {
     if (!president) return;
-    setPath([{ type: 'detail', president, navKey: nextNavKey() }]);
+    setPath([{ type: 'detail', president, navKey: nextNavKey(), ...options }]);
   }, []);
 
   const pop = useCallback(() => {

@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppModel } from '../state/AppModelContext.jsx';
-import { useSlideshow } from '../state/SlideshowContext.jsx';
 import { wikipediaArticleURL } from '../data/wikipedia.js';
 import { assetUrl } from '../data/assetUrl.js';
 import NavBar from '../components/NavBar.jsx';
@@ -8,19 +7,32 @@ import ViewedProgressBar from '../components/ViewedProgressBar.jsx';
 import Icon from '../components/Icon.jsx';
 
 const DETAIL_REVEAL_DELAY_MS = 2000; // matches Swift's `delaySecs`
+const SLIDESHOW_INTERVAL_TENTHS = 50; // 5.0 seconds, matches PresidentDetailView's slideshowIntervalTenths
 
-/** Port of PresidentDetailView.swift. `selected` is the president this screen was pushed with. */
-export default function PresidentDetailScreen({ selected }) {
+/**
+ * Port of PresidentDetailView.swift. `selected` is the president this screen was pushed with.
+ * `startSlideshow`/`isRandomMode` are only set when Home's Start Slideshow button pushed this
+ * screen; the slideshow's timer, pause state, and (in random mode) its random-walk history all
+ * live here for the screen's whole lifetime — the app no longer swaps in a fresh detail screen on
+ * every tick, so Previous/Next/pause can all act on the same instance's state.
+ */
+export default function PresidentDetailScreen({ selected, startSlideshow = false, isRandomMode = false }) {
   const { presidents, viewedIDs, buildInfo, markViewed, nextRandomPresident } = useAppModel();
-  const slideshow = useSlideshow();
-  const isSlideshowActive = slideshow.isRunning;
 
-  const [index, setIndex] = useState(() => {
+  const startIndex = (() => {
     const found = presidents.findIndex((p) => p.order === selected.order);
     return found >= 0 ? found : 0;
-  });
-  const [detailsVisible, setDetailsVisible] = useState(false);
+  })();
 
+  const [detailsVisible, setDetailsVisible] = useState(false);
+  const [isSlideshowActive] = useState(startSlideshow);
+  const [isSlideshowPaused, setIsSlideshowPaused] = useState(false);
+  const [remainingTenths, setRemainingTenths] = useState(SLIDESHOW_INTERVAL_TENTHS);
+
+  // `index` (which president is shown) and, in random mode, the walk's history/position all
+  // change together, so they're one state object updated atomically.
+  const [nav, setNav] = useState({ index: startIndex, history: [startIndex], position: 0 });
+  const index = nav.index;
   const president = presidents[index];
   const isFirst = index === 0;
   const isLast = index === presidents.length - 1;
@@ -41,36 +53,90 @@ export default function PresidentDetailScreen({ selected }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
-  function handleToolbarButton(action) {
-    if (isSlideshowActive) {
-      slideshow.stop();
-      return;
+  function advanceForward(prevNav) {
+    if (isRandomMode) {
+      if (prevNav.position < prevNav.history.length - 1) {
+        const position = prevNav.position + 1;
+        return { ...prevNav, index: prevNav.history[position], position };
+      }
+      const next = nextRandomPresident();
+      const newIndex = next ? presidents.findIndex((p) => p.order === next.order) : -1;
+      if (newIndex < 0) return prevNav;
+      const history = [...prevNav.history, newIndex];
+      return { index: newIndex, history, position: history.length - 1 };
     }
-    action();
+    const newIndex = prevNav.index === presidents.length - 1 ? 0 : prevNav.index + 1;
+    return { ...prevNav, index: newIndex };
   }
 
+  function stepBackward(prevNav) {
+    if (isRandomMode) {
+      if (prevNav.position === 0) return prevNav;
+      const position = prevNav.position - 1;
+      return { ...prevNav, index: prevNav.history[position], position };
+    }
+    const newIndex = prevNav.index === 0 ? presidents.length - 1 : prevNav.index - 1;
+    return { ...prevNav, index: newIndex };
+  }
+
+  // Auto-advance timer: only runs while a slideshow is active, uses a ref for the tick body so
+  // the interval (set up once) always calls the latest closure instead of a stale one.
+  const tickRef = useRef(() => {});
+  tickRef.current = () => {
+    if (isSlideshowPaused) return;
+    setRemainingTenths((prev) => {
+      const next = prev - 1;
+      if (next <= 0) {
+        setNav((prevNav) => advanceForward(prevNav));
+        return SLIDESHOW_INTERVAL_TENTHS;
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (!isSlideshowActive) return undefined;
+    const id = setInterval(() => tickRef.current(), 100);
+    return () => clearInterval(id);
+  }, [isSlideshowActive]);
+
   function goToPrevious() {
-    setIndex((i) => (i > 0 ? i - 1 : i));
+    if (isSlideshowActive) {
+      setNav((prevNav) => stepBackward(prevNav));
+      setRemainingTenths(SLIDESHOW_INTERVAL_TENTHS);
+    } else if (!isFirst) {
+      setNav((prevNav) => ({ ...prevNav, index: prevNav.index - 1 }));
+    }
   }
 
   function goToNext() {
-    setIndex((i) => (i < presidents.length - 1 ? i + 1 : i));
+    if (isSlideshowActive) {
+      setNav((prevNav) => advanceForward(prevNav));
+      setRemainingTenths(SLIDESHOW_INTERVAL_TENTHS);
+    } else if (!isLast) {
+      setNav((prevNav) => ({ ...prevNav, index: prevNav.index + 1 }));
+    }
   }
 
+  // Manual jump when no slideshow is running (independent of the Random Mode checkbox, which
+  // only affects Next/Previous once a slideshow is active).
   function goToRandom() {
     const next = nextRandomPresident();
     if (!next) return;
     const newIndex = presidents.findIndex((p) => p.order === next.order);
-    if (newIndex >= 0) setIndex(newIndex);
+    if (newIndex >= 0) setNav((prevNav) => ({ ...prevNav, index: newIndex }));
   }
 
   const orderText = String(president.order).padStart(2, '0');
   const title = isSlideshowActive
-    ? `#${orderText} · ${(slideshow.remainingTenths / 10).toFixed(1).padStart(4, '0')}s ${buildInfo}`
+    ? `#${orderText} · ${(remainingTenths / 10).toFixed(1).padStart(4, '0')}s ${buildInfo}`
     : `#${orderText} ${buildInfo}`;
 
   const imageSrc = president.large || president.thumbnail;
   const articleURL = wikipediaArticleURL(president);
+
+  const isPreviousDisabled = isSlideshowActive ? isRandomMode && nav.position === 0 : isFirst;
+  const isNextDisabled = isSlideshowActive ? false : isLast;
 
   return (
     <div className="screen-scroll">
@@ -107,23 +173,29 @@ export default function PresidentDetailScreen({ selected }) {
         <button
           className="toolbar-btn toolbar-btn-icon"
           aria-label="Previous"
-          disabled={!isSlideshowActive && isFirst}
-          onClick={() => handleToolbarButton(goToPrevious)}
+          disabled={isPreviousDisabled}
+          onClick={goToPrevious}
         >
           <Icon name="chevron-left" size={20} />
         </button>
-        <button
-          className="toolbar-btn toolbar-btn-icon"
-          aria-label="Random"
-          onClick={() => handleToolbarButton(goToRandom)}
-        >
-          <Icon name="shuffle" size={19} />
-        </button>
+        {isSlideshowActive ? (
+          <button
+            className="toolbar-btn toolbar-btn-icon"
+            aria-label={isSlideshowPaused ? 'Play' : 'Pause'}
+            onClick={() => setIsSlideshowPaused((p) => !p)}
+          >
+            <Icon name={isSlideshowPaused ? 'play-circle-fill' : 'pause-circle-fill'} size={19} />
+          </button>
+        ) : (
+          <button className="toolbar-btn toolbar-btn-icon" aria-label="Random" onClick={goToRandom}>
+            <Icon name="shuffle" size={19} />
+          </button>
+        )}
         <button
           className="toolbar-btn toolbar-btn-icon"
           aria-label="Next"
-          disabled={!isSlideshowActive && isLast}
-          onClick={() => handleToolbarButton(goToNext)}
+          disabled={isNextDisabled}
+          onClick={goToNext}
         >
           <Icon name="chevron-right" size={20} />
         </button>

@@ -236,6 +236,63 @@ input {
   color: var(--tint);
 }
 
+/* Random Mode row — stands in for SwiftUI's `Toggle` (which renders as a switch on iOS, not a
+   literal checkbox). The real checkbox input is visually hidden but still drives the switch via
+   sibling selectors, so it stays keyboard/screen-reader accessible. */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 2px 2px;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 51px;
+  height: 31px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.switch-track {
+  position: absolute;
+  inset: 0;
+  background: var(--separator);
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+
+.switch input:checked ~ .switch-track {
+  background: var(--tint);
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease;
+}
+
+.switch input:checked ~ .switch-thumb {
+  transform: translateX(20px);
+}
+
 .btn-bordered:active {
   background: var(--tint-fill-pressed);
   transform: scale(0.97);

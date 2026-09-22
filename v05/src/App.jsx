@@ -1,6 +1,5 @@
 import { AppModelProvider } from './state/AppModelContext.jsx';
 import { NavigationProvider, useNavigation } from './navigation/NavigationContext.jsx';
-import { SlideshowProvider } from './state/SlideshowContext.jsx';
 import HomeScreen from './screens/HomeScreen.jsx';
 import PresidentListScreen from './screens/PresidentListScreen.jsx';
 import PresidentDetailScreen from './screens/PresidentDetailScreen.jsx';
@@ -12,18 +11,23 @@ function Router() {
 
   if (!top) return <HomeScreen />;
   if (top.type === 'list') return <PresidentListScreen key={top.navKey} />;
-  return <PresidentDetailScreen key={top.navKey} selected={top.president} />;
+  return (
+    <PresidentDetailScreen
+      key={top.navKey}
+      selected={top.president}
+      startSlideshow={!!top.startSlideshow}
+      isRandomMode={!!top.isRandomMode}
+    />
+  );
 }
 
 export default function App() {
   return (
     <AppModelProvider>
       <NavigationProvider>
-        <SlideshowProvider>
-          <div className="app-shell">
-            <Router />
-          </div>
-        </SlideshowProvider>
+        <div className="app-shell">
+          <Router />
+        </div>
       </NavigationProvider>
     </AppModelProvider>
   );
