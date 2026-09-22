@@ -89,13 +89,14 @@ struct HomeView: View {
                 }
             }
             .navigationDestination(for: President.self) { president in
-                // Set before constructing the view below so its first render already reflects
-                // `president` — every push (list tap, Random Head, or slideshow start) funnels
-                // through here, keeping `appModel.slideIndex` as the single source of truth for
-                // which president is displayed. `let _ = ...` (rather than a bare statement) is
-                // required here: ViewBuilder tries to interpret a plain expression-statement as
-                // a View, but a `let` declaration is invisible to it.
-                let _ = { appModel.slideIndex = appModel.presidents.firstIndex(of: president) ?? 0 }()
+                // NB: this closure is *not* a run-once initializer — NavigationStack re-invokes
+                // it whenever HomeView's body recomputes (e.g. every `markViewed` call changes
+                // `remainingCount`, which HomeView's body reads), even while `president` itself
+                // hasn't changed. A side effect here previously reset `appModel.slideIndex` back
+                // to this same starting value on every such re-invocation, silently undoing every
+                // slideshow advance. `PresidentDetailView` now owns seeding/advancing
+                // `appModel.slideIndex` itself instead (in `onAppear` and its own navigation
+                // methods), which only run once per view *identity*, not once per re-invocation.
                 PresidentDetailView(
                     presidents: appModel.presidents,
                     selected: president,

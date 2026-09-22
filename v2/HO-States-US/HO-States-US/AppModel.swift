@@ -72,13 +72,15 @@ final class AppModel {
         }
     }
 
-    /// Clears viewed tracking and deals a fresh shuffle. This is the only place the random draw
-    /// order is ever reshuffled — `nextRandomPresident()` just walks (and wraps within) whatever
-    /// permutation was last dealt here.
+    /// Clears viewed tracking, deals a fresh shuffle, and rewinds the sequential slideshow back
+    /// to the first president. This is the only place the random draw order is ever reshuffled —
+    /// `nextRandomPresident()` just walks (and wraps within) whatever permutation was last dealt
+    /// here.
     func resetViewed() {
         viewedPresidentIDs.removeAll()
         shuffledIndexes = presidents.indices.shuffled()
         nextShuffleIndex = 0
         cycleCount += 1
+        slideIndex = 0
     }
 }

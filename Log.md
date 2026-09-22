@@ -1114,3 +1114,108 @@ case the user wants sequential resume scoped more narrowly.
 - Since UI automation wasn't possible this session, an actual on-device/Simulator walkthrough
   (start a sequential slideshow, let it advance a few presidents, stop it, restart it, confirm it
   resumes rather than restarting at #1) is still worth doing by hand before trusting this fully.
+
+# --
+
+2026-09-22 04:27:57 (v2: fix — slideshow (both modes) failed to advance, regression from the
+previous entry's `slideIndex` refactor)
+
+## Request
+
+User reported, after trying the previous entry's build: "slideshow in non-random mode and random
+mode fails to advance."
+
+## Root cause
+
+The previous entry's `HomeView.swift` change set `appModel.slideIndex` from inside the shared
+`navigationDestination(for: President.self)` closure, on the assumption that closure ran once
+per navigation (like an `init`). It doesn't: `HomeView.body` reads
+`appModel.viewedPresidentIDs.count` (via `remainingCount`), which changes on **every**
+`markViewed` call — i.e. on every single slideshow tick — forcing `HomeView.body` to recompute,
+which reconstructs the `.navigationDestination` modifier and re-invokes its closure with the
+*same, original* `president` value for that stack entry (navigation hadn't pushed a new value;
+only `appModel.slideIndex` had changed). That re-invocation reset `appModel.slideIndex` right
+back to the original president's index — immediately after `advanceSlideshow()` had moved it
+forward — so the display never visibly advanced, in both modes (the reset logic didn't care about
+`isRandomMode`). This exact fragility was already hinted at by a pre-existing comment in this
+codebase noting `.id(president.id)` was needed because "SwiftUI reuses the existing
+PresidentDetailView instance" — i.e. this destination closure is known to re-fire more than a
+naive read of the code would suggest.
+
+## Fix
+
+Moved persistence entirely into `PresidentDetailView`, off the fragile closure:
+
+- `PresidentDetailView.swift`: restored a local `@State private var index: Int` (seeded once per
+  view *identity* via `@State`'s `initialValue`, immune to `init` re-running on reconstruction —
+  unlike a plain class-property write, which has no such "first time only" protection). `index` is
+  what actually drives rendering again (`president`, `.task(id:)`, toolbar disabled-state). Added
+  `private func setIndex(_ newValue: Int)`, now the *only* place that mutates navigation state —
+  it sets `index` and mirrors the same value into `appModel.slideIndex` together, so the two never
+  drift. All of `goToPrevious`/`goToNext`/`goToRandom`/`advanceSlideshow` now call it instead of
+  assigning either value directly. Also added `appModel.slideIndex = index` inside `.onAppear`
+  (which — unlike `init` — genuinely fires once per identity) so a president that's viewed but
+  never advanced past still updates the persisted resume point.
+- `HomeView.swift`: removed the `let _ = { appModel.slideIndex = ... }()` line from the
+  `navigationDestination` closure entirely, replaced with a comment explaining why it doesn't
+  belong there. `startSlideshow()`'s read of `appModel.slideIndex` for sequential resume is
+  unchanged — it's now fed by `PresidentDetailView`'s writes instead.
+
+## Verification
+
+- `xcodebuild -scheme HO-States-US -destination 'generic/platform=iOS Simulator' build` —
+  succeeded. Installed and relaunched on the "iPhone Air" simulator; Home screen renders correctly
+  post-fix.
+- Same limitation as the previous entry: no assistive-access permission for `osascript`/System
+  Events in this environment, so actual taps still couldn't be scripted — verification is a
+  manual trace confirming `setIndex` is now the only mutation path and nothing outside
+  `PresidentDetailView` writes `appModel.slideIndex` anymore. **A real Simulator/device
+  click-through (start each slideshow mode, confirm the countdown actually advances the displayed
+  president) is still owed before trusting this fully** — this exact category of bug (looked right
+  on paper, broke in practice) is why that matters here specifically.
+
+## Cost (approximate, as requested)
+
+- **Time**: this fix (report → root-cause → patch → rebuild → this entry) ran from roughly
+  04:17 to 04:28, about **10–11 minutes** wall-clock. Not tracked precisely; read off the previous
+  and this entry's timestamps.
+- **Tokens**: not something this session can introspect or measure directly — no tool exposes
+  actual token accounting from inside the conversation. Rough order-of-magnitude guess based on
+  transcript shape (two full `xcodebuild` invocations, each tailed to their last ~30–60 lines
+  rather than shown in full, plus a few file reads/edits in the few-hundred-line range): likely
+  **tens of thousands of tokens** for this turn. Treat this as a guess, not a measurement — if
+  accurate cost tracking matters, that needs to come from wherever this session's usage is
+  actually billed/metered, not from anything stated in-conversation.
+
+# --
+
+2026-09-22 04:34:19 (v2: Reset Visit Count now also rewinds the sequential slideshow)
+
+## Request
+
+"Reset visit count should reset slide show to beginning."
+
+## What changed
+
+- `AppModel.swift`: `resetViewed()` now also sets `slideIndex = 0`, alongside its existing
+  `viewedPresidentIDs.removeAll()` / reshuffle / `cycleCount` bump. `resetViewed()` is called both
+  from the Home screen's "Reset Visit Count" button and from `markViewed(resetIfComplete:)` when a
+  slideshow completes a full lap on its own — both cases now also rewind the persisted sequential
+  slideshow position back to president #1, matching the request.
+- Confirmed this can't race with a currently-running slideshow's own display: "Reset Visit Count"
+  only exists on `HomeView`, which is only reachable when the navigation path is empty (i.e. never
+  while a slideshow's pushed detail screen is covering it) — so there's no case where this needs
+  to also touch a live `PresidentDetailView`'s local `index`.
+
+## Verification
+
+- `xcodebuild -scheme HO-States-US -destination 'generic/platform=iOS Simulator' build` —
+  succeeded. Same caveat as the last two entries: no scripted click-through in this environment,
+  so this is verified by trace (one-line change, low risk) rather than by watching it run.
+
+## Cost (approximate)
+
+- **Time**: roughly 6–7 minutes (04:27 → 04:34), following directly from the previous entry.
+- **Tokens**: not measurable from inside this session (see previous entry's note) — this turn was
+  much smaller than the last one (one file, a two-line change, no long build-log tails needed
+  beyond the final confirmation build), so call it a small fraction of that entry's estimate.

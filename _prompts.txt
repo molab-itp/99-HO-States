@@ -222,7 +222,6 @@ rename nextDrawPosition nextShuffleIndex
 when past end of shuffledIndexes wrap around
 don't automatically reshuffle,
 only reshuffle when appModel.resetViewed
-append this chat to Log.md with date and time stamp
 when slide show starts in random mode,
 resume at nextShuffleIndex
 in PresidentDetailView move index
@@ -230,4 +229,17 @@ into AppModel and rename slideIndex
 so that it persists and
 when slide show resumes in non-random mode
 it picks up from where it left off
- 
+
+v02.48
+
+slideshow in non-random mode and random mode
+fails to advance
+
+v02.49
+
+Reset visit count should reset slide show to begining
+
+# --
+append this chat to Log.md with date and time stamp
+with approximate time cost and token cost
+
