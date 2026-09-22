@@ -12,35 +12,35 @@ struct HomeView: View {
     private var remainingCount: Int {
         appModel.presidents.count - appModel.viewedPresidentIDs.count
     }
-
+    
     var body: some View {
         NavigationStack(path: $path) {
             VStack(spacing: 24) {
                 Spacer()
-
+                
                 Image(systemName: "building.columns.fill")
                     .font(.system(size: 72))
                     .foregroundStyle(.tint)
-
+                
                 Text("USNA Heads")
                     .font(.largeTitle.bold())
-
+                
                 Text("Browse portraits and biographies of every United States of North America Head of State.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
-
+                
                 Spacer()
-
+                
                 VStack(spacing: 16) {
                     NavigationLink(value: HomeDestination.list) {
                         Label("List of Heads", systemImage: "list.bullet")
                             .frame(maxWidth: .infinity)
                     }
-//                    .buttonStyle(.borderedProminent)
+                    //                    .buttonStyle(.borderedProminent)
                     .buttonStyle(.bordered)
-
+                    
                     Button {
                         goToRandomPresident()
                     } label: {
@@ -48,11 +48,11 @@ struct HomeView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
-
+                    
                     Toggle(isOn: $isRandomMode) {
                         Label("Random Mode", systemImage: "shuffle")
                     }
-
+                    
                     Button {
                         startSlideshow()
                     } label: {
@@ -63,22 +63,25 @@ struct HomeView: View {
                 }
                 .controlSize(.large)
                 .padding(.horizontal, 32)
-
+                
                 Link(destination: sourceURL) {
                     Label("Source: Wikipedia", systemImage: "link")
                         .font(.footnote)
                 }
                 .padding(.top, 8)
-              VStack(spacing: 4) {
-                Text("\(remainingCount) left to see")
-                  .font(.callout.weight(.medium))
-                Button("Reset Visit Count", role: .destructive) {
-                  appModel.resetViewed()
+                VStack(spacing: 4) {
+                    Text("\(remainingCount) left to see")
+                        .font(.callout.weight(.medium))
+                    Button("Reset Visit Count", role: .destructive) {
+                        appModel.resetViewed()
+                    }
+                    .font(.footnote)
                 }
-                .font(.footnote)
-              }
-
-
+                
+                Text(appModel.buildInfo)
+                    .font(.footnote.monospaced())
+                    .foregroundStyle(.secondary)
+                
                 Spacer()
             }
             .padding()
@@ -114,7 +117,7 @@ struct HomeView: View {
             }
         }
     }
-
+    
     private func goToRandomPresident() {
         pendingSlideshow = nil
         guard let president = appModel.nextRandomPresident() else { return }
@@ -122,7 +125,7 @@ struct HomeView: View {
         newPath.append(president)
         path = newPath
     }
-
+    
     private func startSlideshow() {
         pendingSlideshow = isRandomMode
         // Random mode draws the next card from the shared shuffle (resuming at
