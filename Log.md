@@ -1279,3 +1279,20 @@ Also brought `v2`'s 1024×1024 `AppIcon.appiconset` source over as `v05`'s web i
 subpath and serve 200 from the dev server; full smoke suite still passes.
 
 **Cost**: ~20 minutes.
+
+# --
+
+2026-09-22 09:04:09 (v2: pinch-to-zoom + pan on PresidentDetailView's headerImage)
+
+Added `MagnifyGesture` (1x–4x, always attached) and a `DragGesture` for panning (only attached
+once zoomed past 1x, so the ScrollView's own vertical scroll stays usable over the image at rest)
+to `headerImage`. Double-tap toggles 1x/2.5x. Scale/offset applied before the existing rounded-rect
+`clipShape` so the frame stays fixed while content zooms/pans inside it. Added `onChange(of: index)`
+to reset zoom when the displayed president changes (view instance persists across Next/Previous/
+slideshow advances, so this doesn't happen automatically).
+
+`xcodebuild` succeeded, app installs and launches without crashing. Could not verify the actual
+gesture behavior — no assistive-access permission for scripted taps/pinches in this environment —
+so this needs a manual check in Simulator/device before fully trusting it.
+
+**Cost**: ~15 minutes.

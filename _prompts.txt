@@ -257,6 +257,24 @@ sync v05 with v2
 and bring v2 app icon over as web icon 
 to be used when web page save as home screen on iOS
 
+v02.54 
+
+- added black
+ViewedProgressBar
+    private static let colors: [Color] = [.black, .green, .red, .yellow]
+
+v02.55
+
+in v2/HO-States-US/HO-States-US/PresidentDetailView.swift
+add pick and zoom on headerImage
+
+this environment has no assistive-access permission for osascript/System Events, 
+so touch simulation into the Simulator isn't available to me here
+
+need to double tap to get pin active
+slight jump when panning
+possible conflict with outter scrolling viewing
+
 # --
 append this chat to Log.md with date and time stamp
 with approximate time cost
