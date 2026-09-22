@@ -1353,3 +1353,23 @@ exist yet → pressed Home → file appeared with exactly `{"reactions":{"1":"he
 quit, relaunched, navigated back → reaction still read "Heart", loaded from disk.
 
 **Cost**: ~35 minutes (idb setup + install + full live verification).
+
+# --
+
+2026-09-22 17:52:04 (v2: reactions now support multiple per president, +/- UI)
+
+Reworked reactions from single-value to `[President.ID: Set<PresidentReaction>]` in `AppModel`
+(`addReaction`/`removeReaction` replacing `setReaction`); JSON persistence shape now
+`{"1":["heart","thumbsUp"]}`. `ReactionPickerStrip` takes an `options` list instead of a single
+`selected` value, reused for both add (shows not-yet-picked) and remove (shows only active).
+`PresidentSummaryView` now shows a row of active-reaction icons plus separate +/- buttons, each
+disabled when there's nothing to add/remove.
+
+Verified live with `idb`: added Heart, added Thumbs up, confirmed the add-strip excluded Heart
+the second time and the remove-strip showed only the 2 active ones, removed Heart, backgrounded
+(confirmed JSON now `{"1":["thumbsUp"]}`), relaunched, confirmed it reloaded correctly. Hit one
+`idb` ambiguity along the way: once an icon and a picker button share a label ("Heart" as both
+`AXImage` and `AXButton`), marker-based tap matches whichever comes first in the tree — had to
+fall back to coordinates to hit the actual button.
+
+**Cost**: ~25 minutes.

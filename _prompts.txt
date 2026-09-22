@@ -309,6 +309,12 @@ by app going into background
 2026-09-22 17:06:06
 2026-09-22 17:16:41
 
+v02.60
+
+in v2 PresidentSummaryView update interface for reactionControl 
+➕ button to add reaction icon
+➖ button to remove, ie. support multip reactions
+
 # --
 append this chat to Log.md with date and time stamp
 with approximate time cost

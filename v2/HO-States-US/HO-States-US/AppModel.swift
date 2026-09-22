@@ -31,9 +31,10 @@ final class AppModel {
     /// restarted picks up from this index instead of always restarting at the first president.
     var slideIndex = 0
 
-    /// User-picked feedback per president (heart / thumbs up / thumbs down / question mark),
-    /// keyed by `President.id`. Set from `PresidentSummaryView`'s reaction strip.
-    private(set) var reactions: [President.ID: PresidentReaction] = [:]
+    /// User-picked feedback per president (heart / thumbs up / thumbs down / question mark) —
+    /// a president can carry any combination of these, added and removed independently via
+    /// `PresidentSummaryView`'s +/- buttons.
+    private(set) var reactions: [President.ID: Set<PresidentReaction>] = [:]
 
     var buildInfo:String {
         "[\(cycleCount)|\(Self.bundleVersion())]"
@@ -50,14 +51,22 @@ final class AppModel {
         loadPersistedState()
     }
 
-    func reaction(for president: President) -> PresidentReaction? {
-        reactions[president.id]
+    func reactions(for president: President) -> Set<PresidentReaction> {
+        reactions[president.id] ?? []
     }
 
-    /// Passing `nil` clears an existing reaction (used when tapping the already-selected one
-    /// again in the picker strip).
-    func setReaction(_ reaction: PresidentReaction?, for president: President) {
-        reactions[president.id] = reaction
+    func addReaction(_ reaction: PresidentReaction, for president: President) {
+        reactions[president.id, default: []].insert(reaction)
+    }
+
+    /// Removes the entry for `president` entirely once its last reaction is removed, rather than
+    /// leaving an empty `Set` behind, so `reactions(for:)` and a persisted-then-reloaded file
+    /// agree on what "no reactions" looks like.
+    func removeReaction(_ reaction: PresidentReaction, for president: President) {
+        reactions[president.id]?.remove(reaction)
+        if reactions[president.id]?.isEmpty == true {
+            reactions[president.id] = nil
+        }
     }
 
     /// Returns the next president in the current shuffle order, wrapping back to its start once
@@ -114,10 +123,10 @@ final class AppModel {
         var slideIndex: Int
         var shuffledIndexes: [Int]
         var nextShuffleIndex: Int
-        /// String-keyed (rather than `[Int: PresidentReaction]`) so the written JSON is a normal
-        /// `{"1": "heart", ...}` object instead of `Codable`'s flattened-array encoding of
-        /// non-string-keyed dictionaries.
-        var reactions: [String: PresidentReaction]
+        /// String-keyed (rather than `[Int: Set<PresidentReaction>]`) so the written JSON is a
+        /// normal `{"1": ["heart", "thumbsUp"], ...}` object instead of `Codable`'s
+        /// flattened-array encoding of non-string-keyed dictionaries.
+        var reactions: [String: Set<PresidentReaction>]
     }
 
     private static func stateFileURL() -> URL {
