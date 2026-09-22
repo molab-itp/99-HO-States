@@ -1391,3 +1391,24 @@ Added Heart three times in a row, confirmed all three render as separate icons. 
 confirmed the JSON preserves order+duplicates, relaunched, confirmed exact reload.
 
 **Cost**: ~20 minutes.
+
+# --
+
+2026-09-22 18:22:42 (v2: header-image zoom/pan now persists per president)
+
+New `ImageZoomState` (scale + offset), stored in `AppModel.imageZoomStates` keyed by president,
+same persisted-JSON pattern as `reactions`. `ZoomableHeaderImage` now takes `@Environment(AppModel)`,
+seeds from the stored state `onAppear`, and writes back via a new `persistZoom()` at the end of
+every gesture/toggle — clearing the entry once back at 1x/no-offset.
+
+Verified live with `idb`: double-tap zoomed Washington to 2.5x, backgrounded (confirmed
+`imageZoomStates:{"1":{"scale":2.5,...}}`), force-quit, relaunched, navigated back — reloaded
+already zoomed. Also confirmed in-session: pinch-zoomed Washington, navigated to Adams (plain 1x,
+no carryover), back to Washington (zoom restored). Hit a real `idb` quirk along the way:
+`idb ui pinch`'s synthesized 2-finger gesture didn't reliably fire SwiftUI's `MagnifyGesture
+.onEnded` (visually zoomed but never persisted) — isolated by switching to `idb ui multi-tap`
+(double-tap → a plain function call, not a gesture-end callback) to confirm the app's own logic
+was correct.
+
+**Cost**: ~30 minutes (mostly chasing the idb pinch-completion quirk down to confirm it wasn't an
+app bug).

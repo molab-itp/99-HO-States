@@ -1,50 +1,61 @@
 import SwiftUI
 
 /// The president's portrait, with pinch-to-zoom, pan (once zoomed), and double-tap to toggle
-/// between 1x and 2.5x. Owns its zoom/pan state entirely — the caller resets it simply by giving
-/// this view a fresh identity (`.id(president.id)`) each time the president changes, rather than
-/// this view needing to observe that change itself.
+/// between 1x and 2.5x. The caller gives this view a fresh identity (`.id(president.id)`) each
+/// time the president changes, so `scale`/`offset` start from `AppModel`'s persisted zoom state
+/// for that specific president (seeded `onAppear`, since `@Environment` isn't available in
+/// `init`) rather than always resetting to 1x/no-offset.
 struct ZoomableHeaderImage: View {
     let president: President
+    @Environment(AppModel.self) private var appModel
 
     @State private var scale: CGFloat = 1
     @State private var lastScale: CGFloat = 1
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
     private let minScale: CGFloat = 1
-    private let maxScale: CGFloat = 4
+    private let maxScale: CGFloat = 30
 
     var body: some View {
-        if let name = president.largeImageName ?? president.thumbnailImageName, let image = imageIfAvailable(name) {
-            let scaledImage = image
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity)
-                // Scale/offset are applied *before* the clip below, so the clip's rounded-rect
-                // bounds stay fixed to the original frame while the pinched/panned content moves
-                // underneath it, instead of the corner radius itself zooming and drifting.
-                .scaleEffect(scale)
-                .offset(offset)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .onTapGesture(count: 2) { toggleZoom() }
+        Group {
+            if let name = president.largeImageName ?? president.thumbnailImageName, let image = imageIfAvailable(name) {
+                let scaledImage = image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+                    // Scale/offset are applied *before* the clip below, so the clip's rounded-rect
+                    // bounds stay fixed to the original frame while the pinched/panned content moves
+                    // underneath it, instead of the corner radius itself zooming and drifting.
+                    .scaleEffect(scale)
+                    .offset(offset)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .onTapGesture(count: 2) { toggleZoom() }
 
-            // Panning only makes sense once zoomed in; leaving the drag gesture off entirely at
-            // 1x (rather than just no-op'ing inside it) keeps the enclosing ScrollView's own
-            // vertical drag free to scroll the page normally when the image isn't zoomed.
-            if scale > minScale {
-                scaledImage.gesture(magnifyGesture.simultaneously(with: panGesture))
-            } else {
-                scaledImage.gesture(magnifyGesture)
-            }
-        } else {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(.secondary.opacity(0.2))
-                .frame(height: 220)
-                .overlay {
-                    Image(systemName: "person.crop.circle")
-                        .font(.system(size: 64))
-                        .foregroundStyle(.secondary)
+                // Panning only makes sense once zoomed in; leaving the drag gesture off entirely at
+                // 1x (rather than just no-op'ing inside it) keeps the enclosing ScrollView's own
+                // vertical drag free to scroll the page normally when the image isn't zoomed.
+                if scale > minScale {
+                    scaledImage.gesture(magnifyGesture.simultaneously(with: panGesture))
+                } else {
+                    scaledImage.gesture(magnifyGesture)
                 }
+            } else {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.secondary.opacity(0.2))
+                    .frame(height: 220)
+                    .overlay {
+                        Image(systemName: "person.crop.circle")
+                            .font(.system(size: 64))
+                            .foregroundStyle(.secondary)
+                    }
+            }
+        }
+        .onAppear {
+            guard let saved = appModel.imageZoomState(for: president) else { return }
+            scale = saved.scale
+            lastScale = saved.scale
+            offset = saved.offset
+            lastOffset = saved.offset
         }
     }
 
@@ -61,6 +72,7 @@ struct ZoomableHeaderImage: View {
                         resetZoom()
                     }
                 }
+                persistZoom()
             }
     }
 
@@ -74,6 +86,7 @@ struct ZoomableHeaderImage: View {
             }
             .onEnded { _ in
                 lastOffset = offset
+                persistZoom()
             }
     }
 
@@ -88,6 +101,7 @@ struct ZoomableHeaderImage: View {
                 lastScale = 2.5
             }
         }
+        persistZoom()
     }
 
     private func resetZoom() {
@@ -95,5 +109,16 @@ struct ZoomableHeaderImage: View {
         lastScale = minScale
         offset = .zero
         lastOffset = .zero
+    }
+
+    /// Writes the current scale/offset to `AppModel`, keyed to this specific president — or
+    /// clears its entry once back at the 1x/no-offset default, so a never-zoomed or reset
+    /// president doesn't linger as a redundant stored state.
+    private func persistZoom() {
+        if scale <= minScale && offset == .zero {
+            appModel.setImageZoomState(nil, for: president)
+        } else {
+            appModel.setImageZoomState(ImageZoomState(scale: scale, offset: offset), for: president)
+        }
     }
 }

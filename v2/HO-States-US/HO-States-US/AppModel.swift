@@ -37,6 +37,11 @@ final class AppModel {
     /// most recently added one.
     private(set) var reactions: [President.ID: [PresidentReaction]] = [:]
 
+    /// Per-president pinch-zoom/pan state for `ZoomableHeaderImage`, so returning to a president
+    /// shows the same zoom/pan as when it was last left. A president with no entry (never zoomed,
+    /// or reset back to 1x) renders at the default 1x/no-offset.
+    private(set) var imageZoomStates: [President.ID: ImageZoomState] = [:]
+
     var buildInfo:String {
         "[\(cycleCount)|\(Self.bundleVersion())]"
     }
@@ -68,6 +73,16 @@ final class AppModel {
         guard var list = reactions[president.id], !list.isEmpty else { return }
         list.removeLast()
         reactions[president.id] = list.isEmpty ? nil : list
+    }
+
+    func imageZoomState(for president: President) -> ImageZoomState? {
+        imageZoomStates[president.id]
+    }
+
+    /// Passing `nil` clears the stored state (used once the image is back at 1x/no-offset, so a
+    /// "reset" president doesn't linger as a redundant entry).
+    func setImageZoomState(_ state: ImageZoomState?, for president: President) {
+        imageZoomStates[president.id] = state
     }
 
     /// Returns the next president in the current shuffle order, wrapping back to its start once
@@ -129,6 +144,8 @@ final class AppModel {
         /// flattened-array encoding of non-string-keyed dictionaries. Order matters here (it's
         /// add-order, and "-" pops the end), unlike the earlier `Set`-based version.
         var reactions: [String: [PresidentReaction]]
+        /// String-keyed for the same reason as `reactions` above.
+        var imageZoomStates: [String: ImageZoomState]
     }
 
     private static func stateFileURL() -> URL {
@@ -154,6 +171,9 @@ final class AppModel {
         reactions = Dictionary(uniqueKeysWithValues: state.reactions.compactMap { key, value in
             Int(key).map { ($0, value) }
         })
+        imageZoomStates = Dictionary(uniqueKeysWithValues: state.imageZoomStates.compactMap { key, value in
+            Int(key).map { ($0, value) }
+        })
     }
 
     /// Writes the current resumable state to disk. See the note above `PersistedState` — call
@@ -163,7 +183,8 @@ final class AppModel {
             slideIndex: slideIndex,
             shuffledIndexes: shuffledIndexes,
             nextShuffleIndex: nextShuffleIndex,
-            reactions: Dictionary(uniqueKeysWithValues: reactions.map { (String($0.key), $0.value) })
+            reactions: Dictionary(uniqueKeysWithValues: reactions.map { (String($0.key), $0.value) }),
+            imageZoomStates: Dictionary(uniqueKeysWithValues: imageZoomStates.map { (String($0.key), $0.value) })
         )
         guard let data = try? JSONEncoder().encode(state) else { return }
         try? data.write(to: Self.stateFileURL(), options: .atomic)
