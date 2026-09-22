@@ -89,14 +89,21 @@ struct HomeView: View {
                 }
             }
             .navigationDestination(for: President.self) { president in
+                // Set before constructing the view below so its first render already reflects
+                // `president` — every push (list tap, Random Head, or slideshow start) funnels
+                // through here, keeping `appModel.slideIndex` as the single source of truth for
+                // which president is displayed. `let _ = ...` (rather than a bare statement) is
+                // required here: ViewBuilder tries to interpret a plain expression-statement as
+                // a View, but a `let` declaration is invisible to it.
+                let _ = { appModel.slideIndex = appModel.presidents.firstIndex(of: president) ?? 0 }()
                 PresidentDetailView(
                     presidents: appModel.presidents,
                     selected: president,
                     isRandomMode: pendingSlideshow ?? false,
                     startSlideshow: pendingSlideshow != nil
                 )
-                // Forces a fresh view (and fresh @State index) each time a new president is
-                // pushed at the same navigation stack position.
+                // Forces a fresh view each time a new president is pushed at the same
+                // navigation stack position.
                 .id(president.id)
             }
         }
@@ -117,7 +124,17 @@ struct HomeView: View {
 
     private func startSlideshow() {
         pendingSlideshow = isRandomMode
-        let president = isRandomMode ? appModel.nextRandomPresident() : appModel.presidents.first
+        // Random mode draws the next card from the shared shuffle (resuming at
+        // `nextShuffleIndex`); sequential mode resumes from wherever `slideIndex` was last left,
+        // falling back to the first president only if that index is somehow out of bounds.
+        let president: President?
+        if isRandomMode {
+            president = appModel.nextRandomPresident()
+        } else if appModel.presidents.indices.contains(appModel.slideIndex) {
+            president = appModel.presidents[appModel.slideIndex]
+        } else {
+            president = appModel.presidents.first
+        }
         guard let president else { return }
         var newPath = NavigationPath()
         newPath.append(president)

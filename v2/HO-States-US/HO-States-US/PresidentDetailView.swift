@@ -6,7 +6,6 @@ struct PresidentDetailView: View {
     @Environment(AppModel.self) private var appModel
     let presidents: [President]
     let isRandomMode: Bool
-    @State private var index: Int
     @State private var detailsVisible = false
 
     private let slideshowIntervalTenths = 50 // 5.0 seconds
@@ -17,6 +16,8 @@ struct PresidentDetailView: View {
 
     // Indices visited during this slideshow's random walk (in random mode only), so Previous can
     // step back through them and Next can replay forward instead of always drawing a fresh card.
+    // Unlike `appModel.slideIndex`, this doesn't need to persist beyond one slideshow session —
+    // resuming a random-mode slideshow instead continues from `appModel`'s `nextShuffleIndex`.
     @State private var randomHistory: [Int]
     @State private var randomPosition = 0
 
@@ -29,12 +30,14 @@ struct PresidentDetailView: View {
         self.presidents = presidents
         self.isRandomMode = isRandomMode
         let startIndex = presidents.firstIndex(of: selected) ?? 0
-        _index = State(initialValue: startIndex)
         _isSlideshowActive = State(initialValue: startSlideshow)
         _randomHistory = State(initialValue: [startIndex])
     }
 
-    private var president: President { presidents[index] }
+    // `appModel.slideIndex` is set by the caller (`HomeView`'s shared `navigationDestination`)
+    // before this view is constructed, so it already reflects `selected` by the time `body`
+    // first renders.
+    private var president: President { presidents[appModel.slideIndex] }
 
     // Fixed-width (leading-zero, fully monospaced) title so the number/countdown don't jiggle
     // side-to-side as their digits change every tenth of a second.
@@ -81,7 +84,7 @@ struct PresidentDetailView: View {
             }
             .padding()
         }
-        .task(id: index) {
+        .task(id: appModel.slideIndex) {
             appModel.markViewed(president, resetIfComplete: isSlideshowActive)
             detailsVisible = false
             try? await Task.sleep(nanoseconds: delaySecs * 1_000_000_000)
@@ -170,14 +173,14 @@ struct PresidentDetailView: View {
         if isSlideshowActive {
             return isRandomMode && randomPosition == 0
         }
-        return index == 0
+        return appModel.slideIndex == 0
     }
 
     private var isNextDisabled: Bool {
         if isSlideshowActive {
             return false
         }
-        return index == presidents.count - 1
+        return appModel.slideIndex == presidents.count - 1
     }
 
     private func goToPrevious() {
@@ -185,14 +188,14 @@ struct PresidentDetailView: View {
             if isRandomMode {
                 guard randomPosition > 0 else { return }
                 randomPosition -= 1
-                index = randomHistory[randomPosition]
+                appModel.slideIndex = randomHistory[randomPosition]
             } else {
-                index = index == 0 ? presidents.count - 1 : index - 1
+                appModel.slideIndex = appModel.slideIndex == 0 ? presidents.count - 1 : appModel.slideIndex - 1
             }
             restartSlideshowCountdown()
         } else {
-            guard index > 0 else { return }
-            index -= 1
+            guard appModel.slideIndex > 0 else { return }
+            appModel.slideIndex -= 1
         }
     }
 
@@ -201,15 +204,15 @@ struct PresidentDetailView: View {
             advanceSlideshow()
             restartSlideshowCountdown()
         } else {
-            guard index < presidents.count - 1 else { return }
-            index += 1
+            guard appModel.slideIndex < presidents.count - 1 else { return }
+            appModel.slideIndex += 1
         }
     }
 
     private func goToRandom() {
         guard let next = appModel.nextRandomPresident(),
               let newIndex = presidents.firstIndex(of: next) else { return }
-        index = newIndex
+        appModel.slideIndex = newIndex
     }
 
     /// Advances one slideshow step forward: sequentially (wrapping past the last president) when
@@ -219,15 +222,15 @@ struct PresidentDetailView: View {
         if isRandomMode {
             if randomPosition < randomHistory.count - 1 {
                 randomPosition += 1
-                index = randomHistory[randomPosition]
+                appModel.slideIndex = randomHistory[randomPosition]
             } else if let next = appModel.nextRandomPresident(),
                       let newIndex = presidents.firstIndex(of: next) {
                 randomHistory.append(newIndex)
                 randomPosition = randomHistory.count - 1
-                index = newIndex
+                appModel.slideIndex = newIndex
             }
         } else {
-            index = index == presidents.count - 1 ? 0 : index + 1
+            appModel.slideIndex = appModel.slideIndex == presidents.count - 1 ? 0 : appModel.slideIndex + 1
         }
     }
 

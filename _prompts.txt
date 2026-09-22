@@ -215,4 +215,19 @@ v05.46
 
 in react web app v05 bring recent updates from SwiftUI v2
 
+v02.47
+
+in v2 rework shuffle logic
+rename nextDrawPosition nextShuffleIndex
+when past end of shuffledIndexes wrap around
+don't automatically reshuffle,
+only reshuffle when appModel.resetViewed
 append this chat to Log.md with date and time stamp
+when slide show starts in random mode,
+resume at nextShuffleIndex
+in PresidentDetailView move index
+into AppModel and rename slideIndex
+so that it persists and
+when slide show resumes in non-random mode
+it picks up from where it left off
+ 

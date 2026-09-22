@@ -1040,3 +1040,77 @@ instead of a shared context re-pushing a fresh screen each time.
   machine pins to older versions of those.
 - `v4` still has neither this session's nor the prior session's slideshow changes — only `v2` and
   `v05` are in sync as of this entry.
+
+# --
+
+2026-09-22 04:17:07 (v2: rework shuffle logic + persist slideIndex in AppModel)
+
+## Request
+
+In `v2` only (not ported to `v05` this session): rework `AppModel`'s shuffle logic — rename
+`nextDrawPosition` to `nextShuffleIndex`, wrap around instead of reshuffling once
+`shuffledIndexes` is exhausted, and only ever reshuffle from `appModel.resetViewed()`. A
+random-mode slideshow that starts should resume at `nextShuffleIndex` (continue the existing
+walk) rather than starting fresh. Move `PresidentDetailView`'s local `index` into `AppModel`,
+renamed `slideIndex`, so it persists — specifically so a non-random (sequential) slideshow that's
+stopped and restarted picks up from where it left off instead of always restarting at president
+#1.
+
+## What changed
+
+- `AppModel.swift`: `nextDrawPosition` → `nextShuffleIndex`. `nextRandomPresident()` no longer
+  reshuffles when exhausted — it just wraps `nextShuffleIndex` back to 0 and keeps walking the
+  same permutation. All reshuffling was consolidated into `resetViewed()` (now shuffles
+  `shuffledIndexes`, resets `nextShuffleIndex`, and bumps `cycleCount` — previously `cycleCount`
+  only incremented on the old auto-reshuffle-on-exhaustion path). `markViewed(resetIfComplete:)`
+  now calls `resetViewed()` instead of duplicating `viewedPresidentIDs.removeAll()`, so a
+  slideshow completing a full lap also reshuffles, same as pressing "Reset Visit Count" now does.
+  Added `var slideIndex = 0` — an index into `presidents`, tracking whichever president
+  `PresidentDetailView` is currently showing.
+- `PresidentDetailView.swift`: removed the local `@State private var index`; every former use
+  (`president`, toolbar disabled-state, Previous/Next/Random, `advanceSlideshow()`,
+  `.task(id:)`) now reads/writes `appModel.slideIndex` instead. `randomHistory`/`randomPosition`
+  stay local `@State` (per-slideshow-session only — resuming a random-mode slideshow relies on
+  `nextShuffleIndex` in `AppModel`, not on replaying the exact prior walk).
+- `HomeView.swift`: the shared `navigationDestination(for: President.self)` closure (the single
+  choke point for every fresh push — list tap, "Random Head", and slideshow start) now sets
+  `appModel.slideIndex = appModel.presidents.firstIndex(of: president) ?? 0` *before*
+  constructing `PresidentDetailView`, so its first render already shows the right president
+  (avoids `@Environment` not being readable inside `PresidentDetailView`'s own `init`). Note this
+  needed the `let _ = { ... }()` idiom, not a bare assignment statement — `ViewBuilder` tries to
+  make every plain expression-statement conform to `View`, but a `let` declaration is invisible
+  to it (caught by an actual build failure, see below). `startSlideshow()`'s sequential branch now
+  reads `appModel.slideIndex` (bounds-checked, falling back to `presidents.first`) instead of
+  always starting at `presidents.first`.
+
+## Design decision (not explicitly specified in the request)
+
+`slideIndex` is a single, unified pointer — every fresh detail push (including plain list taps
+and the standalone "Random Head" button, not just slideshows) updates it. So a sequential
+slideshow resumes from wherever the president was *last displayed at all*, not only from where a
+prior slideshow specifically left off. This follows the request's literal instruction ("move
+index into AppModel") rather than introducing a second, slideshow-only index. Flagged here in
+case the user wants sequential resume scoped more narrowly.
+
+## Verification
+
+- `xcodebuild -scheme HO-States-US -destination 'generic/platform=iOS Simulator' build` — full
+  Xcode toolchain was available this session (unlike the prior "Random Mode" session, which had
+  no Xcode and could only review code by hand). First attempt caught a real compiler error in
+  `HomeView.swift` (`type '()' cannot conform to 'View'` from the bare `appModel.slideIndex = ...`
+  assignment inside the `navigationDestination` closure); fixed with the `let _ = { ... }()`
+  wrapper above, then **build succeeded**.
+- Installed and launched the built app on the "iPhone Air" (iOS 26.5) simulator; Home screen
+  screenshot confirmed the app launches cleanly post-refactor (Random Mode toggle off, "47 left to
+  see"). Could not script actual taps through the flow — `osascript`/System Events has no
+  assistive-access permission in this environment — so the resume/wrap/reshuffle behavior itself
+  was verified by manual trace through the code paths, not by driving the UI.
+
+## Follow-up notes
+
+- Not ported to `v05` — the request scoped this to `v2` only. `v05`'s slideshow position still
+  resets on every stop/restart (its `nav` state is local to `PresidentDetailScreen`); worth a
+  future session if the same "picks up where it left off" behavior is wanted there.
+- Since UI automation wasn't possible this session, an actual on-device/Simulator walkthrough
+  (start a sequential slideshow, let it advance a few presidents, stop it, restart it, confirm it
+  resumes rather than restarting at #1) is still worth doing by hand before trusting this fully.
