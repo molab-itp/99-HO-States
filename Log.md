@@ -1296,3 +1296,21 @@ gesture behavior — no assistive-access permission for scripted taps/pinches in
 so this needs a manual check in Simulator/device before fully trusting it.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-09-22 09:16:54 (v2: split PresidentDetailView.swift into PresidentDetail/ components)
+
+Split the 410-line `PresidentDetailView.swift` into a new `PresidentDetail/` folder: trimmed
+`PresidentDetailView.swift` (225 lines, state + nav/slideshow logic + composition),
+`ZoomableHeaderImage.swift` (now fully self-contained — gets `.id(president.id)` from the caller
+instead of needing an `onChange` to reset its zoom), `ViewedProgressBar.swift`,
+`PresidentSummaryView.swift`, `PresidentDetailToolbar.swift` (custom `ToolbarContent` struct), and
+`PresidentDetailTitleView.swift`. No `project.pbxproj` edits needed — this target uses Xcode's
+file-system-synchronized group, so the new folder was picked up automatically.
+
+`xcodebuild` succeeded; installed and launched on the simulator, Home renders correctly. Same
+caveat as recent entries: no scripted taps in this environment, so the detail screen's actual
+behavior post-split wasn't exercised interactively.
+
+**Cost**: ~15 minutes.

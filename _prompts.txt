@@ -275,6 +275,13 @@ need to double tap to get pin active
 slight jump when panning
 possible conflict with outter scrolling viewing
 
+v02.56
+
+PresidentDetailView is getting too long.
+Create a folder PresidentDetail
+and in it re-factor PresidentDetailView
+into component views
+
 # --
 append this chat to Log.md with date and time stamp
 with approximate time cost

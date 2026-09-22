@@ -1,0 +1,99 @@
+import SwiftUI
+
+/// The president's portrait, with pinch-to-zoom, pan (once zoomed), and double-tap to toggle
+/// between 1x and 2.5x. Owns its zoom/pan state entirely — the caller resets it simply by giving
+/// this view a fresh identity (`.id(president.id)`) each time the president changes, rather than
+/// this view needing to observe that change itself.
+struct ZoomableHeaderImage: View {
+    let president: President
+
+    @State private var scale: CGFloat = 1
+    @State private var lastScale: CGFloat = 1
+    @State private var offset: CGSize = .zero
+    @State private var lastOffset: CGSize = .zero
+    private let minScale: CGFloat = 1
+    private let maxScale: CGFloat = 4
+
+    var body: some View {
+        if let name = president.largeImageName ?? president.thumbnailImageName, let image = imageIfAvailable(name) {
+            let scaledImage = image
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
+                // Scale/offset are applied *before* the clip below, so the clip's rounded-rect
+                // bounds stay fixed to the original frame while the pinched/panned content moves
+                // underneath it, instead of the corner radius itself zooming and drifting.
+                .scaleEffect(scale)
+                .offset(offset)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .onTapGesture(count: 2) { toggleZoom() }
+
+            // Panning only makes sense once zoomed in; leaving the drag gesture off entirely at
+            // 1x (rather than just no-op'ing inside it) keeps the enclosing ScrollView's own
+            // vertical drag free to scroll the page normally when the image isn't zoomed.
+            if scale > minScale {
+                scaledImage.gesture(magnifyGesture.simultaneously(with: panGesture))
+            } else {
+                scaledImage.gesture(magnifyGesture)
+            }
+        } else {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.secondary.opacity(0.2))
+                .frame(height: 220)
+                .overlay {
+                    Image(systemName: "person.crop.circle")
+                        .font(.system(size: 64))
+                        .foregroundStyle(.secondary)
+                }
+        }
+    }
+
+    private var magnifyGesture: some Gesture {
+        MagnifyGesture()
+            .onChanged { value in
+                let newScale = lastScale * value.magnification
+                scale = min(max(newScale, minScale), maxScale)
+            }
+            .onEnded { _ in
+                lastScale = scale
+                if scale <= minScale {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        resetZoom()
+                    }
+                }
+            }
+    }
+
+    private var panGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                offset = CGSize(
+                    width: lastOffset.width + value.translation.width,
+                    height: lastOffset.height + value.translation.height
+                )
+            }
+            .onEnded { _ in
+                lastOffset = offset
+            }
+    }
+
+    /// Double-tap toggles between 1x (reset) and a fixed 2.5x zoom, the common photo-viewer
+    /// shorthand for "zoom in on roughly the middle" without requiring a pinch gesture.
+    private func toggleZoom() {
+        withAnimation(.easeOut(duration: 0.2)) {
+            if scale > minScale {
+                resetZoom()
+            } else {
+                scale = 2.5
+                lastScale = 2.5
+            }
+        }
+    }
+
+    private func resetZoom() {
+        scale = minScale
+        lastScale = minScale
+        offset = .zero
+        lastOffset = .zero
+    }
+}
