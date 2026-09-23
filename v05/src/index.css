@@ -521,7 +521,8 @@ input {
 
 .reaction-icon {
   display: flex;
-  color: var(--tint);
+  font-size: 17px;
+  line-height: 1;
 }
 
 .reaction-btn {
@@ -554,8 +555,11 @@ input {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
   border: none;
   border-radius: 50%;
   background: var(--fill-pressed);
@@ -565,6 +569,103 @@ input {
 
 .reaction-picker-option:active {
   background: var(--tint-fill-pressed);
+}
+
+/* Port of EmojiPickerSheet.swift: a bottom sheet with an inline title bar, an always-visible
+   search field, and an adaptive grid of 44pt emoji cells. */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  height: 85vh;
+  height: 85dvh;
+  background: var(--grouped-bg);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  overflow: hidden;
+}
+
+.sheet-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.sheet-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--label);
+}
+
+.sheet-cancel {
+  position: absolute;
+  left: 16px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--tint);
+  font: inherit;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.sheet-search {
+  margin: 0 16px 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--thumb-bg);
+  color: var(--label);
+  font: inherit;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 4px;
+  padding: 0 16px 16px;
+  overflow-y: auto;
+  align-content: start;
+}
+
+.emoji-grid-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.emoji-grid-cell:active {
+  background: var(--fill-pressed);
+}
+
+.emoji-grid-empty {
+  grid-column: 1 / -1;
+  margin: 48px 0;
+  text-align: center;
+  color: var(--secondary-label);
 }
 
 .detail-text .subtitle {

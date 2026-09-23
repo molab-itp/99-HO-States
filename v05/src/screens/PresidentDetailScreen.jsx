@@ -186,7 +186,7 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
           </h1>
           <ReactionControl
             reactions={reactionsFor(president)}
-            onAdd={(reactionId) => addReaction(reactionId, president)}
+            onAdd={(emoji) => addReaction(emoji, president)}
             onRemoveLast={() => removeLastReaction(president)}
           />
           <p className="subtitle">

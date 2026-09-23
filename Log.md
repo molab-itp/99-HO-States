@@ -1500,3 +1500,14 @@ still load (heart/thumbs up/thumbs down/question → ❤️ 👍 👎 ❓). Buil
 hasn't been run.
 
 **Cost**: ~5 minutes.
+
+# --
+
+2026-09-23 10:53 (v05.66: port v2 emoji reactions to React)
+
+v05 now matches v02.65: the reaction strip shows 🫏 🐘 ☀️ 🌍 🌗 ★, and ★ opens a new searchable
+`EmojiPickerSheet.jsx` (names come from the `unicode-emoji-json` package, loaded only when the
+sheet opens). Old saved reactions load as ❤️ 👍 👎 ❓. Version is now 0.1.7. Tested in headless
+Chromium (add, search, remove, old saved reactions); the smoke test passes.
+
+**Cost**: ~15 minutes.

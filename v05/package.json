@@ -1,7 +1,7 @@
 {
   "name": "ho-states-us-web",
   "private": true,
-  "version": "0.1.6",
+  "version": "0.1.7",
   "type": "module",
   "description": "React (web, React Native-friendly) port of the v2 HO-States-US SwiftUI app.",
   "scripts": {
@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "unicode-emoji-json": "^0.9.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",

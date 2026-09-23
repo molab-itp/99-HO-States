@@ -1,25 +1,32 @@
-import { REACTIONS } from '../data/presidentReaction.js';
-import Icon from './Icon.jsx';
+import { PRESETS } from '../data/presidentReaction.js';
 
 /**
  * Port of ReactionPickerStrip.swift: the horizontal strip of reaction choices that pops up from
- * the + button below a president's name. Always shows all four reactions — repeats are allowed,
- * so there's nothing to filter out based on what's already picked.
+ * the + button below a president's name — the quick-pick emoji in `PRESETS`, then a trailing ★
+ * that asks for the full emoji sheet (`onMore`) instead of picking anything itself. Always shows
+ * all presets — repeats are allowed, so there's nothing to filter out.
  */
-export default function ReactionPickerStrip({ onPick }) {
+export default function ReactionPickerStrip({ onPick, onMore }) {
   return (
     <div className="reaction-picker-strip">
-      {REACTIONS.map((reaction) => (
+      {PRESETS.map((emoji) => (
         <button
-          key={reaction.id}
+          key={emoji}
           type="button"
           className="reaction-picker-option"
-          aria-label={reaction.label}
-          onClick={() => onPick(reaction.id)}
+          onClick={() => onPick(emoji)}
         >
-          <Icon name={reaction.icon} size={16} />
+          {emoji}
         </button>
       ))}
+      <button
+        type="button"
+        className="reaction-picker-option reaction-picker-more"
+        aria-label="More Emoji"
+        onClick={onMore}
+      >
+        ★
+      </button>
     </div>
   );
 }

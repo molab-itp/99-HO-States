@@ -1,28 +1,31 @@
 import { useState } from 'react';
-import { reactionInfo } from '../data/presidentReaction.js';
 import ReactionPickerStrip from './ReactionPickerStrip.jsx';
+import EmojiPickerSheet from './EmojiPickerSheet.jsx';
 import Icon from './Icon.jsx';
 
 /**
  * Port of PresidentSummaryView.swift's `reactionControl`: the current reactions for a president
- * (in add-order, repeats allowed), a + button that pops up `ReactionPickerStrip`, and a - button
- * that always removes whichever reaction was added most recently.
+ * (emoji, in add-order, repeats allowed), a + button that pops up `ReactionPickerStrip` (whose
+ * ★ opens `EmojiPickerSheet`), and a - button that always removes whichever reaction was added
+ * most recently.
  */
 export default function ReactionControl({ reactions, onAdd, onRemoveLast }) {
   const [showingAddPicker, setShowingAddPicker] = useState(false);
+  const [showingEmojiSheet, setShowingEmojiSheet] = useState(false);
+
+  const addReaction = (emoji) => {
+    onAdd(emoji);
+    setShowingAddPicker(false);
+  };
 
   return (
     <div className="reaction-control">
       <div className="reaction-row">
-        {reactions.map((id, i) => {
-          const info = reactionInfo(id);
-          if (!info) return null;
-          return (
-            <span key={i} className="reaction-icon" aria-label={info.label}>
-              <Icon name={info.icon} size={17} />
-            </span>
-          );
-        })}
+        {reactions.map((emoji, i) => (
+          <span key={i} className="reaction-icon">
+            {emoji}
+          </span>
+        ))}
 
         <button
           type="button"
@@ -45,12 +48,11 @@ export default function ReactionControl({ reactions, onAdd, onRemoveLast }) {
       </div>
 
       {showingAddPicker && (
-        <ReactionPickerStrip
-          onPick={(id) => {
-            onAdd(id);
-            setShowingAddPicker(false);
-          }}
-        />
+        <ReactionPickerStrip onPick={addReaction} onMore={() => setShowingEmojiSheet(true)} />
+      )}
+
+      {showingEmojiSheet && (
+        <EmojiPickerSheet onPick={addReaction} onClose={() => setShowingEmojiSheet(false)} />
       )}
     </div>
   );

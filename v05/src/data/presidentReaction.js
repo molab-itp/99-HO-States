@@ -1,15 +1,27 @@
 // Port of PresidentReaction.swift: a lightweight feedback reaction a user can attach to a
-// president, picked from a small fixed set (mirrors iMessage-style tapbacks) rather than free
-// text. `AppModel` persists these keyed by president order, same as the Swift version.
-export const REACTIONS = [
-  { id: 'heart', icon: 'heart-fill', label: 'Heart' },
-  { id: 'thumbsUp', icon: 'hand-thumbs-up-fill', label: 'Thumbs up' },
-  { id: 'thumbsDown', icon: 'hand-thumbs-down-fill', label: 'Thumbs down' },
-  { id: 'question', icon: 'question-circle-fill', label: 'Question mark' },
-];
+// president — a single emoji, either one of the quick-pick `PRESETS` or any emoji chosen from
+// `EmojiPickerSheet`. `AppModel` persists these (as bare emoji strings) keyed by president order,
+// same as the Swift version.
 
-const REACTIONS_BY_ID = Object.fromEntries(REACTIONS.map((r) => [r.id, r]));
+// The quick-pick choices shown in `ReactionPickerStrip`, ahead of its ★ "more" button.
+export const PRESETS = ['🫏', '🐘', '☀️', '🌍', '🌗'];
 
-export function reactionInfo(id) {
-  return REACTIONS_BY_ID[id];
+// Values written by the earlier fixed-set, icon-based version, mapped to equivalent emoji so
+// reactions saved before the switch still show up as something sensible.
+const LEGACY_VALUES = {
+  heart: '❤️',
+  thumbsUp: '👍',
+  thumbsDown: '👎',
+  question: '❓',
+};
+
+export function normalizeReaction(value) {
+  return LEGACY_VALUES[value] ?? value;
+}
+
+// Applies `normalizeReaction` across a persisted `{ [order]: [reaction, ...] }` map.
+export function normalizeReactions(reactions) {
+  return Object.fromEntries(
+    Object.entries(reactions ?? {}).map(([order, list]) => [order, list.map(normalizeReaction)])
+  );
 }

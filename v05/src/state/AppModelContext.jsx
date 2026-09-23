@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import presidents from '../data/presidents.js';
 import { version as appVersion } from '../../package.json';
 import { loadPersistedState, savePersistedState } from '../data/persistedState.js';
+import { normalizeReactions } from '../data/presidentReaction.js';
 
 const AppModelContext = createContext(null);
 
@@ -57,7 +58,7 @@ export function AppModelProvider({ children }) {
 
   // User-picked feedback and per-president pinch-zoom/pan state, keyed by `president.order`.
   // Ported from `AppModel.swift`'s `reactions`/`imageZoomStates`.
-  const [reactions, setReactions] = useState(() => persisted?.reactions ?? {});
+  const [reactions, setReactions] = useState(() => normalizeReactions(persisted?.reactions));
   const [imageZoomStates, setImageZoomStates] = useState(() => persisted?.imageZoomStates ?? {});
 
   const nextRandomPresident = useCallback(() => {
@@ -100,10 +101,10 @@ export function AppModelProvider({ children }) {
 
   const reactionsFor = useCallback((president) => reactions[president.order] ?? [], [reactions]);
 
-  const addReaction = useCallback((reactionId, president) => {
+  const addReaction = useCallback((emoji, president) => {
     setReactions((prev) => ({
       ...prev,
-      [president.order]: [...(prev[president.order] ?? []), reactionId],
+      [president.order]: [...(prev[president.order] ?? []), emoji],
     }));
   }, []);
 
