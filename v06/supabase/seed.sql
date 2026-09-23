@@ -1,0 +1,2 @@
+-- Local-only seed data, loaded by `supabase db reset`. Profiles are created by the auth trigger on
+-- sign-in, so there is nothing to seed yet.

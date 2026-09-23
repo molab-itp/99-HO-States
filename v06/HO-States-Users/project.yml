@@ -1,0 +1,57 @@
+# Source of truth for HO-States-Users.xcodeproj. Regenerate after adding/removing files:
+#   xcodegen generate
+name: HO-States-Users
+options:
+  bundleIdPrefix: com.jht1900
+  deploymentTarget:
+    iOS: "26.0"
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: 2.55.0
+targets:
+  HO-States-Users:
+    type: application
+    platform: iOS
+    sources:
+      - path: HOStatesUsers
+        excludes:
+          - "Supabase*.plist"
+      # Listed so they're editable in Xcode's navigator, but not bundled here. The gitignored
+      # Supabase.plist may not exist, so the "Copy Supabase.plist if present" script bundles it.
+      - path: HOStatesUsers/Supabase.plist
+        optional: true
+        buildPhase: none
+      - path: HOStatesUsers/Supabase.example.plist
+        buildPhase: none
+    # Merged with the generated Info.plist keys; registers the magic-link callback scheme.
+    info:
+      path: HOStatesUsers/Info.plist
+      properties:
+        CFBundleURLTypes:
+          - CFBundleURLName: com.jht1900.HO-States-Users.auth
+            CFBundleURLSchemes: [hostates]
+    dependencies:
+      - package: Supabase
+    postCompileScripts:
+      # Supabase.plist is gitignored (copy Supabase.example.plist and fill it in), so it's copied
+      # in by script only when present; a fresh clone still builds and shows setup instructions.
+      - name: Copy Supabase.plist if present
+        basedOnDependencyAnalysis: false
+        script: |
+          SRC="${SRCROOT}/HOStatesUsers/Supabase.plist"
+          DST="${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Supabase.plist"
+          if [ -f "$SRC" ]; then cp "$SRC" "$DST"; else rm -f "$DST"; fi
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.jht1900.HO-States-Users
+        DEVELOPMENT_TEAM: 3RCW2SSL8G
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: YES
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+        INFOPLIST_KEY_CFBundleDisplayName: HO Users
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: "0.6"

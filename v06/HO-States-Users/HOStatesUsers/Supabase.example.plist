@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Dashboard > Project Settings > API. Local stack: http://127.0.0.1:54321 -->
+	<key>SUPABASE_URL</key>
+	<string>https://YOUR-PROJECT-REF.supabase.co</string>
+	<!-- The publishable (or legacy anon) key. Safe to ship in the app; RLS is what protects data. -->
+	<key>SUPABASE_PUBLISHABLE_KEY</key>
+	<string>sb_publishable_...</string>
+</dict>
+</plist>

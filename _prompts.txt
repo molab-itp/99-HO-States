@@ -329,6 +329,29 @@ v05.63
 
 up v05 to v02, use localStorage to save
 
+v06.64
+
+in new folder v06 Create SwiftUI ios app using supabase as backend that supports
+google signon and displays a list of signed on users
+I eventually want to apply to v2 and v05,
+so setup recommended database architecture for rapid
+schema development without mirgration headaches
+
+npx supabase login
+npx supabase link --project-ref jcoolgnracpgjncksopx
+npx supabase db push
+
+You're right: new free-plan projects can't edit email templates while they use 
+Supabase's built-in email sender.
+
+https://supabase.com/dashboard/project/jcoolgnracpgjncksopx/settings/api-keys
+sb_publishable_Mt9sK0-7VF8i7gNgK-gvsQ_isioWOUP
+
+>> fails to send signon email
+>> email rate exceeded
+>> sign in as guest fails with message:
+    THe data couldn't be read because it is missing
+    
 # --
 append this chat to Log.md with date and time stamp
 with approximate time cost

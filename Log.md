@@ -1442,3 +1442,49 @@ navigating back to the same president, reading the expected JSON back out of loc
 `package.json` to 0.1.6.
 
 **Cost**: ~40 minutes.
+
+# --
+
+2026-09-23 03:29:29 (v06: new SwiftUI app, Supabase backend, Google sign-in, signed-on users list)
+
+New `v06/` with two parts. `supabase/` is set up for rapid schema work: declarative
+`schemas/*.sql` are the source of truth, and `supabase db diff` generates the migrations. There
+is a `profiles` table, filled in by a trigger on `auth.users` at Google sign-in, plus a
+`touch_last_seen()` RPC, and a schemaless `app_state` jsonb table keyed by
+(user, app, key) so v2's `AppState.json` and v05's localStorage state can sync later with no
+migrations. RLS is on for every table. `HO-States-Users/` is an xcodegen project using
+supabase-swift 2.55: Google sign-in via `signInWithOAuth` in an ASWebAuthenticationSession, so
+one Google Web client serves both iOS and web; a users list with avatar, "You" badge, last active
+time, pull-to-refresh and sign out; a gitignored `Supabase.plist` for config, with a setup screen
+when it's missing; and `AppStateStore.swift`, ready to copy into v2. The README covers setup and
+the architecture.
+
+Verified: ran the SQL in PGlite with a stubbed `auth` schema (profile sync and RLS isolation
+behaved correctly). The app builds for the iOS 26.0 simulator; screenshots showed the setup
+screen and the sign-in screen. Real Google sign-in is untested, since it needs a Supabase project
+and Google OAuth client. No Docker is installed, so the first migration was hand-assembled from
+`schemas/`.
+
+**Cost**: ~25 minutes.
+
+# --
+
+2026-09-23 04:38:18 (v06: magic-link + guest sign-in replaces Google, Supabase.plist fixes)
+
+Replaced Google OAuth with sign-in that uses only Supabase. A first try with 6-digit email codes was
+dropped: free-plan projects can't edit email templates on Supabase's built-in email sender. v06 now
+uses a magic link with the default template, returning to the app at `hostates://auth-callback`
+(PKCE, handled in `.onOpenURL`), plus **Continue as Guest** (`signInAnonymously()`). Added
+migration `20260923120000_profiles_is_anonymous.sql` so guests show as "Guest XXXX", and the
+profile trigger now runs when a guest adds an email. Tested in PGlite and in the simulator against
+a mock auth/REST server: link sent, callback exchanged for a session, list loaded, guest signed in.
+
+Supabase.plist "not loading": the file was copied into the app fine, but the key was still the
+placeholder. The setup screen now says exactly what's wrong, both plists appear in Xcode's file
+list, a stray staged duplicate plist was unstaged, and the gitignore now blocks any
+`Supabase.plist` in that folder. The key is at Dashboard → Project Settings → API Keys.
+
+Note: the built-in email sender only delivers to org team members; others use guest until a custom
+SMTP provider is set up.
+
+**Cost**: ~35 minutes.
