@@ -1,7 +1,7 @@
-// Port of ViewedProgressBar in PresidentDetailView.swift: one segment per president, at its own
-// position (by order), filled in once that president has been viewed, cycling red/green/yellow
-// so progress reads as a strip of color rather than a single flat bar.
-const COLORS = ['#d0342c', '#2e7d32', '#f2c811'];
+// Port of ViewedProgressBar.swift: one segment per president, at its own position (by order),
+// filled in once that president has been viewed, cycling green/red/yellow/black so progress
+// reads as a strip of color rather than a single flat bar.
+const COLORS = ['#2e7d32', '#d0342c', '#f2c811', '#000000', '#d0342c', '#f2c811'];
 
 export default function ViewedProgressBar({ total, viewedIDs }) {
   const segments = Array.from({ length: Math.max(total, 1) }, (_, i) => i);

@@ -453,12 +453,22 @@ input {
   transition: background 0.3s ease;
 }
 
+/* Clips the pinched/panned image to the same rounded-rect bounds the unzoomed frame has, same
+   role as ZoomableHeaderImage.swift's `.clipShape` applied after `.scaleEffect`/`.offset`. */
+.zoomable-image {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
 .detail-image {
   width: 100%;
   border-radius: var(--radius-md);
   display: block;
   background: var(--thumb-bg);
-  box-shadow: var(--shadow-card);
+  transform-origin: center;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .detail-image-placeholder {
@@ -496,6 +506,65 @@ input {
   font-size: 17px;
   font-weight: 400;
   letter-spacing: normal;
+}
+
+/* Port of PresidentSummaryView.swift's `reactionControl`. */
+.reaction-control {
+  margin: 0 0 16px;
+}
+
+.reaction-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reaction-icon {
+  display: flex;
+  color: var(--tint);
+}
+
+.reaction-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--label);
+  cursor: pointer;
+}
+
+.reaction-btn:disabled {
+  color: var(--tertiary-label);
+  cursor: default;
+}
+
+.reaction-picker-strip {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 6px;
+  width: fit-content;
+  background: var(--fill-pressed);
+  border-radius: var(--radius-sm);
+}
+
+.reaction-picker-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: var(--fill-pressed);
+  color: var(--tint);
+  cursor: pointer;
+}
+
+.reaction-picker-option:active {
+  background: var(--tint-fill-pressed);
 }
 
 .detail-text .subtitle {

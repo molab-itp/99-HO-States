@@ -4,6 +4,8 @@ import { wikipediaArticleURL } from '../data/wikipedia.js';
 import { assetUrl } from '../data/assetUrl.js';
 import NavBar from '../components/NavBar.jsx';
 import ViewedProgressBar from '../components/ViewedProgressBar.jsx';
+import ZoomableHeaderImage from '../components/ZoomableHeaderImage.jsx';
+import ReactionControl from '../components/ReactionControl.jsx';
 import Icon from '../components/Icon.jsx';
 
 const DETAIL_REVEAL_DELAY_MS = 2000; // matches Swift's `delaySecs`
@@ -17,7 +19,19 @@ const SLIDESHOW_INTERVAL_TENTHS = 50; // 5.0 seconds, matches PresidentDetailVie
  * every tick, so Previous/Next/pause can all act on the same instance's state.
  */
 export default function PresidentDetailScreen({ selected, startSlideshow = false, isRandomMode = false }) {
-  const { presidents, viewedIDs, buildInfo, markViewed, nextRandomPresident, setSlideIndex } = useAppModel();
+  const {
+    presidents,
+    viewedIDs,
+    buildInfo,
+    markViewed,
+    nextRandomPresident,
+    setSlideIndex,
+    reactionsFor,
+    addReaction,
+    removeLastReaction,
+    imageZoomStateFor,
+    setImageZoomStateFor,
+  } = useAppModel();
 
   const startIndex = (() => {
     const found = presidents.findIndex((p) => p.order === selected.order);
@@ -158,18 +172,23 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
       <div className="detail">
         <ViewedProgressBar total={presidents.length} viewedIDs={viewedIDs} />
 
-        {imageSrc ? (
-          <img className="detail-image" src={assetUrl(imageSrc)} alt={president.name} />
-        ) : (
-          <div className="detail-image-placeholder">
-            <Icon name="person-circle" size={64} />
-          </div>
-        )}
+        <ZoomableHeaderImage
+          key={president.order}
+          imageSrc={imageSrc ? assetUrl(imageSrc) : null}
+          alt={president.name}
+          initialZoom={imageZoomStateFor(president)}
+          onZoomChange={(state) => setImageZoomStateFor(state, president)}
+        />
 
         <div className={detailsVisible ? 'detail-text visible' : 'detail-text'}>
           <h1 className="name-mono">
             #{president.order} {president.name}
           </h1>
+          <ReactionControl
+            reactions={reactionsFor(president)}
+            onAdd={(reactionId) => addReaction(reactionId, president)}
+            onRemoveLast={() => removeLastReaction(president)}
+          />
           <p className="subtitle">
             {president.term} · {president.party}
           </p>

@@ -1412,3 +1412,33 @@ was correct.
 
 **Cost**: ~30 minutes (mostly chasing the idb pinch-completion quirk down to confirm it wasn't an
 app bug).
+
+# --
+
+2026-09-23 01:46:32 (v05: caught up to v2 — reactions, header zoom/pan, localStorage persistence)
+
+Ported everything v2 had gained since the last v05 sync: `PresidentReaction`
+(`presidentReaction.js`) + `ReactionPickerStrip`/`ReactionControl` components (+ / - buttons,
+add-strip, ordered repeats, last-added removal); `ZoomableHeaderImage` component implementing
+pinch-zoom, pan-once-zoomed, and double-tap-to-2.5x via pointer events (`touch-action` switches
+between `pan-y`/`none` so the page still scrolls normally at 1x, same as the Swift version's
+gesture-only-when-zoomed rule); `ViewedProgressBar`'s color cycle updated to match v2's
+green/red/yellow/black. Added Bootstrap Icons for heart/thumbs-up/thumbs-down/question-circle/
+plus-circle/minus-circle as SF Symbols stand-ins.
+
+Persistence: new `persistedState.js` (localStorage, key `ho-states-us.appState.v1`) as the web
+analog of v2's `AppState.json` — same fields (slideIndex, shuffle state, reactions,
+imageZoomStates), same "write sparingly" intent (`AppModelContext` now saves on
+`visibilitychange`→hidden and `pagehide`, not on every mutation), same stale-shuffle-length guard
+on load.
+
+Verified with Playwright: existing `npm run smoke` suite still passes clean (no regressions).
+Wrote a throwaway script dispatching synthetic two-pointer pinch events at the zoomable image,
+which surfaced a real bug — `setPointerCapture` throwing (`NotFoundError`) silently aborted the
+whole gesture handler before it tracked the pointer — fixed with a try/catch. Confirmed heart +
+thumbs-up reactions render, "-" removes the last-added one, pinch scales the image, and a full
+page reload (dropping all in-memory nav state) still shows the reaction and the zoom after
+navigating back to the same president, reading the expected JSON back out of localStorage. Bumped
+`package.json` to 0.1.6.
+
+**Cost**: ~40 minutes.
