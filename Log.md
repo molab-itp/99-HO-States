@@ -1511,3 +1511,18 @@ sheet opens). Old saved reactions load as ❤️ 👍 👎 ❓. Version is now 0
 Chromium (add, search, remove, old saved reactions); the smoke test passes.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-09-23 17:57 (v06: Docker vs. OrbStack for local Supabase)
+
+Asked which to use for running v06's Supabase stack locally. Recommended OrbStack: this Mac (M2
+Max) has neither installed, `supabase start` runs about 10–12 containers and OrbStack uses much
+less memory and CPU for that, and the Supabase CLI works with it unchanged. Docker Desktop is the
+better choice for matching course instructions or avoiding license questions (OrbStack is free
+only for personal, non-commercial use; Docker Desktop is free for education). Setup:
+`brew install orbstack`, `brew install supabase/tap/supabase`, then `cd v06 && supabase start`.
+The simulator reaches it at `http://127.0.0.1:54321`; a physical iPhone needs the Mac's LAN IP.
+No code changed.
+
+**Cost**: ~2 minutes.

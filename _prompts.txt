@@ -370,3 +370,7 @@ update react app v05 with SwiftUI app v2 changes
 append this chat to Log.md with date and time stamp
 with approximate time cost
 keep description short
+
+v06.67
+
+for v06 supabased ios app what recommend Docker vs. OrbStack for local development
