@@ -31,7 +31,7 @@ final class AppModel {
     /// restarted picks up from this index instead of always restarting at the first president.
     var slideIndex = 0
 
-    /// User-picked feedback per president (heart / thumbs up / thumbs down / question mark), in
+    /// User-picked emoji feedback per president (a preset like 🐘, or any emoji from the sheet), in
     /// the order added. An ordered list rather than a `Set` — the same reaction can be added more
     /// than once (each "+" press appends whatever was picked), and "-" always removes just the
     /// most recently added one.
@@ -140,7 +140,7 @@ final class AppModel {
         var shuffledIndexes: [Int]
         var nextShuffleIndex: Int
         /// String-keyed (rather than `[Int: [PresidentReaction]]`) so the written JSON is a
-        /// normal `{"1": ["heart", "heart", "thumbsUp"], ...}` object instead of `Codable`'s
+        /// normal `{"1": ["🐘", "🐘", "🌍"], ...}` object instead of `Codable`'s
         /// flattened-array encoding of non-string-keyed dictionaries. Order matters here (it's
         /// add-order, and "-" pops the end), unlike the earlier `Set`-based version.
         var reactions: [String: [PresidentReaction]]

@@ -6,6 +6,7 @@ struct PresidentSummaryView: View {
     let president: President
     @Environment(AppModel.self) private var appModel
     @State private var showingAddPicker = false
+    @State private var showingEmojiSheet = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -33,8 +34,7 @@ struct PresidentSummaryView: View {
         return VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 12) {
                 ForEach(Array(currentReactions.enumerated()), id: \.offset) { _, reaction in
-                    Image(systemName: reaction.symbolName)
-                        .foregroundStyle(.tint)
+                    Text(reaction.emoji)
                         .accessibilityLabel(reaction.accessibilityLabel)
                 }
 
@@ -58,16 +58,24 @@ struct PresidentSummaryView: View {
             .font(.callout)
 
             if showingAddPicker {
-                // Always all 4 — unlike the earlier one-of-each version, repeats are allowed, so
-                // there's nothing to filter out here.
-                ReactionPickerStrip(options: PresidentReaction.allCases) { picked in
-                    appModel.addReaction(picked, for: president)
-                    withAnimation(.easeOut(duration: 0.2)) {
-                        showingAddPicker = false
-                    }
-                }
+                // Always all presets — repeats are allowed, so there's nothing to filter out here.
+                ReactionPickerStrip(
+                    options: PresidentReaction.presets,
+                    onPick: addReaction,
+                    onMore: { showingEmojiSheet = true }
+                )
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
+        }
+        .sheet(isPresented: $showingEmojiSheet) {
+            EmojiPickerSheet(onPick: addReaction)
+        }
+    }
+
+    private func addReaction(_ reaction: PresidentReaction) {
+        appModel.addReaction(reaction, for: president)
+        withAnimation(.easeOut(duration: 0.2)) {
+            showingAddPicker = false
         }
     }
 }

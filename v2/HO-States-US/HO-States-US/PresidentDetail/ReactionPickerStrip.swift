@@ -1,12 +1,12 @@
 import SwiftUI
 
-/// The horizontal strip of reaction choices that pops up from `PresidentSummaryView`'s + or -
-/// button. `options` is whichever subset actually makes sense for that action — the + button
-/// shows reactions not yet added, the - button shows only ones currently present — so every
-/// choice shown here is always a valid tap with no separate "already selected" state to track.
+/// The horizontal strip of reaction choices that pops up from `PresidentSummaryView`'s + button:
+/// the quick-pick emoji in `options`, then a trailing ★ that asks for the full emoji sheet
+/// (`onMore`) instead of picking anything itself.
 struct ReactionPickerStrip: View {
     let options: [PresidentReaction]
     let onPick: (PresidentReaction) -> Void
+    let onMore: () -> Void
 
     var body: some View {
         HStack(spacing: 8) {
@@ -14,15 +14,24 @@ struct ReactionPickerStrip: View {
                 Button {
                     onPick(reaction)
                 } label: {
-                    Image(systemName: reaction.symbolName)
-                        .font(.body)
-                        .frame(width: 32, height: 32)
-                        .background(Circle().fill(Color.secondary.opacity(0.1)))
+                    cell(Text(reaction.emoji))
                 }
                 .accessibilityLabel(reaction.accessibilityLabel)
             }
+
+            Button(action: onMore) {
+                cell(Text("★").foregroundStyle(.tint))
+            }
+            .accessibilityLabel("More Emoji")
         }
         .padding(6)
         .background(RoundedRectangle(cornerRadius: 12).fill(Color.secondary.opacity(0.08)))
+    }
+
+    private func cell(_ label: some View) -> some View {
+        label
+            .font(.title3)
+            .frame(width: 36, height: 36)
+            .background(Circle().fill(Color.secondary.opacity(0.1)))
     }
 }

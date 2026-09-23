@@ -1488,3 +1488,15 @@ Note: the built-in email sender only delivers to org team members; others use gu
 SMTP provider is set up.
 
 **Cost**: ~35 minutes.
+
+# --
+
+2026-09-23 10:38 (v2: emoji reactions + searchable emoji sheet)
+
+The v2 reaction picker now shows emojis instead of SF Symbols: 🫏 🐘 ☀️ 🌍 🌗, then ★, which opens
+a sheet with a search bar (`EmojiPickerSheet.swift`, 1,395 emojis from Unicode data, searched by
+name). `PresidentReaction` now holds any emoji as a string. Reactions saved by the old version
+still load (heart/thumbs up/thumbs down/question → ❤️ 👍 👎 ❓). Builds for the simulator; the new UI
+hasn't been run.
+
+**Cost**: ~5 minutes.

@@ -351,7 +351,17 @@ sb_publishable_Mt9sK0-7VF8i7gNgK-gvsQ_isioWOUP
 >> email rate exceeded
 >> sign in as guest fails with message:
     THe data couldn't be read because it is missing
-    
+
+v02.65
+
+in v2 PresidentSummaryView.swift
+change reactionControl
+to use emojis rather than symbols
+and make the set of reactions the following emojis:
+🫏 🐘 ☀️ 🌍 🌗 ★
+selecting last emoji ★ should bring up a sheet to allow 
+select from emoji with search bar
+
 # --
 append this chat to Log.md with date and time stamp
 with approximate time cost
