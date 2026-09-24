@@ -130,6 +130,13 @@ limits. `config.toml` points both templates at `templates/otp.html`, so each ema
 6-digit code; type it into the simulator. Restart the stack (`npx supabase stop && npx supabase
 start`) after changing a template.
 
+## Tools
+- [`tools/clear-guest-users.sh`](tools/clear-guest-users.sh) deletes guest users and unknown users
+  (no email or phone). Their `profiles` and `app_state` rows are deleted with them. It only lists
+  them unless you pass `--delete`, and it asks before deleting. The hosted project needs
+  `SUPABASE_SECRET_KEY` (Project Settings → API Keys → Secret keys); `--local` targets the local
+  stack instead.
+
 ## How the app works
 - **Email code:** `SignInView` calls `AuthModel.sendSignInEmail`, which calls
   `signInWithOTP(email:redirectTo:)`. That emails a code and a link, and creates the user on first

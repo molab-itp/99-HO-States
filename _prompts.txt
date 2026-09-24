@@ -384,3 +384,18 @@ append this chat to Log.md with date and time stamp
 with approximate time cost
 keep description short
 
+v06.68
+
+in v06 create bash script and store in v06/tools
+to clear out all unknown or guest users in the db
+
+https://supabase.com/dashboard/project/jcoolgnracpgjncksopx/settings/api-keys
+
+SUPABASE_SECRET_KEY=sb_secret_… v06/tools/clear-guest-users.sh          # list only (dry run)
+SUPABASE_SECRET_KEY=sb_secret_… v06/tools/clear-guest-users.sh --delete # actually delete
+v06/tools/clear-guest-users.sh --local [--delete]                      # local stack; key read
+
+6-digit login shows up a spam 
+jht1493@gmail.com
+jht9529@gmail.com
+jht9229@nyu.edu
