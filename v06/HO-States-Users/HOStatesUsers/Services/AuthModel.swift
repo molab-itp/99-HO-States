@@ -70,6 +70,26 @@ final class AuthModel {
         }
     }
 
+    /// Native Sign in with Apple: exchanges Apple's ID token for a Supabase session, which fires
+    /// `authStateChanges`. `nonce` is the raw value whose SHA-256 went into the Apple request;
+    /// Supabase hashes it again to check the token. Apple sends the name only on the very first
+    /// authorization, and it isn't in the token, so it's saved to user metadata as `full_name`,
+    /// which the `profiles` trigger copies to `display_name`. Needs the Apple provider enabled in
+    /// the Supabase dashboard, with the app's bundle id as a Client ID.
+    func signInWithApple(idToken: String, nonce: String, fullName: PersonNameComponents?) async {
+        errorMessage = nil
+        do {
+            try await client.auth.signInWithIdToken(
+                credentials: .init(provider: .apple, idToken: idToken, nonce: nonce))
+            let name = fullName.map { $0.formatted() } ?? ""
+            if !name.isEmpty {
+                try await client.auth.update(user: UserAttributes(data: ["full_name": .string(name)]))
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     /// "Continue as Guest": a real user with its own id (so `app_state` and RLS work as usual),
     /// but no email. Needs "Allow anonymous sign-ins" enabled in the Supabase dashboard.
     func signInAsGuest() async {

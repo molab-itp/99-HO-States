@@ -402,6 +402,17 @@ store profile photo at full resolution
 and create a thumb at lower resolution 
 use thumb to display in list of users
 
+v06.70
 
+in v06 add apple signon as option
 
+What you need to do
+
+1. In the Supabase dashboard, go to Authentication → Sign In / Providers → Apple. Turn it on and add com.jht1900.HO-States-Users under Client IDs. The native flow doesn't need the secret key or callback URL.
+2. Run npx supabase db push to apply the trigger change.
+3. In Xcode, automatic signing should turn on Sign in with Apple for the App ID the first time you build to a device.
+4. To test in the simulator, sign in to an Apple Account in the simulator's Settings.
+
+ran on simulator get error: Provider (issuer "https://appleid.apple.com") is not enabled
+>> Forgot to save changes in supabase admin
 

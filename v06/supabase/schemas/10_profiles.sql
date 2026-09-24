@@ -36,7 +36,8 @@ create policy "Users can update their own profile"
 
 -- Creates the `profiles` row on first sign-in and refreshes it on every later one, and when a
 -- guest adds an email. Email sign-in only provides the email; name/avatar are picked up from
--- `raw_user_meta_data` if they're ever set there (e.g. `signInWithOTP(email:data:)`). `security definer` because the
+-- `raw_user_meta_data` when set there. Sign in with Apple sets `full_name` right after the first
+-- sign-in (the app calls `auth.update(user:)`), so metadata changes fire it too. `security definer` because the
 -- trigger fires as the auth service, which can't write `public.profiles` through RLS.
 create or replace function public.sync_profile_from_auth_user()
 returns trigger
@@ -69,7 +70,7 @@ $$;
 -- `auth.users` if you change it. Edit it here (to keep this file the source of truth) and then
 -- hand-copy the change into a new migration.
 create trigger on_auth_user_signed_in
-  after insert or update of email, is_anonymous, last_sign_in_at on auth.users
+  after insert or update of email, is_anonymous, last_sign_in_at, raw_user_meta_data on auth.users
   for each row execute function public.sync_profile_from_auth_user();
 
 create or replace function public.touch_last_seen()

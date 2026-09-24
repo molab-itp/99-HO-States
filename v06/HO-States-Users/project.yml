@@ -31,6 +31,12 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: com.jht1900.HO-States-Users.auth
             CFBundleURLSchemes: [hostates]
+    # Written by xcodegen. Sign in with Apple also needs the capability on the App ID, which
+    # automatic signing adds.
+    entitlements:
+      path: HOStatesUsers/HOStatesUsers.entitlements
+      properties:
+        com.apple.developer.applesignin: [Default]
     dependencies:
       - package: Supabase
     postCompileScripts:

@@ -1,8 +1,13 @@
+import AuthenticationServices
+import CryptoKit
 import SwiftUI
 
-/// Email a 6-digit code, or continue as a guest.
+/// Email a 6-digit code, Sign in with Apple, or continue as a guest.
 struct SignInView: View {
     @Environment(AuthModel.self) private var auth
+    @Environment(\.colorScheme) private var colorScheme
+    /// Raw nonce for the Apple request in flight; Apple gets its SHA-256, Supabase gets this.
+    @State private var appleNonce: String?
     @State private var email = ""
     /// Non-nil once a code has been sent; the address it was sent to.
     @State private var codeSentTo: String?
@@ -62,6 +67,10 @@ struct SignInView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .disabled(!trimmedEmail.contains("@"))
+
+            SignInWithAppleButton(.signIn, onRequest: configureAppleRequest, onCompletion: finishAppleSignIn)
+                .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                .frame(height: 50)
 
             Button {
                 isEmailFocused = false
@@ -126,6 +135,44 @@ struct SignInView: View {
             }
             isWorking = false
         }
+    }
+
+    private func configureAppleRequest(_ request: ASAuthorizationAppleIDRequest) {
+        isEmailFocused = false
+        auth.errorMessage = nil
+        let nonce = Self.randomNonce()
+        appleNonce = nonce
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = SHA256.hash(data: Data(nonce.utf8)).map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func finishAppleSignIn(_ result: Result<ASAuthorization, Error>) {
+        switch result {
+        case .success(let authorization):
+            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                  let tokenData = credential.identityToken,
+                  let idToken = String(data: tokenData, encoding: .utf8),
+                  let nonce = appleNonce else {
+                auth.errorMessage = "Sign in with Apple didn't return an identity token."
+                return
+            }
+            isWorking = true
+            Task {
+                await auth.signInWithApple(idToken: idToken, nonce: nonce, fullName: credential.fullName)
+                isWorking = false
+            }
+        case .failure(let error):
+            // Closing the Apple sheet isn't an error worth showing.
+            if (error as? ASAuthorizationError)?.code != .canceled {
+                auth.errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private static func randomNonce() -> String {
+        var bytes = [UInt8](repeating: 0, count: 32)
+        _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        return bytes.map { String(format: "%02x", $0) }.joined()
     }
 
     private func verify() {

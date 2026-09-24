@@ -1,10 +1,10 @@
-# v06 — Supabase backend + email-code / guest sign-in (SwiftUI)
+# v06 — Supabase backend + email-code / Apple / guest sign-in (SwiftUI)
 
 `HO-States-Users/` is a small SwiftUI app. You sign in either with a 6-digit code that Supabase
-Auth emails you, or as a guest with no email at all. It
+Auth emails you, with Sign in with Apple, or as a guest with no email at all. It
 lists every user who has signed on and when they were last active. It uses Supabase Auth on the
-Pro plan, plus a custom SMTP provider (Resend) for sending email. There's no Google/Apple OAuth
-setup.
+Pro plan, plus a custom SMTP provider (Resend) for sending email. Apple sign-in is native (no web
+OAuth redirect).
 `supabase/` holds the database, which is set up so v2 (iOS) and v05 (web) can adopt it later.
 
 ```
@@ -117,7 +117,19 @@ Any SMTP provider works (Postmark, Brevo, Amazon SES, …).
 2. **Authentication → Sign In / Providers**: turn on **Allow anonymous sign-ins** for the
    "Continue as Guest" button. Email sign-in is already on by default.
 
-### 6. iOS app
+### 6. Sign in with Apple
+1. **Authentication → Sign In / Providers → Apple**: turn it on and add
+   `com.jht1900.HO-States-Users` (the app's bundle id) to **Client IDs**. The native flow sends
+   Apple's ID token straight to Supabase, so the Services ID, secret key and callback URL fields
+   aren't needed; they're only for web sign-in (v05 later).
+2. The app's `HOStatesUsers.entitlements` (written by xcodegen from `project.yml`) has the
+   Sign in with Apple capability. With automatic signing, Xcode turns it on for the App ID in
+   team `3RCW2SSL8G`. Otherwise enable it at developer.apple.com → Identifiers.
+3. Push the trigger change: `npx supabase db push` (`migrations/20260924000000_apple_sign_in.sql`).
+
+The simulator needs to be signed in to an Apple Account (Settings) to test this.
+
+### 7. iOS app
 ```sh
 cd v06/HO-States-Users
 cp HOStatesUsers/Supabase.example.plist HOStatesUsers/Supabase.plist   # fill in URL + publishable key
@@ -155,6 +167,15 @@ start`) after changing a template.
   calls `AuthModel.handleAuthCallback`, which exchanges the code with `session(from:)`. The link
   uses PKCE, so it only works on the device and app install that asked for it. v05 (web) uses the
   same call with its own URL as `redirectTo`.
+- **Sign in with Apple:** `SignInView` shows `SignInWithAppleButton`. It asks for name and email
+  and puts the SHA-256 of a random nonce in the request. `AuthModel.signInWithApple` passes
+  Apple's identity token and the raw nonce to `signInWithIdToken(credentials:)`, which creates the
+  user on first use. Apple sends the user's name only the first time they authorize the app, and
+  not inside the token, so the app saves it with `auth.update(user:)` as `full_name` in user
+  metadata. The `profiles` trigger also fires on metadata changes and copies it to
+  `display_name`. If the user picks "Hide My Email", `email` is a `@privaterelay.appleid.com`
+  address. To see the name prompt again, remove the app under Settings → Apple Account → Sign in
+  with Apple.
 - **Guest:** `signInAnonymously()` creates a real user with its own id but no email. Guests can
   see the list and have their own `app_state` like anyone else, and they show up as
   "Guest XXXX" (`profiles.is_anonymous`).

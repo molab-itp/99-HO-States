@@ -1566,3 +1566,16 @@ scanner requests since. A later failure was from typing the code in an older ema
 requesting several new ones.
 
 **Cost**: ~40 minutes.
+
+# --
+
+2026-09-24 06:06 (v06.70: Sign in with Apple)
+
+Added native Sign in with Apple to the v06 sign-in screen. The Apple ID token goes to Supabase's
+`signInWithIdToken`. The name Apple sends on first sign-in is saved to user metadata, and a
+trigger change (migration `20260924000000_apple_sign_in`) copies it to `profiles.display_name`.
+Added the entitlement through `project.yml`, enabled Apple in the local `config.toml`, and added
+a README setup step. Builds for the simulator. Not tested end to end yet: the Apple provider still
+needs turning on in the dashboard, and `db push` still needs to run.
+
+**Cost**: ~15 minutes.
