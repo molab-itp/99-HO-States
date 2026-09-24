@@ -243,7 +243,7 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# 6-digit sign-in code ({{ .Token }}) plus link. "confirmation" goes to first-time users,
+# 6-digit sign-in code ({{ .Token }}) only, no link (mail scanners open links and use up the token). "confirmation" goes to first-time users,
 # "magic_link" to returning ones. Mirror these in Dashboard → Authentication → Emails → Templates.
 [auth.email.template.confirmation]
 subject = "Your HO States sign-in code"

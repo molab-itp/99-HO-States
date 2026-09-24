@@ -1,7 +1,7 @@
 # v06 — Supabase backend + email-code / guest sign-in (SwiftUI)
 
 `HO-States-Users/` is a small SwiftUI app. You sign in either with a 6-digit code that Supabase
-Auth emails you (the same email also has a sign-in link), or as a guest with no email at all. It
+Auth emails you, or as a guest with no email at all. It
 lists every user who has signed on and when they were last active. It uses Supabase Auth on the
 Pro plan, plus a custom SMTP provider (Resend) for sending email. There's no Google/Apple OAuth
 setup.
@@ -11,7 +11,7 @@ setup.
 v06/
   supabase/
     config.toml            local-stack config (anonymous sign-ins, redirect URLs, email templates)
-    templates/otp.html     sign-in email: 6-digit code + link (copy into the dashboard too)
+    templates/otp.html     sign-in email: 6-digit code only (copy into the dashboard too)
     schemas/*.sql          ← SOURCE OF TRUTH for the database (edit these)
     migrations/*.sql       ← generated from schemas/ (don't hand-edit, except auth.* triggers)
     seed.sql
@@ -83,7 +83,11 @@ In the Supabase Dashboard:
    - **Magic Link**, which is sent to returning users
 
    Set the subject of each to "Your HO States sign-in code". `{{ .Token }}` is the 6-digit code.
-   `{{ .ConfirmationURL }}` is the link, which still works as a fallback.
+   The template leaves out the sign-in link (`{{ .ConfirmationURL }}`) on purpose. The link and
+   the code share one single-use token. Mail security scanners (e.g. Microsoft Safe Links on
+   school or work mail) and link-tracking email services open every link in an email, which uses
+   up the token. The code then fails with "Token has expired or is invalid", and the auth log
+   shows a `GET /verify` from an address that isn't yours.
 2. **Authentication → Sign In / Providers → Email**: set **Email OTP Length** to `6` and
    **Email OTP Expiration** to `3600` seconds.
 
@@ -140,12 +144,13 @@ start`) after changing a template.
 
 ## How the app works
 - **Email code:** `SignInView` calls `AuthModel.sendSignInEmail`, which calls
-  `signInWithOTP(email:redirectTo:)`. That emails a code and a link, and creates the user on first
+  `signInWithOTP(email:redirectTo:)`. That emails a code and creates the user on first
   use. The user types the 6-digit code; `.textContentType(.oneTimeCode)` lets iOS suggest it from
   Mail. When the sixth digit is typed, `verifyCode` calls `verifyOTP(email:token:type: .email)`.
   The code works on any device, so the email can be read on a phone while signing in on the
   simulator.
-- **Magic link (fallback):** tapping the link in the same email goes through Supabase and reopens the
+- **Magic link (not in the current email):** the app still handles a sign-in link, in case a
+  template adds `{{ .ConfirmationURL }}` back. Tapping it goes through Supabase and reopens the
   app at `hostates://auth-callback?code=…`. The scheme is registered in `project.yml`, and `.onOpenURL`
   calls `AuthModel.handleAuthCallback`, which exchanges the code with `session(from:)`. The link
   uses PKCE, so it only works on the device and app install that asked for it. v05 (web) uses the

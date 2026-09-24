@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Email a 6-digit code (the email also carries a sign-in link), or continue as a guest.
+/// Email a 6-digit code, or continue as a guest.
 struct SignInView: View {
     @Environment(AuthModel.self) private var auth
     @State private var email = ""
@@ -23,7 +23,7 @@ struct SignInView: View {
                 .foregroundStyle(.tint)
             Text(codeSentTo == nil ? "HO Users" : "Check your email")
                 .font(.largeTitle.bold())
-            Text(codeSentTo.map { "Enter the \(Self.codeLength)-digit code sent to \($0), or tap the link in the email on this device." }
+            Text(codeSentTo.map { "Enter the \(Self.codeLength)-digit code sent to \($0)." }
                  ?? "Sign in to see who else is here.")
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

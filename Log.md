@@ -1546,3 +1546,23 @@ Problems fixed along the way:
 Builds for the simulator. The user confirmed that the emailed code arrived.
 
 **Cost**: ~45 minutes.
+
+# --
+
+2026-09-24 00:11 (v06.69: profile photos; sign-in code fix)
+
+Users can now upload a profile photo. The app stores two JPEGs in a public `avatars` bucket: the
+full-resolution photo and a 256px square thumb, which is what the users list shows. Tapping a
+user shows their full-size photo; on your own profile you can choose or remove one. Migration
+`20260923200000_profile_photos` adds the `profiles.photo_path` and `photo_thumb_path` columns,
+the bucket, and upload policies (each user writes only their own folder). It is tested on the
+local stack. The hosted `db push` was blocked by a permission check and is still to run.
+`clear-guest-users.sh` now also deletes a user's photos.
+
+Sign-in codes kept failing with "token has expired or is invalid". The auth logs showed mail
+scanners opening the email's sign-in link seconds after each send, which used up the code.
+Removed the link from `otp.html` and from both hosted templates (via the Management API). No
+scanner requests since. A later failure was from typing the code in an older email after
+requesting several new ones.
+
+**Cost**: ~40 minutes.

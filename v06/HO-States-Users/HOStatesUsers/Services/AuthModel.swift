@@ -29,9 +29,10 @@ final class AuthModel {
         }
     }
 
-    /// Emails a 6-digit code plus a sign-in link, creating the user on first use. The code comes
-    /// from `{{ .Token }}` in the "Confirm signup" and "Magic Link" email templates; the link
-    /// (`{{ .ConfirmationURL }}`) reopens the app at `SupabaseConfig.authRedirectURL`, which
+    /// Emails a 6-digit code, creating the user on first use. The code comes from `{{ .Token }}`
+    /// in the "Confirm signup" and "Magic Link" email templates. The templates leave out the link
+    /// (`{{ .ConfirmationURL }}`) because mail scanners open it and use up the shared token; if
+    /// it's added back, it reopens the app at `SupabaseConfig.authRedirectURL`, which
     /// `handleAuthCallback` finishes. Returns whether the email was sent, so the UI can switch to
     /// "enter the code".
     func sendSignInEmail(to email: String) async -> Bool {
