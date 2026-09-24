@@ -311,6 +311,13 @@ input {
   opacity: 0.5;
 }
 
+.source-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
 .visited {
   display: flex;
   flex-direction: column;
@@ -422,7 +429,23 @@ input {
   white-space: nowrap;
 }
 
+.president-row .names .term-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.president-row .names .reactions {
+  margin-left: auto;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
 .president-row .names .term {
+  flex-shrink: 0;
   font-size: 13px;
   color: var(--secondary-label);
   margin-top: 1px;

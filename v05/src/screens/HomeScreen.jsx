@@ -3,7 +3,8 @@ import { useAppModel } from '../state/AppModelContext.jsx';
 import { useNavigation } from '../navigation/NavigationContext.jsx';
 import Icon from '../components/Icon.jsx';
 
-const WIKIPEDIA_SOURCE_URL = 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States';
+const SOURCE_DATA_URL = 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States';
+const SOURCE_CODE_URL = 'https://github.com/molab-itp/99-HO-States';
 
 export default function HomeScreen() {
   const { presidents, viewedIDs, nextRandomPresident, resetViewed, slideIndex, buildInfo } = useAppModel();
@@ -28,8 +29,8 @@ export default function HomeScreen() {
       <div className="icon">
         <Icon name="bank" size={64} />
       </div>
-      <h1>USNA Heads</h1>
-      <p className="subtitle">Browse portraits and biographies of every United States of North America Head of State.</p>
+      <h1>USnA Heads</h1>
+      <p className="subtitle">Browse portraits and biographies of every United States of North America<br />Head of State.</p>
 
       <div className="actions">
         <button className="btn btn-bordered" onClick={pushList}>
@@ -58,16 +59,22 @@ export default function HomeScreen() {
         </button>
       </div>
 
-      <a className="source-link" href={WIKIPEDIA_SOURCE_URL} target="_blank" rel="noopener noreferrer">
-        <Icon name="link-45deg" size={14} />
-        Source: Wikipedia
-      </a>
-
       <div className="visited">
         <p className="visited-count">{remainingCount} left to see</p>
         <button className="btn-text-destructive" onClick={resetViewed}>
           Reset Visit Count
         </button>
+      </div>
+
+      <div className="source-links">
+        <a className="source-link" href={SOURCE_DATA_URL} target="_blank" rel="noopener noreferrer">
+          <Icon name="link-45deg" size={14} />
+          Data Source: Wikipedia
+        </a>
+        <a className="source-link" href={SOURCE_CODE_URL} target="_blank" rel="noopener noreferrer">
+          <Icon name="link-45deg" size={14} />
+          Source Code
+        </a>
       </div>
 
       <p className="build-info">{buildInfo}</p>

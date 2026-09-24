@@ -1613,3 +1613,18 @@ only clips what's drawn, not where touches land. Added a matching
 gestures. Builds for the simulator; not checked by hand. Panning still has no limits.
 
 **Cost**: ~5 minutes.
+
+# --
+
+2026-09-24 13:45 (v05: sync web app with v2 v02.72–v02.74)
+
+Brought v05 up to date with the v2 commits since v05.66. Renamed "USNA Heads" to "USnA Heads" in
+the home title, the list nav bar, the page `<title>` and the smoke test. On Home, the subtitle now
+breaks before "Head of State.", and the single Wikipedia link became two stacked links ("Data
+Source: Wikipedia", "Source Code") below the visit count. List rows show their reaction emojis
+right-aligned on the term line, on one line with "…" when too long. Bumped `package.json` to
+0.1.8. Did not port v02.74's zoom drag fix: the web container's `overflow: hidden` already limits
+touches to the visible image. Build and `npm run smoke` pass; checked the list with seeded
+reactions in a screenshot.
+
+**Cost**: ~10 minutes.

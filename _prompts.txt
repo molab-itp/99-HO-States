@@ -459,3 +459,7 @@ USnA Heads
 v02.74
 
 in v2 ZoomableHeaderImage dragging starts outside the visible part of the image
+
+v05.75
+
+sync web ab in v05 with changes to v2

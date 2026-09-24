@@ -46,7 +46,7 @@ async function main() {
   try {
     console.log('Home screen...');
     await page.goto(url);
-    await page.waitForSelector('text=USNA Heads');
+    await page.waitForSelector('text=USnA Heads');
     await shot('home');
 
     console.log('List of Heads...');
