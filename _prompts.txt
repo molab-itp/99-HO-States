@@ -427,3 +427,21 @@ Log-screens/2026-09-24-HOS-User-1024.png
 Log-screens/2026-09-24-xcode-ho-users-missing.png
 Log-screens/2026-09-24-xcode-ho-users-init-fail.png
 Log-screens/2026-09-24-xcode-ho-users-no-orientation
+
+Log-screens/2026-09-24-xcode-ho-users-compliance.png
+
+to v06 add info setting "App Uses Non-Exempt Encryption" = NO
+
+v06.71
+
+why is v2/HO-States-US/HO-States-US.xcodeproj Info.plist absent
+but present in v06/HO-States-Users/HO-States-Users.xcodeproj
+
+Both projects build their Info.plist the same way, with `GENERATE_INFOPLIST_FILE = YES`. The difference is that v06 has a setting Xcode can't generate on its own.
+
+**v2 has no file.** Xcode builds the whole Info.plist from `INFOPLIST_KEY_*` build settings in the target, such as `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO` and `INFOPLIST_KEY_CFBundleDisplayName = "USNA Heads"`. You edit these in the target's Info tab or Build Settings, and they're stored in `project.pbxproj`. Nothing v2 needs goes beyond those settings.
+
+**v06 needs a file for its URL scheme.** `hostates://` is how the sign-in link reopens the app. It's the `CFBundleURLTypes` key, and Xcode has no `INFOPLIST_KEY_` build setting for it. The only way to add it is a real plist file, set as `INFOPLIST_FILE = HOStatesUsers/Info.plist`. Xcode merges that file with the keys it generates. The file exists because xcodegen created it for the URL scheme when it generated the project. In Xcode, adding a URL Type under the target's Info tab also creates this file.
+
+Only `CFBundleURLTypes` requires the file. The encryption key I just added could live in either place. To match v2, I could move it to `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO` in build settings and leave only the URL scheme in the file.
+
