@@ -423,3 +423,7 @@ is now in folder mode so does not need to be
 regenerated to add/remove files
 how to add icon file:
 Log-screens/2026-09-24-HOS-User-1024.png
+
+Log-screens/2026-09-24-xcode-ho-users-missing.png
+Log-screens/2026-09-24-xcode-ho-users-init-fail.png
+Log-screens/2026-09-24-xcode-ho-users-no-orientation
