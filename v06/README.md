@@ -99,6 +99,12 @@ emails your Supabase organization's team members, about 2 emails an hour ("email
    - Sender: an address on your verified domain, with sender name "HO States"
 3. **Authentication → Rate Limits**: raise the email limit to something like 30 an hour.
 
+The sender must be on a domain whose DNS you control. A school or work address (e.g. `@nyu.edu`)
+fails with `550 The nyu.edu domain is not verified`, which shows up in the app as "Error sending
+magic link email". Without your own domain, use Brevo instead: it can verify a single sender
+address by email. Its SMTP settings are host `smtp-relay.brevo.com`, port `587`, and the SMTP
+login and key from Brevo → SMTP & API.
+
 Any SMTP provider works (Postmark, Brevo, Amazon SES, …).
 
 ### 5. Redirect URLs and guest sign-in

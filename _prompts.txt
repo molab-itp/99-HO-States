@@ -366,15 +366,21 @@ v05.66
 
 update react app v05 with SwiftUI app v2 changes
 
+v06.67
+
+for v06 supabased ios app what recommend Docker vs. OrbStack for local development
+orbstack installed
+Email login with 6-digit confirmation setup
+Run around with DNS and db config
+cd v06
+npx supabase link --project-ref jcoolgnracpgjncksopx
+npx supabase migration list      # the "Remote" column should be blank for 20260923120000
+npx supabase db push             # applies it; answer Y
+npx supabase migration repair --status applied 20260923000000
+npx supabase db push
+
 # --
 append this chat to Log.md with date and time stamp
 with approximate time cost
 keep description short
 
-v06.67
-
-for v06 supabased ios app what recommend Docker vs. OrbStack for local development
-
-orbstack installed
-
-Email login with 6-digit confirmation setup

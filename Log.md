@@ -1526,3 +1526,23 @@ The simulator reaches it at `http://127.0.0.1:54321`; a physical iPhone needs th
 No code changed.
 
 **Cost**: ~2 minutes.
+
+# --
+
+2026-09-23 21:25 (v06: 6-digit email code sign-in)
+
+v06 now signs in with a 6-digit code from the email, and the same email still has a sign-in
+link. The code screen is in `SignInView`; `AuthModel.verifyCode` calls
+`verifyOTP(email:token:type: .email)`. The new email template is `supabase/templates/otp.html`,
+and `config.toml` points the local stack at it. The README setup covers the Pro plan (needed to
+edit templates), Resend SMTP, and pasting the template into both Confirm signup and Magic Link.
+Problems fixed along the way:
+- An `@nyu.edu` sender was rejected by Resend (550, domain not verified), and NYU's DMARC policy
+  (`p=reject`) blocks it anyway. Switched to `jht9629@jht1493.net`, whose domain is verified.
+- "The data couldn't be read because it is missing" after sign-in, as a guest too: the hosted
+  database lacked `profiles.is_anonymous`. Linked the project and ran `db push`; migrations are
+  now in sync.
+
+Builds for the simulator. The user confirmed that the emailed code arrived.
+
+**Cost**: ~45 minutes.
