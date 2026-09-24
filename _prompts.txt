@@ -453,3 +453,5 @@ v02.73
 
 in v2 PresidentRow gather the reaction emojis as a string and 
 display right justified after to president.term
+
+USnA Heads
