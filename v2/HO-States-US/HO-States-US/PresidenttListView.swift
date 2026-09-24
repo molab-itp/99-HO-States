@@ -23,7 +23,12 @@ struct PresidenttListView: View {
 }
 
 private struct PresidentRow: View {
+    @Environment(AppModel.self) private var appModel
     let president: President
+
+    private var reactionsText: String {
+        appModel.reactions(for: president).map(\.emoji).joined()
+    }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -33,9 +38,15 @@ private struct PresidentRow: View {
             VStack(alignment: .leading) {
                 Text("#\(String(format: "%02d", president.order)) \(president.name)")
                     .font(.headline)
-                Text(president.term)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                HStack {
+                    Text(president.term)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(reactionsText)
+                        .font(.subheadline)
+                        .lineLimit(1)
+                }
             }
         }
     }
