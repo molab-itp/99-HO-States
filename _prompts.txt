@@ -374,3 +374,7 @@ keep description short
 v06.67
 
 for v06 supabased ios app what recommend Docker vs. OrbStack for local development
+
+orbstack installed
+
+Email login with 6-digit confirmation setup

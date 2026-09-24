@@ -29,14 +29,28 @@ final class AuthModel {
         }
     }
 
-    /// Emails a sign-in link, creating the user on first use. It uses Supabase's default email
-    /// template, so nothing needs editing on the free plan. Tapping the link in Mail on this device
-    /// reopens the app at `SupabaseConfig.authRedirectURL`, which `handleAuthCallback` finishes.
-    /// Returns whether the email was sent, so the UI can switch to "check your email".
-    func sendMagicLink(to email: String) async -> Bool {
+    /// Emails a 6-digit code plus a sign-in link, creating the user on first use. The code comes
+    /// from `{{ .Token }}` in the "Confirm signup" and "Magic Link" email templates; the link
+    /// (`{{ .ConfirmationURL }}`) reopens the app at `SupabaseConfig.authRedirectURL`, which
+    /// `handleAuthCallback` finishes. Returns whether the email was sent, so the UI can switch to
+    /// "enter the code".
+    func sendSignInEmail(to email: String) async -> Bool {
         errorMessage = nil
         do {
             try await client.auth.signInWithOTP(email: email, redirectTo: SupabaseConfig.authRedirectURL)
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
+        }
+    }
+
+    /// Verifies the 6-digit code from the email, which fires `authStateChanges`. Unlike the link,
+    /// the code works on any device, so the email can be read on a phone or Mac.
+    func verifyCode(_ code: String, email: String) async -> Bool {
+        errorMessage = nil
+        do {
+            _ = try await client.auth.verifyOTP(email: email, token: code, type: .email)
             return true
         } catch {
             errorMessage = error.localizedDescription

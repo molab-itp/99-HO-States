@@ -1,15 +1,17 @@
-# v06 — Supabase backend + magic-link / guest sign-in (SwiftUI)
+# v06 — Supabase backend + email-code / guest sign-in (SwiftUI)
 
-`HO-States-Users/` is a small SwiftUI app. You sign in either with a link that Supabase Auth
-emails you, or as a guest with no email at all. It lists every user who has signed on and when
-they were last active. It uses only Supabase services on the free plan: no Google/Apple OAuth
-setup, and no email-template edits.
+`HO-States-Users/` is a small SwiftUI app. You sign in either with a 6-digit code that Supabase
+Auth emails you (the same email also has a sign-in link), or as a guest with no email at all. It
+lists every user who has signed on and when they were last active. It uses Supabase Auth on the
+Pro plan, plus a custom SMTP provider (Resend) for sending email. There's no Google/Apple OAuth
+setup.
 `supabase/` holds the database, which is set up so v2 (iOS) and v05 (web) can adopt it later.
 
 ```
 v06/
   supabase/
-    config.toml            local-stack config (anonymous sign-ins, redirect URLs, schema_paths)
+    config.toml            local-stack config (anonymous sign-ins, redirect URLs, email templates)
+    templates/otp.html     sign-in email: 6-digit code + link (copy into the dashboard too)
     schemas/*.sql          ← SOURCE OF TRUTH for the database (edit these)
     migrations/*.sql       ← generated from schemas/ (don't hand-edit, except auth.* triggers)
     seed.sql
@@ -68,22 +70,44 @@ Rules that keep this painless:
    npx supabase db push
    ```
 
-### 2. Auth settings (all free plan)
+### 2. Plan upgrade (Pro)
+**Organization → Billing**: switch to **Pro**. The plan covers the whole organization. Free
+projects created after June 3, 2026 can't edit email templates while they use Supabase's
+built-in email sender, and the 6-digit code needs a template edit. Pro removes that lock.
+
+### 3. Email code sign-in
 In the Supabase Dashboard:
-1. **Authentication → URL Configuration → Redirect URLs**: add `hostates://auth-callback`. This
-   is where the magic link returns to the app (v2 later too). Add `http://localhost:5173` for v05.
+1. **Authentication → Emails → Templates**: paste
+   [`supabase/templates/otp.html`](supabase/templates/otp.html) into **both** templates:
+   - **Confirm signup**, which is sent to first-time users
+   - **Magic Link**, which is sent to returning users
+
+   Set the subject of each to "Your HO States sign-in code". `{{ .Token }}` is the 6-digit code.
+   `{{ .ConfirmationURL }}` is the link, which still works as a fallback.
+2. **Authentication → Sign In / Providers → Email**: set **Email OTP Length** to `6` and
+   **Email OTP Expiration** to `3600` seconds.
+
+Once this is done, you can test with your own address. Even on Pro, the built-in sender only
+emails your Supabase organization's team members, about 2 emails an hour ("email rate exceeded").
+
+### 4. Custom SMTP (needed before anyone else can sign in)
+1. Sign up at https://resend.com (free tier: 3,000 emails a month, 100 a day). Verify a domain you
+   own and create an API key.
+2. **Authentication → Emails → SMTP Settings**: turn on custom SMTP and enter:
+   - Host `smtp.resend.com`, port `465`
+   - User `resend`, password: the API key
+   - Sender: an address on your verified domain, with sender name "HO States"
+3. **Authentication → Rate Limits**: raise the email limit to something like 30 an hour.
+
+Any SMTP provider works (Postmark, Brevo, Amazon SES, …).
+
+### 5. Redirect URLs and guest sign-in
+1. **Authentication → URL Configuration → Redirect URLs**: add `hostates://auth-callback`. The
+   sign-in link returns to the app here (v2 later too). Add `http://localhost:5173` for v05.
 2. **Authentication → Sign In / Providers**: turn on **Allow anonymous sign-ins** for the
    "Continue as Guest" button. Email sign-in is already on by default.
 
-The default email templates already contain the sign-in link, so they don't need editing (which
-the free plan no longer allows with Supabase's built-in email sender).
-
-**Email limitation:** Supabase's built-in email sender only delivers to the email addresses of
-your Supabase organization's team members, a few per hour. That's enough to test magic links
-yourself. Anyone else should use **Continue as Guest** until you add a custom SMTP provider (Resend,
-Brevo, …) under **Authentication → Emails → SMTP Settings**, which removes the limit.
-
-### 3. iOS app
+### 6. iOS app
 ```sh
 cd v06/HO-States-Users
 cp HOStatesUsers/Supabase.example.plist HOStatesUsers/Supabase.plist   # fill in URL + publishable key
@@ -95,13 +119,20 @@ screen.
 
 ### Local stack (optional, needs Docker/OrbStack)
 Run `npx supabase start` and point `Supabase.plist` at `http://127.0.0.1:54321`. No real email is
-sent: magic links show up in the local mail catcher at http://127.0.0.1:54324, with no sender
-limits. Open that page in the simulator's Safari and tap the link.
+sent: sign-in emails show up in the local mail catcher at http://127.0.0.1:54324, with no sender
+limits. `config.toml` points both templates at `templates/otp.html`, so each email shows the
+6-digit code; type it into the simulator. Restart the stack (`npx supabase stop && npx supabase
+start`) after changing a template.
 
 ## How the app works
-- **Magic link:** `SignInView` calls `signInWithOTP(email:redirectTo:)`, which emails a link and
-  creates the user on first use. Tapping the link in Mail goes through Supabase and reopens the app
-  at `hostates://auth-callback?code=…`. The scheme is registered in `project.yml`, and `.onOpenURL`
+- **Email code:** `SignInView` calls `AuthModel.sendSignInEmail`, which calls
+  `signInWithOTP(email:redirectTo:)`. That emails a code and a link, and creates the user on first
+  use. The user types the 6-digit code; `.textContentType(.oneTimeCode)` lets iOS suggest it from
+  Mail. When the sixth digit is typed, `verifyCode` calls `verifyOTP(email:token:type: .email)`.
+  The code works on any device, so the email can be read on a phone while signing in on the
+  simulator.
+- **Magic link (fallback):** tapping the link in the same email goes through Supabase and reopens the
+  app at `hostates://auth-callback?code=…`. The scheme is registered in `project.yml`, and `.onOpenURL`
   calls `AuthModel.handleAuthCallback`, which exchanges the code with `session(from:)`. The link
   uses PKCE, so it only works on the device and app install that asked for it. v05 (web) uses the
   same call with its own URL as `redirectTo`.

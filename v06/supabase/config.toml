@@ -243,6 +243,16 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# 6-digit sign-in code ({{ .Token }}) plus link. "confirmation" goes to first-time users,
+# "magic_link" to returning ones. Mirror these in Dashboard → Authentication → Emails → Templates.
+[auth.email.template.confirmation]
+subject = "Your HO States sign-in code"
+content_path = "./supabase/templates/otp.html"
+
+[auth.email.template.magic_link]
+subject = "Your HO States sign-in code"
+content_path = "./supabase/templates/otp.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"
