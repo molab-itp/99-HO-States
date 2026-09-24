@@ -132,7 +132,8 @@ start`) after changing a template.
 
 ## Tools
 - [`tools/clear-guest-users.sh`](tools/clear-guest-users.sh) deletes guest users and unknown users
-  (no email or phone). Their `profiles` and `app_state` rows are deleted with them. It only lists
+  (no email or phone). Their `profiles` and `app_state` rows are deleted with them, and so are their
+  profile photos. It only lists
   them unless you pass `--delete`, and it asks before deleting. The hosted project needs
   `SUPABASE_SECRET_KEY` (Project Settings → API Keys → Secret keys); `--local` targets the local
   stack instead.
@@ -158,6 +159,18 @@ start`) after changing a template.
   sign-ins, or a guest adding an email, refresh it.
 - `UsersListView` calls the `touch_last_seen()` RPC and then reads `profiles`. It does this on
   appear, on pull-to-refresh, and whenever the app returns to the foreground.
+- **Profile photo:** tap a user to see their full-size photo. On your own profile, **Choose
+  Photo** opens the system photo picker, which needs no photo-library permission. `ProfilePhoto`
+  re-encodes the picked image, often HEIC, as two JPEGs:
+  - the full-resolution image
+  - a 256px center-cropped square thumbnail
+
+  Re-encoding applies the EXIF orientation and strips metadata such as GPS location.
+  `ProfilePhotoService` uploads both files to the public `avatars` bucket as
+  `<user id>/<random>-full.jpg` and `…-thumb.jpg`. It then sets `profiles.photo_path` and
+  `photo_thumb_path` and deletes the previous pair. The list loads only the thumbnails. Storage
+  policies (`schemas/30_profile_photos.sql`) limit each user to writing their own folder. Anyone
+  with a file's URL can view it, but the file names are random.
 
 Possible next steps:
 - **Guest upgrade:** let a guest add an email with `auth.updateUser(user: .init(email:))`. They

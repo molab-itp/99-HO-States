@@ -7,20 +7,43 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A106E6AB02BDEE1120B46AA /* AuthModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8828368D446530ABD9941A25 /* AuthModel.swift */; };
+		0E61A4C13B45C2776FBA24EF /* ProfileRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0E30655D99F901D84DEBC9 /* ProfileRow.swift */; };
+		17F19F73FFBB04A654C34A59 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F1F48655CA37791D5526FA /* RootView.swift */; };
+		31B282DC956358D3F22DADEF /* ProfilePhotoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3222C41E3DD9C49C641A46BA /* ProfilePhotoService.swift */; };
+		3D4FDDD30A927ADA3E2235C2 /* AppStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9B0E098A43E3FE343EA5A9 /* AppStateStore.swift */; };
+		47F7AC241CCD58DEF8537021 /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5CA6B0EE5CB932C816A0C7A /* Profile.swift */; };
+		4D07DDD5176CC552290F4FCC /* SetupRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C802EF34FDB47494CBFBCCDE /* SetupRequiredView.swift */; };
+		80B042CAE1358ACFFEF0173B /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8367BC704112A32029A5B6CA /* SupabaseConfig.swift */; };
+		8D8C90423C61EF820DD5B5E9 /* ProfilePhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4B8754208507E3EE0C6811 /* ProfilePhoto.swift */; };
 		91BD4A2C7385CAB656118C8A /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 82FD515D00AAB754E3538984 /* Supabase */; };
+		98AE3C113F40A7A56F551BED /* UsersListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8843C0B109504638F91A32F /* UsersListView.swift */; };
+		98D01E177BC30AEF32DE9FFC /* HOStatesUsersApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AEEFB3FE952198AC0B100E6 /* HOStatesUsersApp.swift */; };
+		D8EF1374BC635E449BC41640 /* ProfileDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A48568284B8F78119346A23F /* ProfileDetailView.swift */; };
+		DE72681D7D9CBD46616D3768 /* ProfilesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5578F47BFF601C5B12FFEAE6 /* ProfilesService.swift */; };
+		E9C519EC8858F761E079CC86 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5F6E5693B16BBF133BED3C /* SignInView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1C9B0E098A43E3FE343EA5A9 /* AppStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateStore.swift; sourceTree = "<group>"; };
+		2B5F6E5693B16BBF133BED3C /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		3222C41E3DD9C49C641A46BA /* ProfilePhotoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePhotoService.swift; sourceTree = "<group>"; };
+		37E31F9127E3B0DCDE92AD38 /* Supabase.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Supabase.plist; sourceTree = "<group>"; };
+		5578F47BFF601C5B12FFEAE6 /* ProfilesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilesService.swift; sourceTree = "<group>"; };
+		6281EECDE5DC4D64412D5A79 /* Supabase.example.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Supabase.example.plist; sourceTree = "<group>"; };
+		7AEEFB3FE952198AC0B100E6 /* HOStatesUsersApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HOStatesUsersApp.swift; sourceTree = "<group>"; };
+		8367BC704112A32029A5B6CA /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
+		8828368D446530ABD9941A25 /* AuthModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModel.swift; sourceTree = "<group>"; };
+		8B0E30655D99F901D84DEBC9 /* ProfileRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRow.swift; sourceTree = "<group>"; };
+		A48568284B8F78119346A23F /* ProfileDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDetailView.swift; sourceTree = "<group>"; };
+		C5CA6B0EE5CB932C816A0C7A /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
+		C802EF34FDB47494CBFBCCDE /* SetupRequiredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupRequiredView.swift; sourceTree = "<group>"; };
+		D3F1F48655CA37791D5526FA /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		D8843C0B109504638F91A32F /* UsersListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsersListView.swift; sourceTree = "<group>"; };
+		E9FDB5668CF6292CF5ADFC56 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		EB89F154C1D19FF43DC0C415 /* HO-States-Users.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "HO-States-Users.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FE4B8754208507E3EE0C6811 /* ProfilePhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePhoto.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		AB15391B3064BA1B00DE764A /* HOStatesUsers */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = HOStatesUsers;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		306B2FB5DA3B63ECBAF6F291 /* Frameworks */ = {
@@ -34,6 +57,45 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2FB559877ABC0F37E759EA05 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				1C9B0E098A43E3FE343EA5A9 /* AppStateStore.swift */,
+				8828368D446530ABD9941A25 /* AuthModel.swift */,
+				3222C41E3DD9C49C641A46BA /* ProfilePhotoService.swift */,
+				5578F47BFF601C5B12FFEAE6 /* ProfilesService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		5E037A366E2975349F8DD312 /* HOStatesUsers */ = {
+			isa = PBXGroup;
+			children = (
+				7AEEFB3FE952198AC0B100E6 /* HOStatesUsersApp.swift */,
+				E9FDB5668CF6292CF5ADFC56 /* Info.plist */,
+				6281EECDE5DC4D64412D5A79 /* Supabase.example.plist */,
+				37E31F9127E3B0DCDE92AD38 /* Supabase.plist */,
+				8367BC704112A32029A5B6CA /* SupabaseConfig.swift */,
+				E246D6B43E2A5DC2D1B76988 /* Models */,
+				2FB559877ABC0F37E759EA05 /* Services */,
+				B153A3FDF39DB4E600FE5B18 /* Views */,
+			);
+			path = HOStatesUsers;
+			sourceTree = "<group>";
+		};
+		B153A3FDF39DB4E600FE5B18 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A48568284B8F78119346A23F /* ProfileDetailView.swift */,
+				8B0E30655D99F901D84DEBC9 /* ProfileRow.swift */,
+				D3F1F48655CA37791D5526FA /* RootView.swift */,
+				C802EF34FDB47494CBFBCCDE /* SetupRequiredView.swift */,
+				2B5F6E5693B16BBF133BED3C /* SignInView.swift */,
+				D8843C0B109504638F91A32F /* UsersListView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		BBBCA7D0AA98DFD1812032D5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -42,10 +104,19 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		E246D6B43E2A5DC2D1B76988 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				C5CA6B0EE5CB932C816A0C7A /* Profile.swift */,
+				FE4B8754208507E3EE0C6811 /* ProfilePhoto.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		FE226FA7D131373B18698F09 = {
 			isa = PBXGroup;
 			children = (
-				AB15391B3064BA1B00DE764A /* HOStatesUsers */,
+				5E037A366E2975349F8DD312 /* HOStatesUsers */,
 				BBBCA7D0AA98DFD1812032D5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -64,9 +135,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				AB15391B3064BA1B00DE764A /* HOStatesUsers */,
 			);
 			name = "HO-States-Users";
 			packageProductDependencies = (
@@ -139,6 +207,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D4FDDD30A927ADA3E2235C2 /* AppStateStore.swift in Sources */,
+				0A106E6AB02BDEE1120B46AA /* AuthModel.swift in Sources */,
+				98D01E177BC30AEF32DE9FFC /* HOStatesUsersApp.swift in Sources */,
+				47F7AC241CCD58DEF8537021 /* Profile.swift in Sources */,
+				D8EF1374BC635E449BC41640 /* ProfileDetailView.swift in Sources */,
+				8D8C90423C61EF820DD5B5E9 /* ProfilePhoto.swift in Sources */,
+				31B282DC956358D3F22DADEF /* ProfilePhotoService.swift in Sources */,
+				0E61A4C13B45C2776FBA24EF /* ProfileRow.swift in Sources */,
+				DE72681D7D9CBD46616D3768 /* ProfilesService.swift in Sources */,
+				17F19F73FFBB04A654C34A59 /* RootView.swift in Sources */,
+				4D07DDD5176CC552290F4FCC /* SetupRequiredView.swift in Sources */,
+				E9C519EC8858F761E079CC86 /* SignInView.swift in Sources */,
+				80B042CAE1358ACFFEF0173B /* SupabaseConfig.swift in Sources */,
+				98AE3C113F40A7A56F551BED /* UsersListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

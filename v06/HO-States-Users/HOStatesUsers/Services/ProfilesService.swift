@@ -15,6 +15,16 @@ struct ProfilesService {
             .value
     }
 
+    func fetch(id: UUID) async throws -> Profile {
+        try await client
+            .from("profiles")
+            .select()
+            .eq("id", value: id)
+            .single()
+            .execute()
+            .value
+    }
+
     /// Marks the current user as active now, so the list reflects app opens and not just fresh
     /// sign-ins (a persisted session skips sign-in entirely).
     func touchLastSeen() async throws {

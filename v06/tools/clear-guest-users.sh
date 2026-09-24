@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Deletes guest users (anonymous sign-ins) and unknown users (no email, no phone) from Supabase
-# Auth. Their `profiles` and `app_state` rows go with them (`on delete cascade`).
+# Auth. Their `profiles` and `app_state` rows go with them (`on delete cascade`); their profile
+# photos in the `avatars` bucket are deleted first, since Storage files don't cascade.
 #
 # Uses the Auth Admin API, so it needs a secret key (never commit it):
 #   hosted:  Dashboard → Project Settings → API Keys → Secret keys (sb_secret_…)
@@ -46,6 +47,16 @@ headers=(-H "apikey: $key")
 
 api() { curl -sS --fail-with-body "${headers[@]}" "$@"; }
 
+# Deletes everything in a user's `avatars/<id>/` folder (see supabase/schemas/30_profile_photos.sql).
+delete_photos() {
+  local names
+  names=$(api -X POST "$url/storage/v1/object/list/avatars" -H 'Content-Type: application/json' \
+    -d "{\"prefix\":\"$1/\",\"limit\":1000}" | jq -c --arg id "$1" '[.[] | "\($id)/\(.name)"]')
+  [[ "$names" == "[]" ]] && return 0
+  api -X DELETE "$url/storage/v1/object/avatars" -H 'Content-Type: application/json' \
+    -d "{\"prefixes\":$names}" >/dev/null
+}
+
 # Collect every user, page by page.
 per_page=1000
 page=1
@@ -77,7 +88,7 @@ read -r -p "Delete these $count users? [y/N] " answer
 
 failed=0
 for id in $(jq -r '.[].id' <<<"$targets"); do
-  if api -X DELETE "$url/auth/v1/admin/users/$id" >/dev/null; then
+  if delete_photos "$id" && api -X DELETE "$url/auth/v1/admin/users/$id" >/dev/null; then
     echo "  deleted $id"
   else
     echo "  FAILED  $id" >&2

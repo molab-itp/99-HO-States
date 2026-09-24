@@ -395,11 +395,13 @@ jht1493@gmail.com
 jht9529@gmail.com
 jht9229@nyu.edu
 
+v06.69
+
+in v06 allow user to upload profile photo
+store profile photo at full resolution
+and create a thumb at lower resolution 
+use thumb to display in list of users
 
 
 
 
-# --
-append this chat to Log.md with date and time stamp
-with approximate time cost
-keep description short

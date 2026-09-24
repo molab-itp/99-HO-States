@@ -10,6 +10,7 @@ struct UsersListView: View {
     @State private var hasLoaded = false
 
     private var service: ProfilesService { ProfilesService(client: auth.client) }
+    private var photos: ProfilePhotoService { ProfilePhotoService(client: auth.client) }
 
     var body: some View {
         NavigationStack {
@@ -20,7 +21,13 @@ struct UsersListView: View {
                         .foregroundStyle(.red)
                 }
                 ForEach(profiles) { profile in
-                    ProfileRow(profile: profile, isCurrentUser: profile.id == currentUserID)
+                    NavigationLink(value: profile) {
+                        ProfileRow(
+                            profile: profile,
+                            isCurrentUser: profile.id == currentUserID,
+                            thumbURL: photos.publicURL(for: profile.photoThumbPath)
+                        )
+                    }
                 }
             }
             .overlay {
@@ -31,6 +38,11 @@ struct UsersListView: View {
                 }
             }
             .navigationTitle("Signed-on Users")
+            .navigationDestination(for: Profile.self) { profile in
+                ProfileDetailView(profile: profile, isCurrentUser: profile.id == currentUserID) {
+                    await reload()
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Sign Out") {

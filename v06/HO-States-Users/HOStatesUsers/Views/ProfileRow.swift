@@ -3,10 +3,12 @@ import SwiftUI
 struct ProfileRow: View {
     let profile: Profile
     let isCurrentUser: Bool
+    /// The uploaded photo's thumbnail; falls back to an avatar from the sign-in provider, if any.
+    let thumbURL: URL?
 
     var body: some View {
         HStack(spacing: 12) {
-            AsyncImage(url: profile.avatarURL) { image in
+            AsyncImage(url: thumbURL ?? profile.avatarURL) { image in
                 image.resizable().scaledToFill()
             } placeholder: {
                 Image(systemName: "person.crop.circle.fill")
