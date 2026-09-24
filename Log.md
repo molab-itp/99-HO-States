@@ -1602,3 +1602,14 @@ new Source Code link made the page taller. Added `.fixedSize(horizontal: false, 
 so the subtitle keeps its full height. Not built or checked in the simulator.
 
 **Cost**: ~2 minutes.
+
+# --
+
+2026-09-24 13:11 (v2: ZoomableHeaderImage drag outside visible image)
+
+When zoomed in, a drag that started outside the visible image still panned it. `.clipShape`
+only clips what's drawn, not where touches land. Added a matching
+`.contentShape(RoundedRectangle(cornerRadius: 12))` so only the visible frame responds to
+gestures. Builds for the simulator; not checked by hand. Panning still has no limits.
+
+**Cost**: ~5 minutes.

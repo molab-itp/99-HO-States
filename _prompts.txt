@@ -455,3 +455,7 @@ in v2 PresidentRow gather the reaction emojis as a string and
 display right justified after to president.term
 
 USnA Heads
+
+v02.74
+
+in v2 ZoomableHeaderImage dragging starts outside the visible part of the image

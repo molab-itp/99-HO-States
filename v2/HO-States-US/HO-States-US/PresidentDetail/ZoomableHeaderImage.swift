@@ -29,6 +29,10 @@ struct ZoomableHeaderImage: View {
                     .scaleEffect(scale)
                     .offset(offset)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    // clipShape only clips drawing, not hit-testing: without this the scaled/offset
+                    // content still receives touches outside the visible frame, so drags starting
+                    // on neighboring views (progress bar, summary text) would pan the image.
+                    .contentShape(RoundedRectangle(cornerRadius: 12))
                     .onTapGesture(count: 2) { toggleZoom() }
 
                 // Panning only makes sense once zoomed in; leaving the drag gesture off entirely at
