@@ -16,8 +16,10 @@ v06/
     migrations/*.sql       ← generated from schemas/ (don't hand-edit, except auth.* triggers)
     seed.sql
   HO-States-Users/
-    project.yml            xcodegen spec → HO-States-Users.xcodeproj
+    HO-States-Users.xcodeproj   folder-synced: files added under HOStatesUsers/ join the app
+    project.yml            old xcodegen spec, retired (running it undoes folder mode)
     HOStatesUsers/         app sources; Supabase.plist (gitignored) holds URL + key
+      Assets.xcassets/AppIcon.appiconset   app icon: one 1024×1024 PNG, no transparency
 ```
 
 ## Database architecture: rapid schema changes with few migrations
@@ -122,7 +124,7 @@ Any SMTP provider works (Postmark, Brevo, Amazon SES, …).
    `com.jht1900.HO-States-Users` (the app's bundle id) to **Client IDs**. The native flow sends
    Apple's ID token straight to Supabase, so the Services ID, secret key and callback URL fields
    aren't needed; they're only for web sign-in (v05 later).
-2. The app's `HOStatesUsers.entitlements` (written by xcodegen from `project.yml`) has the
+2. The app's `HOStatesUsers/HOStatesUsers.entitlements` has the
    Sign in with Apple capability. With automatic signing, Xcode turns it on for the App ID in
    team `3RCW2SSL8G`. Otherwise enable it at developer.apple.com → Identifiers.
 3. Push the trigger change: `npx supabase db push` (`migrations/20260924000000_apple_sign_in.sql`).
@@ -133,9 +135,16 @@ The simulator needs to be signed in to an Apple Account (Settings) to test this.
 ```sh
 cd v06/HO-States-Users
 cp HOStatesUsers/Supabase.example.plist HOStatesUsers/Supabase.plist   # fill in URL + publishable key
-xcodegen generate            # only needed after adding/removing Swift files
 open HO-States-Users.xcodeproj
 ```
+The project uses Xcode's synchronized folder, so adding or removing files under `HOStatesUsers/`
+needs no project change. It copies everything there into the app except `Info.plist` and
+`Supabase*.plist`, which are excluded in the target's folder exceptions. The "Copy Supabase.plist
+if present" build script bundles `Supabase.plist` only when it exists.
+
+To change the app icon, replace `Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png` with another
+1024×1024 PNG that has no alpha channel (App Store requirement), keeping the name. Or drag an
+image onto the AppIcon well in Xcode.
 Without `Supabase.plist`, the app still builds and runs, and shows a "Supabase not configured"
 screen.
 
@@ -163,7 +172,7 @@ start`) after changing a template.
   simulator.
 - **Magic link (not in the current email):** the app still handles a sign-in link, in case a
   template adds `{{ .ConfirmationURL }}` back. Tapping it goes through Supabase and reopens the
-  app at `hostates://auth-callback?code=…`. The scheme is registered in `project.yml`, and `.onOpenURL`
+  app at `hostates://auth-callback?code=…`. The scheme is registered in `Info.plist`, and `.onOpenURL`
   calls `AuthModel.handleAuthCallback`, which exchanges the code with `session(from:)`. The link
   uses PKCE, so it only works on the device and app install that asked for it. v05 (web) uses the
   same call with its own URL as `redirectTo`.

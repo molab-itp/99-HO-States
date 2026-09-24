@@ -1,5 +1,6 @@
-# Source of truth for HO-States-Users.xcodeproj. Regenerate after adding/removing files:
-#   xcodegen generate
+# RETIRED: HO-States-Users.xcodeproj is now edited in Xcode and uses a synchronized folder.
+# Don't run `xcodegen generate`: it would overwrite the project and undo folder mode, the
+# Resources phase and the app icon setup. Kept only as a record of the original settings.
 name: HO-States-Users
 options:
   bundleIdPrefix: com.jht1900

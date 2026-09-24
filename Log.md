@@ -1579,3 +1579,16 @@ a README setup step. Builds for the simulator. Not tested end to end yet: the Ap
 needs turning on in the dashboard, and `db push` still needs to run.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-09-24 06:30 (v06: app icon, folder-mode project fixes)
+
+Added the app icon: `Assets.xcassets/AppIcon.appiconset` with one 1024px PNG, made from
+`Log-screens/2026-09-24-HOS-User-1024.png` with its (fully opaque) alpha channel removed. The
+folder-mode Xcode project had no Resources build phase, so nothing except Swift files was copied
+into the app. Added one, and excluded `Info.plist` and `Supabase*.plist` from it. Checked that the
+simulator build contains the icon. Marked `project.yml` as retired (running xcodegen would undo
+folder mode) and updated the README.
+
+**Cost**: ~10 minutes.
