@@ -445,3 +445,7 @@ Both projects build their Info.plist the same way, with `GENERATE_INFOPLIST_FILE
 
 Only `CFBundleURLTypes` requires the file. The encryption key I just added could live in either place. To match v2, I could move it to `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO` in build settings and leave only the URL scheme in the file.
 
+v02.72
+
+Text is clipped in HomeView "Browse portraits and biographies...
+

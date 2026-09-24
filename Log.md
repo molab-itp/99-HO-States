@@ -1592,3 +1592,13 @@ simulator build contains the icon. Marked `project.yml` as retired (running xcod
 folder mode) and updated the README.
 
 **Cost**: ~10 minutes.
+
+# --
+
+2026-09-24 12:23 (v2: HomeView subtitle clipped)
+
+The "Browse portraits and biographies…" subtitle in `v2/.../HomeView.swift` was cut off after the
+new Source Code link made the page taller. Added `.fixedSize(horizontal: false, vertical: true)`
+so the subtitle keeps its full height. Not built or checked in the simulator.
+
+**Cost**: ~2 minutes.

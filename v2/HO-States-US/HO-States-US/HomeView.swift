@@ -2,7 +2,10 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(AppModel.self) private var appModel
-    private let sourceURL = URL(string: "https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States")!
+    
+    private let sourceDataURL = URL(string: "https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States")!
+    private let sourceCodeURL = URL(string: "https://github.com/molab-itp/99-HO-States")!
+
     @State private var path = NavigationPath()
     @State private var isRandomMode = false
     // Set right before pushing a president to kick off a slideshow (carrying whether it should
@@ -22,15 +25,16 @@ struct HomeView: View {
                     .font(.system(size: 72))
                     .foregroundStyle(.tint)
                 
-                Text("USNA Heads")
+                Text("USnA Heads")
                     .font(.largeTitle.bold())
                 
-                Text("Browse portraits and biographies of every United States of North America Head of State.")
+                Text("Browse portraits and biographies of every United States of North America \nHead of State.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 32)
-                
+
                 Spacer()
                 
                 VStack(spacing: 16) {
@@ -64,11 +68,6 @@ struct HomeView: View {
                 .controlSize(.large)
                 .padding(.horizontal, 32)
                 
-                Link(destination: sourceURL) {
-                    Label("Source: Wikipedia", systemImage: "link")
-                        .font(.footnote)
-                }
-                .padding(.top, 8)
                 VStack(spacing: 4) {
                     Text("\(remainingCount) left to see")
                         .font(.callout.weight(.medium))
@@ -76,6 +75,17 @@ struct HomeView: View {
                         appModel.resetViewed()
                     }
                     .font(.footnote)
+                }
+                VStack(spacing: 4) {
+                    Link(destination: sourceDataURL) {
+                        Label("Data Source: Wikipedia", systemImage: "link")
+                            .font(.footnote)
+                    }
+                    //                .padding(.top, 8)
+                    Link(destination: sourceCodeURL) {
+                        Label("Source Code", systemImage: "link")
+                            .font(.footnote)
+                    }
                 }
                 
                 Text(appModel.buildInfo)
