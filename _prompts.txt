@@ -464,3 +464,22 @@ v05.75
 
 sync web ab in v05 with changes to v2
 
+v02.76
+
+in v2 PresidentDetailView.swift
+add a pencil icon that jumps to
+an image edit page where president photo
+is overlayed with PencilKit drawing layer
+that allows user to draw on photo
+drawing is saved as png to local storage
+in photo subfolder and linked to president saved data
+include button to clear drawing layer
+when detail view show drawing layer if present
+
+why didn't you run and test the app 
+
+> I skipped it to save time.
+
+save ok now.
+
+president photo is longer draggable

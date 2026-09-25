@@ -15,6 +15,7 @@ struct PresidentDetailView: View {
     // recreated (e.g. a sequential slideshow that's stopped and restarted resumes from it).
     @State private var index: Int
     @State private var detailsVisible = false
+    @State private var isDrawingEditorPresented = false
 
     private let slideshowIntervalTenths = 50 // 5.0 seconds
     @State private var isSlideshowActive: Bool
@@ -91,6 +92,11 @@ struct PresidentDetailView: View {
             stopSlideshowTimer()
         }
         .navigationBarTitleDisplayMode(.inline)
+        // Pushing the editor fires `onDisappear` above, which stops a running slideshow's timer
+        // so the president can't change mid-drawing; `onAppear` restarts it on return.
+        .navigationDestination(isPresented: $isDrawingEditorPresented) {
+            PresidentDrawingEditorView(president: president)
+        }
         .toolbar {
             ToolbarItem(placement: .principal) {
                 PresidentDetailTitleView(
@@ -98,6 +104,13 @@ struct PresidentDetailView: View {
                     buildInfo: appModel.buildInfo,
                     slideshowRemainingTenths: isSlideshowActive ? slideshowRemainingTenths : nil
                 )
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    isDrawingEditorPresented = true
+                } label: {
+                    Label("Draw on Photo", systemImage: "pencil.tip.crop.circle")
+                }
             }
             PresidentDetailToolbar(
                 isSlideshowActive: isSlideshowActive,

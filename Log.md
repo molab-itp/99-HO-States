@@ -1628,3 +1628,18 @@ touches to the visible image. Build and `npm run smoke` pass; checked the list w
 reactions in a screenshot.
 
 **Cost**: ~10 minutes.
+
+# --
+
+2026-09-25 05:24 (v2: draw on president photo with PencilKit)
+
+Added a pencil button to the detail view. It opens a new `PresidentDrawingEditorView` with a
+PencilKit layer over the photo, a Clear button, and Done. The drawing saves when you leave the
+editor; leaving it empty deletes the saved drawing. Files go in Application Support/Photos (a PNG
+plus the editable strokes). `AppModel.drawingFileNames` links them to each president and is
+saved in AppState.json. `ZoomableHeaderImage` shows the PNG over the portrait, and it zooms and
+pans with it. Saving crashed (SIGABRT) on the Large portraits because the PNG was rendered past
+PencilKit's ~8192px limit, so the PNG's long side is now fixed at 2048px. Builds for the
+simulator; the fix is not checked on a device.
+
+**Cost**: ~20 minutes.

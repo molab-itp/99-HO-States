@@ -22,6 +22,16 @@ struct ZoomableHeaderImage: View {
                 let scaledImage = image
                     .resizable()
                     .scaledToFit()
+                    // The drawing PNG has the portrait's aspect ratio, so fitting it into the same
+                    // frame lines it up exactly, and applying it before `scaleEffect`/`offset`
+                    // makes it zoom and pan together with the photo.
+                    .overlay {
+                        if let drawing = appModel.drawingImage(for: president) {
+                            Image(uiImage: drawing)
+                                .resizable()
+                                .scaledToFit()
+                        }
+                    }
                     .frame(maxWidth: .infinity)
                     // Scale/offset are applied *before* the clip below, so the clip's rounded-rect
                     // bounds stay fixed to the original frame while the pinched/panned content moves

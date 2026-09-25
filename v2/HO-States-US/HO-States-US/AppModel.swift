@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import UIKit
 
 /// App-wide state shared via the SwiftUI environment. Owns the loaded president list and a
 /// shuffled draw order used by every "Random" control (`HomeView`'s Random President button,
@@ -41,6 +42,15 @@ final class AppModel {
     /// shows the same zoom/pan as when it was last left. A president with no entry (never zoomed,
     /// or reset back to 1x) renders at the default 1x/no-offset.
     private(set) var imageZoomStates: [President.ID: ImageZoomState] = [:]
+
+    /// PNG file name (inside `PresidentDrawingStore`'s Photos folder) of each president's saved
+    /// photo drawing, overlaid on the portrait by `ZoomableHeaderImage`. No entry means no drawing.
+    private(set) var drawingFileNames: [President.ID: String] = [:]
+
+    /// Bumped on every drawing save/clear. A re-saved drawing keeps the same file name, so this is
+    /// what tells views reading `drawingImage(for:)` that the image behind that name changed.
+    private var drawingRevision = 0
+    @ObservationIgnored private var drawingImageCache: [President.ID: UIImage] = [:]
 
     var buildInfo:String {
         "[\(cycleCount)|\(Self.bundleVersion())]"
@@ -85,6 +95,29 @@ final class AppModel {
         imageZoomStates[president.id] = state
     }
 
+    /// The saved drawing PNG for `president`, loaded from disk once and then cached, since the
+    /// header image reads this on every body pass (including each frame of a pinch or pan).
+    func drawingImage(for president: President) -> UIImage? {
+        _ = drawingRevision
+        guard let fileName = drawingFileNames[president.id] else { return nil }
+        if let cached = drawingImageCache[president.id] {
+            return cached
+        }
+        let image = PresidentDrawingStore.loadImage(named: fileName)
+        drawingImageCache[president.id] = image
+        return image
+    }
+
+    /// Links (or, with `nil`, unlinks) a drawing PNG already written by `PresidentDrawingStore`.
+    /// Unlike other state, this persists immediately: the PNG is already on disk, and losing the
+    /// link to it if the app were killed before backgrounding would orphan the user's drawing.
+    func setDrawingFileName(_ fileName: String?, for president: President) {
+        drawingFileNames[president.id] = fileName
+        drawingImageCache[president.id] = nil
+        drawingRevision += 1
+        persistState()
+    }
+
     /// Returns the next president in the current shuffle order, wrapping back to its start once
     /// every index has been served. Never reshuffles — only `resetViewed()` deals a new
     /// permutation — so resuming a random-mode slideshow just continues walking the same order.
@@ -126,8 +159,8 @@ final class AppModel {
 
     // MARK: - Persistence
     //
-    // Only `slideIndex`, the shuffle state (`shuffledIndexes`/`nextShuffleIndex`), and
-    // `reactions` survive across app launches — enough to resume browsing where the user left
+    // Only `slideIndex`, the shuffle state (`shuffledIndexes`/`nextShuffleIndex`), `reactions`,
+    // `imageZoomStates`, and `drawingFileNames` survive across app launches — enough to resume browsing where the user left
     // off and keep their feedback, without also persisting `viewedPresidentIDs`/`cycleCount`
     // (not asked for, and would make "Reset Visit Count" behave inconsistently across launches).
     //
@@ -146,6 +179,9 @@ final class AppModel {
         var reactions: [String: [PresidentReaction]]
         /// String-keyed for the same reason as `reactions` above.
         var imageZoomStates: [String: ImageZoomState]
+        /// String-keyed like `reactions`. Optional so a state file written before drawings
+        /// existed still decodes instead of discarding everything else in it.
+        var drawingFileNames: [String: String]?
     }
 
     private static func stateFileURL() -> URL {
@@ -174,6 +210,9 @@ final class AppModel {
         imageZoomStates = Dictionary(uniqueKeysWithValues: state.imageZoomStates.compactMap { key, value in
             Int(key).map { ($0, value) }
         })
+        drawingFileNames = Dictionary(uniqueKeysWithValues: (state.drawingFileNames ?? [:]).compactMap { key, value in
+            Int(key).map { ($0, value) }
+        })
     }
 
     /// Writes the current resumable state to disk. See the note above `PersistedState` — call
@@ -184,7 +223,8 @@ final class AppModel {
             shuffledIndexes: shuffledIndexes,
             nextShuffleIndex: nextShuffleIndex,
             reactions: Dictionary(uniqueKeysWithValues: reactions.map { (String($0.key), $0.value) }),
-            imageZoomStates: Dictionary(uniqueKeysWithValues: imageZoomStates.map { (String($0.key), $0.value) })
+            imageZoomStates: Dictionary(uniqueKeysWithValues: imageZoomStates.map { (String($0.key), $0.value) }),
+            drawingFileNames: Dictionary(uniqueKeysWithValues: drawingFileNames.map { (String($0.key), $0.value) })
         )
         guard let data = try? JSONEncoder().encode(state) else { return }
         try? data.write(to: Self.stateFileURL(), options: .atomic)
