@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Merge the current branch into main, using the last vNN.NN entry
-# in _prompts.txt as the merge commit message, then switch back.
+# Commit and push the current branch, then merge it into main, using the
+# last vNN.NN entry in _prompts.txt as the commit message, push main,
+# then switch back.
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
@@ -11,12 +12,6 @@ MAIN=main
 branch=$(git rev-parse --abbrev-ref HEAD)
 if [ "$branch" = "$MAIN" ]; then
   echo "Already on $MAIN; switch to the branch to publish." >&2
-  exit 1
-fi
-
-if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
-  echo "Working tree has uncommitted changes; commit them first." >&2
-  git status --short --untracked-files=no >&2
   exit 1
 fi
 
@@ -37,9 +32,18 @@ echo "----"
 echo "$msg"
 echo "----"
 
+# Commit any pending changes on the branch, then push it.
+git add -A
+if ! git diff --cached --quiet; then
+  git commit -m "$msg"
+fi
+git push origin "$branch"
+
 git switch "$MAIN"
 trap 'git switch "$branch"' EXIT
 
-git merge --no-ff "$branch" -F <(printf "%s\n\n(merge %s)\n" "$msg" "$branch")
+git merge --no-ff "$branch" -m "$msg"
 
-echo "Merged $branch into $MAIN."
+git push origin "$MAIN"
+
+echo "Merged $branch into $MAIN and pushed."
