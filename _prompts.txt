@@ -547,3 +547,8 @@ v05.85
 
 in v05 adjust css so that on display 1080 wide  x 1920 tall
 the image and text fills most of the screen
+
+v05.86
+
+in v05 on mobile don't do default pan and zoom when 
+touch on image. 
