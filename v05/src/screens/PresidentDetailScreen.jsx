@@ -9,9 +9,10 @@ import ReactionControl from '../components/ReactionControl.jsx';
 import Icon from '../components/Icon.jsx';
 import PresidentDrawingEditor from '../components/PresidentDrawingEditor.jsx';
 import { useStoredBoolean } from '../state/useStoredBoolean.js';
+import { useStoredNumber } from '../state/useStoredNumber.js';
+import { SlideshowSettings } from '../state/slideshowSettings.js';
 
-const DETAIL_REVEAL_DELAY_MS = 2000; // matches Swift's `delaySecs`
-const SLIDESHOW_INTERVAL_TENTHS = 50; // 5.0 seconds, matches PresidentDetailView's slideshowIntervalTenths
+const SLIDESHOW_TICK_SECS = 0.1; // matches PresidentDetailView's slideshowTickSecs
 
 /**
  * Port of PresidentDetailView.swift. `selected` is the president this screen was pushed with.
@@ -42,10 +43,22 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
     return found >= 0 ? found : 0;
   })();
 
+  // Chosen on Home; read-only here. Seconds to wait before fading in the details is the interval
+  // times the chosen fraction, matching Swift's computed `delaySecs`.
+  const [slideshowIntervalSecs] = useStoredNumber(
+    SlideshowSettings.intervalSecsKey,
+    SlideshowSettings.defaultIntervalSecs,
+  );
+  const [delayFraction] = useStoredNumber(
+    SlideshowSettings.delayFractionKey,
+    SlideshowSettings.defaultDelayFraction,
+  );
+  const delaySecs = slideshowIntervalSecs * delayFraction;
+
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [isSlideshowActive] = useState(startSlideshow);
   const [isSlideshowPaused, setIsSlideshowPaused] = useState(false);
-  const [remainingTenths, setRemainingTenths] = useState(SLIDESHOW_INTERVAL_TENTHS);
+  const [remainingSecs, setRemainingSecs] = useState(slideshowIntervalSecs);
   const [isDrawingEditorOpen, setIsDrawingEditorOpen] = useState(false);
   // Port of `@AppStorage("showsDrawings")`: shared across presidents and reloads, so hiding
   // drawings stays in effect while browsing.
@@ -67,7 +80,7 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
     setDetailsVisible(false);
     const timer = setTimeout(() => {
       if (!cancelled) setDetailsVisible(true);
-    }, DETAIL_REVEAL_DELAY_MS);
+    }, delaySecs * 1000);
     return () => {
       cancelled = true;
       clearTimeout(timer);
@@ -119,29 +132,30 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
   // equivalent of the Swift editor push firing `onDisappear` and stopping the timer.
   tickRef.current = () => {
     if (isSlideshowPaused || isDrawingEditorOpen) return;
-    setRemainingTenths((prev) => Math.max(0, prev - 1));
+    setRemainingSecs((prev) => Math.max(0, prev - SLIDESHOW_TICK_SECS));
   };
 
   useEffect(() => {
     if (!isSlideshowActive) return undefined;
-    const id = setInterval(() => tickRef.current(), 100);
+    const id = setInterval(() => tickRef.current(), SLIDESHOW_TICK_SECS * 1000);
     return () => clearInterval(id);
   }, [isSlideshowActive]);
 
   // Advances exactly once each time the countdown reaches zero. A plain `useEffect` keyed on the
   // resulting value only reacts to genuine changes (unlike a functional updater, which StrictMode
-  // double-invokes), so this can't double-fire the way the inline version above did.
+  // double-invokes), so this can't double-fire the way the inline version above did. Half-tick
+  // tolerance absorbs floating-point drift from repeated subtraction.
   useEffect(() => {
-    if (!isSlideshowActive || remainingTenths > 0) return;
+    if (!isSlideshowActive || remainingSecs >= SLIDESHOW_TICK_SECS / 2) return;
     setNav((prevNav) => advanceForward(prevNav));
-    setRemainingTenths(SLIDESHOW_INTERVAL_TENTHS);
+    setRemainingSecs(slideshowIntervalSecs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [remainingTenths, isSlideshowActive]);
+  }, [remainingSecs, isSlideshowActive]);
 
   function goToPrevious() {
     if (isSlideshowActive) {
       setNav((prevNav) => stepBackward(prevNav));
-      setRemainingTenths(SLIDESHOW_INTERVAL_TENTHS);
+      setRemainingSecs(slideshowIntervalSecs);
     } else if (!isFirst) {
       setNav((prevNav) => ({ ...prevNav, index: prevNav.index - 1 }));
     }
@@ -150,7 +164,7 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
   function goToNext() {
     if (isSlideshowActive) {
       setNav((prevNav) => advanceForward(prevNav));
-      setRemainingTenths(SLIDESHOW_INTERVAL_TENTHS);
+      setRemainingSecs(slideshowIntervalSecs);
     } else if (!isLast) {
       setNav((prevNav) => ({ ...prevNav, index: prevNav.index + 1 }));
     }
@@ -167,7 +181,7 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
 
   const orderText = String(president.order).padStart(2, '0');
   const title = isSlideshowActive
-    ? `#${orderText} · ${(remainingTenths / 10).toFixed(1).padStart(4, '0')}s ${buildInfo}`
+    ? `#${orderText} · ${remainingSecs.toFixed(1).padStart(4, '0')}s ${buildInfo}`
     : `#${orderText} ${buildInfo}`;
 
   const imageSrc = president.large || president.thumbnail;

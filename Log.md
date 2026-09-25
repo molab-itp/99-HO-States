@@ -1677,3 +1677,14 @@ counts in seconds instead of tenths, and the delay is the interval times the cho
 (default 0.5). Builds for the simulator; not run in the app.
 
 **Cost**: ~6 minutes.
+
+# --
+
+2026-09-25 07:55 (v05: sync slideshow interval and delay settings from v2)
+
+Ported v02.79 to the web app. Home has new Slide Interval (5, 10, 15s) and Fadein Delay (0.1,
+0.2, 0.5 of the interval) pickers, saved in localStorage. The detail screen counts down in seconds
+and fades in details after interval × fraction. Bumped to 0.1.10. Build and `npm run smoke` pass,
+with a new step for the settings.
+
+**Cost**: ~8 minutes.

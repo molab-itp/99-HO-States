@@ -6,9 +6,9 @@ enum SlideshowSettings {
     static let intervalSecsKey = "slideshowIntervalSecs"
     static let delayFractionKey = "slideshowDelayFraction"
     static let intervalSecsOptions: [Double] = [5, 10, 15]
-    static let delayFractionOptions: [Double] = [0.1, 0.2, 0.5]
+    static let delayFractionOptions: [Double] = [0.1, 0.2, 0.4]
     static let defaultIntervalSecs: Double = 5
-    static let defaultDelayFraction: Double = 0.5
+    static let defaultDelayFraction: Double = 0.4
 }
 
 struct PresidentDetailView: View {

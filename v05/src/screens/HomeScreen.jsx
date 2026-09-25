@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useAppModel } from '../state/AppModelContext.jsx';
 import { useNavigation } from '../navigation/NavigationContext.jsx';
 import Icon from '../components/Icon.jsx';
+import SegmentedPicker from '../components/SegmentedPicker.jsx';
+import { SlideshowSettings } from '../state/slideshowSettings.js';
+import { useStoredNumber } from '../state/useStoredNumber.js';
 
 const SOURCE_DATA_URL = 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States';
 const SOURCE_CODE_URL = 'https://github.com/molab-itp/99-HO-States';
@@ -10,6 +13,14 @@ export default function HomeScreen() {
   const { presidents, viewedIDs, nextRandomPresident, resetViewed, slideIndex, buildInfo } = useAppModel();
   const { pushList, replaceWithDetail } = useNavigation();
   const [isRandomMode, setIsRandomMode] = useState(false);
+  const [slideshowIntervalSecs, setSlideshowIntervalSecs] = useStoredNumber(
+    SlideshowSettings.intervalSecsKey,
+    SlideshowSettings.defaultIntervalSecs,
+  );
+  const [delayFraction, setDelayFraction] = useStoredNumber(
+    SlideshowSettings.delayFractionKey,
+    SlideshowSettings.defaultDelayFraction,
+  );
 
   const remainingCount = presidents.length - viewedIDs.size;
 
@@ -53,6 +64,20 @@ export default function HomeScreen() {
             <span className="switch-thumb" />
           </span>
         </label>
+        <SegmentedPicker
+          label="Slide Interval"
+          options={SlideshowSettings.intervalSecsOptions}
+          value={slideshowIntervalSecs}
+          onChange={setSlideshowIntervalSecs}
+          formatOption={(secs) => `${secs}s`}
+        />
+        <SegmentedPicker
+          label="Fadein Delay"
+          options={SlideshowSettings.delayFractionOptions}
+          value={delayFraction}
+          onChange={setDelayFraction}
+          formatOption={(fraction) => `${(slideshowIntervalSecs * fraction).toFixed(1)}s`}
+        />
         <button className="btn btn-bordered" onClick={startSlideshow}>
           <Icon name="play-circle-fill" />
           Start Slideshow

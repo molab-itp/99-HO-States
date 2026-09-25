@@ -131,6 +131,35 @@ async function main() {
     await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
 
+    console.log('Slide Interval / Fadein Delay pickers persist and drive the detail screen...');
+    await page.click('.segmented[aria-label="Slide Interval"] >> text=10s');
+    const delayLabels = await page.locator('.segmented[aria-label="Fadein Delay"] .segment').allTextContents();
+    assert(delayLabels.join(',') === '1.0s,2.0s,5.0s', `delay labels should scale with a 10s interval: got ${delayLabels}`);
+    await page.click('.segmented[aria-label="Fadein Delay"] >> text=1.0s');
+    await page.reload();
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+    assert(
+      (await page.locator('.segmented[aria-label="Slide Interval"] .segment.selected').textContent()) === '10s',
+      'Slide Interval should survive a reload',
+    );
+    assert(
+      (await page.locator('.segmented[aria-label="Fadein Delay"] .segment.selected').textContent()) === '1.0s',
+      'Fadein Delay should survive a reload',
+    );
+    await shot('home-slideshow-settings');
+    await page.click('button:has-text("Start Slideshow")');
+    await page.waitForSelector('.nav-title-mono', { timeout: 4000 });
+    const tenSecTitle = await page.locator('.nav-title-mono').textContent();
+    const tenSecRemaining = parseFloat(tenSecTitle.split('· ')[1]);
+    assert(tenSecRemaining > 5, `10s interval countdown should start above 5s: got ${JSON.stringify(tenSecTitle)}`);
+    // Fadein Delay of 1.0s: details show well before the old fixed 2s reveal.
+    await page.waitForSelector('.detail-text.visible', { timeout: 1600 });
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+    // Back to the defaults so the natural-tick test below waits out 5s, not 10s.
+    await page.click('.segmented[aria-label="Slide Interval"] >> text=5s');
+    await page.click('.segmented[aria-label="Fadein Delay"] >> text=2.5s');
+
     // `slideIndex` (which president a sequential slideshow resumes at) persists across the whole
     // session — earlier steps above (list row, Next/Previous/Random, Random Head) already moved
     // it around — so reset first to get a deterministic #01 start for this section.
