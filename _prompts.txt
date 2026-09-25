@@ -486,6 +486,22 @@ v02.77
 
 add a hide/show draw layer to PresidentDetailView
 
-v05.78
+v05.78 -- branch
 
 sync web app in v05 with changes to v2
+
+v02.79
+
+in v2 on HomeView
+in PresidentDetailView make seconds basic unit
+for values slideshowIntervalTenths delaySecs
+add ui to select values for 
+ slideshowIntervalSecs (5, 10, 15 sec)  
+ delaySecs (0.1, 0.2, 0.5 factions of slideshowIntervalSecs )
+ used in PresidentDetailView
+persist these values
+
+v05.80
+
+sync web app in v05 with changes to v2
+

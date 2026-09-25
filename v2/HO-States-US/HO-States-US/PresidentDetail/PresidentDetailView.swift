@@ -1,6 +1,15 @@
 import SwiftUI
 
-let delaySecs: UInt64 = 2
+/// Persisted slideshow timing, chosen on `HomeView` and used by `PresidentDetailView`. Seconds are
+/// the basic unit; the details delay is stored as a fraction of the slideshow interval.
+enum SlideshowSettings {
+    static let intervalSecsKey = "slideshowIntervalSecs"
+    static let delayFractionKey = "slideshowDelayFraction"
+    static let intervalSecsOptions: [Double] = [5, 10, 15]
+    static let delayFractionOptions: [Double] = [0.1, 0.2, 0.5]
+    static let defaultIntervalSecs: Double = 5
+    static let defaultDelayFraction: Double = 0.5
+}
 
 struct PresidentDetailView: View {
     @Environment(AppModel.self) private var appModel
@@ -19,11 +28,18 @@ struct PresidentDetailView: View {
     // Shared across presidents and launches, so hiding drawings stays in effect while browsing.
     @AppStorage("showsDrawings") private var showsDrawings = true
 
-    private let slideshowIntervalTenths = 50 // 5.0 seconds
+    @AppStorage(SlideshowSettings.intervalSecsKey)
+    private var slideshowIntervalSecs = SlideshowSettings.defaultIntervalSecs
+    @AppStorage(SlideshowSettings.delayFractionKey)
+    private var delayFraction = SlideshowSettings.defaultDelayFraction
+    /// Seconds to wait after a president appears before fading in the details.
+    private var delaySecs: Double { slideshowIntervalSecs * delayFraction }
+
+    private let slideshowTickSecs = 0.1
     @State private var isSlideshowActive: Bool
     @State private var isSlideshowPaused = false
     @State private var slideshowTimer: Timer?
-    @State private var slideshowRemainingTenths = 0
+    @State private var slideshowRemainingSecs = 0.0
 
     // Indices visited during this slideshow's random walk (in random mode only), so Previous can
     // step back through them and Next can replay forward instead of always drawing a fresh card.
@@ -74,7 +90,7 @@ struct PresidentDetailView: View {
         .task(id: index) {
             appModel.markViewed(president, resetIfComplete: isSlideshowActive)
             detailsVisible = false
-            try? await Task.sleep(nanoseconds: delaySecs * 1_000_000_000)
+            try? await Task.sleep(for: .seconds(delaySecs))
             guard !Task.isCancelled else { return }
             withAnimation(.easeIn(duration: 0.5)) {
                 detailsVisible = true
@@ -104,7 +120,7 @@ struct PresidentDetailView: View {
                 PresidentDetailTitleView(
                     order: president.order,
                     buildInfo: appModel.buildInfo,
-                    slideshowRemainingTenths: isSlideshowActive ? slideshowRemainingTenths : nil
+                    slideshowRemainingSecs: isSlideshowActive ? slideshowRemainingSecs : nil
                 )
             }
             if appModel.drawingImage(for: president) != nil {
@@ -210,8 +226,8 @@ struct PresidentDetailView: View {
     }
 
     private func beginSlideshowTimer() {
-        slideshowRemainingTenths = slideshowIntervalTenths
-        let timer = Timer(timeInterval: 0.1, repeats: true) { _ in
+        slideshowRemainingSecs = slideshowIntervalSecs
+        let timer = Timer(timeInterval: slideshowTickSecs, repeats: true) { _ in
             Task { @MainActor in
                 tickSlideshow()
             }
@@ -222,15 +238,16 @@ struct PresidentDetailView: View {
 
     private func tickSlideshow() {
         guard !isSlideshowPaused else { return }
-        slideshowRemainingTenths -= 1
-        if slideshowRemainingTenths <= 0 {
+        slideshowRemainingSecs = max(0, slideshowRemainingSecs - slideshowTickSecs)
+        // Half-tick tolerance absorbs floating-point drift from repeated subtraction.
+        if slideshowRemainingSecs < slideshowTickSecs / 2 {
             advanceSlideshow()
             restartSlideshowCountdown()
         }
     }
 
     private func restartSlideshowCountdown() {
-        slideshowRemainingTenths = slideshowIntervalTenths
+        slideshowRemainingSecs = slideshowIntervalSecs
     }
 
     private func toggleSlideshowPause() {

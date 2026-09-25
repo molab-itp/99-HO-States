@@ -12,6 +12,10 @@ struct HomeView: View {
     // run in random mode), and cleared whenever navigation returns to Home, so that an ordinary
     // list tap or the "Random Head" button never accidentally lands in slideshow mode.
     @State private var pendingSlideshow: Bool?
+    @AppStorage(SlideshowSettings.intervalSecsKey)
+    private var slideshowIntervalSecs = SlideshowSettings.defaultIntervalSecs
+    @AppStorage(SlideshowSettings.delayFractionKey)
+    private var delayFraction = SlideshowSettings.defaultDelayFraction
     private var remainingCount: Int {
         appModel.presidents.count - appModel.viewedPresidentIDs.count
     }
@@ -55,6 +59,24 @@ struct HomeView: View {
                     
                     Toggle(isOn: $isRandomMode) {
                         Label("Random Mode", systemImage: "shuffle")
+                    }
+
+                    LabeledContent("Slide Interval") {
+                        Picker("Slide Interval", selection: $slideshowIntervalSecs) {
+                            ForEach(SlideshowSettings.intervalSecsOptions, id: \.self) { secs in
+                                Text("\(Int(secs))s").tag(secs)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+
+                    LabeledContent("Fadein Delay") {
+                        Picker("Fadein Delay", selection: $delayFraction) {
+                            ForEach(SlideshowSettings.delayFractionOptions, id: \.self) { fraction in
+                                Text(String(format: "%.1fs", slideshowIntervalSecs * fraction)).tag(fraction)
+                            }
+                        }
+                        .pickerStyle(.segmented)
                     }
                     
                     Button {

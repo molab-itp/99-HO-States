@@ -1666,3 +1666,14 @@ hides or shows it. Drawings are saved as vector strokes in localStorage, since t
 PencilKit. Bumped to 0.1.9. Build and `npm run smoke` pass, with new drawing steps in the test.
 
 **Cost**: ~20 minutes.
+
+# --
+
+2026-09-25 07:39 (v2: slideshow interval and delay settings)
+
+Added two segmented pickers to `HomeView`: slideshow interval (5, 10 or 15s) and details delay
+(0.1, 0.2 or 0.5 of the interval). Both are saved with `@AppStorage`. `PresidentDetailView` now
+counts in seconds instead of tenths, and the delay is the interval times the chosen fraction
+(default 0.5). Builds for the simulator; not run in the app.
+
+**Cost**: ~6 minutes.

@@ -8,15 +8,15 @@ import SwiftUI
 struct PresidentDetailTitleView: View {
     let order: Int
     let buildInfo: String
-    /// `nil` when no slideshow is running; otherwise the countdown, in tenths of a second, until
-    /// the next auto-advance.
-    let slideshowRemainingTenths: Int?
+    /// `nil` when no slideshow is running; otherwise the countdown, in seconds, until the next
+    /// auto-advance.
+    let slideshowRemainingSecs: Double?
 
     var body: some View {
         let orderText = String(format: "%02d", order)
         HStack {
-            if let tenths = slideshowRemainingTenths {
-                let secondsText = String(format: "%04.1f", Double(tenths) / 10)
+            if let seconds = slideshowRemainingSecs {
+                let secondsText = String(format: "%04.1f", seconds)
                 Text("#\(orderText) · \(secondsText)s \(buildInfo)").font(.system(.body, design: .monospaced))
             } else {
                 Text("#\(orderText) \(buildInfo)").font(.system(.body, design: .monospaced))
