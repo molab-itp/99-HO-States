@@ -538,3 +538,7 @@ v05.83
 bin/publish.sh does not push to main after merge
 
 yes push to prep before merge with commit $msg
+
+v05.84
+
+git merge --ff-only "$branch". 

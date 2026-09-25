@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Commit and push the current branch, then merge it into main, using the
-# last vNN.NN entry in _prompts.txt as the commit message, push main,
+# Commit and push the current branch with the last vNN.NN entry in
+# _prompts.txt as the message, fast-forward main to it, push main,
 # then switch back.
 set -euo pipefail
 
@@ -42,8 +42,8 @@ git push origin "$branch"
 git switch "$MAIN"
 trap 'git switch "$branch"' EXIT
 
-git merge --no-ff "$branch" -m "$msg"
+git merge --ff-only "$branch"
 
 git push origin "$MAIN"
 
-echo "Merged $branch into $MAIN and pushed."
+echo "Fast-forwarded $MAIN to $branch and pushed."
