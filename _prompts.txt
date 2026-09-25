@@ -532,3 +532,9 @@ merges in current branch tag
 with last _prompts.txt v?.? entry
 comments to main
 and finally switches to back to original branch
+
+v05.83
+
+bin/publish.sh does not push to main after merge
+
+yes push to prep before merge with commit $msg
