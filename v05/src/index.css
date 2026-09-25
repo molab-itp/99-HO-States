@@ -125,7 +125,11 @@ input {
   font-size: 17px;
   letter-spacing: -0.01em;
   text-align: center;
-  flex: 1;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nav-bar .nav-title-mono {
@@ -153,8 +157,51 @@ input {
   background: var(--fill-pressed);
 }
 
-.nav-spacer {
+.nav-leading,
+.nav-trailing {
+  display: flex;
+  align-items: center;
   min-width: 44px;
+  flex: 1 0 0;
+}
+
+.nav-trailing {
+  justify-content: flex-end;
+}
+
+/* Trailing bar buttons (v2's `.topBarTrailing` toolbar items): plain label color like the back
+   chevron, with the destructive/text variants used by the drawing editor. */
+.nav-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--label);
+  cursor: pointer;
+  min-width: 40px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+}
+
+.nav-action:active:not(:disabled) {
+  background: var(--fill-pressed);
+}
+
+.nav-action:disabled {
+  color: var(--tertiary-label);
+  cursor: default;
+}
+
+.nav-action-destructive:not(:disabled) {
+  color: var(--destructive);
+}
+
+.nav-action-text {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--tint);
 }
 
 /* Home screen — matches the plain (no nav bar) root view; buttons use SwiftUI's `.bordered`
@@ -484,14 +531,108 @@ input {
   box-shadow: var(--shadow-card);
 }
 
+/* The zoom/pan transform goes on this wrapper, so the photo and its drawing move together. */
+.zoomable-content {
+  position: relative;
+  transform-origin: center;
+}
+
 .detail-image {
   width: 100%;
   border-radius: var(--radius-md);
   display: block;
   background: var(--thumb-bg);
-  transform-origin: center;
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* Same box as the photo; the SVG's viewBox is the photo's natural size, so strokes line up. */
+.drawing-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Drawing editor — a full-screen layer over the detail screen, standing in for the pushed
+   PresidentDrawingEditorView. */
+.drawing-editor {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.drawing-editor-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 16px;
+}
+
+.drawing-editor-photo {
+  position: relative;
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.drawing-editor-photo img {
+  display: block;
+  max-width: 100%;
+  /* Nav bar + tools bar + padding: the photo is fitted to the space between them. */
+  max-height: calc(100dvh - 150px);
+  background: var(--thumb-bg);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.drawing-surface {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.drawing-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+  border-top: 0.5px solid var(--separator);
+  background: var(--bar-bg);
+}
+
+.pen-colors {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  justify-content: center;
+}
+
+.pen-color {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--separator);
+  cursor: pointer;
+  padding: 0;
+}
+
+.pen-color.selected {
+  outline: 2.5px solid var(--label);
+  outline-offset: 2px;
 }
 
 .detail-image-placeholder {

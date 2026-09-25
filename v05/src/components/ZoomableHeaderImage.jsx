@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import Icon from './Icon.jsx';
+import DrawingOverlay from './DrawingOverlay.jsx';
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 30;
@@ -21,9 +22,10 @@ function distance(a, b) {
  * zoomed), and double-tap to toggle between 1x and 2.5x. The caller gives this component a fresh
  * `key={president.order}` each time the president changes, so `scale`/`offset` start fresh from
  * `initialZoom` (this president's persisted zoom state, if any) instead of carrying over the
- * previous president's zoom/pan.
+ * previous president's zoom/pan. `drawing`, when given, is the president's saved drawing, laid
+ * over the photo.
  */
-export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoomChange }) {
+export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoomChange, drawing = null }) {
   const [scale, setScaleState] = useState(initialZoom?.scale ?? MIN_SCALE);
   const [offset, setOffsetState] = useState({
     x: initialZoom?.offsetX ?? 0,
@@ -173,17 +175,24 @@ export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoom
       onPointerUp={endPointer}
       onPointerCancel={endPointer}
     >
-      <img
-        className="detail-image"
-        src={imageSrc}
-        alt={alt}
-        draggable={false}
-        onDragStart={(e) => e.preventDefault()}
+      {/* The drawing sits inside the transformed box, so it zooms and pans together with the
+          photo, same as the Swift overlay applied before `scaleEffect`/`offset`. */}
+      <div
+        className="zoomable-content"
         style={{
           transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
           transition: isInteracting ? 'none' : 'transform 0.2s ease-out',
         }}
-      />
+      >
+        <img
+          className="detail-image"
+          src={imageSrc}
+          alt={alt}
+          draggable={false}
+          onDragStart={(e) => e.preventDefault()}
+        />
+        {drawing && <DrawingOverlay drawing={drawing} aria-hidden="true" />}
+      </div>
     </div>
   );
 }

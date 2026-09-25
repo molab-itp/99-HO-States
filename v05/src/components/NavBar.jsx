@@ -1,22 +1,26 @@
 import { useNavigation } from '../navigation/NavigationContext.jsx';
 import Icon from './Icon.jsx';
 
-/** Standing in for SwiftUI's automatic inline navigation bar (back button + centered title). */
-export default function NavBar({ title, monospace = false }) {
+/**
+ * Standing in for SwiftUI's automatic inline navigation bar (back button + centered title).
+ * `onBack` replaces the default stack pop (for the drawing editor layer, which isn't a stack
+ * entry), and `trailing` holds `.topBarTrailing` toolbar items.
+ */
+export default function NavBar({ title, monospace = false, onBack, trailing }) {
   const { path, pop } = useNavigation();
-  const showBack = path.length > 0;
+  const showBack = onBack || path.length > 0;
 
   return (
     <div className="nav-bar">
-      {showBack ? (
-        <button className="nav-back" onClick={pop} aria-label="Back">
-          <Icon name="chevron-left" size={20} />
-        </button>
-      ) : (
-        <span className="nav-spacer" />
-      )}
+      <div className="nav-leading">
+        {showBack && (
+          <button className="nav-back" onClick={onBack ?? pop} aria-label="Back">
+            <Icon name="chevron-left" size={20} />
+          </button>
+        )}
+      </div>
       <span className={monospace ? 'nav-title nav-title-mono' : 'nav-title'}>{title}</span>
-      <span className="nav-spacer" />
+      <div className="nav-trailing">{trailing}</div>
     </div>
   );
 }

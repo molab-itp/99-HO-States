@@ -12,6 +12,10 @@ const rootDir = path.join(__dirname, '..');
 const screenshotDir = path.join(rootDir, 'playwright', 'screenshots');
 const PORT = 5183;
 
+function assert(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
 function assertIncludes(text, expected, message) {
   if (!text || !text.includes(expected)) {
     throw new Error(`${message}: got ${JSON.stringify(text)}`);
@@ -73,6 +77,42 @@ async function main() {
     await page.click('button[aria-label="Random"]');
     await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
     await shot('detail-random');
+
+    console.log('Draw on Photo: draw a stroke, Done saves it over the portrait...');
+    assert(!(await page.isVisible('button[aria-label="Hide Drawing"]')), 'no hide/show button before a drawing exists');
+    await page.click('button[aria-label="Draw on Photo"]');
+    await page.waitForSelector('.drawing-surface');
+    const box = await page.locator('.drawing-surface').boundingBox();
+    await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.3);
+    await page.mouse.down();
+    for (let i = 1; i <= 10; i++) {
+      await page.mouse.move(box.x + box.width * (0.2 + i * 0.06), box.y + box.height * (0.3 + i * 0.03));
+    }
+    await page.mouse.up();
+    assert((await page.locator('.drawing-surface path').count()) === 1, 'editor should show the new stroke');
+    await shot('drawing-editor');
+    await page.click('button:has-text("Done")');
+    await page.waitForSelector('.drawing-overlay path');
+    await shot('detail-with-drawing');
+
+    console.log('Hide / Show drawing, and it survives a reload...');
+    await page.click('button[aria-label="Hide Drawing"]');
+    await page.waitForSelector('.drawing-overlay', { state: 'detached' });
+    await page.click('button[aria-label="Show Drawing"]');
+    await page.waitForSelector('.drawing-overlay path');
+    const drawnTitle = (await page.locator('.nav-title-mono').textContent()).split(' ')[0];
+    await page.reload();
+    await page.click('text=List of Heads');
+    await page.locator('.president-row .name', { hasText: drawnTitle }).click();
+    await page.waitForSelector('.drawing-overlay path');
+
+    console.log('Clear + Done deletes the drawing...');
+    await page.click('button[aria-label="Draw on Photo"]');
+    await page.waitForSelector('.drawing-surface path');
+    await page.click('button[aria-label="Clear"]');
+    await page.click('button:has-text("Done")');
+    await page.waitForSelector('.drawing-overlay', { state: 'detached' });
+    assert(!(await page.isVisible('button[aria-label="Hide Drawing"]')), 'hide/show button should go away with the drawing');
 
     console.log('Back to List (this detail was pushed from the list row)...');
     await page.click('button[aria-label="Back"]');

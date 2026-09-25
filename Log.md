@@ -1655,3 +1655,14 @@ applies to every president and is kept after the app restarts. `ZoomableHeaderIm
 showed it, confirmed no button without a drawing, and confirmed it stayed hidden after a relaunch.
 
 **Cost**: ~8 minutes.
+
+# --
+
+2026-09-25 05:44 (v05: sync web app with v2 v02.76–v02.77)
+
+Ported v2's photo drawing to v05. A pencil button opens a drawing editor over the portrait, with
+Clear, Undo and pen colors. The drawing shows over the photo and zooms with it, and an eye button
+hides or shows it. Drawings are saved as vector strokes in localStorage, since the web has no
+PencilKit. Bumped to 0.1.9. Build and `npm run smoke` pass, with new drawing steps in the test.
+
+**Cost**: ~20 minutes.

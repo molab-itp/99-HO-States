@@ -485,3 +485,7 @@ save ok now.
 v02.77
 
 add a hide/show draw layer to PresidentDetailView
+
+v05.78
+
+sync web app in v05 with changes to v2

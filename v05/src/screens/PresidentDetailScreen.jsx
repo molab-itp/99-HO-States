@@ -7,6 +7,8 @@ import ViewedProgressBar from '../components/ViewedProgressBar.jsx';
 import ZoomableHeaderImage from '../components/ZoomableHeaderImage.jsx';
 import ReactionControl from '../components/ReactionControl.jsx';
 import Icon from '../components/Icon.jsx';
+import PresidentDrawingEditor from '../components/PresidentDrawingEditor.jsx';
+import { useStoredBoolean } from '../state/useStoredBoolean.js';
 
 const DETAIL_REVEAL_DELAY_MS = 2000; // matches Swift's `delaySecs`
 const SLIDESHOW_INTERVAL_TENTHS = 50; // 5.0 seconds, matches PresidentDetailView's slideshowIntervalTenths
@@ -31,6 +33,8 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
     removeLastReaction,
     imageZoomStateFor,
     setImageZoomStateFor,
+    drawingFor,
+    setDrawingFor,
   } = useAppModel();
 
   const startIndex = (() => {
@@ -42,6 +46,10 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
   const [isSlideshowActive] = useState(startSlideshow);
   const [isSlideshowPaused, setIsSlideshowPaused] = useState(false);
   const [remainingTenths, setRemainingTenths] = useState(SLIDESHOW_INTERVAL_TENTHS);
+  const [isDrawingEditorOpen, setIsDrawingEditorOpen] = useState(false);
+  // Port of `@AppStorage("showsDrawings")`: shared across presidents and reloads, so hiding
+  // drawings stays in effect while browsing.
+  const [showsDrawings, setShowsDrawings] = useStoredBoolean('ho-states-us.showsDrawings', true);
 
   // `index` (which president is shown) and, in random mode, the walk's history/position all
   // change together, so they're one state object updated atomically.
@@ -107,8 +115,10 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
   // version of this that called `setNav(...)` from inside here had that side effect fire twice
   // per tick, advancing the slideshow by 2 presidents instead of 1.
   const tickRef = useRef(() => {});
+  // The drawing editor also holds the countdown, so the president can't change mid-drawing — the
+  // equivalent of the Swift editor push firing `onDisappear` and stopping the timer.
   tickRef.current = () => {
-    if (isSlideshowPaused) return;
+    if (isSlideshowPaused || isDrawingEditorOpen) return;
     setRemainingTenths((prev) => Math.max(0, prev - 1));
   };
 
@@ -161,6 +171,7 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
     : `#${orderText} ${buildInfo}`;
 
   const imageSrc = president.large || president.thumbnail;
+  const drawing = drawingFor(president);
   const articleURL = wikipediaArticleURL(president);
 
   const isPreviousDisabled = isSlideshowActive ? isRandomMode && nav.position === 0 : isFirst;
@@ -168,7 +179,26 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
 
   return (
     <div className="screen-scroll">
-      <NavBar title={title} monospace />
+      <NavBar
+        title={title}
+        monospace
+        trailing={
+          <>
+            {drawing && (
+              <button
+                className="nav-action"
+                aria-label={showsDrawings ? 'Hide Drawing' : 'Show Drawing'}
+                onClick={() => setShowsDrawings(!showsDrawings)}
+              >
+                <Icon name={showsDrawings ? 'eye' : 'eye-slash'} size={19} />
+              </button>
+            )}
+            <button className="nav-action" aria-label="Draw on Photo" onClick={() => setIsDrawingEditorOpen(true)}>
+              <Icon name="pencil-square" size={18} />
+            </button>
+          </>
+        }
+      />
       <div className="detail">
         <ViewedProgressBar total={presidents.length} viewedIDs={viewedIDs} />
 
@@ -178,6 +208,7 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
           alt={president.name}
           initialZoom={imageZoomStateFor(president)}
           onZoomChange={(state) => setImageZoomStateFor(state, president)}
+          drawing={showsDrawings ? drawing : null}
         />
 
         <div className={detailsVisible ? 'detail-text visible' : 'detail-text'}>
@@ -233,6 +264,18 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
           <Icon name="chevron-right" size={20} />
         </button>
       </div>
+
+      {isDrawingEditorOpen && (
+        <PresidentDrawingEditor
+          president={president}
+          imageSrc={imageSrc ? assetUrl(imageSrc) : null}
+          initialDrawing={drawing}
+          onClose={(result) => {
+            setIsDrawingEditorOpen(false);
+            if (result !== undefined) setDrawingFor(result, president);
+          }}
+        />
+      )}
     </div>
   );
 }

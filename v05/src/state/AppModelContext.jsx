@@ -3,6 +3,7 @@ import presidents from '../data/presidents.js';
 import { version as appVersion } from '../../package.json';
 import { loadPersistedState, savePersistedState } from '../data/persistedState.js';
 import { normalizeReactions } from '../data/presidentReaction.js';
+import { deleteDrawing, loadAllDrawings, saveDrawing } from '../data/presidentDrawingStore.js';
 
 const AppModelContext = createContext(null);
 
@@ -60,6 +61,11 @@ export function AppModelProvider({ children }) {
   // Ported from `AppModel.swift`'s `reactions`/`imageZoomStates`.
   const [reactions, setReactions] = useState(() => normalizeReactions(persisted?.reactions));
   const [imageZoomStates, setImageZoomStates] = useState(() => persisted?.imageZoomStates ?? {});
+
+  // Each president's saved photo drawing (see `presidentDrawingStore.js`), overlaid on the
+  // portrait by `ZoomableHeaderImage`. Ported from `AppModel.swift`'s `drawingFileNames`, except
+  // the strokes themselves are held here rather than a file name pointing at a PNG.
+  const [drawings, setDrawings] = useState(() => loadAllDrawings(presidents));
 
   const nextRandomPresident = useCallback(() => {
     if (presidents.length === 0) return null;
@@ -142,6 +148,27 @@ export function AppModelProvider({ children }) {
     });
   }, []);
 
+  const drawingFor = useCallback((president) => drawings[president.order] ?? null, [drawings]);
+
+  // Saves (or, with `null`, deletes) `president`'s drawing. Unlike other state, this writes to
+  // storage immediately rather than waiting for `persistNow`, same as Swift's
+  // `setDrawingFileName`: a drawing is real user work, and a crash or killed tab before the page
+  // is hidden shouldn't lose it.
+  const setDrawingFor = useCallback((drawing, president) => {
+    if (drawing) {
+      saveDrawing(president.order, drawing);
+    } else {
+      deleteDrawing(president.order);
+    }
+    setDrawings((prev) => {
+      if (drawing) return { ...prev, [president.order]: drawing };
+      if (!(president.order in prev)) return prev;
+      const next = { ...prev };
+      delete next[president.order];
+      return next;
+    });
+  }, []);
+
   // Port of AppModel.swift's `buildInfo`: `[cycleCount|bundleVersion]`, using this app's own
   // package.json version as the web analog of CFBundleVersion.
   const buildInfo = `[${cycleCount}|${appVersion}]`;
@@ -188,6 +215,8 @@ export function AppModelProvider({ children }) {
       removeLastReaction,
       imageZoomStateFor,
       setImageZoomStateFor,
+      drawingFor,
+      setDrawingFor,
     }),
     [
       viewedIDs,
@@ -202,6 +231,8 @@ export function AppModelProvider({ children }) {
       removeLastReaction,
       imageZoomStateFor,
       setImageZoomStateFor,
+      drawingFor,
+      setDrawingFor,
     ],
   );
 
