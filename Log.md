@@ -1739,3 +1739,58 @@ Checked by sampling the header height and text opacity each frame through an adv
 stays at 435px and the text starts at 0. Build and `npm run smoke` pass.
 
 **Cost**: ~5 minutes.
+
+# --
+
+2026-09-25 ~14:10 (bin/publish.sh: publish the current branch to main)
+
+New script bin/publish.sh. It reads the last `vNN.NN` entry in _prompts.txt (from that header
+line to the end of the file) and uses it as the commit message. Revised over a few prompts, it
+now: stages everything (`git add -A`) and commits on the current branch if anything changed,
+pushes that branch, switches to main, merges the branch in, pushes main, and switches back (via
+an EXIT trap, so it returns even if a step fails). It refuses to run from main or if no `v?.?`
+entry is found. `git commit -F <(...)` was replaced with plain `-m "$msg"` for readability.
+
+**Cost**: ~10 minutes.
+
+# --
+
+2026-09-25 ~14:40 (bin/publish.sh: fast-forward main instead of a merge commit)
+
+Each version showed up twice on main (v05.82, v05.83): once for the commit on prep and once for
+the `--no-ff` merge commit, which used the same message. The merge is now
+`git merge --ff-only`, so main just moves to prep's commit and each version appears once. To
+allow that, prep was fast-forwarded once to main (14a186c..3006ca7) and pushed. If main ever
+gets a commit that prep lacks, the script now stops with an error instead of making a duplicate.
+The two existing duplicates are left in place, since removing them would rewrite pushed history.
+
+**Cost**: ~5 minutes.
+
+# --
+
+2026-09-25 ~14:50 (why the Pages deploy didn't run for v05.84)
+
+The push to main worked, but .github/workflows/deploy-pages.yml only runs on pushes that change
+v4/, v05/, pages/ or the workflow file itself. v05.84 only touched _prompts.txt and
+bin/publish.sh, so GitHub skipped it; the site had nothing new to build. A deploy can be forced
+with Run workflow on the Actions tab or `gh workflow run deploy-pages.yml` (gh isn't logged in on
+this machine yet). No changes made.
+
+**Cost**: ~2 minutes.
+
+# --
+
+2026-09-25 15:06 (v05: fill a 1080×1920 portrait kiosk display)
+
+On the LG portrait display the detail screen used only the 720px phone column, so the photo and
+text sat in the upper middle with wide margins and an empty lower half. Added a media query to
+v05/src/index.css for portrait screens at least 1000px wide: it drops the 720px cap, sizes the
+photo to 56% of the screen height (centered, with its wrapper shrunk to fit so the drawing
+overlay and zoom clipping stay aligned), and scales up the text (extract 16 → 26px, name and
+term/party line 30px, nav title 24px). Checked in headless Chromium at 1080×1920: for #6 John
+Quincy Adams the text ends at y≈1713, and for #19 Rutherford B. Hayes (the longest extract) at
+y≈1791, both above the toolbar at 1863, so nothing scrolls. `npm run smoke` still passes at
+phone size. Not yet checked on the real display; if its browser scales pages up, it will report
+a width under 1000px and the new layout won't apply.
+
+**Cost**: ~8 minutes.

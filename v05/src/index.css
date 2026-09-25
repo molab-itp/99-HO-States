@@ -981,3 +981,64 @@ input {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   font-weight: 600;
 }
+
+/* Large portrait displays (e.g. a 1080×1920 kiosk screen): drop the phone-width column so the
+   detail screen's photo and text fill most of the screen. The photo is sized by height so a
+   long extract below it still fits; the wrapper shrinks to the photo so the drawing overlay and
+   zoom clipping stay aligned with it. */
+@media (min-width: 1000px) and (orientation: portrait) {
+  .app-shell {
+    max-width: none;
+  }
+
+  .nav-bar .nav-title-mono {
+    font-size: 24px;
+  }
+
+  .detail {
+    padding: 20px 32px;
+  }
+
+  .progress-bar {
+    height: 8px;
+    margin-bottom: 20px;
+  }
+
+  .zoomable-image {
+    width: fit-content;
+    margin: 0 auto;
+  }
+
+  .detail-image {
+    width: auto;
+    height: 56vh;
+    max-width: calc(100vw - 64px);
+    object-fit: contain;
+  }
+
+  .detail-text {
+    margin-top: 24px;
+  }
+
+  .detail-text h1.name-mono {
+    font-size: 30px;
+  }
+
+  .reaction-control {
+    margin-bottom: 20px;
+  }
+
+  .detail-text .subtitle {
+    margin-bottom: 20px;
+    font-size: 30px;
+  }
+
+  .detail-text p {
+    margin-bottom: 20px;
+    font-size: 26px;
+  }
+
+  .wiki-link {
+    font-size: 22px;
+  }
+}
