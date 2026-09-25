@@ -1698,3 +1698,44 @@ In `PresidentDetailView`, the header image cross-fades over that period when the
 changes, but only while a slideshow is running. Builds for the simulator; not run in the app.
 
 **Cost**: ~5 minutes.
+
+# --
+
+2026-09-25 13:41 (v05: sync slideshow fade period from v2)
+
+Ported v02.80 to the web app. Home has a new Fade Period picker (0.1, 1 or 2s, default 1s), saved
+in localStorage. While a slideshow runs, the detail screen's header image cross-fades over that
+period when the president changes; manual browsing still swaps instantly. Also picked up v2's
+wider option lists (Slide Interval adds 20s, Fadein Delay adds 0.5). Bumped to 0.1.11. Build and
+`npm run smoke` pass, with new steps for the picker and the cross-fade. The smoke test's reset
+step clicked a "2.5s" delay option that didn't exist; it now clicks the 2.0s default.
+
+**Cost**: ~7 minutes.
+
+# --
+
+2026-09-25 13:44 (v05: fix flash before the slideshow image fade)
+
+The outgoing image flashed blank for a moment before fading. The layer swap happened in an
+effect, so for one commit React dropped the old image and then mounted a new copy, which the
+browser had to decode again. Now the swap happens during render, and both layers are keyed by
+president, so the old image's DOM (and decoded <img>) becomes the fading-out layer as is.
+Checked by tagging the <img> before Next and sampling opacities each frame: the same node fades
+1 → 0 while the new one fades 0 → 1. Build and `npm run smoke` pass.
+
+**Cost**: ~5 minutes.
+
+# --
+
+2026-09-25 13:47 (v05: fix incoming image and text flash on slideshow advance)
+
+Two more flashes on each advance. The new president's text appeared at full opacity and then
+faded out, because the hide ran in an effect (after paint) and the CSS transition also animated
+the hide. Now the reveal is tracked by index, so the text is hidden in the same render, and only
+the reveal is animated. The header also jumped while the incoming image loaded, because the
+outgoing layer was absolutely positioned and the loading <img> had no height. Now both layers
+share one CSS grid cell, so the frame stays as tall as the taller image (like a ZStack).
+Checked by sampling the header height and text opacity each frame through an advance: the height
+stays at 435px and the text starts at 0. Build and `npm run smoke` pass.
+
+**Cost**: ~5 minutes.

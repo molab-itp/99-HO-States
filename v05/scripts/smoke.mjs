@@ -134,7 +134,7 @@ async function main() {
     console.log('Slide Interval / Fadein Delay pickers persist and drive the detail screen...');
     await page.click('.segmented[aria-label="Slide Interval"] >> text=10s');
     const delayLabels = await page.locator('.segmented[aria-label="Fadein Delay"] .segment').allTextContents();
-    assert(delayLabels.join(',') === '1.0s,2.0s,5.0s', `delay labels should scale with a 10s interval: got ${delayLabels}`);
+    assert(delayLabels.join(',') === '1.0s,2.0s,4.0s,5.0s', `delay labels should scale with a 10s interval: got ${delayLabels}`);
     await page.click('.segmented[aria-label="Fadein Delay"] >> text=1.0s');
     await page.reload();
     await page.waitForSelector('button:has-text("Start Slideshow")');
@@ -158,7 +158,24 @@ async function main() {
     await page.waitForSelector('button:has-text("Start Slideshow")');
     // Back to the defaults so the natural-tick test below waits out 5s, not 10s.
     await page.click('.segmented[aria-label="Slide Interval"] >> text=5s');
-    await page.click('.segmented[aria-label="Fadein Delay"] >> text=2.5s');
+    await page.click('.segmented[aria-label="Fadein Delay"] >> text=2.0s');
+
+    console.log('Fade Period picker persists...');
+    const fadeLabels = await page.locator('.segmented[aria-label="Fade Period"] .segment').allTextContents();
+    assert(fadeLabels.join(',') === '0.1s,1s,2s', `fade period labels: got ${fadeLabels}`);
+    assert(
+      (await page.locator('.segmented[aria-label="Fade Period"] .segment.selected').textContent()) === '1s',
+      'Fade Period should default to 1s',
+    );
+    await page.click('.segmented[aria-label="Fade Period"] >> text="2s"');
+    await page.reload();
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+    assert(
+      (await page.locator('.segmented[aria-label="Fade Period"] .segment.selected').textContent()) === '2s',
+      'Fade Period should survive a reload',
+    );
+    // Back to the 1s default for the cross-fade check below.
+    await page.click('.segmented[aria-label="Fade Period"] >> text="1s"');
 
     // `slideIndex` (which president a sequential slideshow resumes at) persists across the whole
     // session — earlier steps above (list row, Next/Previous/Random, Random Head) already moved
@@ -200,6 +217,12 @@ async function main() {
     const afterNextTitle = await page.locator('.nav-title-mono').textContent();
     assertIncludes(afterNextTitle, '·', 'slideshow should still be active after Next');
     assertIncludes(afterNextTitle, '#03', 'sequential Next should move to the next president');
+
+    console.log('Slideshow advance cross-fades the header image over the 1s Fade Period...');
+    assert((await page.locator('.fade-layer.fade-out').count()) === 1, 'outgoing image should be fading out');
+    assert((await page.locator('.fade-layer.fade-in').count()) === 1, 'incoming image should be fading in');
+    await shot('slideshow-cross-fade');
+    await page.waitForSelector('.fade-layer.fade-out', { state: 'detached', timeout: 1500 });
 
     console.log('Pause / Play toggle...');
     await page.click('button[aria-label="Pause"]');

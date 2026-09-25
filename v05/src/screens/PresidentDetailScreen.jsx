@@ -54,8 +54,12 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
     SlideshowSettings.defaultDelayFraction,
   );
   const delaySecs = slideshowIntervalSecs * delayFraction;
+  const [fadePeriod] = useStoredNumber(SlideshowSettings.fadePeriodKey, SlideshowSettings.defaultFadePeriod);
 
-  const [detailsVisible, setDetailsVisible] = useState(false);
+  // The index whose details have been revealed. Derived rather than a boolean reset in the effect
+  // below, so a new president's text is hidden in the same render that shows it — an effect runs
+  // after paint, which let the new text flash at full opacity first.
+  const [revealedIndex, setRevealedIndex] = useState(null);
   const [isSlideshowActive] = useState(startSlideshow);
   const [isSlideshowPaused, setIsSlideshowPaused] = useState(false);
   const [remainingSecs, setRemainingSecs] = useState(slideshowIntervalSecs);
@@ -71,15 +75,15 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
   const president = presidents[index];
   const isFirst = index === 0;
   const isLast = index === presidents.length - 1;
+  const detailsVisible = revealedIndex === index;
 
   // Mirrors `.task(id: index)`: mark viewed immediately, then fade the text in after a delay
   // that's cancelled (never revealed) if `index` changes again first.
   useEffect(() => {
     let cancelled = false;
     markViewed(president, isSlideshowActive);
-    setDetailsVisible(false);
     const timer = setTimeout(() => {
-      if (!cancelled) setDetailsVisible(true);
+      if (!cancelled) setRevealedIndex(index);
     }, delaySecs * 1000);
     return () => {
       cancelled = true;
@@ -87,6 +91,23 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
+
+  // Port of the Swift ZStack + `.transition(.opacity)`: while a slideshow runs, the previous
+  // president's image stays on top of the new one and fades out over `fadePeriod` as the new one
+  // fades in. Manual browsing (no slideshow) swaps the image instantly. The switch is made during
+  // render (not in an effect) so the outgoing image's layer is never unmounted, not even for one
+  // commit: remounting it made a fresh <img> that flashed blank while the browser decoded it.
+  const [fade, setFade] = useState({ shown: president, outgoing: null });
+  if (fade.shown.order !== president.order) {
+    setFade({ shown: president, outgoing: isSlideshowActive ? fade.shown : null });
+  }
+  const outgoing = fade.outgoing;
+  useEffect(() => {
+    if (!outgoing) return undefined;
+    const timer = setTimeout(() => setFade((f) => ({ ...f, outgoing: null })), fadePeriod * 1000);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outgoing]);
 
   // Mirrors `index` into `appModel.slideIndex` on every change (including the initial mount), so
   // it persists across this screen being unmounted and remounted — e.g. a sequential slideshow
@@ -216,14 +237,31 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
       <div className="detail">
         <ViewedProgressBar total={presidents.length} viewedIDs={viewedIDs} />
 
-        <ZoomableHeaderImage
-          key={president.order}
-          imageSrc={imageSrc ? assetUrl(imageSrc) : null}
-          alt={president.name}
-          initialZoom={imageZoomStateFor(president)}
-          onZoomChange={(state) => setImageZoomStateFor(state, president)}
-          drawing={showsDrawings ? drawing : null}
-        />
+        <div className="header-fade" style={{ '--fade-period': `${fadePeriod}s` }}>
+          {/* Both layers are keyed by president, so when the current one becomes the outgoing one
+              React keeps its DOM (and its already-decoded <img>). The outgoing layer comes first
+              so the incoming one is appended after it rather than moving it; z-index puts the
+              outgoing one on top. A fresh key per president also resets zoom/pan state. */}
+          {[outgoing, president].filter(Boolean).map((p) => {
+            const isOutgoing = p === outgoing;
+            const src = p.large || p.thumbnail;
+            const layerDrawing = drawingFor(p);
+            let className = 'fade-layer';
+            if (isOutgoing) className += ' fade-out';
+            else if (outgoing) className += ' fade-in';
+            return (
+              <div key={p.order} className={className} aria-hidden={isOutgoing || undefined}>
+                <ZoomableHeaderImage
+                  imageSrc={src ? assetUrl(src) : null}
+                  alt={p.name}
+                  initialZoom={imageZoomStateFor(p)}
+                  onZoomChange={isOutgoing ? undefined : (state) => setImageZoomStateFor(state, p)}
+                  drawing={showsDrawings ? layerDrawing : null}
+                />
+              </div>
+            );
+          })}
+        </div>
 
         <div className={detailsVisible ? 'detail-text visible' : 'detail-text'}>
           <h1 className="name-mono">

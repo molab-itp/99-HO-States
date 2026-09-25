@@ -21,6 +21,10 @@ export default function HomeScreen() {
     SlideshowSettings.delayFractionKey,
     SlideshowSettings.defaultDelayFraction,
   );
+  const [fadePeriod, setFadePeriod] = useStoredNumber(
+    SlideshowSettings.fadePeriodKey,
+    SlideshowSettings.defaultFadePeriod,
+  );
 
   const remainingCount = presidents.length - viewedIDs.size;
 
@@ -77,6 +81,13 @@ export default function HomeScreen() {
           value={delayFraction}
           onChange={setDelayFraction}
           formatOption={(fraction) => `${(slideshowIntervalSecs * fraction).toFixed(1)}s`}
+        />
+        <SegmentedPicker
+          label="Fade Period"
+          options={SlideshowSettings.fadePeriodOptions}
+          value={fadePeriod}
+          onChange={setFadePeriod}
+          formatOption={(secs) => `${secs}s`}
         />
         <button className="btn btn-bordered" onClick={startSlideshow}>
           <Icon name="play-circle-fill" />

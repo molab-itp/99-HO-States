@@ -514,3 +514,12 @@ in v2 have slide images fade in and fade out by
 new settings fadePeriod in seconds
 create UI for 0.1, 1, and 2 seconds on HomeView
 and persist
+
+v05.81
+
+sync web app in v05 with changes to v2
+
+in v05 there is a flash before the image fades
+
+better, but in coming image and text flashes briefly
+before fading in
