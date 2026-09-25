@@ -508,3 +508,27 @@ sync web app in v05 with changes to v2
     static let defaultDelayFraction: Double = 0.4
   defaultDelayFraction: 0.4,
 
+v02.80
+
+in v2 have slide images fade in and fade out by 
+new settings fadePeriod in seconds
+create UI for 0.1, 1, and 2 seconds on HomeView
+and persist
+
+v05.81
+
+sync web app in v05 with changes to v2
+
+in v05 there is a flash before the image fades
+
+better, but in coming image and text flashes briefly
+before fading in
+
+v05.82
+
+write bash script and store in bin/publish.sh
+that switches to main branch
+merges in current branch tag 
+with last _prompts.txt v?.? entry
+comments to main
+and finally switches to back to original branch

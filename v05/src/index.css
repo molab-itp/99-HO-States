@@ -533,6 +533,40 @@ input {
   box-shadow: var(--shadow-card);
 }
 
+/* Slideshow cross-fade (Swift's ZStack + `.transition(.opacity)`): the outgoing image sits on top
+   of the incoming one and both animate over `--fade-period`, set inline from the Fade Period
+   setting. */
+.header-fade {
+  display: grid;
+}
+
+/* Both layers share one grid cell, so the frame is as tall as the taller one (like a ZStack) and
+   doesn't collapse while the incoming image is still loading. */
+.fade-layer {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+.fade-layer.fade-out {
+  z-index: 1;
+  pointer-events: none;
+  animation: header-fade-out var(--fade-period, 1s) ease-in-out forwards;
+}
+
+.fade-layer.fade-in {
+  animation: header-fade-in var(--fade-period, 1s) ease-in-out;
+}
+
+@keyframes header-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes header-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 /* The zoom/pan transform goes on this wrapper, so the photo and its drawing move together. */
 .zoomable-content {
   position: relative;
@@ -651,11 +685,12 @@ input {
 .detail-text {
   margin-top: 18px;
   opacity: 0;
-  transition: opacity 0.5s ease-in;
 }
 
+/* Only the reveal is animated; hiding for the next president is instant. */
 .detail-text.visible {
   opacity: 1;
+  transition: opacity 0.5s ease-in;
 }
 
 .detail-text h1 {

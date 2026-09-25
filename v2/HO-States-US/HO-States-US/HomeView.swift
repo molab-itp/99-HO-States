@@ -16,6 +16,8 @@ struct HomeView: View {
     private var slideshowIntervalSecs = SlideshowSettings.defaultIntervalSecs
     @AppStorage(SlideshowSettings.delayFractionKey)
     private var delayFraction = SlideshowSettings.defaultDelayFraction
+    @AppStorage(SlideshowSettings.fadePeriodKey)
+    private var fadePeriod = SlideshowSettings.defaultFadePeriod
     private var remainingCount: Int {
         appModel.presidents.count - appModel.viewedPresidentIDs.count
     }
@@ -74,6 +76,15 @@ struct HomeView: View {
                         Picker("Fadein Delay", selection: $delayFraction) {
                             ForEach(SlideshowSettings.delayFractionOptions, id: \.self) { fraction in
                                 Text(String(format: "%.1fs", slideshowIntervalSecs * fraction)).tag(fraction)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+
+                    LabeledContent("Fade Period") {
+                        Picker("Fade Period", selection: $fadePeriod) {
+                            ForEach(SlideshowSettings.fadePeriodOptions, id: \.self) { secs in
+                                Text("\(secs.formatted())s").tag(secs)
                             }
                         }
                         .pickerStyle(.segmented)
