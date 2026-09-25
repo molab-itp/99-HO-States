@@ -1794,3 +1794,17 @@ phone size. Not yet checked on the real display; if its browser scales pages up,
 a width under 1000px and the new layout won't apply.
 
 **Cost**: ~8 minutes.
+
+# --
+
+2026-09-25 17:07 (v05: fix pinch-zoom/pan on the photo; no browser pan/zoom there)
+
+On mobile, pinch and pan on the detail photo often failed. The photo frame used
+`touch-action: pan-y` while unzoomed, so a slight vertical drift started a page scroll, which
+cancelled the pointers mid-pinch (and iOS ignores touch-action changes mid-gesture). The frame
+now always has `touch-action: none` (v05/src/index.css), and ZoomableHeaderImage.jsx blocks
+native `touchmove` and Safari `gesturestart`/`gesturechange` on it, so the app's own
+pinch/pan/double-tap get every touch. Trade-off: swiping on the photo no longer scrolls the page.
+Build passes; not yet tested on a phone.
+
+**Cost**: ~4 minutes.

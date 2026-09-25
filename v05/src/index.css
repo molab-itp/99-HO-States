@@ -531,6 +531,11 @@ input {
   overflow: hidden;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
+  /* All touches on the photo belong to our pinch/pan/double-tap handlers, never to the browser's
+     own scroll or page zoom — otherwise a slight vertical drift starts a page scroll, which
+     cancels the pointers mid-pinch. */
+  touch-action: none;
+  -webkit-touch-callout: none;
 }
 
 /* Slideshow cross-fade (Swift's ZStack + `.transition(.opacity)`): the outgoing image sits on top

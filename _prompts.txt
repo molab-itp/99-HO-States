@@ -550,5 +550,7 @@ the image and text fills most of the screen
 
 v05.86
 
+zoom and panning fails now
+
 in v05 on mobile don't do default pan and zoom when 
 touch on image. 

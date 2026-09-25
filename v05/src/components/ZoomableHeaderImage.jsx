@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 import DrawingOverlay from './DrawingOverlay.jsx';
 
@@ -41,6 +41,25 @@ export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoom
   const pinchRef = useRef(null); // { startDistance, startScale } while 2 fingers are down
   const panRef = useRef(null); // { pointerId, startX, startY, startOffsetX, startOffsetY }
   const lastTapRef = useRef(null); // { time, x, y } of the most recent completed tap
+  const frameRef = useRef(null);
+
+  // `touch-action: none` (in CSS) keeps the browser from scrolling or page-zooming on a touch
+  // that starts on the photo, so our pointer handlers always get the gesture. iOS Safari still
+  // fires its own pinch (`gesture*`) events, so block those and stray touchmoves too; these must
+  // be native non-passive listeners for preventDefault to take effect.
+  useEffect(() => {
+    const el = frameRef.current;
+    if (!el) return undefined;
+    const prevent = (e) => e.preventDefault();
+    el.addEventListener('touchmove', prevent, { passive: false });
+    el.addEventListener('gesturestart', prevent);
+    el.addEventListener('gesturechange', prevent);
+    return () => {
+      el.removeEventListener('touchmove', prevent);
+      el.removeEventListener('gesturestart', prevent);
+      el.removeEventListener('gesturechange', prevent);
+    };
+  }, [imageSrc]);
 
   function setScale(value) {
     scaleRef.current = value;
@@ -168,8 +187,8 @@ export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoom
 
   return (
     <div
+      ref={frameRef}
       className="zoomable-image"
-      style={{ touchAction: scale > MIN_SCALE ? 'none' : 'pan-y' }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={endPointer}
