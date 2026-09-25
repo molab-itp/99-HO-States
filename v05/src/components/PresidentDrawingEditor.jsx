@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import NavBar from './NavBar.jsx';
 import Icon from './Icon.jsx';
 import DrawingOverlay, { strokePath } from './DrawingOverlay.jsx';
@@ -6,7 +6,7 @@ import DrawingOverlay, { strokePath } from './DrawingOverlay.jsx';
 // Stand-ins for PKToolPicker's pen colors; the first matches the Swift canvas's default
 // `.systemRed` pen. Colors are fixed hex values (not theme tokens) so ink looks the same in light
 // and dark mode, like the Swift canvas pinned to `.light`.
-const PEN_COLORS = ['#ff3b30', '#000000', '#ffffff', '#007aff', '#ffcc00', '#34c759'];
+const PEN_COLORS = ['#ff3b30', '#34c759', '#ffcc00', '#ffffff', '#000000', '#007aff'];
 const PEN_WIDTH_PX = 5; // on-screen width, matches `PKInkingTool(.pen, ..., width: 5)`
 
 function roundTenth(value) {
@@ -32,7 +32,28 @@ export default function PresidentDrawingEditor({ president, imageSrc, initialDra
     initialDrawing ? { width: initialDrawing.width, height: initialDrawing.height } : null,
   );
   const surfaceRef = useRef(null);
+  const photoRef = useRef(null);
   const strokeRef = useRef(null);
+
+  // iOS WebKit doesn't honor `touch-action` on SVG elements, so a finger drawing on the surface
+  // soon turns into a page scroll/zoom gesture, which cancels the pointer and cuts the stroke
+  // short. Blocking the photo's native touch events (non-passive, so preventDefault works) keeps
+  // the whole touch for drawing; pointer events still arrive.
+  useEffect(() => {
+    const el = photoRef.current;
+    if (!el) return undefined;
+    const prevent = (e) => e.preventDefault();
+    el.addEventListener('touchstart', prevent, { passive: false });
+    el.addEventListener('touchmove', prevent, { passive: false });
+    el.addEventListener('gesturestart', prevent);
+    el.addEventListener('gesturechange', prevent);
+    return () => {
+      el.removeEventListener('touchstart', prevent);
+      el.removeEventListener('touchmove', prevent);
+      el.removeEventListener('gesturestart', prevent);
+      el.removeEventListener('gesturechange', prevent);
+    };
+  }, [imageSrc]);
 
   function close() {
     if (!imageSize) {
@@ -114,7 +135,7 @@ export default function PresidentDrawingEditor({ president, imageSrc, initialDra
 
       <div className="drawing-editor-body">
         {imageSrc ? (
-          <div className="drawing-editor-photo">
+          <div className="drawing-editor-photo" ref={photoRef}>
             <img
               src={imageSrc}
               alt={president.name}

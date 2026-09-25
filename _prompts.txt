@@ -554,3 +554,17 @@ zoom and panning fails now
 
 in v05 on mobile don't do default pan and zoom when 
 touch on image. 
+
+v05.87
+
+on ios pinch to zoom and pan work ok,
+but in image edit mode touch to draw only draws for a bit then stops
+also is it possible to support zoom and pan 
+on desktop possible with explicit zoom buttons 
+and support mouse down to pan when click on image area
+
+include Mouse-wheel zoom
+
+in v05 in draw mode order the color palette red, green, yellow, white, black, blue
+update package version
+run bin/publish

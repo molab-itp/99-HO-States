@@ -8,6 +8,9 @@ const DOUBLE_TAP_ZOOM = 2.5;
 const DOUBLE_TAP_MAX_DELAY_MS = 300;
 const DOUBLE_TAP_MAX_DISTANCE_PX = 24;
 const TAP_MAX_MOVEMENT_PX = 10;
+const BUTTON_ZOOM_STEP = 1.5;
+const WHEEL_ZOOM_SENSITIVITY = 0.002; // scale factor per wheel pixel, as exp(-deltaY * this)
+const WHEEL_SETTLE_MS = 200; // wheel is considered done this long after its last event
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -42,6 +45,8 @@ export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoom
   const panRef = useRef(null); // { pointerId, startX, startY, startOffsetX, startOffsetY }
   const lastTapRef = useRef(null); // { time, x, y } of the most recent completed tap
   const frameRef = useRef(null);
+  const wheelRef = useRef(null); // latest wheel handler, so the native listener never goes stale
+  const wheelTimerRef = useRef(null);
 
   // `touch-action: none` (in CSS) keeps the browser from scrolling or page-zooming on a touch
   // that starts on the photo, so our pointer handlers always get the gesture. iOS Safari still
@@ -54,10 +59,16 @@ export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoom
     el.addEventListener('touchmove', prevent, { passive: false });
     el.addEventListener('gesturestart', prevent);
     el.addEventListener('gesturechange', prevent);
+    // Mouse wheel (and trackpad scroll/pinch, which arrive as wheel events) zooms the photo
+    // instead of scrolling the page; non-passive so preventDefault works.
+    const onWheel = (e) => wheelRef.current(e);
+    el.addEventListener('wheel', onWheel, { passive: false });
     return () => {
       el.removeEventListener('touchmove', prevent);
       el.removeEventListener('gesturestart', prevent);
       el.removeEventListener('gesturechange', prevent);
+      el.removeEventListener('wheel', onWheel);
+      clearTimeout(wheelTimerRef.current);
     };
   }, [imageSrc]);
 
@@ -91,6 +102,53 @@ export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoom
     } else {
       setScale(DOUBLE_TAP_ZOOM);
     }
+    persistZoom();
+  }
+
+  // Desktop zoom buttons: zoom about the frame's center. The transform is translate-then-scale
+  // around the center, so scaling the offset by the same factor keeps the centered point fixed.
+  function zoomBy(factor) {
+    const newScale = clamp(scaleRef.current * factor, MIN_SCALE, MAX_SCALE);
+    if (newScale <= MIN_SCALE) {
+      resetZoom();
+    } else {
+      const ratio = newScale / scaleRef.current;
+      setOffset({ x: offsetRef.current.x * ratio, y: offsetRef.current.y * ratio });
+      setScale(newScale);
+    }
+    persistZoom();
+  }
+
+  // Wheel zoom keeps the point under the cursor fixed. With the frame's center as origin, a
+  // content point c shows at offset + scale * c, so solving for the offset that keeps the
+  // cursor's point in place gives newOffset = m - (m - offset) * newScale / scale.
+  wheelRef.current = (e) => {
+    e.preventDefault();
+    const deltaPx = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * 400 : e.deltaY;
+    const oldScale = scaleRef.current;
+    const newScale = clamp(oldScale * Math.exp(-deltaPx * WHEEL_ZOOM_SENSITIVITY), MIN_SCALE, MAX_SCALE);
+    if (newScale === oldScale) return;
+    if (newScale <= MIN_SCALE) {
+      resetZoom();
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const mx = e.clientX - (rect.left + rect.width / 2);
+      const my = e.clientY - (rect.top + rect.height / 2);
+      const ratio = newScale / oldScale;
+      setOffset({ x: mx - (mx - offsetRef.current.x) * ratio, y: my - (my - offsetRef.current.y) * ratio });
+      setScale(newScale);
+    }
+    // No easing while the wheel is turning; save once it settles rather than on every event.
+    setIsInteracting(true);
+    clearTimeout(wheelTimerRef.current);
+    wheelTimerRef.current = setTimeout(() => {
+      if (pointersRef.current.size === 0) setIsInteracting(false);
+      persistZoom();
+    }, WHEEL_SETTLE_MS);
+  };
+
+  function handleButtonReset() {
+    resetZoom();
     persistZoom();
   }
 
@@ -188,7 +246,7 @@ export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoom
   return (
     <div
       ref={frameRef}
-      className="zoomable-image"
+      className={scale > MIN_SCALE ? 'zoomable-image zoomed' : 'zoomable-image'}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={endPointer}
@@ -211,6 +269,24 @@ export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoom
           onDragStart={(e) => e.preventDefault()}
         />
         {drawing && <DrawingOverlay drawing={drawing} aria-hidden="true" />}
+      </div>
+      {/* Explicit zoom controls for mouse users (hidden on touch screens by CSS). Their pointer
+          events stop here so a click doesn't also start a pan or count toward a double-tap. */}
+      <div className="zoom-controls" onPointerDown={(e) => e.stopPropagation()}>
+        <button className="zoom-btn" aria-label="Zoom Out" disabled={scale <= MIN_SCALE} onClick={() => zoomBy(1 / BUTTON_ZOOM_STEP)}>
+          <Icon name="minus-circle" size={18} />
+        </button>
+        <button
+          className="zoom-btn zoom-btn-text"
+          aria-label="Reset Zoom"
+          disabled={scale <= MIN_SCALE && offset.x === 0 && offset.y === 0}
+          onClick={handleButtonReset}
+        >
+          1×
+        </button>
+        <button className="zoom-btn" aria-label="Zoom In" disabled={scale >= MAX_SCALE} onClick={() => zoomBy(BUTTON_ZOOM_STEP)}>
+          <Icon name="plus-circle" size={18} />
+        </button>
       </div>
     </div>
   );

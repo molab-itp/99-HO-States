@@ -1808,3 +1808,46 @@ pinch/pan/double-tap get every touch. Trade-off: swiping on the photo no longer 
 Build passes; not yet tested on a phone.
 
 **Cost**: ~4 minutes.
+
+# --
+
+2026-09-25 17:28 (how to test the v05 local dev build on an iPhone)
+
+The iPhone and the Mac must be on the same Wi-Fi network.
+
+1. Start the dev server from `v05/` so it listens on the network:
+
+   ```bash
+   npm run dev -- --host
+   ```
+
+   Vite prints a `Network:` URL, e.g. `http://192.168.1.177:5173/` (the Mac's current Wi-Fi
+   address).
+
+2. Open that URL in Safari on the iPhone. Saved edits reload on the phone automatically.
+
+**If the page won't load**
+
+- The first time, macOS may ask whether to allow incoming connections for `node`. Click Allow,
+  or check System Settings → Network → Firewall.
+- Some public or guest Wi-Fi networks block devices from reaching each other. A personal
+  hotspot works around that.
+
+**Console errors from the phone**
+
+- iPhone: Settings → Apps → Safari → Advanced → Web Inspector on.
+- Connect the iPhone to the Mac by USB. In desktop Safari, turn on Settings → Advanced →
+  "Show features for web developers".
+- Open Develop → *your iPhone* → the page, for the full inspector (console, elements,
+  breakpoints).
+
+**Testing the production build instead**
+
+```bash
+npm run build && npx vite preview --host
+```
+
+Open the `Network:` URL it prints, adding `/99-HO-States/v05/` to the end (the production
+build uses that path prefix).
+
+**Cost**: ~1 minute.

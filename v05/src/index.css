@@ -538,6 +538,65 @@ input {
   -webkit-touch-callout: none;
 }
 
+/* Once zoomed, a mouse drag pans the photo. */
+.zoomable-image.zoomed {
+  cursor: grab;
+}
+
+.zoomable-image.zoomed:active {
+  cursor: grabbing;
+}
+
+/* Zoom buttons for desktop: only on devices with a mouse, where there's no pinch gesture. */
+.zoomable-image {
+  position: relative;
+}
+
+.zoom-controls {
+  display: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--bar-bg);
+  box-shadow: var(--shadow-card);
+  cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .zoom-controls {
+    display: flex;
+  }
+}
+
+.zoom-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--label);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.zoom-btn:hover:not(:disabled) {
+  background: var(--fill-pressed);
+}
+
+.zoom-btn:disabled {
+  color: var(--tertiary-label);
+  cursor: default;
+}
+
 /* Slideshow cross-fade (Swift's ZStack + `.transition(.opacity)`): the outgoing image sits on top
    of the incoming one and both animate over `--fade-period`, set inline from the Fade Period
    setting. */
@@ -621,6 +680,7 @@ input {
 
 .drawing-editor-photo {
   position: relative;
+  touch-action: none;
   max-width: 100%;
   border-radius: var(--radius-md);
   overflow: hidden;
