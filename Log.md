@@ -1688,3 +1688,13 @@ and fades in details after interval × fraction. Bumped to 0.1.10. Build and `np
 with a new step for the settings.
 
 **Cost**: ~8 minutes.
+
+# --
+
+2026-09-25 13:36 (v2: slideshow image fade period setting)
+
+Added a Fade Period picker to `HomeView` (0.1, 1 or 2s, default 1s), saved with `@AppStorage`.
+In `PresidentDetailView`, the header image cross-fades over that period when the president
+changes, but only while a slideshow is running. Builds for the simulator; not run in the app.
+
+**Cost**: ~5 minutes.

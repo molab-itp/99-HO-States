@@ -5,10 +5,13 @@ import SwiftUI
 enum SlideshowSettings {
     static let intervalSecsKey = "slideshowIntervalSecs"
     static let delayFractionKey = "slideshowDelayFraction"
-    static let intervalSecsOptions: [Double] = [5, 10, 15]
-    static let delayFractionOptions: [Double] = [0.1, 0.2, 0.4]
+    static let intervalSecsOptions: [Double] = [5, 10, 15, 20]
+    static let delayFractionOptions: [Double] = [0.1, 0.2, 0.4, 0.5]
     static let defaultIntervalSecs: Double = 5
     static let defaultDelayFraction: Double = 0.4
+    static let fadePeriodKey = "slideshowFadePeriod"
+    static let fadePeriodOptions: [Double] = [0.1, 1, 2]
+    static let defaultFadePeriod: Double = 1
 }
 
 struct PresidentDetailView: View {
@@ -32,6 +35,8 @@ struct PresidentDetailView: View {
     private var slideshowIntervalSecs = SlideshowSettings.defaultIntervalSecs
     @AppStorage(SlideshowSettings.delayFractionKey)
     private var delayFraction = SlideshowSettings.defaultDelayFraction
+    @AppStorage(SlideshowSettings.fadePeriodKey)
+    private var fadePeriod = SlideshowSettings.defaultFadePeriod
     /// Seconds to wait after a president appears before fading in the details.
     private var delaySecs: Double { slideshowIntervalSecs * delayFraction }
 
@@ -77,11 +82,18 @@ struct PresidentDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 ViewedProgressBar(total: presidents.count, viewedPresidentIDs: appModel.viewedPresidentIDs)
-                ZoomableHeaderImage(president: president, showsDrawing: showsDrawings)
-                    // Gives the image a fresh identity (and so fresh, reset zoom/pan state) each
-                    // time the displayed president changes, since this view instance otherwise
-                    // persists across Next/Previous/slideshow advances.
-                    .id(president.id)
+                // A ZStack so the outgoing and incoming images overlap while they cross-fade,
+                // instead of stacking vertically during the transition.
+                ZStack {
+                    ZoomableHeaderImage(president: president, showsDrawing: showsDrawings)
+                        // Gives the image a fresh identity (and so fresh, reset zoom/pan state) each
+                        // time the displayed president changes, since this view instance otherwise
+                        // persists across Next/Previous/slideshow advances.
+                        .id(president.id)
+                        .transition(.opacity)
+                }
+                // Only slideshow advances fade; manual browsing swaps the image instantly.
+                .animation(isSlideshowActive ? .easeInOut(duration: fadePeriod) : nil, value: president.id)
                 PresidentSummaryView(president: president)
                     .opacity(detailsVisible ? 1 : 0)
             }

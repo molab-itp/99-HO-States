@@ -508,3 +508,9 @@ sync web app in v05 with changes to v2
     static let defaultDelayFraction: Double = 0.4
   defaultDelayFraction: 0.4,
 
+v02.80
+
+in v2 have slide images fade in and fade out by 
+new settings fadePeriod in seconds
+create UI for 0.1, 1, and 2 seconds on HomeView
+and persist
