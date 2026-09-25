@@ -7,6 +7,8 @@ import SwiftUI
 /// `init`) rather than always resetting to 1x/no-offset.
 struct ZoomableHeaderImage: View {
     let president: President
+    /// Whether the saved drawing (if any) is overlaid on the portrait.
+    var showsDrawing = true
     @Environment(AppModel.self) private var appModel
 
     @State private var scale: CGFloat = 1
@@ -26,7 +28,7 @@ struct ZoomableHeaderImage: View {
                     // frame lines it up exactly, and applying it before `scaleEffect`/`offset`
                     // makes it zoom and pan together with the photo.
                     .overlay {
-                        if let drawing = appModel.drawingImage(for: president) {
+                        if showsDrawing, let drawing = appModel.drawingImage(for: president) {
                             Image(uiImage: drawing)
                                 .resizable()
                                 .scaledToFit()

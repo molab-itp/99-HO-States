@@ -16,6 +16,8 @@ struct PresidentDetailView: View {
     @State private var index: Int
     @State private var detailsVisible = false
     @State private var isDrawingEditorPresented = false
+    // Shared across presidents and launches, so hiding drawings stays in effect while browsing.
+    @AppStorage("showsDrawings") private var showsDrawings = true
 
     private let slideshowIntervalTenths = 50 // 5.0 seconds
     @State private var isSlideshowActive: Bool
@@ -59,7 +61,7 @@ struct PresidentDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 ViewedProgressBar(total: presidents.count, viewedPresidentIDs: appModel.viewedPresidentIDs)
-                ZoomableHeaderImage(president: president)
+                ZoomableHeaderImage(president: president, showsDrawing: showsDrawings)
                     // Gives the image a fresh identity (and so fresh, reset zoom/pan state) each
                     // time the displayed president changes, since this view instance otherwise
                     // persists across Next/Previous/slideshow advances.
@@ -104,6 +106,18 @@ struct PresidentDetailView: View {
                     buildInfo: appModel.buildInfo,
                     slideshowRemainingTenths: isSlideshowActive ? slideshowRemainingTenths : nil
                 )
+            }
+            if appModel.drawingImage(for: president) != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showsDrawings.toggle()
+                    } label: {
+                        Label(
+                            showsDrawings ? "Hide Drawing" : "Show Drawing",
+                            systemImage: showsDrawings ? "eye" : "eye.slash"
+                        )
+                    }
+                }
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {

@@ -1643,3 +1643,15 @@ PencilKit's ~8192px limit, so the PNG's long side is now fixed at 2048px. Builds
 simulator; the fix is not checked on a device.
 
 **Cost**: ~20 minutes.
+
+# --
+
+2026-09-25 05:32 (v2: hide/show drawing layer in detail view)
+
+Added an eye button to the `PresidentDetailView` toolbar that hides or shows the drawing over the
+photo. It only appears when the president has a drawing. The setting (`@AppStorage("showsDrawings")`)
+applies to every president and is kept after the app restarts. `ZoomableHeaderImage` gets a
+`showsDrawing` flag. Tested in the iPhone 17 simulator with idb and a test drawing: hid and
+showed it, confirmed no button without a drawing, and confirmed it stayed hidden after a relaunch.
+
+**Cost**: ~8 minutes.

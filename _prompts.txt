@@ -482,4 +482,6 @@ why didn't you run and test the app
 
 save ok now.
 
-president photo is longer draggable
+v02.77
+
+add a hide/show draw layer to PresidentDetailView
