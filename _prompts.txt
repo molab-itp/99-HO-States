@@ -523,3 +523,12 @@ in v05 there is a flash before the image fades
 
 better, but in coming image and text flashes briefly
 before fading in
+
+v05.82
+
+write bash script and store in bin/publish.sh
+that switches to main branch
+merges in current branch tag 
+with last _prompts.txt v?.? entry
+comments to main
+and finally switches to back to original branch
