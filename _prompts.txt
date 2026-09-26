@@ -568,3 +568,6 @@ include Mouse-wheel zoom
 in v05 in draw mode order the color palette red, green, yellow, white, black, blue
 update package version
 run bin/publish
+
+v02.87
+
