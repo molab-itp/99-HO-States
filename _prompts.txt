@@ -571,3 +571,11 @@ run bin/publish
 
 v02.87
 
+icon journey
+
+- [500 Plus Traditional Colors of China](https://color-term.com/traditional-color-of-china/)
+
+https://www.google.com/search?q=chinese+to+english&rlz=1C5CHFA_enUS975US976&oq=chinese+to+&gs_lcrp=EgZjaHJvbWUqDQgAEAAYgwEYsQMYgAQyDQgAEAAYgwEYsQMYgAQyCggBEAAYsQMYgAQyBggCEEUYOTIHCAMQABiABDIKCAQQABixAxiABDIHCAUQABiABDIHCAYQABiABDIHCAcQABiABDIHCAgQABiABDIHCAkQABiABNIBCDU3OThqMGo3qAIAsAIA&sourceid=chrome&source=chrome.ob&ie=UTF-8
+
+ho 何
+
