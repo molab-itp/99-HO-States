@@ -36,7 +36,7 @@ struct HomeView: View {
           Text("USnA Heads")
             .font(.largeTitle.bold())
           
-          Text("Browse portraits and biographies of every United States of North America \nHead of State.")
+          Text("Browse portraits and biographies of every United States of north America \nHead of State.")
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
@@ -120,7 +120,7 @@ struct HomeView: View {
               Label("Source Code", systemImage: "link")
                 .font(.footnote)
             }
-            Link(destination: sourceDataURL) {
+            Link(destination: webAppURL) {
               Label("Web App", systemImage: "link")
                 .font(.footnote)
             }
