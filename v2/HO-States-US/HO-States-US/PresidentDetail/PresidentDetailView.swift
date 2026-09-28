@@ -1,8 +1,10 @@
 import SwiftUI
 
-/// Persisted slideshow timing, chosen on `HomeView` and used by `PresidentDetailView`. Seconds are
-/// the basic unit; the details delay is stored as a fraction of the slideshow interval.
+/// Persisted slideshow settings, chosen on `SettingsView` and used by `PresidentDetailView`. Seconds
+/// are the basic unit; the details delay is stored as a fraction of the slideshow interval.
 enum SlideshowSettings {
+    static let randomModeKey = "slideshowRandomMode"
+    static let defaultRandomMode = false
     static let intervalSecsKey = "slideshowIntervalSecs"
     static let delayFractionKey = "slideshowDelayFraction"
     static let intervalSecsOptions: [Double] = [5, 10, 15, 20]
@@ -17,7 +19,6 @@ enum SlideshowSettings {
 struct PresidentDetailView: View {
     @Environment(AppModel.self) private var appModel
     let presidents: [President]
-    let isRandomMode: Bool
     // The source of truth for rendering — `@State` so it's seeded exactly once per view
     // *identity* and immune to `init` re-running on every reconstruction (SwiftUI reconstructs
     // this struct, and re-executes `init`, far more often than the view's identity actually
@@ -28,9 +29,12 @@ struct PresidentDetailView: View {
     @State private var index: Int
     @State private var detailsVisible = false
     @State private var isDrawingEditorPresented = false
+    @State private var isSettingsPresented = false
     // Shared across presidents and launches, so hiding drawings stays in effect while browsing.
     @AppStorage("showsDrawings") private var showsDrawings = true
 
+    @AppStorage(SlideshowSettings.randomModeKey)
+    private var isRandomMode = SlideshowSettings.defaultRandomMode
     @AppStorage(SlideshowSettings.intervalSecsKey)
     private var slideshowIntervalSecs = SlideshowSettings.defaultIntervalSecs
     @AppStorage(SlideshowSettings.delayFractionKey)
@@ -41,30 +45,24 @@ struct PresidentDetailView: View {
     private var delaySecs: Double { slideshowIntervalSecs * delayFraction }
 
     private let slideshowTickSecs = 0.1
-    @State private var isSlideshowActive: Bool
-    @State private var isSlideshowPaused = false
+    // The slideshow is always "on" — Play/Pause just toggles whether its countdown advances. It
+    // starts paused, so launching the app lands on a still president until Play is pressed.
+    @State private var isSlideshowPaused = true
+    private var isPlaying: Bool { !isSlideshowPaused }
     @State private var slideshowTimer: Timer?
     @State private var slideshowRemainingSecs = 0.0
 
-    // Indices visited during this slideshow's random walk (in random mode only), so Previous can
-    // step back through them and Next can replay forward instead of always drawing a fresh card.
-    // Unlike `index`/`appModel.slideIndex`, this doesn't need to persist beyond one slideshow
-    // session — resuming a random-mode slideshow instead continues from `appModel`'s
-    // `nextShuffleIndex`.
+    // Indices visited during the random walk (in random mode only), so Previous can step back
+    // through them and Next can replay forward instead of always drawing a fresh card. Unlike
+    // `index`/`appModel.slideIndex`, this doesn't persist across launches — random mode instead
+    // continues from `appModel`'s `nextShuffleIndex`. Restarted whenever Settings picks a president.
     @State private var randomHistory: [Int]
     @State private var randomPosition = 0
 
-    init(
-        presidents: [President],
-        selected: President,
-        isRandomMode: Bool = false,
-        startSlideshow: Bool = false
-    ) {
+    init(presidents: [President], selected: President) {
         self.presidents = presidents
-        self.isRandomMode = isRandomMode
         let startIndex = presidents.firstIndex(of: selected) ?? 0
         _index = State(initialValue: startIndex)
-        _isSlideshowActive = State(initialValue: startSlideshow)
         _randomHistory = State(initialValue: [startIndex])
     }
 
@@ -92,15 +90,15 @@ struct PresidentDetailView: View {
                         .id(president.id)
                         .transition(.opacity)
                 }
-                // Only slideshow advances fade; manual browsing swaps the image instantly.
-                .animation(isSlideshowActive ? .easeInOut(duration: fadePeriod) : nil, value: president.id)
+                // Only advances while playing fade; manual browsing swaps the image instantly.
+                .animation(isPlaying ? .easeInOut(duration: fadePeriod) : nil, value: president.id)
                 PresidentSummaryView(president: president)
                     .opacity(detailsVisible ? 1 : 0)
             }
             .padding()
         }
         .task(id: index) {
-            appModel.markViewed(president, resetIfComplete: isSlideshowActive)
+            appModel.markViewed(president, resetIfComplete: isPlaying)
             detailsVisible = false
             try? await Task.sleep(for: .seconds(delaySecs))
             guard !Task.isCancelled else { return }
@@ -114,9 +112,7 @@ struct PresidentDetailView: View {
             // `appModel.slideIndex`, covering the case where a president is viewed but never
             // advanced past before the user backs out.
             appModel.slideIndex = index
-            if isSlideshowActive {
-                beginSlideshowTimer()
-            }
+            beginSlideshowTimer()
         }
         .onDisappear {
             stopSlideshowTimer()
@@ -127,12 +123,17 @@ struct PresidentDetailView: View {
         .navigationDestination(isPresented: $isDrawingEditorPresented) {
             PresidentDrawingEditorView(president: president)
         }
+        // A sheet doesn't fire `onDisappear`, so `tickSlideshow` instead holds the countdown
+        // while this is up.
+        .sheet(isPresented: $isSettingsPresented) {
+            SettingsView(onSelect: showFromSettings, onStartSlideshow: startSlideshow)
+        }
         .toolbar {
             ToolbarItem(placement: .principal) {
                 PresidentDetailTitleView(
                     order: president.order,
                     buildInfo: appModel.buildInfo,
-                    slideshowRemainingSecs: isSlideshowActive ? slideshowRemainingSecs : nil
+                    slideshowRemainingSecs: isPlaying ? slideshowRemainingSecs : nil
                 )
             }
             if appModel.drawingImage(for: president) != nil {
@@ -154,68 +155,59 @@ struct PresidentDetailView: View {
                     Label("Draw on Photo", systemImage: "pencil.tip.crop.circle")
                 }
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    isSettingsPresented = true
+                } label: {
+                    Label("Settings", systemImage: "info.circle")
+                }
+            }
             PresidentDetailToolbar(
-                isSlideshowActive: isSlideshowActive,
                 isSlideshowPaused: isSlideshowPaused,
                 isPreviousDisabled: isPreviousDisabled,
                 isNextDisabled: isNextDisabled,
                 onPrevious: goToPrevious,
-                onCenterButton: {
-                    if isSlideshowActive {
-                        toggleSlideshowPause()
-                    } else {
-                        goToRandom()
-                    }
-                },
+                onPlayPause: toggleSlideshowPause,
                 onNext: goToNext
             )
         }
     }
 
     private var isPreviousDisabled: Bool {
-        if isSlideshowActive {
-            return isRandomMode && randomPosition == 0
-        }
-        return index == 0
+        isRandomMode && randomPosition == 0
     }
 
-    private var isNextDisabled: Bool {
-        if isSlideshowActive {
-            return false
-        }
-        return index == presidents.count - 1
-    }
+    private var isNextDisabled: Bool { false }
 
     private func goToPrevious() {
-        if isSlideshowActive {
-            if isRandomMode {
-                guard randomPosition > 0 else { return }
-                randomPosition -= 1
-                setIndex(randomHistory[randomPosition])
-            } else {
-                setIndex(index == 0 ? presidents.count - 1 : index - 1)
-            }
-            restartSlideshowCountdown()
+        if isRandomMode {
+            guard randomPosition > 0 else { return }
+            randomPosition -= 1
+            setIndex(randomHistory[randomPosition])
         } else {
-            guard index > 0 else { return }
-            setIndex(index - 1)
+            setIndex(index == 0 ? presidents.count - 1 : index - 1)
         }
+        restartSlideshowCountdown()
     }
 
     private func goToNext() {
-        if isSlideshowActive {
-            advanceSlideshow()
-            restartSlideshowCountdown()
-        } else {
-            guard index < presidents.count - 1 else { return }
-            setIndex(index + 1)
-        }
+        advanceSlideshow()
+        restartSlideshowCountdown()
     }
 
-    private func goToRandom() {
-        guard let next = appModel.nextRandomPresident(),
-              let newIndex = presidents.firstIndex(of: next) else { return }
+    /// Shows a president picked in Settings (from the list or Random Head), starting a fresh
+    /// random-walk history from it.
+    private func showFromSettings(_ selected: President) {
+        guard let newIndex = presidents.firstIndex(of: selected) else { return }
+        randomHistory = [newIndex]
+        randomPosition = 0
         setIndex(newIndex)
+        restartSlideshowCountdown()
+    }
+
+    private func startSlideshow() {
+        isSlideshowPaused = false
+        restartSlideshowCountdown()
     }
 
     /// Advances one slideshow step forward: sequentially (wrapping past the last president) when
@@ -238,6 +230,7 @@ struct PresidentDetailView: View {
     }
 
     private func beginSlideshowTimer() {
+        stopSlideshowTimer()
         slideshowRemainingSecs = slideshowIntervalSecs
         let timer = Timer(timeInterval: slideshowTickSecs, repeats: true) { _ in
             Task { @MainActor in
@@ -249,7 +242,7 @@ struct PresidentDetailView: View {
     }
 
     private func tickSlideshow() {
-        guard !isSlideshowPaused else { return }
+        guard isPlaying, !isSettingsPresented else { return }
         slideshowRemainingSecs = max(0, slideshowRemainingSecs - slideshowTickSecs)
         // Half-tick tolerance absorbs floating-point drift from repeated subtraction.
         if slideshowRemainingSecs < slideshowTickSecs / 2 {

@@ -569,7 +569,7 @@ in v05 in draw mode order the color palette red, green, yellow, white, black, bl
 update package version
 run bin/publish
 
-v02.87
+v02.88
 
 icon journey
 
@@ -579,3 +579,10 @@ https://www.google.com/search?q=chinese+to+english&rlz=1C5CHFA_enUS975US976&oq=c
 
 ho 何
 
+v02.89
+
+in v2, restructure navigation so that
+- HomeView becomes SettingsView
+- app start view is v2/HO-States-US/HO-States-US/PresidentDetail/PresidentDetailView.swift
+- in PresidentDetailToolbar center button is always play/pause animation
+- in PresidentDetailView info style icon as topBarTrailing that opens up SettingsView

@@ -3,8 +3,8 @@ import Observation
 import UIKit
 
 /// App-wide state shared via the SwiftUI environment. Owns the loaded president list and a
-/// shuffled draw order used by every "Random" control (`HomeView`'s Random President button,
-/// its slideshow, and `PresidentDetailView`'s Random toolbar button) so random selection cycles
+/// shuffled draw order used by every "Random" control (`SettingsView`'s Random Head button and
+/// `PresidentDetailView`'s random-mode slideshow / Next button) so random selection cycles
 /// through the full set before repeating instead of drawing independently each time.
 @Observable
 final class AppModel {

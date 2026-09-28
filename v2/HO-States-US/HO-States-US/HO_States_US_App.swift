@@ -14,8 +14,15 @@ struct HO_States_US_App: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView()
-                .environment(appModel)
+            NavigationStack {
+                PresidentDetailView(
+                    presidents: appModel.presidents,
+                    selected: appModel.presidents.indices.contains(appModel.slideIndex)
+                        ? appModel.presidents[appModel.slideIndex]
+                        : appModel.presidents[0]
+                )
+            }
+            .environment(appModel)
         }
         // The one place `AppModel.persistState()` is called — writing on every mutation (a
         // slideshow tick, a reaction pick) would mean far more disk I/O than the data warrants,

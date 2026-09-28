@@ -1,18 +1,23 @@
 import SwiftUI
 
-struct HomeView: View {
+/// Settings and app info, presented as a sheet from `PresidentDetailView`'s info button. Actions
+/// that change what's displayed (picking from the list, Random Head, Start Slideshow) are handed
+/// back to `PresidentDetailView` through the callbacks, and dismiss the sheet.
+struct SettingsView: View {
     @Environment(AppModel.self) private var appModel
-    
+    @Environment(\.dismiss) private var dismiss
+
+    /// Shows `president` in the detail view.
+    let onSelect: (President) -> Void
+    /// Starts (unpauses) the detail view's slideshow.
+    let onStartSlideshow: () -> Void
+
     private let sourceDataURL = URL(string: "https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States")!
     private let sourceCodeURL = URL(string: "https://github.com/molab-itp/99-HO-States")!
     private let webAppURL = URL(string: "https://molab-itp.github.io/99-HO-States/v05/")!
-  
-    @State private var path = NavigationPath()
-    @State private var isRandomMode = false
-    // Set right before pushing a president to kick off a slideshow (carrying whether it should
-    // run in random mode), and cleared whenever navigation returns to Home, so that an ordinary
-    // list tap or the "Random Head" button never accidentally lands in slideshow mode.
-    @State private var pendingSlideshow: Bool?
+
+    @AppStorage(SlideshowSettings.randomModeKey)
+    private var isRandomMode = SlideshowSettings.defaultRandomMode
     @AppStorage(SlideshowSettings.intervalSecsKey)
     private var slideshowIntervalSecs = SlideshowSettings.defaultIntervalSecs
     @AppStorage(SlideshowSettings.delayFractionKey)
@@ -22,49 +27,50 @@ struct HomeView: View {
     private var remainingCount: Int {
         appModel.presidents.count - appModel.viewedPresidentIDs.count
     }
-    
+
   var body: some View {
-    NavigationStack(path: $path) {
+    NavigationStack {
       ScrollView {
         VStack(spacing: 24) {
-          Spacer()
-          
           Image(systemName: "building.columns.fill")
             .font(.system(size: 72))
             .foregroundStyle(.tint)
-          
+
           Text("USnA Heads")
             .font(.largeTitle.bold())
-          
+
           Text("Browse portraits and biographies of every United States of north America \nHead of State.")
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, 32)
-          
-          Spacer()
-          
+
           VStack(spacing: 16) {
-            NavigationLink(value: HomeDestination.list) {
+            NavigationLink {
+              PresidenttListView(presidents: appModel.presidents) { president in
+                select(president)
+              }
+            } label: {
               Label("List of Heads", systemImage: "list.bullet")
                 .frame(maxWidth: .infinity)
             }
-            //                    .buttonStyle(.borderedProminent)
             .buttonStyle(.bordered)
-            
+
             Button {
-              goToRandomPresident()
+              if let president = appModel.nextRandomPresident() {
+                select(president)
+              }
             } label: {
               Label("Random Head", systemImage: "shuffle")
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
-            
+
             Toggle(isOn: $isRandomMode) {
               Label("Random Mode", systemImage: "shuffle")
             }
-            
+
             LabeledContent("Slide Interval") {
               Picker("Slide Interval", selection: $slideshowIntervalSecs) {
                 ForEach(SlideshowSettings.intervalSecsOptions, id: \.self) { secs in
@@ -73,7 +79,7 @@ struct HomeView: View {
               }
               .pickerStyle(.segmented)
             }
-            
+
             LabeledContent("Fadein Delay") {
               Picker("Fadein Delay", selection: $delayFraction) {
                 ForEach(SlideshowSettings.delayFractionOptions, id: \.self) { fraction in
@@ -82,7 +88,7 @@ struct HomeView: View {
               }
               .pickerStyle(.segmented)
             }
-            
+
             LabeledContent("Fade Period") {
               Picker("Fade Period", selection: $fadePeriod) {
                 ForEach(SlideshowSettings.fadePeriodOptions, id: \.self) { secs in
@@ -91,9 +97,10 @@ struct HomeView: View {
               }
               .pickerStyle(.segmented)
             }
-            
+
             Button {
-              startSlideshow()
+              onStartSlideshow()
+              dismiss()
             } label: {
               Label("Start Slideshow", systemImage: "play.circle")
                 .frame(maxWidth: .infinity)
@@ -102,7 +109,7 @@ struct HomeView: View {
           }
           .controlSize(.large)
           .padding(.horizontal, 32)
-          
+
           VStack(spacing: 4) {
             Text("\(remainingCount) left to see")
               .font(.callout.weight(.medium))
@@ -128,77 +135,27 @@ struct HomeView: View {
           Text(appModel.buildInfo)
             .font(.footnote.monospaced())
             .foregroundStyle(.secondary)
-          
-          Spacer()
         }
         .padding()
-        .navigationDestination(for: HomeDestination.self) { destination in
-          switch destination {
-          case .list:
-            PresidenttListView(presidents: appModel.presidents)
-          }
-        }
-        .navigationDestination(for: President.self) { president in
-          // NB: this closure is *not* a run-once initializer — NavigationStack re-invokes
-          // it whenever HomeView's body recomputes (e.g. every `markViewed` call changes
-          // `remainingCount`, which HomeView's body reads), even while `president` itself
-          // hasn't changed. A side effect here previously reset `appModel.slideIndex` back
-          // to this same starting value on every such re-invocation, silently undoing every
-          // slideshow advance. `PresidentDetailView` now owns seeding/advancing
-          // `appModel.slideIndex` itself instead (in `onAppear` and its own navigation
-          // methods), which only run once per view *identity*, not once per re-invocation.
-          PresidentDetailView(
-            presidents: appModel.presidents,
-            selected: president,
-            isRandomMode: pendingSlideshow ?? false,
-            startSlideshow: pendingSlideshow != nil
-          )
-          // Forces a fresh view each time a new president is pushed at the same
-          // navigation stack position.
-          .id(president.id)
-        }
       }
-      .onChange(of: path) { _, newPath in
-        if newPath.isEmpty {
-          pendingSlideshow = nil
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+        ToolbarItem(placement: .confirmationAction) {
+          Button("Done") {
+            dismiss()
+          }
         }
       }
     }
   }
-    
-    private func goToRandomPresident() {
-        pendingSlideshow = nil
-        guard let president = appModel.nextRandomPresident() else { return }
-        var newPath = NavigationPath()
-        newPath.append(president)
-        path = newPath
-    }
-    
-    private func startSlideshow() {
-        pendingSlideshow = isRandomMode
-        // Random mode draws the next card from the shared shuffle (resuming at
-        // `nextShuffleIndex`); sequential mode resumes from wherever `slideIndex` was last left,
-        // falling back to the first president only if that index is somehow out of bounds.
-        let president: President?
-        if isRandomMode {
-            president = appModel.nextRandomPresident()
-        } else if appModel.presidents.indices.contains(appModel.slideIndex) {
-            president = appModel.presidents[appModel.slideIndex]
-        } else {
-            president = appModel.presidents.first
-        }
-        guard let president else { return }
-        var newPath = NavigationPath()
-        newPath.append(president)
-        path = newPath
-    }
-}
 
-private enum HomeDestination: Hashable {
-    case list
+    private func select(_ president: President) {
+        onSelect(president)
+        dismiss()
+    }
 }
 
 #Preview {
-    HomeView()
+    SettingsView(onSelect: { _ in }, onStartSlideshow: {})
         .environment(AppModel())
 }

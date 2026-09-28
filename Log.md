@@ -1851,3 +1851,16 @@ Open the `Network:` URL it prints, adding `/99-HO-States/v05/` to the end (the p
 build uses that path prefix).
 
 **Cost**: ~1 minute.
+
+# --
+
+2026-09-28 16:06 (v2: open on PresidentDetailView; HomeView becomes SettingsView)
+
+The iOS app now opens straight to PresidentDetailView, on the last president viewed. HomeView is
+renamed SettingsView and opens as a sheet from a new info button at the top right. List of Heads,
+Random Head and Start Slideshow update the detail view and close the sheet. The center toolbar
+button is always Play/Pause (Random removed), and the slideshow starts paused. Previous/Next now
+behave the same whether playing or paused. Random Mode is saved between launches. Builds for the
+simulator; not yet run.
+
+**Cost**: ~6 minutes.

@@ -7,16 +7,20 @@
 
 import SwiftUI
 
-/// The scrollable list of all presidents. Presented inside a `NavigationStack` owned by
-/// `HomeView`, which also declares the shared `navigationDestination(for: President.self)`.
+/// The scrollable list of all presidents. Pushed from `SettingsView`; tapping a row hands the
+/// president to `onSelect` (which shows it in `PresidentDetailView` and dismisses Settings).
 struct PresidenttListView: View {
     let presidents: [President]
+    let onSelect: (President) -> Void
 
     var body: some View {
         List(presidents) { president in
-            NavigationLink(value: president) {
+            Button {
+                onSelect(president)
+            } label: {
                 PresidentRow(president: president)
             }
+            .foregroundStyle(.primary)
         }
         .navigationTitle("USnA Heads")
     }
@@ -69,10 +73,7 @@ private struct PresidentRow: View {
 #Preview {
     let presidents = PresidentsRepository.loadAll()
     NavigationStack {
-        PresidenttListView(presidents: presidents)
-            .navigationDestination(for: President.self) { president in
-                PresidentDetailView(presidents: presidents, selected: president)
-            }
+        PresidenttListView(presidents: presidents) { _ in }
     }
     .environment(AppModel(presidents: presidents))
 }
