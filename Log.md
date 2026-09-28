@@ -1864,3 +1864,19 @@ behave the same whether playing or paused. Random Mode is saved between launches
 simulator; not yet run.
 
 **Cost**: ~6 minutes.
+
+# --
+
+2026-09-28 19:23 (v05: sync web app with v2 navigation; v2: fix slide interval setting)
+
+**v05.90** — The web app now opens on the detail screen, paused. Home became a Settings sheet
+opened from an info button; the center toolbar button is always Play/Pause, and Random Mode is
+saved. Settings changes now reach the detail screen without a reload. Smoke test updated and
+passing. Version 0.1.15, published with `bin/publish`.
+
+**v2** — Changing Slide Interval in Settings only applied to the first countdown; later advances
+went back to the interval from launch (the slideshow `Timer` kept a stale copy of the view).
+Replaced it with `.onReceive(Timer.publish…)`. Reproduced and confirmed fixed in the iPhone 17
+Pro simulator with idb. Not yet committed.
+
+**Cost**: ~25 minutes.
