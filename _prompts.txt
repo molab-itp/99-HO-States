@@ -586,3 +586,7 @@ in v2, restructure navigation so that
 - app start view is v2/HO-States-US/HO-States-US/PresidentDetail/PresidentDetailView.swift
 - in PresidentDetailToolbar center button is always play/pause animation
 - in PresidentDetailView info style icon as topBarTrailing that opens up SettingsView
+
+v05.90
+
+sync web app in v05 with changes to v2

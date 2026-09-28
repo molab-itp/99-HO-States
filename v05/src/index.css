@@ -206,7 +206,7 @@ input {
   color: var(--tint);
 }
 
-/* Home screen — matches the plain (no nav bar) root view; buttons use SwiftUI's `.bordered`
+/* Settings content (formerly the Home screen); buttons use SwiftUI's `.bordered`
    style, which on iOS renders as a tinted, filled, continuously-rounded control, not an
    outline. Scoped to SwiftUI's default system-blue tint (rather than the rest of the app's red)
    since the Swift app's AccentColor asset is unset, and an unset AccentColor's real default tint
@@ -653,6 +653,37 @@ input {
   width: 100%;
   height: 100%;
   pointer-events: none;
+}
+
+/* Settings — a full-screen, scrollable layer over the detail screen, standing in for the
+   SwiftUI sheet presented from the info button. Takes Home's system-blue tint (see `.home`) so
+   its Done button matches the rest of the sheet. */
+.settings-sheet {
+  --tint: #007aff;
+
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--bg);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (prefers-color-scheme: dark) {
+  .settings-sheet {
+    --tint: #0a84ff;
+  }
+}
+
+.settings-sheet .home {
+  min-height: auto;
+  justify-content: flex-start;
+}
+
+.settings-sheet .list-screen {
+  min-height: 100%;
 }
 
 /* Drawing editor — a full-screen layer over the detail screen, standing in for the pushed

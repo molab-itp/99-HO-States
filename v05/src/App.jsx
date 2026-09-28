@@ -1,34 +1,21 @@
-import { AppModelProvider } from './state/AppModelContext.jsx';
-import { NavigationProvider, useNavigation } from './navigation/NavigationContext.jsx';
-import HomeScreen from './screens/HomeScreen.jsx';
-import PresidentListScreen from './screens/PresidentListScreen.jsx';
+import { AppModelProvider, useAppModel } from './state/AppModelContext.jsx';
 import PresidentDetailScreen from './screens/PresidentDetailScreen.jsx';
 
-/** Renders whatever is topmost on the navigation stack, Home when the stack is empty. */
-function Router() {
-  const { path } = useNavigation();
-  const top = path[path.length - 1];
-
-  if (!top) return <HomeScreen />;
-  if (top.type === 'list') return <PresidentListScreen key={top.navKey} />;
-  return (
-    <PresidentDetailScreen
-      key={top.navKey}
-      selected={top.president}
-      startSlideshow={!!top.startSlideshow}
-      isRandomMode={!!top.isRandomMode}
-    />
-  );
+/**
+ * Port of `HO_States_US_App`'s root: the app opens straight onto the detail screen at the
+ * persisted `slideIndex` (Settings is a sheet presented from there).
+ */
+function Root() {
+  const { presidents, slideIndex } = useAppModel();
+  return <PresidentDetailScreen selected={presidents[slideIndex] ?? presidents[0]} />;
 }
 
 export default function App() {
   return (
     <AppModelProvider>
-      <NavigationProvider>
-        <div className="app-shell">
-          <Router />
-        </div>
-      </NavigationProvider>
+      <div className="app-shell">
+        <Root />
+      </div>
     </AppModelProvider>
   );
 }

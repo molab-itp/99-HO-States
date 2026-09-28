@@ -8,6 +8,7 @@ import ZoomableHeaderImage from '../components/ZoomableHeaderImage.jsx';
 import ReactionControl from '../components/ReactionControl.jsx';
 import Icon from '../components/Icon.jsx';
 import PresidentDrawingEditor from '../components/PresidentDrawingEditor.jsx';
+import SettingsScreen from './SettingsScreen.jsx';
 import { useStoredBoolean } from '../state/useStoredBoolean.js';
 import { useStoredNumber } from '../state/useStoredNumber.js';
 import { SlideshowSettings } from '../state/slideshowSettings.js';
@@ -15,13 +16,12 @@ import { SlideshowSettings } from '../state/slideshowSettings.js';
 const SLIDESHOW_TICK_SECS = 0.1; // matches PresidentDetailView's slideshowTickSecs
 
 /**
- * Port of PresidentDetailView.swift. `selected` is the president this screen was pushed with.
- * `startSlideshow`/`isRandomMode` are only set when Home's Start Slideshow button pushed this
- * screen; the slideshow's timer, pause state, and (in random mode) its random-walk history all
- * live here for the screen's whole lifetime — the app no longer swaps in a fresh detail screen on
- * every tick, so Previous/Next/pause can all act on the same instance's state.
+ * Port of PresidentDetailView.swift — the app's start screen. `selected` is the president shown
+ * at launch. The slideshow is always "on": Play/Pause just toggles whether its countdown
+ * advances, and it starts paused so launching lands on a still president until Play is pressed.
+ * Settings (list, Random Head, slideshow options) is a sheet opened from the info button.
  */
-export default function PresidentDetailScreen({ selected, startSlideshow = false, isRandomMode = false }) {
+export default function PresidentDetailScreen({ selected }) {
   const {
     presidents,
     viewedIDs,
@@ -43,7 +43,7 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
     return found >= 0 ? found : 0;
   })();
 
-  // Chosen on Home; read-only here. Seconds to wait before fading in the details is the interval
+  // Chosen in Settings; read-only here. Seconds to wait before fading in the details is the interval
   // times the chosen fraction, matching Swift's computed `delaySecs`.
   const [slideshowIntervalSecs] = useStoredNumber(
     SlideshowSettings.intervalSecsKey,
@@ -60,28 +60,29 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
   // below, so a new president's text is hidden in the same render that shows it — an effect runs
   // after paint, which let the new text flash at full opacity first.
   const [revealedIndex, setRevealedIndex] = useState(null);
-  const [isSlideshowActive] = useState(startSlideshow);
-  const [isSlideshowPaused, setIsSlideshowPaused] = useState(false);
+  const [isRandomMode] = useStoredBoolean(SlideshowSettings.randomModeKey, SlideshowSettings.defaultRandomMode);
+  const [isSlideshowPaused, setIsSlideshowPaused] = useState(true);
+  const isPlaying = !isSlideshowPaused;
   const [remainingSecs, setRemainingSecs] = useState(slideshowIntervalSecs);
   const [isDrawingEditorOpen, setIsDrawingEditorOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   // Port of `@AppStorage("showsDrawings")`: shared across presidents and reloads, so hiding
   // drawings stays in effect while browsing.
   const [showsDrawings, setShowsDrawings] = useStoredBoolean('ho-states-us.showsDrawings', true);
 
   // `index` (which president is shown) and, in random mode, the walk's history/position all
-  // change together, so they're one state object updated atomically.
+  // change together, so they're one state object updated atomically. The history restarts
+  // whenever Settings picks a president.
   const [nav, setNav] = useState({ index: startIndex, history: [startIndex], position: 0 });
   const index = nav.index;
   const president = presidents[index];
-  const isFirst = index === 0;
-  const isLast = index === presidents.length - 1;
   const detailsVisible = revealedIndex === index;
 
   // Mirrors `.task(id: index)`: mark viewed immediately, then fade the text in after a delay
   // that's cancelled (never revealed) if `index` changes again first.
   useEffect(() => {
     let cancelled = false;
-    markViewed(president, isSlideshowActive);
+    markViewed(president, isPlaying);
     const timer = setTimeout(() => {
       if (!cancelled) setRevealedIndex(index);
     }, delaySecs * 1000);
@@ -92,14 +93,14 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
-  // Port of the Swift ZStack + `.transition(.opacity)`: while a slideshow runs, the previous
+  // Port of the Swift ZStack + `.transition(.opacity)`: while the slideshow plays, the previous
   // president's image stays on top of the new one and fades out over `fadePeriod` as the new one
-  // fades in. Manual browsing (no slideshow) swaps the image instantly. The switch is made during
+  // fades in. Manual browsing (while paused) swaps the image instantly. The switch is made during
   // render (not in an effect) so the outgoing image's layer is never unmounted, not even for one
   // commit: remounting it made a fresh <img> that flashed blank while the browser decoded it.
   const [fade, setFade] = useState({ shown: president, outgoing: null });
   if (fade.shown.order !== president.order) {
-    setFade({ shown: president, outgoing: isSlideshowActive ? fade.shown : null });
+    setFade({ shown: president, outgoing: isPlaying ? fade.shown : null });
   }
   const outgoing = fade.outgoing;
   useEffect(() => {
@@ -111,7 +112,7 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
 
   // Mirrors `index` into `appModel.slideIndex` on every change (including the initial mount), so
   // it persists across this screen being unmounted and remounted — e.g. a sequential slideshow
-  // that's stopped and later restarted resumes from here instead of always restarting at #1.
+  // e.g. a reload resumes at the president last shown instead of always restarting at #1.
   useEffect(() => {
     setSlideIndex(index);
   }, [index, setSlideIndex]);
@@ -142,66 +143,63 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
     return { ...prevNav, index: newIndex };
   }
 
-  // Auto-advance timer: only runs while a slideshow is active, uses a ref for the tick body so
+  // Auto-advance timer: always running (ticks are ignored while paused), uses a ref for the tick body so
   // the interval (set up once) always calls the latest closure instead of a stale one. The
   // updater is kept pure (just clamped decrement, no side effects) — React 18 StrictMode
   // intentionally double-invokes functional state updaters to catch impure ones, and an earlier
   // version of this that called `setNav(...)` from inside here had that side effect fire twice
   // per tick, advancing the slideshow by 2 presidents instead of 1.
   const tickRef = useRef(() => {});
-  // The drawing editor also holds the countdown, so the president can't change mid-drawing — the
-  // equivalent of the Swift editor push firing `onDisappear` and stopping the timer.
+  // The drawing editor and Settings also hold the countdown, so the president can't change
+  // mid-drawing or behind the sheet — matching the Swift `onDisappear` / `isSettingsPresented`
+  // checks.
   tickRef.current = () => {
-    if (isSlideshowPaused || isDrawingEditorOpen) return;
+    if (!isPlaying || isDrawingEditorOpen || isSettingsOpen) return;
     setRemainingSecs((prev) => Math.max(0, prev - SLIDESHOW_TICK_SECS));
   };
 
   useEffect(() => {
-    if (!isSlideshowActive) return undefined;
     const id = setInterval(() => tickRef.current(), SLIDESHOW_TICK_SECS * 1000);
     return () => clearInterval(id);
-  }, [isSlideshowActive]);
+  }, []);
 
   // Advances exactly once each time the countdown reaches zero. A plain `useEffect` keyed on the
   // resulting value only reacts to genuine changes (unlike a functional updater, which StrictMode
   // double-invokes), so this can't double-fire the way the inline version above did. Half-tick
   // tolerance absorbs floating-point drift from repeated subtraction.
   useEffect(() => {
-    if (!isSlideshowActive || remainingSecs >= SLIDESHOW_TICK_SECS / 2) return;
+    if (remainingSecs >= SLIDESHOW_TICK_SECS / 2) return;
     setNav((prevNav) => advanceForward(prevNav));
     setRemainingSecs(slideshowIntervalSecs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [remainingSecs, isSlideshowActive]);
+  }, [remainingSecs]);
 
   function goToPrevious() {
-    if (isSlideshowActive) {
-      setNav((prevNav) => stepBackward(prevNav));
-      setRemainingSecs(slideshowIntervalSecs);
-    } else if (!isFirst) {
-      setNav((prevNav) => ({ ...prevNav, index: prevNav.index - 1 }));
-    }
+    setNav((prevNav) => stepBackward(prevNav));
+    setRemainingSecs(slideshowIntervalSecs);
   }
 
   function goToNext() {
-    if (isSlideshowActive) {
-      setNav((prevNav) => advanceForward(prevNav));
-      setRemainingSecs(slideshowIntervalSecs);
-    } else if (!isLast) {
-      setNav((prevNav) => ({ ...prevNav, index: prevNav.index + 1 }));
-    }
+    setNav((prevNav) => advanceForward(prevNav));
+    setRemainingSecs(slideshowIntervalSecs);
   }
 
-  // Manual jump when no slideshow is running (independent of the Random Mode checkbox, which
-  // only affects Next/Previous once a slideshow is active).
-  function goToRandom() {
-    const next = nextRandomPresident();
-    if (!next) return;
-    const newIndex = presidents.findIndex((p) => p.order === next.order);
-    if (newIndex >= 0) setNav((prevNav) => ({ ...prevNav, index: newIndex }));
+  /** Shows a president picked in Settings (from the list or Random Head), starting a fresh
+   *  random-walk history from it. */
+  function showFromSettings(picked) {
+    const newIndex = presidents.findIndex((p) => p.order === picked.order);
+    if (newIndex < 0) return;
+    setNav({ index: newIndex, history: [newIndex], position: 0 });
+    setRemainingSecs(slideshowIntervalSecs);
+  }
+
+  function startSlideshow() {
+    setIsSlideshowPaused(false);
+    setRemainingSecs(slideshowIntervalSecs);
   }
 
   const orderText = String(president.order).padStart(2, '0');
-  const title = isSlideshowActive
+  const title = isPlaying
     ? `#${orderText} · ${remainingSecs.toFixed(1).padStart(4, '0')}s ${buildInfo}`
     : `#${orderText} ${buildInfo}`;
 
@@ -209,8 +207,7 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
   const drawing = drawingFor(president);
   const articleURL = wikipediaArticleURL(president);
 
-  const isPreviousDisabled = isSlideshowActive ? isRandomMode && nav.position === 0 : isFirst;
-  const isNextDisabled = isSlideshowActive ? false : isLast;
+  const isPreviousDisabled = isRandomMode && nav.position === 0;
 
   return (
     <div className="screen-scroll">
@@ -230,6 +227,9 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
             )}
             <button className="nav-action" aria-label="Draw on Photo" onClick={() => setIsDrawingEditorOpen(true)}>
               <Icon name="pencil-square" size={18} />
+            </button>
+            <button className="nav-action" aria-label="Settings" onClick={() => setIsSettingsOpen(true)}>
+              <Icon name="info-circle" size={19} />
             </button>
           </>
         }
@@ -294,28 +294,29 @@ export default function PresidentDetailScreen({ selected, startSlideshow = false
         >
           <Icon name="chevron-left" size={20} />
         </button>
-        {isSlideshowActive ? (
-          <button
-            className="toolbar-btn toolbar-btn-icon"
-            aria-label={isSlideshowPaused ? 'Play' : 'Pause'}
-            onClick={() => setIsSlideshowPaused((p) => !p)}
-          >
-            <Icon name={isSlideshowPaused ? 'play-circle-fill' : 'pause-circle-fill'} size={19} />
-          </button>
-        ) : (
-          <button className="toolbar-btn toolbar-btn-icon" aria-label="Random" onClick={goToRandom}>
-            <Icon name="shuffle" size={19} />
-          </button>
-        )}
+        <button
+          className="toolbar-btn toolbar-btn-icon"
+          aria-label={isSlideshowPaused ? 'Play' : 'Pause'}
+          onClick={() => setIsSlideshowPaused((p) => !p)}
+        >
+          <Icon name={isSlideshowPaused ? 'play-circle-fill' : 'pause-circle-fill'} size={19} />
+        </button>
         <button
           className="toolbar-btn toolbar-btn-icon"
           aria-label="Next"
-          disabled={isNextDisabled}
           onClick={goToNext}
         >
           <Icon name="chevron-right" size={20} />
         </button>
       </div>
+
+      {isSettingsOpen && (
+        <SettingsScreen
+          onSelect={showFromSettings}
+          onStartSlideshow={startSlideshow}
+          onClose={() => setIsSettingsOpen(false)}
+        />
+      )}
 
       {isDrawingEditorOpen && (
         <PresidentDrawingEditor
