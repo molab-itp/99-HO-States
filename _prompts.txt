@@ -590,3 +590,8 @@ in v2, restructure navigation so that
 v05.90
 
 sync web app in v05 with changes to v2
+
+v02.91
+
+in v2 changes to settings slide show interval don't take effect
+confirm fix using idb

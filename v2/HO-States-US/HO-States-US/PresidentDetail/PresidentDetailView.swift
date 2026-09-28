@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 /// Persisted slideshow settings, chosen on `SettingsView` and used by `PresidentDetailView`. Seconds
@@ -44,12 +45,18 @@ struct PresidentDetailView: View {
     /// Seconds to wait after a president appears before fading in the details.
     private var delaySecs: Double { slideshowIntervalSecs * delayFraction }
 
-    private let slideshowTickSecs = 0.1
+    private static let slideshowTickSecs = 0.1
     // The slideshow is always "on" — Play/Pause just toggles whether its countdown advances. It
     // starts paused, so launching the app lands on a still president until Play is pressed.
     @State private var isSlideshowPaused = true
     private var isPlaying: Bool { !isSlideshowPaused }
-    @State private var slideshowTimer: Timer?
+    // Delivered through `.onReceive` rather than a `Timer` whose closure is created once in
+    // `onAppear`: such a closure captures that moment's copy of this struct, and its `@AppStorage`
+    // reads then return stale values — so every auto-advance restarted the countdown with the
+    // interval from before Settings changed it. `.onReceive`'s closure is rebuilt on every body
+    // evaluation, so it always sees the current settings. Held in `@State` so re-running `init`
+    // doesn't resubscribe (an unsubscribed `autoconnect` publisher never starts its timer).
+    @State private var slideshowTicks = Timer.publish(every: slideshowTickSecs, on: .main, in: .common).autoconnect()
     @State private var slideshowRemainingSecs = 0.0
 
     // Indices visited during the random walk (in random mode only), so Previous can step back
@@ -112,19 +119,18 @@ struct PresidentDetailView: View {
             // `appModel.slideIndex`, covering the case where a president is viewed but never
             // advanced past before the user backs out.
             appModel.slideIndex = index
-            beginSlideshowTimer()
+            restartSlideshowCountdown()
         }
-        .onDisappear {
-            stopSlideshowTimer()
+        .onReceive(slideshowTicks) { _ in
+            tickSlideshow()
         }
         .navigationBarTitleDisplayMode(.inline)
-        // Pushing the editor fires `onDisappear` above, which stops a running slideshow's timer
-        // so the president can't change mid-drawing; `onAppear` restarts it on return.
+        // `tickSlideshow` holds the countdown while the editor is up so the president can't change
+        // mid-drawing; `onAppear` restarts the countdown on return.
         .navigationDestination(isPresented: $isDrawingEditorPresented) {
             PresidentDrawingEditorView(president: president)
         }
-        // A sheet doesn't fire `onDisappear`, so `tickSlideshow` instead holds the countdown
-        // while this is up.
+        // `tickSlideshow` also holds the countdown while this is up.
         .sheet(isPresented: $isSettingsPresented) {
             SettingsView(onSelect: showFromSettings, onStartSlideshow: startSlideshow)
         }
@@ -229,23 +235,11 @@ struct PresidentDetailView: View {
         }
     }
 
-    private func beginSlideshowTimer() {
-        stopSlideshowTimer()
-        slideshowRemainingSecs = slideshowIntervalSecs
-        let timer = Timer(timeInterval: slideshowTickSecs, repeats: true) { _ in
-            Task { @MainActor in
-                tickSlideshow()
-            }
-        }
-        RunLoop.main.add(timer, forMode: .common)
-        slideshowTimer = timer
-    }
-
     private func tickSlideshow() {
-        guard isPlaying, !isSettingsPresented else { return }
-        slideshowRemainingSecs = max(0, slideshowRemainingSecs - slideshowTickSecs)
+        guard isPlaying, !isSettingsPresented, !isDrawingEditorPresented else { return }
+        slideshowRemainingSecs = max(0, slideshowRemainingSecs - Self.slideshowTickSecs)
         // Half-tick tolerance absorbs floating-point drift from repeated subtraction.
-        if slideshowRemainingSecs < slideshowTickSecs / 2 {
+        if slideshowRemainingSecs < Self.slideshowTickSecs / 2 {
             advanceSlideshow()
             restartSlideshowCountdown()
         }
@@ -257,11 +251,6 @@ struct PresidentDetailView: View {
 
     private func toggleSlideshowPause() {
         isSlideshowPaused.toggle()
-    }
-
-    private func stopSlideshowTimer() {
-        slideshowTimer?.invalidate()
-        slideshowTimer = nil
     }
 }
 
