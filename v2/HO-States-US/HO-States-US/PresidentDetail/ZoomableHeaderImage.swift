@@ -34,8 +34,6 @@ struct ZoomableHeaderImage: View {
                                 .scaledToFit()
                         }
                     }
-                    // Reactions sit above the drawing, and zoom and pan with the photo like it.
-                    .overlay { ReactionOverlay(president: president) }
                     .frame(maxWidth: .infinity)
                     // Scale/offset are applied *before* the clip below, so the clip's rounded-rect
                     // bounds stay fixed to the original frame while the pinched/panned content moves
@@ -43,6 +41,9 @@ struct ZoomableHeaderImage: View {
                     .scaleEffect(scale)
                     .offset(offset)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    // Reactions go after the zoom/pan and clip, so they stay pinned along the
+                    // bottom edge of the visible frame instead of moving with the photo.
+                    .overlay { ReactionOverlay(president: president) }
                     // clipShape only clips drawing, not hit-testing: without this the scaled/offset
                     // content still receives touches outside the visible frame, so drags starting
                     // on neighboring views (progress bar, summary text) would pan the image.
