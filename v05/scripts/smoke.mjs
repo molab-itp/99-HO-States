@@ -246,6 +246,7 @@ async function main() {
     const runningTitle = await title();
     assertIncludes(runningTitle, '·', 'playing title should show a countdown');
     assertIncludes(runningTitle, '#01', 'sequential slideshow should start from the shown president');
+    assert((await page.locator('.zoom-controls').count()) === 0, 'zoom controls should be hidden while playing');
     await shot('slideshow-running');
 
     // Regression check for a real bug: the auto-advance previously fired via a `setRemainingTenths`
@@ -312,6 +313,23 @@ async function main() {
     const after = await page.locator('.visited-count').textContent();
     console.log(`  "${before}" -> "${after}"`);
     await shot('after-reset');
+
+    console.log('Zoom controls on a touch phone (no hover, coarse pointer): shown while paused...');
+    const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    const phonePage = await phone.newPage();
+    phonePage.on('pageerror', (err) => consoleErrors.push(String(err)));
+    await phonePage.goto(url);
+    await phonePage.waitForSelector('.zoom-controls');
+    assert(await phonePage.isVisible('button[aria-label="Zoom In"]'), 'zoom controls should show on a touch screen');
+    await phonePage.tap('button[aria-label="Zoom In"]');
+    await phonePage.waitForSelector('.zoomable-image.zoomed');
+    await phonePage.tap('button[aria-label="Reset Zoom"]');
+    await phonePage.waitForSelector('.zoomable-image.zoomed', { state: 'detached' });
+    await phonePage.tap('button[aria-label="Play"]');
+    await phonePage.waitForSelector('.zoom-controls', { state: 'detached' });
+    await phonePage.tap('button[aria-label="Pause"]');
+    await phonePage.waitForSelector('.zoom-controls');
+    await phone.close();
   } finally {
     await browser.close();
     await server.close();

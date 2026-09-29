@@ -547,13 +547,13 @@ input {
   cursor: grabbing;
 }
 
-/* Zoom buttons for desktop: only on devices with a mouse, where there's no pinch gesture. */
+/* Zoom buttons, on desktop and touch screens alike; left out while the slideshow plays. */
 .zoomable-image {
   position: relative;
 }
 
 .zoom-controls {
-  display: none;
+  display: flex;
   position: absolute;
   top: 8px;
   right: 8px;
@@ -566,11 +566,6 @@ input {
   cursor: default;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .zoom-controls {
-    display: flex;
-  }
-}
 
 .zoom-btn {
   display: flex;

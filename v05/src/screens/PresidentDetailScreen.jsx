@@ -257,6 +257,7 @@ export default function PresidentDetailScreen({ selected }) {
                   onZoomChange={isOutgoing ? undefined : (state) => setImageZoomStateFor(state, p)}
                   drawing={showsDrawings ? layerDrawing : null}
                   reactions={reactionsFor(p)}
+                  showsZoomControls={!isPlaying}
                 />
               </div>
             );

@@ -27,9 +27,18 @@ function distance(a, b) {
  * `key={president.order}` each time the president changes, so `scale`/`offset` start fresh from
  * `initialZoom` (this president's persisted zoom state, if any) instead of carrying over the
  * previous president's zoom/pan. `drawing`, when given, is the president's saved drawing, laid
- * over the photo; `reactions` are shown along the frame's bottom edge.
+ * over the photo; `reactions` are shown along the frame's bottom edge. `showsZoomControls` hides
+ * the -/1×/+ buttons (e.g. while the slideshow plays); pinch, wheel and double-tap still work.
  */
-export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoomChange, drawing = null, reactions = [] }) {
+export default function ZoomableHeaderImage({
+  imageSrc,
+  alt,
+  initialZoom,
+  onZoomChange,
+  drawing = null,
+  reactions = [],
+  showsZoomControls = true,
+}) {
   const [scale, setScaleState] = useState(initialZoom?.scale ?? MIN_SCALE);
   const [offset, setOffsetState] = useState({
     x: initialZoom?.offsetX ?? 0,
@@ -274,24 +283,27 @@ export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoom
       {/* Outside the transformed box, so reactions stay pinned along the bottom edge of the
           visible frame instead of zooming and panning with the photo. */}
       <ReactionOverlay reactions={reactions} />
-      {/* Explicit zoom controls for mouse users (hidden on touch screens by CSS). Their pointer
-          events stop here so a click doesn't also start a pan or count toward a double-tap. */}
-      <div className="zoom-controls" onPointerDown={(e) => e.stopPropagation()}>
-        <button className="zoom-btn" aria-label="Zoom Out" disabled={scale <= MIN_SCALE} onClick={() => zoomBy(1 / BUTTON_ZOOM_STEP)}>
-          <Icon name="minus-circle" size={18} />
-        </button>
-        <button
-          className="zoom-btn zoom-btn-text"
-          aria-label="Reset Zoom"
-          disabled={scale <= MIN_SCALE && offset.x === 0 && offset.y === 0}
-          onClick={handleButtonReset}
-        >
-          1×
-        </button>
-        <button className="zoom-btn" aria-label="Zoom In" disabled={scale >= MAX_SCALE} onClick={() => zoomBy(BUTTON_ZOOM_STEP)}>
-          <Icon name="plus-circle" size={18} />
-        </button>
-      </div>
+      {/* Explicit zoom controls, for mouse users and as an alternative to pinching on touch
+          screens. Their pointer events stop here so a click doesn't also start a pan or count
+          toward a double-tap. */}
+      {showsZoomControls && (
+        <div className="zoom-controls" onPointerDown={(e) => e.stopPropagation()}>
+          <button className="zoom-btn" aria-label="Zoom Out" disabled={scale <= MIN_SCALE} onClick={() => zoomBy(1 / BUTTON_ZOOM_STEP)}>
+            <Icon name="minus-circle" size={18} />
+          </button>
+          <button
+            className="zoom-btn zoom-btn-text"
+            aria-label="Reset Zoom"
+            disabled={scale <= MIN_SCALE && offset.x === 0 && offset.y === 0}
+            onClick={handleButtonReset}
+          >
+            1×
+          </button>
+          <button className="zoom-btn" aria-label="Zoom In" disabled={scale >= MAX_SCALE} onClick={() => zoomBy(BUTTON_ZOOM_STEP)}>
+            <Icon name="plus-circle" size={18} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

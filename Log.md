@@ -1900,3 +1900,13 @@ now grayscale versions of v2's new app icon. Smoke test extended for reactions a
 Version 0.1.16. Not yet committed.
 
 **Cost**: ~35 minutes.
+
+# --
+
+2026-09-29 11:40 (v05: zoom buttons on mobile, hidden while playing)
+
+The −, 1× and + zoom buttons now show on touch phones as well as desktop, and are hidden while
+the slideshow plays. Smoke test checks both; tested in Chromium with touch emulation, not yet on
+an iPhone. Not yet committed.
+
+**Cost**: ~5 minutes.
