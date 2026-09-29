@@ -616,3 +616,8 @@ v05.94
 sync web app in v05 with changes to v2
 modify icon to be grayscale
 
+v05.95
+
+in v05 have the minus plus one plus zoom icons appear on iOS mobile
+in addition to desktop. 
+Hide these controls when in slideshow play mode.
