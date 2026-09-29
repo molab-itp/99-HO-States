@@ -143,6 +143,36 @@ async function main() {
     await page.waitForSelector('.drawing-overlay', { state: 'detached' });
     assert(!(await page.isVisible('button[aria-label="Hide Drawing"]')), 'hide/show button should go away with the drawing');
 
+    console.log('Reactions: added in the drawing editor, shown along the photo bottom, pinned while zoomed...');
+    assert((await page.locator('.detail-text button[aria-label="Add Reaction"]').count()) === 0, 'reaction controls should not be in the summary text');
+    await page.click('button[aria-label="Draw on Photo"]');
+    await page.waitForSelector('.drawing-surface');
+    for (let i = 0; i < 2; i++) {
+      await page.click('button[aria-label="Add Reaction"]');
+      await page.click('.reaction-picker-option >> nth=0');
+    }
+    assert((await page.locator('.drawing-editor .reaction-overlay').textContent()) === '👍🏾 👍🏾', 'editor overlay should show both reactions');
+    await shot('drawing-editor-reactions');
+    await page.click('button:has-text("Done")');
+    const overlay = page.locator('.zoomable-image:not([aria-hidden]) .reaction-overlay span').last();
+    await overlay.waitFor();
+    const frame = await page.locator('.zoomable-image').last().boundingBox();
+    const reactionsBefore = await overlay.boundingBox();
+    assert(frame.y + frame.height - (reactionsBefore.y + reactionsBefore.height) < 20, 'reactions should sit at the bottom edge of the photo');
+    await page.click('button[aria-label="Zoom In"]');
+    await page.click('button[aria-label="Zoom In"]');
+    await page.waitForTimeout(300);
+    const reactionsAfter = await overlay.boundingBox();
+    assert(Math.abs(reactionsAfter.y - reactionsBefore.y) < 1 && Math.abs(reactionsAfter.height - reactionsBefore.height) < 1, 'reactions should not move or scale with zoom');
+    await shot('detail-reactions-zoomed');
+    await page.click('button[aria-label="Reset Zoom"]');
+    await page.click('button[aria-label="Draw on Photo"]');
+    await page.click('button[aria-label="Remove Reaction"]');
+    await page.click('button[aria-label="Remove Reaction"]');
+    assert(await page.isDisabled('button[aria-label="Remove Reaction"]'), '- should disable once no reactions are left');
+    await page.click('button:has-text("Done")');
+    await page.waitForSelector('.reaction-overlay', { state: 'detached' });
+
     console.log('Random Head from Settings...');
     await openSettings();
     await page.click('text=Random Head');

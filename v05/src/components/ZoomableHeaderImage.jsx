@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 import DrawingOverlay from './DrawingOverlay.jsx';
+import ReactionOverlay from './ReactionOverlay.jsx';
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 30;
@@ -26,9 +27,9 @@ function distance(a, b) {
  * `key={president.order}` each time the president changes, so `scale`/`offset` start fresh from
  * `initialZoom` (this president's persisted zoom state, if any) instead of carrying over the
  * previous president's zoom/pan. `drawing`, when given, is the president's saved drawing, laid
- * over the photo.
+ * over the photo; `reactions` are shown along the frame's bottom edge.
  */
-export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoomChange, drawing = null }) {
+export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoomChange, drawing = null, reactions = [] }) {
   const [scale, setScaleState] = useState(initialZoom?.scale ?? MIN_SCALE);
   const [offset, setOffsetState] = useState({
     x: initialZoom?.offsetX ?? 0,
@@ -270,6 +271,9 @@ export default function ZoomableHeaderImage({ imageSrc, alt, initialZoom, onZoom
         />
         {drawing && <DrawingOverlay drawing={drawing} aria-hidden="true" />}
       </div>
+      {/* Outside the transformed box, so reactions stay pinned along the bottom edge of the
+          visible frame instead of zooming and panning with the photo. */}
+      <ReactionOverlay reactions={reactions} />
       {/* Explicit zoom controls for mouse users (hidden on touch screens by CSS). Their pointer
           events stop here so a click doesn't also start a pan or count toward a double-tap. */}
       <div className="zoom-controls" onPointerDown={(e) => e.stopPropagation()}>

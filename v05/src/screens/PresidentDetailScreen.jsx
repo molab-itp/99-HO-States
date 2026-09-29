@@ -5,7 +5,6 @@ import { assetUrl } from '../data/assetUrl.js';
 import NavBar from '../components/NavBar.jsx';
 import ViewedProgressBar from '../components/ViewedProgressBar.jsx';
 import ZoomableHeaderImage from '../components/ZoomableHeaderImage.jsx';
-import ReactionControl from '../components/ReactionControl.jsx';
 import Icon from '../components/Icon.jsx';
 import PresidentDrawingEditor from '../components/PresidentDrawingEditor.jsx';
 import SettingsScreen from './SettingsScreen.jsx';
@@ -257,6 +256,7 @@ export default function PresidentDetailScreen({ selected }) {
                   initialZoom={imageZoomStateFor(p)}
                   onZoomChange={isOutgoing ? undefined : (state) => setImageZoomStateFor(state, p)}
                   drawing={showsDrawings ? layerDrawing : null}
+                  reactions={reactionsFor(p)}
                 />
               </div>
             );
@@ -267,11 +267,6 @@ export default function PresidentDetailScreen({ selected }) {
           <h1 className="name-mono">
             #{president.order} {president.name}
           </h1>
-          <ReactionControl
-            reactions={reactionsFor(president)}
-            onAdd={(emoji) => addReaction(emoji, president)}
-            onRemoveLast={() => removeLastReaction(president)}
-          />
           <p className="subtitle">
             {president.term} · {president.party}
           </p>
@@ -323,6 +318,9 @@ export default function PresidentDetailScreen({ selected }) {
           president={president}
           imageSrc={imageSrc ? assetUrl(imageSrc) : null}
           initialDrawing={drawing}
+          reactions={reactionsFor(president)}
+          onAddReaction={(emoji) => addReaction(emoji, president)}
+          onRemoveLastReaction={() => removeLastReaction(president)}
           onClose={(result) => {
             setIsDrawingEditorOpen(false);
             if (result !== undefined) setDrawingFor(result, president);

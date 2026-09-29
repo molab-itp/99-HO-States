@@ -610,3 +610,9 @@ v02.93
 
 in v2 adjust PresidentDetailView so that emojis
 appear at bottom of image when image is zoomed/panned
+
+v05.94
+
+sync web app in v05 with changes to v2
+modify icon to be grayscale
+

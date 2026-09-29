@@ -1880,3 +1880,23 @@ Replaced it with `.onReceive(Timer.publish…)`. Reproduced and confirmed fixed 
 Pro simulator with idb. Not yet committed.
 
 **Cost**: ~25 minutes.
+
+# --
+
+2026-09-29 11:29 (v2: reactions move to drawing editor, shown over the photo; v05: sync; grayscale web icon)
+
+**v2** — The reaction + / − buttons moved from the summary text into PresidentDrawingEditorView,
+above the photo (the PencilKit tool picker sits along the bottom on iPhone). The emojis now show
+as a layer along the bottom edge of the photo (new `ReactionOverlay.swift`), both in the editor
+and on the detail view, above any drawing. The row shrinks to fit when there are many. A
+follow-up change keeps the emojis pinned to the bottom of the frame when the photo is zoomed or
+panned. Checked in the iPhone 17 Pro simulator with idb; stray test strokes and reactions were
+removed afterwards.
+
+**v05** — Synced with v2: reaction controls in the drawing editor, emoji layer on the photo
+(pinned while zoomed), and the new quick-pick emojis (👍🏾 👎🏾 🫏 🐘 🌗). v05 didn't have v2's
+slide-interval bug, so there was nothing to port. `favicon.png` and `apple-touch-icon.png` are
+now grayscale versions of v2's new app icon. Smoke test extended for reactions and passing.
+Version 0.1.16. Not yet committed.
+
+**Cost**: ~35 minutes.

@@ -4,36 +4,36 @@ import EmojiPickerSheet from './EmojiPickerSheet.jsx';
 import Icon from './Icon.jsx';
 
 /**
- * Port of PresidentSummaryView.swift's `reactionControl`: the current reactions for a president
- * (emoji, in add-order, repeats allowed), a + button that pops up `ReactionPickerStrip` (whose
- * ★ opens `EmojiPickerSheet`), and a - button that always removes whichever reaction was added
- * most recently.
+ * Port of PresidentDrawingEditorView.swift's `reactionControl`: a + button that pops up
+ * `ReactionPickerStrip` (whose ★ opens `EmojiPickerSheet`), and a - button that always removes
+ * whichever reaction was added most recently. The reactions themselves show on the photo (see
+ * `ReactionOverlay`), not here. `onPickerToggle` reports whether the strip is open, so the editor
+ * can make room for it.
  */
-export default function ReactionControl({ reactions, onAdd, onRemoveLast }) {
+export default function ReactionControl({ reactions, onAdd, onRemoveLast, onPickerToggle }) {
   const [showingAddPicker, setShowingAddPicker] = useState(false);
   const [showingEmojiSheet, setShowingEmojiSheet] = useState(false);
 
+  const setPickerShown = (shown) => {
+    setShowingAddPicker(shown);
+    onPickerToggle?.(shown);
+  };
+
   const addReaction = (emoji) => {
     onAdd(emoji);
-    setShowingAddPicker(false);
+    setPickerShown(false);
   };
 
   return (
     <div className="reaction-control">
       <div className="reaction-row">
-        {reactions.map((emoji, i) => (
-          <span key={i} className="reaction-icon">
-            {emoji}
-          </span>
-        ))}
-
         <button
           type="button"
           className="reaction-btn"
           aria-label="Add Reaction"
-          onClick={() => setShowingAddPicker((v) => !v)}
+          onClick={() => setPickerShown(!showingAddPicker)}
         >
-          <Icon name="plus-circle" size={17} />
+          <Icon name="plus-circle" size={22} />
         </button>
 
         <button
@@ -43,7 +43,7 @@ export default function ReactionControl({ reactions, onAdd, onRemoveLast }) {
           disabled={reactions.length === 0}
           onClick={onRemoveLast}
         >
-          <Icon name="minus-circle" size={17} />
+          <Icon name="minus-circle" size={22} />
         </button>
       </div>
 

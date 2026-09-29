@@ -704,8 +704,9 @@ input {
   flex: 1;
   min-height: 0;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   padding: 16px;
 }
 
@@ -721,11 +722,16 @@ input {
 .drawing-editor-photo img {
   display: block;
   max-width: 100%;
-  /* Nav bar + tools bar + padding: the photo is fitted to the space between them. */
-  max-height: calc(100dvh - 150px);
+  /* Nav bar + reaction buttons + tools bar + padding: the photo is fitted to the space between
+     them, less the reaction picker strip's height while it's open. */
+  max-height: calc(100dvh - 190px);
   background: var(--thumb-bg);
   user-select: none;
   -webkit-user-select: none;
+}
+
+.drawing-editor-body.picker-open .drawing-editor-photo img {
+  max-height: calc(100dvh - 246px);
 }
 
 .drawing-surface {
@@ -805,21 +811,15 @@ input {
   letter-spacing: normal;
 }
 
-/* Port of PresidentSummaryView.swift's `reactionControl`. */
+/* Port of PresidentDrawingEditorView.swift's `reactionControl`, above the photo. */
 .reaction-control {
-  margin: 0 0 16px;
+  align-self: stretch;
 }
 
 .reaction-row {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.reaction-icon {
-  display: flex;
-  font-size: 17px;
-  line-height: 1;
 }
 
 .reaction-btn {
@@ -836,6 +836,25 @@ input {
 .reaction-btn:disabled {
   color: var(--tertiary-label);
   cursor: default;
+}
+
+/* Port of ReactionOverlay.swift: the reactions along the bottom edge of the photo, over the
+   drawing. The overlay is the size container its emoji row is fitted to (see ReactionOverlay.jsx). */
+.reaction-overlay {
+  position: absolute;
+  inset: 0;
+  container-type: inline-size;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 8px 6px;
+  pointer-events: none;
+}
+
+.reaction-overlay span {
+  line-height: 1.1;
+  white-space: nowrap;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.4));
 }
 
 .reaction-picker-strip {
@@ -1118,10 +1137,6 @@ input {
 
   .detail-text h1.name-mono {
     font-size: 30px;
-  }
-
-  .reaction-control {
-    margin-bottom: 20px;
   }
 
   .detail-text .subtitle {

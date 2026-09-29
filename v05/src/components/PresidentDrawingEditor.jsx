@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import NavBar from './NavBar.jsx';
 import Icon from './Icon.jsx';
 import DrawingOverlay, { strokePath } from './DrawingOverlay.jsx';
+import ReactionControl from './ReactionControl.jsx';
+import ReactionOverlay from './ReactionOverlay.jsx';
 
 // Stand-ins for PKToolPicker's pen colors; the first matches the Swift canvas's default
 // `.systemRed` pen. Colors are fixed hex values (not theme tokens) so ink looks the same in light
@@ -20,12 +22,22 @@ function roundTenth(value) {
  * detail screen (losing its slideshow position and history). The drawing is handed back through
  * `onClose` whenever the editor goes away (Done or Back), so there's no way to lose strokes by
  * leaving: `null` means the canvas was left empty (delete the saved drawing), `undefined` means
- * the photo never loaded, so there's nothing to write back.
+ * the photo never loaded, so there's nothing to write back. Reactions are added and removed here
+ * too, with the controls above the photo and the emoji shown along the photo's bottom edge.
  */
-export default function PresidentDrawingEditor({ president, imageSrc, initialDrawing, onClose }) {
+export default function PresidentDrawingEditor({
+  president,
+  imageSrc,
+  initialDrawing,
+  onClose,
+  reactions,
+  onAddReaction,
+  onRemoveLastReaction,
+}) {
   const [strokes, setStrokes] = useState(() => initialDrawing?.strokes ?? []);
   const [currentStroke, setCurrentStroke] = useState(null);
   const [color, setColor] = useState(PEN_COLORS[0]);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   // The portrait's natural size, which is the coordinate space strokes are stored in. Known up
   // front for an existing drawing, otherwise read from the image once it loads.
   const [imageSize, setImageSize] = useState(() =>
@@ -133,7 +145,13 @@ export default function PresidentDrawingEditor({ president, imageSrc, initialDra
         }
       />
 
-      <div className="drawing-editor-body">
+      <div className={isPickerOpen ? 'drawing-editor-body picker-open' : 'drawing-editor-body'}>
+        <ReactionControl
+          reactions={reactions}
+          onAdd={onAddReaction}
+          onRemoveLast={onRemoveLastReaction}
+          onPickerToggle={setIsPickerOpen}
+        />
         {imageSrc ? (
           <div className="drawing-editor-photo" ref={photoRef}>
             <img
@@ -169,6 +187,7 @@ export default function PresidentDrawingEditor({ president, imageSrc, initialDra
                 )}
               </DrawingOverlay>
             )}
+            <ReactionOverlay reactions={reactions} />
           </div>
         ) : (
           <div className="detail-image-placeholder">

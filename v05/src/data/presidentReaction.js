@@ -4,7 +4,7 @@
 // same as the Swift version.
 
 // The quick-pick choices shown in `ReactionPickerStrip`, ahead of its ★ "more" button.
-export const PRESETS = ['🫏', '🐘', '☀️', '🌍', '🌗'];
+export const PRESETS = ['👍🏾', '👎🏾', '🫏', '🐘', '🌗'];
 
 // Values written by the earlier fixed-set, icon-based version, mapped to equivalent emoji so
 // reactions saved before the switch still show up as something sensible.
