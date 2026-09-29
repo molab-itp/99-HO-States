@@ -8,6 +8,7 @@
 
 /* Begin PBXFileReference section */
 		ABF9BB5E305BEB4000A294ED /* HO-States-US.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HO-States-US.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		ABF9BB90305BEB4000A294ED /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../../README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -32,6 +33,7 @@
 		ABF9BB55305BEB4000A294ED = {
 			isa = PBXGroup;
 			children = (
+				ABF9BB90305BEB4000A294ED /* README.md */,
 				ABF9BB60305BEB4000A294ED /* HO-States-US */,
 				ABF9BB5F305BEB4000A294ED /* Products */,
 			);

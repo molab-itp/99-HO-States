@@ -595,3 +595,7 @@ v02.91
 
 in v2 changes to settings slide show interval don't take effect
 confirm fix using idb
+
+v02.91
+
+in v2 add file relative reference to top level README.md
