@@ -11,7 +11,7 @@ struct PresidentReaction: Hashable, Codable {
     }
 
     /// The quick-pick choices shown in `ReactionPickerStrip`, ahead of its ★ "more" button.
-    static let presets: [PresidentReaction] = ["🫏", "🐘", "☀️", "🌍", "🌗"].map(PresidentReaction.init)
+    static let presets: [PresidentReaction] = [ "👍🏾", "👎🏾","🫏", "🐘","🌗"].map(PresidentReaction.init)
 
     /// The Unicode name(s) of the emoji, e.g. "sun with rays" — VoiceOver reads the emoji fine on
     /// its own, but this gives `accessibilityLabel` a stable, readable value.
