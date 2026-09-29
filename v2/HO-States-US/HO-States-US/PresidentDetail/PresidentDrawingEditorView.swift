@@ -4,13 +4,17 @@ import SwiftUI
 /// Pushed from `PresidentDetailView`'s pencil button: the president's portrait with a PencilKit
 /// canvas laid exactly over it. The drawing is saved automatically when this view goes away (Done
 /// or Back), so there's no way to lose strokes by leaving; Clear empties the canvas, and leaving
-/// with an empty canvas deletes the saved drawing.
+/// with an empty canvas deletes the saved drawing. Reactions are added and removed here too, with
+/// the controls above the photo (the tool picker docks along the bottom on iPhone) and the emoji
+/// shown as a layer along the photo's bottom edge.
 struct PresidentDrawingEditorView: View {
     let president: President
     @Environment(AppModel.self) private var appModel
     @Environment(\.dismiss) private var dismiss
 
     @State private var controller = DrawingCanvasController()
+    @State private var showingAddPicker = false
+    @State private var showingEmojiSheet = false
 
     private var photo: UIImage? {
         guard let name = president.largeImageName ?? president.thumbnailImageName else { return nil }
@@ -20,21 +24,25 @@ struct PresidentDrawingEditorView: View {
     var body: some View {
         Group {
             if let photo {
-                Image(uiImage: photo)
-                    .resizable()
-                    .scaledToFit()
-                    // The overlay gets exactly the fitted image's frame, so the canvas bounds are
-                    // the photo's on-screen rect — the basis for converting to image coordinates.
-                    .overlay {
-                        DrawingCanvas(
-                            controller: controller,
-                            imageSize: photo.size,
-                            presidentID: president.id
-                        )
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                    .padding()
+                VStack(spacing: 12) {
+                    reactionControl
+                    Image(uiImage: photo)
+                        .resizable()
+                        .scaledToFit()
+                        // The overlay gets exactly the fitted image's frame, so the canvas bounds are
+                        // the photo's on-screen rect — the basis for converting to image coordinates.
+                        .overlay {
+                            DrawingCanvas(
+                                controller: controller,
+                                imageSize: photo.size,
+                                presidentID: president.id
+                            )
+                        }
+                        .overlay { ReactionOverlay(president: president) }
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding()
             } else {
                 ContentUnavailableView("No Photo", systemImage: "photo")
             }
@@ -54,6 +62,53 @@ struct PresidentDrawingEditorView: View {
             }
         }
         .onDisappear(perform: save)
+        .sheet(isPresented: $showingEmojiSheet) {
+            EmojiPickerSheet(onPick: addReaction)
+        }
+    }
+
+    /// + opens the quick-pick strip (whose ★ opens the full emoji sheet); − removes the most
+    /// recently added reaction. The reactions themselves show on the photo, not here.
+    private var reactionControl: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 12) {
+                Button {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        showingAddPicker.toggle()
+                    }
+                } label: {
+                    Image(systemName: "plus.circle")
+                }
+                .accessibilityLabel("Add Reaction")
+
+                Button {
+                    appModel.removeLastReaction(for: president)
+                } label: {
+                    Image(systemName: "minus.circle")
+                }
+                .accessibilityLabel("Remove Reaction")
+                .disabled(appModel.reactions(for: president).isEmpty)
+            }
+            .font(.title3)
+
+            if showingAddPicker {
+                // Always all presets — repeats are allowed, so there's nothing to filter out here.
+                ReactionPickerStrip(
+                    options: PresidentReaction.presets,
+                    onPick: addReaction,
+                    onMore: { showingEmojiSheet = true }
+                )
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func addReaction(_ reaction: PresidentReaction) {
+        appModel.addReaction(reaction, for: president)
+        withAnimation(.easeOut(duration: 0.2)) {
+            showingAddPicker = false
+        }
     }
 
     private func save() {

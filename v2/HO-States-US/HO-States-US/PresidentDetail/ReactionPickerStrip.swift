@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The horizontal strip of reaction choices that pops up from `PresidentSummaryView`'s + button:
+/// The horizontal strip of reaction choices that pops up from `PresidentDrawingEditorView`'s + button:
 /// the quick-pick emoji in `options`, then a trailing ★ that asks for the full emoji sheet
 /// (`onMore`) instead of picking anything itself.
 struct ReactionPickerStrip: View {

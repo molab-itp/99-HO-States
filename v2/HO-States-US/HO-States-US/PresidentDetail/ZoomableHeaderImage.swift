@@ -34,6 +34,8 @@ struct ZoomableHeaderImage: View {
                                 .scaledToFit()
                         }
                     }
+                    // Reactions sit above the drawing, and zoom and pan with the photo like it.
+                    .overlay { ReactionOverlay(president: president) }
                     .frame(maxWidth: .infinity)
                     // Scale/offset are applied *before* the clip below, so the clip's rounded-rect
                     // bounds stay fixed to the original frame while the pinched/panned content moves

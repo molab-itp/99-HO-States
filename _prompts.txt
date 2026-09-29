@@ -599,3 +599,14 @@ confirm fix using idb
 v02.91
 
 in v2 add file relative reference to top level README.md
+
+v02.92
+
+in v2 move PresidentReaction to PresidentDrawingEditorView
+emojis are now display over the image as an additional layer
+emojis appear at the bottom edge of the image
+
+v02.93
+
+in v2 adjust PresidentDetailView so that emojis
+appear at bottom of image when image is zoomed/panned
