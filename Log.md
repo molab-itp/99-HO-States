@@ -1910,3 +1910,14 @@ the slideshow plays. Smoke test checks both; tested in Chromium with touch emula
 an iPhone. Not yet committed.
 
 **Cost**: ~5 minutes.
+
+# --
+
+2026-09-30 (v05: sync with v2 — new web icon)
+
+The only v2 change since the last sync is the new app icon. `favicon.png` (32×32) and
+`apple-touch-icon.png` (180×180) are now made from `Log-screens/2026-09-30-hos2-icon-1024.png`,
+which is already black and white, so no grayscale step. Build passes. Version 0.1.17. Not yet
+committed.
+
+**Cost**: ~5 minutes.
