@@ -31,8 +31,10 @@ struct PresidentDetailView: View {
     @State private var detailsVisible = false
     @State private var isDrawingEditorPresented = false
     @State private var isSettingsPresented = false
-    // Shared across presidents and launches, so hiding drawings stays in effect while browsing.
-    @AppStorage("showsDrawings") private var showsDrawings = true
+    // Shared across presidents and launches, so the chosen photo/drawing mode stays in effect
+    // while browsing.
+    @AppStorage(DrawingDisplayMode.storageKey)
+    private var drawingDisplayMode = DrawingDisplayMode.photoAndDrawing
 
     @AppStorage(SlideshowSettings.randomModeKey)
     private var isRandomMode = SlideshowSettings.defaultRandomMode
@@ -90,7 +92,7 @@ struct PresidentDetailView: View {
                 // A ZStack so the outgoing and incoming images overlap while they cross-fade,
                 // instead of stacking vertically during the transition.
                 ZStack {
-                    ZoomableHeaderImage(president: president, showsDrawing: showsDrawings)
+                    ZoomableHeaderImage(president: president, displayMode: drawingDisplayMode)
                         // Gives the image a fresh identity (and so fresh, reset zoom/pan state) each
                         // time the displayed president changes, since this view instance otherwise
                         // persists across Next/Previous/slideshow advances.
@@ -144,13 +146,14 @@ struct PresidentDetailView: View {
             }
             if appModel.drawingImage(for: president) != nil {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showsDrawings.toggle()
+                    Menu {
+                        Picker("Show", selection: $drawingDisplayMode) {
+                            ForEach(DrawingDisplayMode.allCases) { mode in
+                                Label(mode.title, systemImage: mode.systemImage).tag(mode)
+                            }
+                        }
                     } label: {
-                        Label(
-                            showsDrawings ? "Hide Drawing" : "Show Drawing",
-                            systemImage: showsDrawings ? "eye" : "eye.slash"
-                        )
+                        Label(drawingDisplayMode.title, systemImage: drawingDisplayMode.systemImage)
                     }
                 }
             }

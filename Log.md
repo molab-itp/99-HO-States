@@ -1921,3 +1921,18 @@ which is already black and white, so no grayscale step. Build passes. Version 0.
 committed.
 
 **Cost**: ~5 minutes.
+
+# --
+
+2026-10-01 03:50 (v2: eye button becomes a photo/drawing menu)
+
+The eye button in PresidentDetailView's toolbar is now a drop-down menu with three choices:
+Photo, Photo + Drawing, and Drawing Only. The toolbar icon shows the current choice (eye.slash,
+eye, scribble), and the choice is remembered across presidents and launches under a new setting,
+`drawingDisplayMode` (so anyone who had drawings hidden with the old button starts at Photo +
+Drawing). In Drawing Only the photo is hidden but keeps its space, so the drawing stays lined up
+and still zooms and pans; it sits on white so dark ink shows in dark mode. A president with no
+drawing always shows the photo. Builds for the iOS Simulator; not yet run in the app. Not yet
+committed.
+
+**Cost**: ~10 minutes.

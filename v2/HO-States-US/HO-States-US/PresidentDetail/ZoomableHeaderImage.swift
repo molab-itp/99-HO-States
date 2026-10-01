@@ -1,5 +1,36 @@
 import SwiftUI
 
+/// What the detail view's header shows: the portrait, the portrait with its saved drawing laid
+/// over it, or the drawing alone. Chosen from the eye menu in `PresidentDetailView`'s toolbar.
+enum DrawingDisplayMode: String, CaseIterable, Identifiable {
+    case photo
+    case photoAndDrawing
+    case drawingOnly
+
+    static let storageKey = "drawingDisplayMode"
+
+    var id: Self { self }
+
+    var showsPhoto: Bool { self != .drawingOnly }
+    var showsDrawing: Bool { self != .photo }
+
+    var title: String {
+        switch self {
+        case .photo: "Photo"
+        case .photoAndDrawing: "Photo + Drawing"
+        case .drawingOnly: "Drawing Only"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .photo: "eye.slash"
+        case .photoAndDrawing: "eye"
+        case .drawingOnly: "scribble"
+        }
+    }
+}
+
 /// The president's portrait, with pinch-to-zoom, pan (once zoomed), and double-tap to toggle
 /// between 1x and 2.5x. The caller gives this view a fresh identity (`.id(president.id)`) each
 /// time the president changes, so `scale`/`offset` start from `AppModel`'s persisted zoom state
@@ -7,8 +38,8 @@ import SwiftUI
 /// `init`) rather than always resetting to 1x/no-offset.
 struct ZoomableHeaderImage: View {
     let president: President
-    /// Whether the saved drawing (if any) is overlaid on the portrait.
-    var showsDrawing = true
+    /// Whether the portrait and/or its saved drawing (if any) are shown.
+    var displayMode: DrawingDisplayMode = .photoAndDrawing
     @Environment(AppModel.self) private var appModel
 
     @State private var scale: CGFloat = 1
@@ -21,14 +52,23 @@ struct ZoomableHeaderImage: View {
     var body: some View {
         Group {
             if let name = president.largeImageName ?? president.thumbnailImageName, let image = imageIfAvailable(name) {
+                // With no drawing to show (and so no eye menu to change modes), always show the photo.
+                let showsPhoto = displayMode.showsPhoto || appModel.drawingImage(for: president) == nil
                 let scaledImage = image
                     .resizable()
                     .scaledToFit()
+                    // Hidden with opacity rather than removed, so the portrait still sizes the
+                    // frame and the drawing lands exactly where it would over the photo. The
+                    // white backing gives the ink a paper to sit on (and stays visible in dark mode).
+                    .opacity(showsPhoto ? 1 : 0)
+                    .background {
+                        if !showsPhoto { Color.white }
+                    }
                     // The drawing PNG has the portrait's aspect ratio, so fitting it into the same
                     // frame lines it up exactly, and applying it before `scaleEffect`/`offset`
                     // makes it zoom and pan together with the photo.
                     .overlay {
-                        if showsDrawing, let drawing = appModel.drawingImage(for: president) {
+                        if displayMode.showsDrawing, let drawing = appModel.drawingImage(for: president) {
                             Image(uiImage: drawing)
                                 .resizable()
                                 .scaledToFit()

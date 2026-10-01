@@ -626,3 +626,11 @@ v05.96
 
 sync web app in v05 with changes to v2
 use Log-screens/2026-09-30-hos2-icon-1024.png for web icon
+
+v02.97
+
+in v2 PresidentDetailView ToolbarItem "eye"
+change to a drop down that shows 3 states:
+- president image
+- president image + drawing layer
+- drawing layer alone
