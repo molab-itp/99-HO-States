@@ -1949,3 +1949,20 @@ but the photo shows; drawing again brings the choice back. Builds for the iOS Si
 run in the app. Not yet committed.
 
 **Cost**: ~5 minutes.
+
+# --
+
+2026-10-01 (v05: sync with v2 — photo/drawing menu, saved per president)
+
+Brings over v02.97 and v02.98. The eye button on the detail screen is now a drop-down menu with
+Photo, Photo + Drawing, and Drawing Only; the button shows the current choice's icon (eye.slash,
+eye, and a brush standing in for SF Symbols' scribble), with a checkmark on the current row. Tapping
+outside or pressing Escape closes it. The choice is kept separately for each president, saved with
+zoom in the app state (older saves still load), and defaults to Photo + Drawing. The old
+app-wide `showsDrawings` setting is gone. In Drawing Only the photo is hidden but keeps its space, so
+the drawing stays lined up and still zooms and pans, on a white backing. A president with no drawing
+always shows the photo. The smoke test covers all three modes, closing on an outside tap, another
+president keeping its own mode, and the choice surviving a reload; it passes with no console errors.
+Version 0.1.18. Not yet committed.
+
+**Cost**: ~15 minutes.

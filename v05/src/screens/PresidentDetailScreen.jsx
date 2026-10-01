@@ -7,6 +7,8 @@ import ViewedProgressBar from '../components/ViewedProgressBar.jsx';
 import ZoomableHeaderImage from '../components/ZoomableHeaderImage.jsx';
 import Icon from '../components/Icon.jsx';
 import PresidentDrawingEditor from '../components/PresidentDrawingEditor.jsx';
+import DrawingDisplayMenu from '../components/DrawingDisplayMenu.jsx';
+import { showsDrawing, showsPhoto } from '../data/drawingDisplayMode.js';
 import SettingsScreen from './SettingsScreen.jsx';
 import { useStoredBoolean } from '../state/useStoredBoolean.js';
 import { useStoredNumber } from '../state/useStoredNumber.js';
@@ -33,6 +35,8 @@ export default function PresidentDetailScreen({ selected }) {
     removeLastReaction,
     imageZoomStateFor,
     setImageZoomStateFor,
+    drawingDisplayModeFor,
+    setDrawingDisplayModeFor,
     drawingFor,
     setDrawingFor,
   } = useAppModel();
@@ -65,9 +69,6 @@ export default function PresidentDetailScreen({ selected }) {
   const [remainingSecs, setRemainingSecs] = useState(slideshowIntervalSecs);
   const [isDrawingEditorOpen, setIsDrawingEditorOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  // Port of `@AppStorage("showsDrawings")`: shared across presidents and reloads, so hiding
-  // drawings stays in effect while browsing.
-  const [showsDrawings, setShowsDrawings] = useStoredBoolean('ho-states-us.showsDrawings', true);
 
   // `index` (which president is shown) and, in random mode, the walk's history/position all
   // change together, so they're one state object updated atomically. The history restarts
@@ -216,13 +217,10 @@ export default function PresidentDetailScreen({ selected }) {
         trailing={
           <>
             {drawing && (
-              <button
-                className="nav-action"
-                aria-label={showsDrawings ? 'Hide Drawing' : 'Show Drawing'}
-                onClick={() => setShowsDrawings(!showsDrawings)}
-              >
-                <Icon name={showsDrawings ? 'eye' : 'eye-slash'} size={19} />
-              </button>
+              <DrawingDisplayMenu
+                mode={drawingDisplayModeFor(president)}
+                onChange={(mode) => setDrawingDisplayModeFor(mode, president)}
+              />
             )}
             <button className="nav-action" aria-label="Draw on Photo" onClick={() => setIsDrawingEditorOpen(true)}>
               <Icon name="pencil-square" size={18} />
@@ -245,6 +243,7 @@ export default function PresidentDetailScreen({ selected }) {
             const isOutgoing = p === outgoing;
             const src = p.large || p.thumbnail;
             const layerDrawing = drawingFor(p);
+            const layerMode = drawingDisplayModeFor(p);
             let className = 'fade-layer';
             if (isOutgoing) className += ' fade-out';
             else if (outgoing) className += ' fade-in';
@@ -255,7 +254,8 @@ export default function PresidentDetailScreen({ selected }) {
                   alt={p.name}
                   initialZoom={imageZoomStateFor(p)}
                   onZoomChange={isOutgoing ? undefined : (state) => setImageZoomStateFor(state, p)}
-                  drawing={showsDrawings ? layerDrawing : null}
+                  drawing={showsDrawing(layerMode) ? layerDrawing : null}
+                  showsPhoto={showsPhoto(layerMode)}
                   reactions={reactionsFor(p)}
                   showsZoomControls={!isPlaying}
                 />

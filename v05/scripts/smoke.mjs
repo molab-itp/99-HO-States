@@ -109,7 +109,7 @@ async function main() {
     await shot('detail-next');
 
     console.log('Draw on Photo: draw a stroke, Done saves it over the portrait...');
-    assert(!(await page.isVisible('button[aria-label="Hide Drawing"]')), 'no hide/show button before a drawing exists');
+    assert(!(await page.isVisible('.nav-menu')), 'no photo/drawing menu before a drawing exists');
     await page.click('button[aria-label="Draw on Photo"]');
     await page.waitForSelector('.drawing-surface');
     const box = await page.locator('.drawing-surface').boundingBox();
@@ -125,15 +125,46 @@ async function main() {
     await page.waitForSelector('.drawing-overlay path');
     await shot('detail-with-drawing');
 
-    console.log('Hide / Show drawing, and it survives a reload (which resumes at the same president)...');
-    await page.click('button[aria-label="Hide Drawing"]');
+    console.log('Photo / Photo + Drawing / Drawing Only menu, saved per president and across a reload...');
+    async function pickDisplayMode(label) {
+      await page.click('.nav-menu > button');
+      await page.waitForSelector('.nav-menu-list');
+      await shot(`display-menu-${label.replace(/\W+/g, '-').toLowerCase()}`);
+      await page.click(`.nav-menu-item:has-text("${label}")`);
+      await page.waitForSelector('.nav-menu-list', { state: 'detached' });
+    }
+    assert(await page.isVisible('button[aria-label="Photo + Drawing"]'), 'menu should start at Photo + Drawing');
+    await pickDisplayMode('Photo');
     await page.waitForSelector('.drawing-overlay', { state: 'detached' });
-    await page.click('button[aria-label="Show Drawing"]');
-    await page.waitForSelector('.drawing-overlay path');
+    assert(await page.isVisible('button[aria-label="Photo"]'), 'menu button should show the Photo mode');
+    await pickDisplayMode('Drawing Only');
+    await page.waitForSelector('.zoomable-content.drawing-only .drawing-overlay path');
+    assert(
+      (await page.locator('.detail-image').evaluate((el) => getComputedStyle(el).opacity)) === '0',
+      'Drawing Only should hide the photo',
+    );
+    await shot('detail-drawing-only');
+    // Tapping outside closes the menu without changing the mode.
+    await page.click('.nav-menu > button');
+    await page.waitForSelector('.nav-menu-list');
+    await page.mouse.click(10, 400);
+    await page.waitForSelector('.nav-menu-list', { state: 'detached' });
+    assert(await page.isVisible('button[aria-label="Drawing Only"]'), 'outside tap should keep Drawing Only');
     const drawnTitle = (await title()).split(' ')[0];
+    // Another president keeps its own (default) mode.
+    await page.click('button[aria-label="Next"]');
+    await page.waitForTimeout(100);
+    assert(!(await page.isVisible('.zoomable-content.drawing-only')), 'next president should show its photo');
+    await page.click('button[aria-label="Previous"]');
+    await page.waitForSelector('.zoomable-content.drawing-only .drawing-overlay path');
+    // Let the new slideIndex reach the pagehide save handler before reloading.
+    await page.waitForTimeout(100);
     await page.reload();
-    await page.waitForSelector('.drawing-overlay path');
+    await page.waitForSelector('.zoomable-content.drawing-only .drawing-overlay path');
     assertIncludes(await title(), drawnTitle, 'reload should resume at the last-shown president');
+    await pickDisplayMode('Photo + Drawing');
+    await page.waitForSelector('.drawing-overlay path');
+    assert(!(await page.isVisible('.zoomable-content.drawing-only')), 'Photo + Drawing shows the photo again');
 
     console.log('Clear + Done deletes the drawing...');
     await page.click('button[aria-label="Draw on Photo"]');
@@ -141,7 +172,7 @@ async function main() {
     await page.click('button[aria-label="Clear"]');
     await page.click('button:has-text("Done")');
     await page.waitForSelector('.drawing-overlay', { state: 'detached' });
-    assert(!(await page.isVisible('button[aria-label="Hide Drawing"]')), 'hide/show button should go away with the drawing');
+    assert(!(await page.isVisible('.nav-menu')), 'photo/drawing menu should go away with the drawing');
 
     console.log('Reactions: added in the drawing editor, shown along the photo bottom, pinned while zoomed...');
     assert((await page.locator('.detail-text button[aria-label="Add Reaction"]').count()) === 0, 'reaction controls should not be in the summary text');

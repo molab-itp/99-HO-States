@@ -27,7 +27,8 @@ function distance(a, b) {
  * `key={president.order}` each time the president changes, so `scale`/`offset` start fresh from
  * `initialZoom` (this president's persisted zoom state, if any) instead of carrying over the
  * previous president's zoom/pan. `drawing`, when given, is the president's saved drawing, laid
- * over the photo; `reactions` are shown along the frame's bottom edge. `showsZoomControls` hides
+ * over the photo; `showsPhoto={false}` hides the photo under it (the eye menu's Drawing Only).
+ * `reactions` are shown along the frame's bottom edge. `showsZoomControls` hides
  * the -/1×/+ buttons (e.g. while the slideshow plays); pinch, wheel and double-tap still work.
  */
 export default function ZoomableHeaderImage({
@@ -36,6 +37,7 @@ export default function ZoomableHeaderImage({
   initialZoom,
   onZoomChange,
   drawing = null,
+  showsPhoto = true,
   reactions = [],
   showsZoomControls = true,
 }) {
@@ -264,8 +266,9 @@ export default function ZoomableHeaderImage({
     >
       {/* The drawing sits inside the transformed box, so it zooms and pans together with the
           photo, same as the Swift overlay applied before `scaleEffect`/`offset`. */}
+      {/* Without a drawing to show, the photo always shows, as in the Swift view. */}
       <div
-        className="zoomable-content"
+        className={showsPhoto || !drawing ? 'zoomable-content' : 'zoomable-content drawing-only'}
         style={{
           transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
           transition: isInteracting ? 'none' : 'transform 0.2s ease-out',

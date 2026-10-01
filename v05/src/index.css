@@ -200,6 +200,59 @@ input {
   color: var(--destructive);
 }
 
+/* Drop-down for a bar button (SwiftUI `Menu` + `Picker`): a rounded list under the button,
+   checkmark on the selected row, title, then the row's icon on the right. Opaque rather than
+   blurred: a backdrop-filter nested inside the nav bar's own can't blur the page behind it. */
+.nav-menu {
+  position: relative;
+}
+
+.nav-menu-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 21;
+  min-width: 220px;
+  padding: 4px 0;
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22), 0 0 0 0.5px var(--separator);
+}
+
+.nav-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px 10px 10px;
+  border: none;
+  background: none;
+  color: var(--label);
+  font: inherit;
+  font-size: 17px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-menu-item + .nav-menu-item {
+  border-top: 0.5px solid var(--separator);
+}
+
+.nav-menu-item:active,
+.nav-menu-item:hover {
+  background: var(--fill-pressed);
+}
+
+.nav-menu-check {
+  display: flex;
+  width: 18px;
+  justify-content: center;
+}
+
+.nav-menu-title {
+  flex: 1;
+}
+
 .nav-action-text {
   font-size: 17px;
   font-weight: 600;
@@ -639,6 +692,18 @@ input {
   background: var(--thumb-bg);
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* Drawing Only: the photo is hidden with opacity rather than removed, so it still sizes the
+   frame and the drawing lands exactly where it would over the photo. The white backing gives the
+   ink a paper to sit on (and stays white in dark mode), like the Swift `Color.white` background. */
+.zoomable-content.drawing-only {
+  background: #ffffff;
+  border-radius: var(--radius-md);
+}
+
+.zoomable-content.drawing-only .detail-image {
+  opacity: 0;
 }
 
 /* Same box as the photo; the SVG's viewBox is the photo's natural size, so strokes line up. */

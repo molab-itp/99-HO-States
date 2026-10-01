@@ -4,6 +4,7 @@ import { version as appVersion } from '../../package.json';
 import { loadPersistedState, savePersistedState } from '../data/persistedState.js';
 import { normalizeReactions } from '../data/presidentReaction.js';
 import { deleteDrawing, loadAllDrawings, saveDrawing } from '../data/presidentDrawingStore.js';
+import { DEFAULT_DRAWING_DISPLAY_MODE, normalizeDrawingDisplayModes } from '../data/drawingDisplayMode.js';
 
 const AppModelContext = createContext(null);
 
@@ -61,6 +62,13 @@ export function AppModelProvider({ children }) {
   // Ported from `AppModel.swift`'s `reactions`/`imageZoomStates`.
   const [reactions, setReactions] = useState(() => normalizeReactions(persisted?.reactions));
   const [imageZoomStates, setImageZoomStates] = useState(() => persisted?.imageZoomStates ?? {});
+
+  // Per-president choice from the eye menu (photo, photo + drawing, or drawing only). A president
+  // with no entry uses the default, photo + drawing. Ported from `AppModel.swift`'s
+  // `drawingDisplayModes`; older saves without it load as all-default.
+  const [drawingDisplayModes, setDrawingDisplayModes] = useState(() =>
+    normalizeDrawingDisplayModes(persisted?.drawingDisplayModes),
+  );
 
   // Each president's saved photo drawing (see `presidentDrawingStore.js`), overlaid on the
   // portrait by `ZoomableHeaderImage`. Ported from `AppModel.swift`'s `drawingFileNames`, except
@@ -148,6 +156,24 @@ export function AppModelProvider({ children }) {
     });
   }, []);
 
+  const drawingDisplayModeFor = useCallback(
+    (president) => drawingDisplayModes[president.order] ?? DEFAULT_DRAWING_DISPLAY_MODE,
+    [drawingDisplayModes],
+  );
+
+  // Choosing the default clears the stored entry, like `setImageZoomStateFor(null, ...)`.
+  const setDrawingDisplayModeFor = useCallback((mode, president) => {
+    setDrawingDisplayModes((prev) => {
+      if (mode === DEFAULT_DRAWING_DISPLAY_MODE) {
+        if (!(president.order in prev)) return prev;
+        const next = { ...prev };
+        delete next[president.order];
+        return next;
+      }
+      return { ...prev, [president.order]: mode };
+    });
+  }, []);
+
   const drawingFor = useCallback((president) => drawings[president.order] ?? null, [drawings]);
 
   // Saves (or, with `null`, deletes) `president`'s drawing. Unlike other state, this writes to
@@ -184,8 +210,9 @@ export function AppModelProvider({ children }) {
       nextShuffleIndex: nextShuffleIndexRef.current,
       reactions,
       imageZoomStates,
+      drawingDisplayModes,
     });
-  }, [slideIndex, reactions, imageZoomStates]);
+  }, [slideIndex, reactions, imageZoomStates, drawingDisplayModes]);
 
   useEffect(() => {
     function handleVisibilityChange() {
@@ -215,6 +242,8 @@ export function AppModelProvider({ children }) {
       removeLastReaction,
       imageZoomStateFor,
       setImageZoomStateFor,
+      drawingDisplayModeFor,
+      setDrawingDisplayModeFor,
       drawingFor,
       setDrawingFor,
     }),
@@ -231,6 +260,8 @@ export function AppModelProvider({ children }) {
       removeLastReaction,
       imageZoomStateFor,
       setImageZoomStateFor,
+      drawingDisplayModeFor,
+      setDrawingDisplayModeFor,
       drawingFor,
       setDrawingFor,
     ],

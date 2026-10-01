@@ -640,3 +640,8 @@ v02.98
 in v2 PresidentDetailView ToolbarItem "eye"
 have the display settings be saved
 for each president
+
+v05.99
+
+sync web app in v05 with changes to v2
+
