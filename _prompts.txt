@@ -643,5 +643,5 @@ for each president
 
 v05.99
 
-sync web app in v05 with changes to v2
+sync web app in v05 with changes to 2v
 
