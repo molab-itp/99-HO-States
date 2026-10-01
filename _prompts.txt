@@ -634,3 +634,9 @@ change to a drop down that shows 3 states:
 - president image
 - president image + drawing layer
 - drawing layer alone
+
+v02.98
+
+in v2 PresidentDetailView ToolbarItem "eye"
+have the display settings be saved
+for each president

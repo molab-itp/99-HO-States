@@ -1,13 +1,12 @@
 import SwiftUI
 
 /// What the detail view's header shows: the portrait, the portrait with its saved drawing laid
-/// over it, or the drawing alone. Chosen from the eye menu in `PresidentDetailView`'s toolbar.
-enum DrawingDisplayMode: String, CaseIterable, Identifiable {
+/// over it, or the drawing alone. Chosen per president from the eye menu in
+/// `PresidentDetailView`'s toolbar and kept in `AppModel`.
+enum DrawingDisplayMode: String, CaseIterable, Codable, Identifiable {
     case photo
     case photoAndDrawing
     case drawingOnly
-
-    static let storageKey = "drawingDisplayMode"
 
     var id: Self { self }
 

@@ -1936,3 +1936,16 @@ drawing always shows the photo. Builds for the iOS Simulator; not yet run in the
 committed.
 
 **Cost**: ~10 minutes.
+
+# --
+
+2026-10-01 04:01 (v2: photo/drawing menu choice saved per president)
+
+The eye menu's choice (Photo, Photo + Drawing, Drawing Only) is now kept separately for each
+president instead of one setting for the whole app. It lives in AppModel next to each president's
+zoom, and is saved with it when the app goes to the background; older save files still load.
+Presidents never changed show Photo + Drawing. If a drawing is cleared, its saved choice stays
+but the photo shows; drawing again brings the choice back. Builds for the iOS Simulator; not yet
+run in the app. Not yet committed.
+
+**Cost**: ~5 minutes.

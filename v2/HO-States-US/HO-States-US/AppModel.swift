@@ -43,6 +43,10 @@ final class AppModel {
     /// or reset back to 1x) renders at the default 1x/no-offset.
     private(set) var imageZoomStates: [President.ID: ImageZoomState] = [:]
 
+    /// Per-president choice from the eye menu (photo, photo + drawing, or drawing only). A
+    /// president with no entry uses the default, `.photoAndDrawing`.
+    private(set) var drawingDisplayModes: [President.ID: DrawingDisplayMode] = [:]
+
     /// PNG file name (inside `PresidentDrawingStore`'s Photos folder) of each president's saved
     /// photo drawing, overlaid on the portrait by `ZoomableHeaderImage`. No entry means no drawing.
     private(set) var drawingFileNames: [President.ID: String] = [:]
@@ -93,6 +97,15 @@ final class AppModel {
     /// "reset" president doesn't linger as a redundant entry).
     func setImageZoomState(_ state: ImageZoomState?, for president: President) {
         imageZoomStates[president.id] = state
+    }
+
+    func drawingDisplayMode(for president: President) -> DrawingDisplayMode {
+        drawingDisplayModes[president.id] ?? .photoAndDrawing
+    }
+
+    /// Choosing the default clears the stored entry, like `setImageZoomState(nil, for:)`.
+    func setDrawingDisplayMode(_ mode: DrawingDisplayMode, for president: President) {
+        drawingDisplayModes[president.id] = mode == .photoAndDrawing ? nil : mode
     }
 
     /// The saved drawing PNG for `president`, loaded from disk once and then cached, since the
@@ -160,7 +173,7 @@ final class AppModel {
     // MARK: - Persistence
     //
     // Only `slideIndex`, the shuffle state (`shuffledIndexes`/`nextShuffleIndex`), `reactions`,
-    // `imageZoomStates`, and `drawingFileNames` survive across app launches — enough to resume browsing where the user left
+    // `imageZoomStates`, `drawingDisplayModes`, and `drawingFileNames` survive across app launches — enough to resume browsing where the user left
     // off and keep their feedback, without also persisting `viewedPresidentIDs`/`cycleCount`
     // (not asked for, and would make "Reset Visit Count" behave inconsistently across launches).
     //
@@ -182,6 +195,8 @@ final class AppModel {
         /// String-keyed like `reactions`. Optional so a state file written before drawings
         /// existed still decodes instead of discarding everything else in it.
         var drawingFileNames: [String: String]?
+        /// String-keyed like `reactions`; optional like `drawingFileNames`, for older state files.
+        var drawingDisplayModes: [String: DrawingDisplayMode]?
     }
 
     private static func stateFileURL() -> URL {
@@ -213,6 +228,9 @@ final class AppModel {
         drawingFileNames = Dictionary(uniqueKeysWithValues: (state.drawingFileNames ?? [:]).compactMap { key, value in
             Int(key).map { ($0, value) }
         })
+        drawingDisplayModes = Dictionary(uniqueKeysWithValues: (state.drawingDisplayModes ?? [:]).compactMap { key, value in
+            Int(key).map { ($0, value) }
+        })
     }
 
     /// Writes the current resumable state to disk. See the note above `PersistedState` — call
@@ -224,7 +242,8 @@ final class AppModel {
             nextShuffleIndex: nextShuffleIndex,
             reactions: Dictionary(uniqueKeysWithValues: reactions.map { (String($0.key), $0.value) }),
             imageZoomStates: Dictionary(uniqueKeysWithValues: imageZoomStates.map { (String($0.key), $0.value) }),
-            drawingFileNames: Dictionary(uniqueKeysWithValues: drawingFileNames.map { (String($0.key), $0.value) })
+            drawingFileNames: Dictionary(uniqueKeysWithValues: drawingFileNames.map { (String($0.key), $0.value) }),
+            drawingDisplayModes: Dictionary(uniqueKeysWithValues: drawingDisplayModes.map { (String($0.key), $0.value) })
         )
         guard let data = try? JSONEncoder().encode(state) else { return }
         try? data.write(to: Self.stateFileURL(), options: .atomic)
