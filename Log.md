@@ -1966,3 +1966,18 @@ president keeping its own mode, and the choice surviving a reload; it passes wit
 Version 0.1.18. Not yet committed.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-10-04 15:10 (v05: sync with v2 — Settings links from JSON, reworded subtitle)
+
+Brings over v02.101, the only v2 change since the last sync. The links at the bottom of Settings
+now come from `src/data/links.json`, a byte-for-byte copy of v2's `Links.json`, loaded through
+`src/data/links.js` and rendered as a list; Settings goes from 2 links to 8. v2's "Web App" entry
+is left out, since in the web app it would only link back to itself. The subtitle now reads
+"Browse portraits and biographies of every Head of State / of the United States of north America",
+taking v2's lowercase "north" (v05 had "North"). The smoke test checks the link count, their order,
+and that "Web App" is absent; it passes with no console errors, and the production build succeeds.
+Version 0.1.19. Not yet committed.
+
+**Cost**: ~5 minutes.

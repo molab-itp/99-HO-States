@@ -81,6 +81,10 @@ async function main() {
     console.log('Settings sheet -> List of Heads -> pick #01...');
     await openSettings();
     await page.waitForSelector('text=USnA Heads');
+    const linkTitles = await page.locator('.source-link').allTextContents();
+    assert(linkTitles.length === 8, `Settings should list the links.json links: got ${linkTitles.length}`);
+    assertIncludes(linkTitles[0], 'Data Source: Wikipedia', 'links should keep links.json order');
+    assert(!linkTitles.some((t) => t.includes('Web App')), 'the web app should not link to itself');
     await shot('settings');
     await page.click('text=List of Heads');
     await page.waitForSelector('.president-list');

@@ -7,9 +7,7 @@ import PresidentListScreen from './PresidentListScreen.jsx';
 import { SlideshowSettings } from '../state/slideshowSettings.js';
 import { useStoredBoolean } from '../state/useStoredBoolean.js';
 import { useStoredNumber } from '../state/useStoredNumber.js';
-
-const SOURCE_DATA_URL = 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States';
-const SOURCE_CODE_URL = 'https://github.com/molab-itp/99-HO-States';
+import links from '../data/links.js';
 
 /**
  * Port of SettingsView.swift: settings and app info, presented as a full-screen sheet from the
@@ -66,9 +64,9 @@ export default function SettingsScreen({ onSelect, onStartSlideshow, onClose }) 
             </div>
             <h1>USnA Heads</h1>
             <p className="subtitle">
-              Browse portraits and biographies of every United States of North America
+              Browse portraits and biographies of every Head of State
               <br />
-              Head of State.
+              of the United States of north America
             </p>
 
             <div className="actions">
@@ -133,14 +131,18 @@ export default function SettingsScreen({ onSelect, onStartSlideshow, onClose }) 
             </div>
 
             <div className="source-links">
-              <a className="source-link" href={SOURCE_DATA_URL} target="_blank" rel="noopener noreferrer">
-                <Icon name="link-45deg" size={14} />
-                Data Source: Wikipedia
-              </a>
-              <a className="source-link" href={SOURCE_CODE_URL} target="_blank" rel="noopener noreferrer">
-                <Icon name="link-45deg" size={14} />
-                Source Code
-              </a>
+              {links.map((link) => (
+                <a
+                  key={link.url}
+                  className="source-link"
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon name="link-45deg" size={14} />
+                  {link.title}
+                </a>
+              ))}
             </div>
 
             <p className="build-info">{buildInfo}</p>
