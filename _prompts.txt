@@ -646,3 +646,11 @@ v05.99
 sync web app in v05 with changes to v2
 
 
+v06.100
+
+in v06 
+delete tool fails with
+curl: (3) URL rejected: Malformed input to a URL function
+
+cd /Users/jht2/Documents/projects/molab/99-HO-States/v06/HO-States-Users/HOStatesUsers
+cp Supabase.example.plist Supabase.plist

@@ -35,10 +35,18 @@ if $local_stack; then
   key=$(sed -n -e 's/^SECRET_KEY="\(.*\)"$/\1/p' <<<"$status_env")
   [[ -n "$key" ]] || key=$(sed -n 's/^SERVICE_ROLE_KEY="\(.*\)"$/\1/p' <<<"$status_env")
 else
-  url=${SUPABASE_URL:-$(/usr/libexec/PlistBuddy -c "Print :SUPABASE_URL" HO-States-Users/HOStatesUsers/Supabase.plist 2>/dev/null || true)}
+  # PlistBuddy reports a missing file or key on stdout, so only keep its output when it succeeds.
+  plist=HO-States-Users/HOStatesUsers/Supabase.plist
+  url=${SUPABASE_URL:-}
+  if [[ -z "$url" && -f "$plist" ]]; then
+    url=$(/usr/libexec/PlistBuddy -c "Print :SUPABASE_URL" "$plist" 2>/dev/null) || url=
+  fi
   key=${SUPABASE_SECRET_KEY:-}
 fi
-[[ -n "$url" ]] || { echo "No project URL: set SUPABASE_URL" >&2; exit 1; }
+url=$(tr -d '[:space:]' <<<"$url")
+url=${url%/}
+[[ -n "$url" ]] || { echo "No project URL: set SUPABASE_URL (https://<project-ref>.supabase.co), or create v06/HO-States-Users/HOStatesUsers/Supabase.plist" >&2; exit 1; }
+[[ "$url" =~ ^https?://[^/]+$ && "$url" != *YOUR-PROJECT-REF* ]] || { echo "Not a valid project URL: $url" >&2; exit 1; }
 [[ -n "$key" ]] || { echo "No secret key: set SUPABASE_SECRET_KEY (sb_secret_…)" >&2; exit 1; }
 
 # New sb_secret_ keys go in `apikey` only; legacy service_role JWTs also need Authorization.
