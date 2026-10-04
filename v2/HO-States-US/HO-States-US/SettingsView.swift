@@ -12,9 +12,8 @@ struct SettingsView: View {
     /// Starts (unpauses) the detail view's slideshow.
     let onStartSlideshow: () -> Void
 
-    private let sourceDataURL = URL(string: "https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States")!
-    private let sourceCodeURL = URL(string: "https://github.com/molab-itp/99-HO-States")!
-    private let webAppURL = URL(string: "https://molab-itp.github.io/99-HO-States/v05/")!
+    /// External links listed at the bottom of the sheet, from Links.json.
+    private let links = LinksRepository.loadAll()
 
     @AppStorage(SlideshowSettings.randomModeKey)
     private var isRandomMode = SlideshowSettings.defaultRandomMode
@@ -119,17 +118,11 @@ struct SettingsView: View {
             .font(.footnote)
           }
           VStack(spacing: 4) {
-            Link(destination: sourceDataURL) {
-              Label("Data Source: Wikipedia", systemImage: "link")
-                .font(.footnote)
-            }
-            Link(destination: sourceCodeURL) {
-              Label("Source Code", systemImage: "link")
-                .font(.footnote)
-            }
-            Link(destination: webAppURL) {
-              Label("Web App", systemImage: "link")
-                .font(.footnote)
+            ForEach(links) { link in
+              Link(destination: link.url) {
+                Label(link.title, systemImage: "link")
+                  .font(.footnote)
+              }
             }
           }
           Text(appModel.buildInfo)

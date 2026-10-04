@@ -1,0 +1,30 @@
+[
+  {
+    "title" : "Data Source: Wikipedia",
+    "url" : "https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States"
+  },
+  {
+    "title" : "Source Code",
+    "url" : "https://github.com/molab-itp/99-HO-States"
+  },
+  {
+    "title" : "Web App",
+    "url" : "https://molab-itp.github.io/99-HO-States/v05/"
+  },
+  {
+    "title" : "Tad Stoermer",
+    "url" : "https://www.youtube.com/@tad.stoermer"
+  },
+  {
+    "title" : "Richard D. Wolff",
+    "url" : "https://en.wikipedia.org/wiki/Richard_D._Wolff"
+  },
+  {
+    "title" : "Heather Cox Richardson",
+    "url" : "https://www.youtube.com/@heathercoxrichardson"
+  },
+  {
+    "title" : "Robert Reich",
+    "url" : "https://www.youtube.com/@RBReich"
+  }
+]

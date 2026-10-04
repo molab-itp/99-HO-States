@@ -654,3 +654,11 @@ curl: (3) URL rejected: Malformed input to a URL function
 
 cd /Users/jht2/Documents/projects/molab/99-HO-States/v06/HO-States-Users/HOStatesUsers
 cp Supabase.example.plist Supabase.plist
+
+v02.101
+
+in 99-HO-States/v2/HO-States-US/HO-States-US/SettingsView.swift
+expand urls reference begining with
+sourceDataURL to include the  4 urls in the comment below it
+move all 7 url references to JSON file
+and render as Link view
