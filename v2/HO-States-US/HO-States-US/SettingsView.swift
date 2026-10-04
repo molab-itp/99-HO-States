@@ -39,7 +39,7 @@ struct SettingsView: View {
           Text("USnA Heads")
             .font(.largeTitle.bold())
 
-          Text("Browse portraits and biographies of every United States of north America \nHead of State.")
+          Text("Browse portraits and biographies of every Head of State\n of the United States of north America")
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
