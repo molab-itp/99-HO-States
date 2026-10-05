@@ -1981,3 +1981,19 @@ and that "Web App" is absent; it passes with no console errors, and the producti
 Version 0.1.19. Not yet committed.
 
 **Cost**: ~5 minutes.
+
+# --
+
+2026-10-05 05:10 (v06: clear-users.sh — clear a user by email address)
+
+`tools/clear-guest-users.sh` is renamed `tools/clear-users.sh` and takes `--email a@b.com` to
+clear the user with that address instead of the guest/unknown set. Repeat `--email` for several
+users; `--email=a@b.com` also works. Matching ignores case, and an address with no user prints
+`No user with email …`. Without `--email` it behaves as before: guest and unknown users only. It
+still only lists unless you pass `--delete`, asks before deleting, works with `--local`, and
+removes the user's photos along with their `profiles` and `app_state` rows. The Tools section of
+`v06/README.md` is updated. Tested against a stubbed `curl` under macOS's bash 3.2: argument
+handling, selection, the dry run, and the cancel prompt. An actual delete against a Supabase stack
+was not run. Not yet committed.
+
+**Cost**: ~3 minutes.
