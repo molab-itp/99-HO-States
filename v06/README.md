@@ -129,9 +129,13 @@ Any SMTP provider works (Postmark, Brevo, Amazon SES, …).
    team `3RCW2SSL8G`. Otherwise enable it at developer.apple.com → Identifiers.
 3. Push the trigger change: `npx supabase db push` (`migrations/20260924000000_apple_sign_in.sql`).
 
+### 7. Live updates
+Run `npx supabase db push` to apply `migrations/20261005000000_profiles_realtime.sql`. Until
+then the app works as before, with no live list updates or banners.
+
 The simulator needs to be signed in to an Apple Account (Settings) to test this.
 
-### 7. iOS app
+### 8. iOS app
 ```sh
 cd v06/HO-States-Users
 cp HOStatesUsers/Supabase.example.plist HOStatesUsers/Supabase.plist   # fill in URL + publishable key
@@ -195,6 +199,15 @@ start`) after changing a template.
   sign-ins, or a guest adding an email, refresh it.
 - `UsersListView` calls the `touch_last_seen()` RPC and then reads `profiles`. It does this on
   appear, on pull-to-refresh, and whenever the app returns to the foreground.
+- **Live updates:** while the list is open, `ProfilesService.observeChanges` listens to Supabase
+  Realtime (Postgres Changes) on `profiles`, which
+  `migrations/20261005000000_profiles_realtime.sql` adds to the `supabase_realtime` publication.
+  `UsersListView` applies each change to the list and shows a banner for a few seconds when
+  another user is created ("joined"), signs in, or is deleted, e.g. by `tools/clear-users.sh`.
+  A user's row is created when their first code is sent, so a new email user shows "joined" and
+  then "signed in" once they enter the code. Returning to the app with a saved session isn't a
+  sign-in; it only moves the user up the list. The banners need the app open and connected:
+  changes made while it's in the background show up in the list on return, without a banner.
 - **Profile photo:** tap a user to see their full-size photo. On your own profile, **Choose
   Photo** opens the system photo picker, which needs no photo-library permission. `ProfilePhoto`
   re-encodes the picked image, often HEIC, as two JPEGs:
@@ -212,4 +225,5 @@ Possible next steps:
 - **Guest upgrade:** let a guest add an email with `auth.updateUser(user: .init(email:))`. They
   keep the same id and `app_state`; the `profiles` trigger already handles this.
 - **Display name:** a field that saves to `profiles.display_name`.
-- **Live updates:** Supabase Realtime on `profiles`.
+- **Push notifications:** announce the same events when the app is closed (APNs, sent from a
+  database webhook and an Edge Function).

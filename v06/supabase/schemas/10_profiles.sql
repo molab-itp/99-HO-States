@@ -34,6 +34,13 @@ create policy "Users can update their own profile"
   using ((select auth.uid()) = id)
   with check ((select auth.uid()) = id);
 
+-- Live updates: Supabase Realtime sends row changes on this table to signed-in clients (the select
+-- policy above decides who gets them). The app turns them into "joined", "signed in" and "was
+-- deleted" banners. A delete only carries the row's `id`, which is all the app needs.
+-- NOTE: `supabase db diff` doesn't pick up publication membership either; hand-copy a change here
+-- into a new migration.
+alter publication supabase_realtime add table public.profiles;
+
 -- Creates the `profiles` row on first sign-in and refreshes it on every later one, and when a
 -- guest adds an email. Email sign-in only provides the email; name/avatar are picked up from
 -- `raw_user_meta_data` when set there. Sign in with Apple sets `full_name` right after the first
