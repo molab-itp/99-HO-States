@@ -130,8 +130,9 @@ Any SMTP provider works (Postmark, Brevo, Amazon SES, …).
 3. Push the trigger change: `npx supabase db push` (`migrations/20260924000000_apple_sign_in.sql`).
 
 ### 7. Live updates
-Run `npx supabase db push` to apply `migrations/20261005000000_profiles_realtime.sql`. Until
-then the app works as before, with no live list updates or banners.
+Run `npx supabase db push` to apply `migrations/20261005000000_profiles_realtime.sql` and
+`migrations/20261005010000_profiles_sign_out.sql`. Until then the app works as before, with no
+live list updates or banners.
 
 The simulator needs to be signed in to an Apple Account (Settings) to test this.
 
@@ -203,7 +204,11 @@ start`) after changing a template.
   Realtime (Postgres Changes) on `profiles`, which
   `migrations/20261005000000_profiles_realtime.sql` adds to the `supabase_realtime` publication.
   `UsersListView` applies each change to the list and shows a banner for a few seconds when
-  another user is created ("joined"), signs in, or is deleted, e.g. by `tools/clear-users.sh`.
+  another user is created ("joined"), signs in, signs out, or is deleted, e.g. by
+  `tools/clear-users.sh`. Signing out changes nothing in `profiles` by itself, so
+  `AuthModel.signOut` first calls the `mark_signed_out()` RPC, which sets
+  `profiles.last_sign_out_at`. Only a sign-out from the app's button is announced; an expired
+  session or a deleted app isn't.
   A user's row is created when their first code is sent, so a new email user shows "joined" and
   then "signed in" once they enter the code. Returning to the app with a saved session isn't a
   sign-in; it only moves the user up the list. The banners need the app open and connected:

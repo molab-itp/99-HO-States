@@ -18,7 +18,10 @@ create table public.profiles (
   last_sign_in_at timestamptz,
   -- Bumped by the client (`touch_last_seen()`) each time the app comes to the foreground, since a
   -- persisted session means `last_sign_in_at` only changes on an actual fresh sign-in.
-  last_seen_at timestamptz
+  last_seen_at timestamptz,
+  -- Set by the client (`mark_signed_out()`) just before it signs out, so other clients can
+  -- announce it. Signing out only deletes the session in `auth`, which nothing here would see.
+  last_sign_out_at timestamptz
 );
 
 alter table public.profiles enable row level security;
@@ -35,8 +38,8 @@ create policy "Users can update their own profile"
   with check ((select auth.uid()) = id);
 
 -- Live updates: Supabase Realtime sends row changes on this table to signed-in clients (the select
--- policy above decides who gets them). The app turns them into "joined", "signed in" and "was
--- deleted" banners. A delete only carries the row's `id`, which is all the app needs.
+-- policy above decides who gets them). The app turns them into "joined", "signed in", "signed
+-- out" and "was deleted" banners. A delete only carries the row's `id`, which is all the app needs.
 -- NOTE: `supabase db diff` doesn't pick up publication membership either; hand-copy a change here
 -- into a new migration.
 alter publication supabase_realtime add table public.profiles;
@@ -87,4 +90,13 @@ security invoker
 set search_path = ''
 as $$
   update public.profiles set last_seen_at = now() where id = (select auth.uid());
+$$;
+
+create or replace function public.mark_signed_out()
+returns void
+language sql
+security invoker
+set search_path = ''
+as $$
+  update public.profiles set last_sign_out_at = now() where id = (select auth.uid());
 $$;

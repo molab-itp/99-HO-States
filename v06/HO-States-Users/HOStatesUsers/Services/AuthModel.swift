@@ -101,7 +101,10 @@ final class AuthModel {
         }
     }
 
+    /// Tells other clients first (see `ProfilesService.markSignedOut`), since nothing in
+    /// `profiles` changes on sign-out itself. That's best effort: it never blocks signing out.
     func signOut() async {
+        try? await ProfilesService(client: client).markSignedOut()
         do {
             try await client.auth.signOut()
         } catch {

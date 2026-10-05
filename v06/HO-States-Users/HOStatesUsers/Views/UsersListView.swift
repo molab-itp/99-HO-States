@@ -113,12 +113,17 @@ struct UsersListView: View {
             announce(.created, profile)
         case .updated(let profile):
             // Updates don't say which column changed, and most are `last_seen_at` bumps, so a
-            // sign-in is one that moves `last_sign_in_at` on from the copy already in the list.
-            // A new user's first sign-in counts too: their row is created when the code is sent.
-            if let known = profiles.first(where: { $0.id == profile.id }),
-               let signedInAt = profile.lastSignInAt,
-               signedInAt.timeIntervalSince(known.lastSignInAt ?? .distantPast) > 1 {
-                announce(.signedIn, profile)
+            // sign-in or sign-out is one that moves `last_sign_in_at` or `last_sign_out_at` on
+            // from the copy already in the list. A new user's first sign-in counts too: their row
+            // is created when the code is sent.
+            if let known = profiles.first(where: { $0.id == profile.id }) {
+                if let signedInAt = profile.lastSignInAt,
+                   signedInAt.timeIntervalSince(known.lastSignInAt ?? .distantPast) > 1 {
+                    announce(.signedIn, profile)
+                } else if let signedOutAt = profile.lastSignOutAt,
+                          signedOutAt.timeIntervalSince(known.lastSignOutAt ?? .distantPast) > 1 {
+                    announce(.signedOut, profile)
+                }
             }
             upsert(profile)
         case .deleted(let id):

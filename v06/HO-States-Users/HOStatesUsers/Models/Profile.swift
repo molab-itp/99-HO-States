@@ -13,6 +13,7 @@ struct Profile: Codable, Identifiable, Hashable, Sendable {
     let createdAt: Date
     let lastSignInAt: Date?
     let lastSeenAt: Date?
+    let lastSignOutAt: Date?
 
     enum CodingKeys: String, CodingKey {
         case id, email
@@ -24,6 +25,7 @@ struct Profile: Codable, Identifiable, Hashable, Sendable {
         case createdAt = "created_at"
         case lastSignInAt = "last_sign_in_at"
         case lastSeenAt = "last_seen_at"
+        case lastSignOutAt = "last_sign_out_at"
     }
 
     /// Guests have no email, so a slice of their id tells them apart in the list.

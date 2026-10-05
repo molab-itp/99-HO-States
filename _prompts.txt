@@ -673,3 +673,16 @@ in v06 modify clear-guest-users.sh to allow
 clearing of a user by email address
 update tool name accordingly
 
+v06.104
+
+in v06 enable real-time notification on user login/create/delete events
+
+npx supabase db push
+
+v06.105
+
+in v06 add logout to real-time notification
+
+npx supabase db push
+
+Issue: no notification guest signout

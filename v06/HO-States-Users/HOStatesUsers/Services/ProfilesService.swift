@@ -25,6 +25,12 @@ struct ProfilesService {
             .value
     }
 
+    /// Records that the current user is about to sign out, which other clients show as a
+    /// "signed out" banner. Call it while the session is still valid.
+    func markSignedOut() async throws {
+        try await client.rpc("mark_signed_out").execute()
+    }
+
     /// A live change to one `profiles` row, from Supabase Realtime.
     enum Change: Sendable {
         case inserted(Profile)
