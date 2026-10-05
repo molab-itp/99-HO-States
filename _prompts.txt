@@ -666,3 +666,10 @@ and render as Link view
 v05.102
 
 sync v05 with v2
+
+v06.103
+
+in v06 modify clear-guest-users.sh to allow
+clearing of a user by email address
+update tool name accordingly
+

@@ -1,33 +1,43 @@
 #!/usr/bin/env bash
-# Deletes guest users (anonymous sign-ins) and unknown users (no email, no phone) from Supabase
-# Auth. Their `profiles` and `app_state` rows go with them (`on delete cascade`); their profile
-# photos in the `avatars` bucket are deleted first, since Storage files don't cascade.
+# Deletes users from Supabase Auth: by default guest users (anonymous sign-ins) and unknown users
+# (no email, no phone); with --email, only the users with those email addresses. Their `profiles`
+# and `app_state` rows go with them (`on delete cascade`); their profile photos in the `avatars`
+# bucket are deleted first, since Storage files don't cascade.
 #
 # Uses the Auth Admin API, so it needs a secret key (never commit it):
 #   hosted:  Dashboard → Project Settings → API Keys → Secret keys (sb_secret_…)
 #
 # Usage (from anywhere):
-#   SUPABASE_SECRET_KEY=sb_secret_… v06/tools/clear-guest-users.sh          # list only (dry run)
-#   SUPABASE_SECRET_KEY=sb_secret_… v06/tools/clear-guest-users.sh --delete # actually delete
-#   v06/tools/clear-guest-users.sh --local [--delete]                      # local stack; key read
-#                                                                           # from `supabase status`
+#   SUPABASE_SECRET_KEY=sb_secret_… v06/tools/clear-users.sh          # list guest/unknown users (dry run)
+#   SUPABASE_SECRET_KEY=sb_secret_… v06/tools/clear-users.sh --delete # actually delete them
+#   … v06/tools/clear-users.sh --email a@b.com [--delete]             # that user instead; repeat
+#                                                                     # --email for several
+#   v06/tools/clear-users.sh --local [--email …] [--delete]           # local stack; key read
+#                                                                     # from `supabase status`
 # The hosted URL comes from SUPABASE_URL, else from the app's Supabase.plist.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."   # v06/
 
+command -v jq >/dev/null || { echo "Needs jq: brew install jq" >&2; exit 1; }
+
 delete=false
 local_stack=false
-for arg in "$@"; do
-  case "$arg" in
+emails='[]'   # JSON array of lowercased addresses; empty means guest/unknown users
+while (( $# > 0 )); do
+  case "$1" in
     --delete) delete=true ;;
     --local) local_stack=true ;;
-    -h|--help) sed -n '2,13p' "$0"; exit 0 ;;
-    *) echo "Unknown option: $arg" >&2; exit 1 ;;
+    --email|--email=*)
+      if [[ "$1" == --email=* ]]; then email=${1#--email=}; else shift; email=${1:-}; fi
+      [[ "$email" == ?*@?* ]] || { echo "--email needs an email address" >&2; exit 1; }
+      emails=$(jq -c --arg e "$email" '. + [$e | ascii_downcase] | unique' <<<"$emails")
+      ;;
+    -h|--help) sed -n '2,16p' "$0"; exit 0 ;;
+    *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
+  shift
 done
-
-command -v jq >/dev/null || { echo "Needs jq: brew install jq" >&2; exit 1; }
 
 if $local_stack; then
   status_env=$(npx supabase status -o env 2>/dev/null) || { echo "Local stack isn't running: npx supabase start" >&2; exit 1; }
@@ -76,13 +86,22 @@ while :; do
   page=$((page + 1))
 done
 
-targets=$(jq '[.[] | select(
-    .is_anonymous == true
-    or (((.email // "") == "") and ((.phone // "") == ""))
-  ) | {id, kind: (if .is_anonymous then "guest" else "unknown" end), created_at, last_sign_in_at}]' <<<"$all")
+if [[ "$emails" == "[]" ]]; then
+  what="guest/unknown"
+  targets=$(jq '[.[] | select(
+      .is_anonymous == true
+      or (((.email // "") == "") and ((.phone // "") == ""))
+    ) | {id, kind: (if .is_anonymous then "guest" else "unknown" end), created_at, last_sign_in_at}]' <<<"$all")
+else
+  what="matching --email"
+  targets=$(jq --argjson emails "$emails" '[.[] | (.email // "" | ascii_downcase) as $e
+    | select($emails | index($e))
+    | {id, kind: $e, created_at, last_sign_in_at}]' <<<"$all")
+  jq -r --argjson emails "$emails" '$emails - [.[].kind] | .[] | "No user with email \(.)"' <<<"$targets" >&2
+fi
 
 count=$(jq length <<<"$targets")
-echo "$url: $(jq length <<<"$all") users, $count guest/unknown"
+echo "$url: $(jq length <<<"$all") users, $count $what"
 jq -r '.[] | "  \(.kind)\t\(.id)\tcreated \(.created_at[0:16])\tlast sign-in \((.last_sign_in_at // "never")[0:16])"' <<<"$targets"
 
 (( count > 0 )) || exit 0

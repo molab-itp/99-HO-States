@@ -156,8 +156,9 @@ limits. `config.toml` points both templates at `templates/otp.html`, so each ema
 start`) after changing a template.
 
 ## Tools
-- [`tools/clear-guest-users.sh`](tools/clear-guest-users.sh) deletes guest users and unknown users
-  (no email or phone). Their `profiles` and `app_state` rows are deleted with them, and so are their
+- [`tools/clear-users.sh`](tools/clear-users.sh) deletes guest users and unknown users
+  (no email or phone), or, with `--email a@b.com` (repeatable), only the users with those email
+  addresses. Their `profiles` and `app_state` rows are deleted with them, and so are their
   profile photos. It only lists
   them unless you pass `--delete`, and it asks before deleting. The hosted project needs
   `SUPABASE_SECRET_KEY` (Project Settings → API Keys → Secret keys); `--local` targets the local
