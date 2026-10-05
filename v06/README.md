@@ -14,6 +14,7 @@ v06/
     templates/otp.html     sign-in email: 6-digit code only (copy into the dashboard too)
     schemas/*.sql          ← SOURCE OF TRUTH for the database (edit these)
     migrations/*.sql       ← generated from schemas/ (don't hand-edit, except auth.* triggers)
+    functions/delete-user/ Edge Function: lets admins delete a user from the app
     seed.sql
   HO-States-Users/
     HO-States-Users.xcodeproj   folder-synced: files added under HOStatesUsers/ join the app
@@ -136,7 +137,25 @@ live list updates or banners.
 
 The simulator needs to be signed in to an Apple Account (Settings) to test this.
 
-### 8. iOS app
+### 8. Admins (deleting users from the app)
+1. Push the `admins` table and deploy the Edge Function, from `v06/`:
+   ```sh
+   npx supabase db push                        # migrations/20261005020000_admins.sql
+   npx supabase functions deploy delete-user   # no Docker needed
+   ```
+2. Make yourself an admin in the dashboard **SQL Editor** (sign in to the app once first, so the
+   user exists):
+   ```sql
+   insert into public.admins (user_id) select id from auth.users where email = 'you@example.com';
+   ```
+   There is no way to do this from the app. To remove an admin, delete their row.
+3. Pull to refresh in the app. Swiping another user's row now shows **Delete**.
+
+The function runs with the project's secret key, which hosted functions get on their own as
+`SUPABASE_SERVICE_ROLE_KEY`. If the project has its legacy API keys turned off, give it a secret
+key instead: `npx supabase secrets set SB_SECRET_KEY=sb_secret_…`.
+
+### 9. iOS app
 ```sh
 cd v06/HO-States-Users
 cp HOStatesUsers/Supabase.example.plist HOStatesUsers/Supabase.plist   # fill in URL + publishable key
@@ -213,6 +232,15 @@ start`) after changing a template.
   then "signed in" once they enter the code. Returning to the app with a saved session isn't a
   sign-in; it only moves the user up the list. The banners need the app open and connected:
   changes made while it's in the background show up in the list on return, without a banner.
+- **Admin delete:** `UsersListView` asks the `is_admin()` RPC whether you are in `public.admins`
+  (`schemas/40_admins.sql`). If so, swiping another user's row shows **Delete**, which asks first
+  and then calls the `delete-user` Edge Function (`supabase/functions/delete-user/index.ts`) with
+  your access token. The function checks the token with the Auth server and looks you up in
+  `admins` again, so hiding the button isn't what protects it. It then deletes the user's photos
+  from the `avatars` bucket and the user from Supabase Auth, which removes their `profiles` and
+  `app_state` rows. Every open app sees the row disappear with a "was deleted" banner. If the
+  deleted user has the app open, it signs them out. An admin can't delete themselves. Deleting an
+  Apple user doesn't revoke the app's access on Apple's side.
 - **Profile photo:** tap a user to see their full-size photo. On your own profile, **Choose
   Photo** opens the system photo picker, which needs no photo-library permission. `ProfilePhoto`
   re-encodes the picked image, often HEIC, as two JPEGs:

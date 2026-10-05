@@ -1,7 +1,8 @@
 import Foundation
 import Supabase
 
-/// Reads and watches `public.profiles` (see `supabase/schemas/10_profiles.sql`).
+/// Reads and watches `public.profiles` (see `supabase/schemas/10_profiles.sql`), and lets admins
+/// delete users.
 struct ProfilesService {
     let client: SupabaseClient
 
@@ -70,5 +71,35 @@ struct ProfilesService {
     /// sign-ins (a persisted session skips sign-in entirely).
     func touchLastSeen() async throws {
         try await client.rpc("touch_last_seen").execute()
+    }
+
+    /// Whether the current user is in `public.admins` (see `supabase/schemas/40_admins.sql`).
+    /// Only decides whether to show the Delete action; the Edge Function checks again.
+    func isAdmin() async throws -> Bool {
+        try await client.rpc("is_admin").execute().value
+    }
+
+    /// Deletes another user's account, photos and data through the `delete-user` Edge Function
+    /// (`supabase/functions/delete-user`). Admins only. Every client, this one included, then
+    /// gets the `profiles` delete over Realtime.
+    func deleteUser(id: UUID) async throws {
+        do {
+            try await client.functions.invoke(
+                "delete-user", options: FunctionInvokeOptions(body: ["user_id": id.uuidString]))
+        } catch FunctionsError.httpError(let code, let data) {
+            // The function explains itself in `{"error": "…"}`; the SDK's own message is only
+            // the status code.
+            let message = (try? JSONDecoder().decode(DeleteUserFailure.self, from: data))?.error
+            throw DeleteUserError(message: message ?? "Deleting the user failed (HTTP \(code)).")
+        }
+    }
+
+    struct DeleteUserError: LocalizedError {
+        let message: String
+        var errorDescription: String? { message }
+    }
+
+    private struct DeleteUserFailure: Decodable {
+        let error: String
     }
 }

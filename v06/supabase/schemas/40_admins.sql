@@ -1,0 +1,36 @@
+-- Admins: the users who may delete other users' accounts from the app. The deleting itself is
+-- done by the `delete-user` Edge Function (see supabase/functions/delete-user/index.ts), which
+-- holds the secret key and checks this table first.
+--
+-- There is no way to become an admin through the API. Add one in the dashboard SQL editor:
+--   insert into public.admins (user_id) select id from auth.users where email = 'you@example.com';
+-- and remove one with:
+--   delete from public.admins where user_id = (select id from auth.users where email = '…');
+
+create table public.admins (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+-- RLS with no policies, and no grants to the client roles: only the Edge Function (as
+-- `service_role`, which bypasses RLS) and `is_admin()` below can read it.
+alter table public.admins enable row level security;
+
+revoke all on public.admins from anon, authenticated;
+grant select on public.admins to service_role;
+
+-- Whether the calling user is an admin, so the app knows to show the Delete action. It only
+-- decides what the UI shows: the Edge Function does its own check. `security definer` because
+-- the caller can't read `admins`.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (select 1 from public.admins where user_id = (select auth.uid()));
+$$;
+
+revoke execute on function public.is_admin() from public, anon;
+grant execute on function public.is_admin() to authenticated;

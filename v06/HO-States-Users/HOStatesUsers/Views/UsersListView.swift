@@ -10,6 +10,10 @@ struct UsersListView: View {
     @State private var hasLoaded = false
     /// The latest live event about another user; clears itself after a few seconds.
     @State private var banner: UserEvent?
+    /// Admins (`public.admins`) can swipe a row to delete that user.
+    @State private var isAdmin = false
+    /// The user an admin swiped, while the "are you sure" dialog is up.
+    @State private var pendingDelete: Profile?
 
     private var service: ProfilesService { ProfilesService(client: auth.client) }
     private var photos: ProfilePhotoService { ProfilePhotoService(client: auth.client) }
@@ -30,6 +34,12 @@ struct UsersListView: View {
                                 isCurrentUser: profile.id == currentUserID,
                                 thumbURL: photos.publicURL(for: profile.photoThumbPath)
                             )
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            if isAdmin && profile.id != currentUserID {
+                                Button("Delete", systemImage: "trash") { pendingDelete = profile }
+                                    .tint(.red)
+                            }
                         }
                     }
                 } footer: {
@@ -58,6 +68,20 @@ struct UsersListView: View {
                 }
             }
             .refreshable { await reload() }
+            .confirmationDialog(
+                "Delete \(pendingDelete?.name ?? "this user")?",
+                isPresented: Binding(
+                    get: { pendingDelete != nil },
+                    set: { if !$0 { pendingDelete = nil } }),
+                titleVisibility: .visible,
+                presenting: pendingDelete
+            ) { profile in
+                Button("Delete User", role: .destructive) {
+                    Task { await delete(profile) }
+                }
+            } message: { _ in
+                Text("Their account, photo and saved data are removed for good.")
+            }
             .safeAreaInset(edge: .bottom) {
                 if let banner {
                     Label(banner.message, systemImage: banner.systemImage)
@@ -91,6 +115,8 @@ struct UsersListView: View {
         do {
             try await service.touchLastSeen()
             profiles = try await service.fetchAll()
+            // Best effort: before the `admins` migration is pushed there is no `is_admin()`.
+            isAdmin = (try? await service.isAdmin()) ?? false
             errorMessage = nil
         } catch is CancellationError {
             return
@@ -98,6 +124,17 @@ struct UsersListView: View {
             errorMessage = error.localizedDescription
         }
         hasLoaded = true
+    }
+
+    private func delete(_ profile: Profile) async {
+        do {
+            try await service.deleteUser(id: profile.id)
+            // Realtime removes the row too; this covers live updates being off.
+            profiles.removeAll { $0.id == profile.id }
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     /// Keeps the list live for as long as it's on screen, and announces what other users do.
@@ -132,6 +169,11 @@ struct UsersListView: View {
             }
             upsert(profile)
         case .deleted(let id):
+            // An admin deleted this account: the session is dead, so go back to sign-in.
+            if id == currentUserID {
+                Task { await auth.signOut() }
+                return
+            }
             guard let index = profiles.firstIndex(where: { $0.id == id }) else { return }
             announce(.deleted, profiles.remove(at: index))
         }
