@@ -2032,3 +2032,38 @@ out because a faulty trigger there could break sign-out. Builds for the iOS Simu
 warnings; no live event was observed. Committed as v06.105.
 
 **Cost**: ~8 minutes.
+
+# --
+
+2026-10-05 14:18 (v06: admin delete user — Edge Function)
+
+Two requests. The first asked for a way to let an admin-style user delete accounts. Two designs
+were suggested: an `admins` table plus a `security definer` SQL function that deletes from
+`auth.users`, or an Edge Function holding the secret key. The second request chose the Edge
+Function, which is now implemented.
+
+Admins can swipe another user's row in the users list and tap **Delete**; after a confirmation
+the account, its photos and its saved data are removed. The pieces:
+
+- `supabase/functions/delete-user/index.ts`: takes `{ "user_id": … }`, checks the caller's token
+  with the Auth server, confirms the caller is in `public.admins`, deletes the target's files
+  from the `avatars` bucket, then deletes the user from Supabase Auth (`profiles` and `app_state`
+  cascade). An admin can't delete themselves.
+- `supabase/schemas/40_admins.sql` and `migrations/20261005020000_admins.sql`: the `admins` table,
+  with no client access, and an `is_admin()` RPC that tells the app whether to show Delete.
+  Admins are added by hand in the dashboard SQL editor.
+- `supabase/config.toml`: `verify_jwt = false` for the function, since it checks the token itself.
+- `ProfilesService`: `isAdmin()` and `deleteUser(id:)`, which surfaces the function's error text.
+- `UsersListView`: the swipe action and confirmation dialog. If your own account is deleted while
+  the app is open, it signs you out.
+- `v06/README.md`: setup step 8 (Admins) and an "Admin delete" entry under How the app works.
+
+To turn it on: `npx supabase db push`, `npx supabase functions deploy delete-user`, then insert
+your user into `public.admins`. The function reads `SUPABASE_SERVICE_ROLE_KEY`; a project with
+legacy API keys turned off needs `npx supabase secrets set SB_SECRET_KEY=sb_secret_…` instead.
+
+The function type-checks with `deno check` and the app builds for the iOS Simulator with no
+warnings. No delete was run against a Supabase stack, and nothing is deployed. The build number
+was not bumped. Not yet committed.
+
+**Cost**: ~15 minutes.
