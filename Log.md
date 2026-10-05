@@ -1997,3 +1997,38 @@ handling, selection, the dry run, and the cancel prompt. An actual delete agains
 was not run. Not yet committed.
 
 **Cost**: ~3 minutes.
+
+# --
+
+2026-10-05 05:25 (v06: real-time notification on user create / sign-in / delete)
+
+While the users list is open, the app now shows a banner for a few seconds when another user is
+created ("joined"), signs in, or is deleted, and the list updates itself as those changes arrive.
+`ProfilesService.observeChanges` listens to Supabase Realtime (Postgres Changes) on `profiles`;
+`UsersListView` applies each change and shows the banner; `UserEvent` holds the wording and icon.
+A new migration, `20261005000000_profiles_realtime.sql`, adds `profiles` to the
+`supabase_realtime` publication and needs `npx supabase db push`; until then the app works as
+before. A sign-in is an update that moves `last_sign_in_at` on from the copy in the list, so
+reopening the app with a saved session only moves that user up the list. A new email user shows
+"joined" when the first code is sent and "signed in" once it is entered. Your own events show no
+banner. "Notification" here means an in-app banner: the app must be open and connected, and push
+notifications (APNs) are listed in the README as a next step. Builds for the iOS Simulator with no
+warnings; no live event was observed, since the migration was not pushed. Committed as v06.104.
+
+**Cost**: ~12 minutes.
+
+# --
+
+2026-10-05 07:34 (v06: real-time notification on sign-out)
+
+Other users now see a "signed out" banner when someone taps Sign Out. Signing out changes nothing
+in `profiles` by itself, so `AuthModel.signOut` first calls a new `mark_signed_out()` RPC, which
+sets a new `profiles.last_sign_out_at` column; other clients pick that up over Realtime. The call
+is best effort and never blocks signing out. Migration `20261005010000_profiles_sign_out.sql`
+adds the column and function and needs `npx supabase db push`. Only the Sign Out button is
+announced: an expired session, a deleted app, or a device on the previous build signs out
+silently. A trigger on `auth.sessions` would also cover other clients such as v05, but was left
+out because a faulty trigger there could break sign-out. Builds for the iOS Simulator with no
+warnings; no live event was observed. Committed as v06.105.
+
+**Cost**: ~8 minutes.
