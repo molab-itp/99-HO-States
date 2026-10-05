@@ -686,3 +686,10 @@ in v06 add logout to real-time notification
 npx supabase db push
 
 Issue: no notification guest signout
+
+v06.106
+
+in v06 and display of build version and number in 
+UsersListView.swift and SignInView.swift
+
+

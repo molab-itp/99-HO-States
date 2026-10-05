@@ -255,7 +255,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.6;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jht1900.HO-States-Users";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -340,7 +340,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.6;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jht1900.HO-States-Users";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;

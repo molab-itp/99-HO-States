@@ -22,14 +22,19 @@ struct UsersListView: View {
                         .font(.footnote)
                         .foregroundStyle(.red)
                 }
-                ForEach(profiles) { profile in
-                    NavigationLink(value: profile) {
-                        ProfileRow(
-                            profile: profile,
-                            isCurrentUser: profile.id == currentUserID,
-                            thumbURL: photos.publicURL(for: profile.photoThumbPath)
-                        )
+                Section {
+                    ForEach(profiles) { profile in
+                        NavigationLink(value: profile) {
+                            ProfileRow(
+                                profile: profile,
+                                isCurrentUser: profile.id == currentUserID,
+                                thumbURL: photos.publicURL(for: profile.photoThumbPath)
+                            )
+                        }
                     }
+                } footer: {
+                    AppVersionLabel()
+                        .frame(maxWidth: .infinity)
                 }
             }
             .overlay {

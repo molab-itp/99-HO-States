@@ -46,6 +46,8 @@ struct SignInView: View {
                     .foregroundStyle(.red)
                     .multilineTextAlignment(.center)
             }
+
+            AppVersionLabel()
         }
         .padding(32)
         .disabled(isWorking)
