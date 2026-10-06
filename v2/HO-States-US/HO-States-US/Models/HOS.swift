@@ -1,7 +1,7 @@
 import Foundation
 
-/// A president entry decoded from the generated Presidents.json resource.
-struct President: Identifiable, Codable, Hashable {
+/// An HOS entry decoded from the generated HOS.json resource.
+struct HOS: Identifiable, Codable, Hashable {
     let order: Int
     let name: String
     let term: String
@@ -16,7 +16,7 @@ struct President: Identifiable, Codable, Hashable {
 
     /// Link to the Wikipedia article this summary was generated from. Falls back to
     /// constructing the canonical URL from `wikipediaTitle` for entries generated before
-    /// this field existed (older Presidents.json without `articleURL`).
+    /// this field existed (older HOS.json without `articleURL`).
     var wikipediaArticleURL: URL? {
         if let articleURL, let url = URL(string: articleURL) {
             return url

@@ -7,18 +7,18 @@
 
 import SwiftUI
 
-/// The scrollable list of all presidents. Pushed from `SettingsView`; tapping a row hands the
-/// president to `onSelect` (which shows it in `PresidentDetailView` and dismisses Settings).
-struct PresidenttListView: View {
-    let presidents: [President]
-    let onSelect: (President) -> Void
+/// The scrollable list of all heads of state. Pushed from `LandingView`; tapping a row hands the
+/// HOS to `onSelect` (which shows it in `HOSDetailView`).
+struct HOSListView: View {
+    let hosList: [HOS]
+    let onSelect: (HOS) -> Void
 
     var body: some View {
-        List(presidents) { president in
+        List(hosList) { hos in
             Button {
-                onSelect(president)
+                onSelect(hos)
             } label: {
-                PresidentRow(president: president)
+                HOSRow(hos: hos)
             }
             .foregroundStyle(.primary)
         }
@@ -26,12 +26,12 @@ struct PresidenttListView: View {
     }
 }
 
-private struct PresidentRow: View {
+private struct HOSRow: View {
     @Environment(AppModel.self) private var appModel
-    let president: President
+    let hos: HOS
 
     private var reactionsText: String {
-        appModel.reactions(for: president).map(\.emoji).joined()
+        appModel.reactions(for: hos).map(\.emoji).joined()
     }
 
     var body: some View {
@@ -40,10 +40,10 @@ private struct PresidentRow: View {
                 .frame(width: 44, height: 44)
                 .clipShape(Circle())
             VStack(alignment: .leading) {
-                Text("#\(String(format: "%02d", president.order)) \(president.name)")
+                Text("#\(String(format: "%02d", hos.order)) \(hos.name)")
                     .font(.headline)
                 HStack {
-                    Text(president.term)
+                    Text(hos.term)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     Spacer()
@@ -57,7 +57,7 @@ private struct PresidentRow: View {
 
     @ViewBuilder
     private var thumbnail: some View {
-        if let name = president.thumbnailImageName, let image = imageIfAvailable(name) {
+        if let name = hos.thumbnailImageName, let image = imageIfAvailable(name) {
             image
                 .resizable()
                 .scaledToFill()
@@ -71,9 +71,9 @@ private struct PresidentRow: View {
 }
 
 #Preview {
-    let presidents = PresidentsRepository.loadAll()
+    let hosList = HOSRepository.loadAll()
     NavigationStack {
-        PresidenttListView(presidents: presidents) { _ in }
+        HOSListView(hosList: hosList) { _ in }
     }
-    .environment(AppModel(presidents: presidents))
+    .environment(AppModel(hosList: hosList))
 }

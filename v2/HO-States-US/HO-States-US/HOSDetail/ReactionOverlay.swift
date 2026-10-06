@@ -1,15 +1,15 @@
 import SwiftUI
 
-/// The president's reactions as a layer over the portrait: one row of emoji along the image's
+/// The HOS's reactions as a layer over the portrait: one row of emoji along the image's
 /// bottom edge, in the order added. Laid over the fitted image by `ZoomableHeaderImage` and
-/// `PresidentDrawingEditorView`, so it gets the photo's exact frame. The row shrinks to fit rather
+/// `HOSDrawingEditorView`, so it gets the photo's exact frame. The row shrinks to fit rather
 /// than wrapping or clipping once there are more reactions than fit across.
 struct ReactionOverlay: View {
-    let president: President
+    let hos: HOS
     @Environment(AppModel.self) private var appModel
 
     var body: some View {
-        let reactions = appModel.reactions(for: president)
+        let reactions = appModel.reactions(for: hos)
         if !reactions.isEmpty {
             Text(reactions.map(\.emoji).joined(separator: " "))
                 .font(.largeTitle)

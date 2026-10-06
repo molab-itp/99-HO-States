@@ -704,4 +704,20 @@ Then in the dashboard SQL Editor, after signing in to the app once:
 
 insert into public.admins (user_id) select id from auth.users where email = 'you@example.com';
 
-You can inspect your deployment in the Dashboard: https://supabase.com/dashboard/project/jcoolgnracpgjncksopx/functions
+You can inspect your deployment in the Dashboard: 
+https://supabase.com/dashboard/project/jcoolgnracpgjncksopx/functions
+
+v02.108
+
+in v2, restructure 
+- rename President in file names and code to HOS
+- rename SettingsView.swift to LandingView
+- rename PresidentDetailView to HOSDetailView
+- add new Resume button on LandingView that goes to HOSDetailView
+- last view state LandingView or HOSDetailView is restore between app launch (plan to add other view in future)
+- create Views folder to hold LandingView and HOSDetailView
+- folder HOSDetail holds all other views that support HOSDetailView
+
+
+
+

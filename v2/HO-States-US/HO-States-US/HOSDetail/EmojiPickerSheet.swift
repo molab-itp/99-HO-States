@@ -4,7 +4,7 @@ import SwiftUI
 /// iOS has no public emoji-picker API, so the list is built from Unicode scalar properties, and
 /// search matches against each scalar's Unicode name (e.g. "sun" finds ☀️ "black sun with rays").
 struct EmojiPickerSheet: View {
-    let onPick: (PresidentReaction) -> Void
+    let onPick: (HOSReaction) -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
 
@@ -20,7 +20,7 @@ struct EmojiPickerSheet: View {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 44), spacing: 4)], spacing: 4) {
                     ForEach(filtered) { entry in
                         Button {
-                            onPick(PresidentReaction(entry.emoji))
+                            onPick(HOSReaction(entry.emoji))
                             dismiss()
                         } label: {
                             Text(entry.emoji)

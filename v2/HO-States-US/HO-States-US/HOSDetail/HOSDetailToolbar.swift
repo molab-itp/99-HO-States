@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// The bottom toolbar's Previous / Play-Pause / Next buttons. Purely presentational — the
-/// slideshow logic lives in `PresidentDetailView`.
-struct PresidentDetailToolbar: ToolbarContent {
+/// slideshow logic lives in `HOSDetailView`.
+struct HOSDetailToolbar: ToolbarContent {
     let isSlideshowPaused: Bool
     let isPreviousDisabled: Bool
     let isNextDisabled: Bool

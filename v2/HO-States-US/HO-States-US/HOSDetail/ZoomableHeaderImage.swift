@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// What the detail view's header shows: the portrait, the portrait with its saved drawing laid
-/// over it, or the drawing alone. Chosen per president from the eye menu in
-/// `PresidentDetailView`'s toolbar and kept in `AppModel`.
+/// over it, or the drawing alone. Chosen per HOS from the eye menu in
+/// `HOSDetailView`'s toolbar and kept in `AppModel`.
 enum DrawingDisplayMode: String, CaseIterable, Codable, Identifiable {
     case photo
     case photoAndDrawing
@@ -30,13 +30,13 @@ enum DrawingDisplayMode: String, CaseIterable, Codable, Identifiable {
     }
 }
 
-/// The president's portrait, with pinch-to-zoom, pan (once zoomed), and double-tap to toggle
-/// between 1x and 2.5x. The caller gives this view a fresh identity (`.id(president.id)`) each
-/// time the president changes, so `scale`/`offset` start from `AppModel`'s persisted zoom state
-/// for that specific president (seeded `onAppear`, since `@Environment` isn't available in
+/// The HOS's portrait, with pinch-to-zoom, pan (once zoomed), and double-tap to toggle
+/// between 1x and 2.5x. The caller gives this view a fresh identity (`.id(hos.id)`) each
+/// time the HOS changes, so `scale`/`offset` start from `AppModel`'s persisted zoom state
+/// for that specific HOS (seeded `onAppear`, since `@Environment` isn't available in
 /// `init`) rather than always resetting to 1x/no-offset.
 struct ZoomableHeaderImage: View {
-    let president: President
+    let hos: HOS
     /// Whether the portrait and/or its saved drawing (if any) are shown.
     var displayMode: DrawingDisplayMode = .photoAndDrawing
     @Environment(AppModel.self) private var appModel
@@ -50,9 +50,9 @@ struct ZoomableHeaderImage: View {
 
     var body: some View {
         Group {
-            if let name = president.largeImageName ?? president.thumbnailImageName, let image = imageIfAvailable(name) {
+            if let name = hos.largeImageName ?? hos.thumbnailImageName, let image = imageIfAvailable(name) {
                 // With no drawing to show (and so no eye menu to change modes), always show the photo.
-                let showsPhoto = displayMode.showsPhoto || appModel.drawingImage(for: president) == nil
+                let showsPhoto = displayMode.showsPhoto || appModel.drawingImage(for: hos) == nil
                 let scaledImage = image
                     .resizable()
                     .scaledToFit()
@@ -67,7 +67,7 @@ struct ZoomableHeaderImage: View {
                     // frame lines it up exactly, and applying it before `scaleEffect`/`offset`
                     // makes it zoom and pan together with the photo.
                     .overlay {
-                        if displayMode.showsDrawing, let drawing = appModel.drawingImage(for: president) {
+                        if displayMode.showsDrawing, let drawing = appModel.drawingImage(for: hos) {
                             Image(uiImage: drawing)
                                 .resizable()
                                 .scaledToFit()
@@ -82,7 +82,7 @@ struct ZoomableHeaderImage: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     // Reactions go after the zoom/pan and clip, so they stay pinned along the
                     // bottom edge of the visible frame instead of moving with the photo.
-                    .overlay { ReactionOverlay(president: president) }
+                    .overlay { ReactionOverlay(hos: hos) }
                     // clipShape only clips drawing, not hit-testing: without this the scaled/offset
                     // content still receives touches outside the visible frame, so drags starting
                     // on neighboring views (progress bar, summary text) would pan the image.
@@ -109,7 +109,7 @@ struct ZoomableHeaderImage: View {
             }
         }
         .onAppear {
-            guard let saved = appModel.imageZoomState(for: president) else { return }
+            guard let saved = appModel.imageZoomState(for: hos) else { return }
             scale = saved.scale
             lastScale = saved.scale
             offset = saved.offset
@@ -169,14 +169,14 @@ struct ZoomableHeaderImage: View {
         lastOffset = .zero
     }
 
-    /// Writes the current scale/offset to `AppModel`, keyed to this specific president — or
+    /// Writes the current scale/offset to `AppModel`, keyed to this specific HOS — or
     /// clears its entry once back at the 1x/no-offset default, so a never-zoomed or reset
-    /// president doesn't linger as a redundant stored state.
+    /// HOS doesn't linger as a redundant stored state.
     private func persistZoom() {
         if scale <= minScale && offset == .zero {
-            appModel.setImageZoomState(nil, for: president)
+            appModel.setImageZoomState(nil, for: hos)
         } else {
-            appModel.setImageZoomState(ImageZoomState(scale: scale, offset: offset), for: president)
+            appModel.setImageZoomState(ImageZoomState(scale: scale, offset: offset), for: hos)
         }
     }
 }

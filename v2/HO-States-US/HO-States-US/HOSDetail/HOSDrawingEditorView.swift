@@ -1,14 +1,14 @@
 import PencilKit
 import SwiftUI
 
-/// Pushed from `PresidentDetailView`'s pencil button: the president's portrait with a PencilKit
+/// Pushed from `HOSDetailView`'s pencil button: the HOS's portrait with a PencilKit
 /// canvas laid exactly over it. The drawing is saved automatically when this view goes away (Done
 /// or Back), so there's no way to lose strokes by leaving; Clear empties the canvas, and leaving
 /// with an empty canvas deletes the saved drawing. Reactions are added and removed here too, with
 /// the controls above the photo (the tool picker docks along the bottom on iPhone) and the emoji
 /// shown as a layer along the photo's bottom edge.
-struct PresidentDrawingEditorView: View {
-    let president: President
+struct HOSDrawingEditorView: View {
+    let hos: HOS
     @Environment(AppModel.self) private var appModel
     @Environment(\.dismiss) private var dismiss
 
@@ -17,7 +17,7 @@ struct PresidentDrawingEditorView: View {
     @State private var showingEmojiSheet = false
 
     private var photo: UIImage? {
-        guard let name = president.largeImageName ?? president.thumbnailImageName else { return nil }
+        guard let name = hos.largeImageName ?? hos.thumbnailImageName else { return nil }
         return UIImage(named: name)
     }
 
@@ -35,10 +35,10 @@ struct PresidentDrawingEditorView: View {
                             DrawingCanvas(
                                 controller: controller,
                                 imageSize: photo.size,
-                                presidentID: president.id
+                                hosID: hos.id
                             )
                         }
-                        .overlay { ReactionOverlay(president: president) }
+                        .overlay { ReactionOverlay(hos: hos) }
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -47,7 +47,7 @@ struct PresidentDrawingEditorView: View {
                 ContentUnavailableView("No Photo", systemImage: "photo")
             }
         }
-        .navigationTitle(president.name)
+        .navigationTitle(hos.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
@@ -82,19 +82,19 @@ struct PresidentDrawingEditorView: View {
                 .accessibilityLabel("Add Reaction")
 
                 Button {
-                    appModel.removeLastReaction(for: president)
+                    appModel.removeLastReaction(for: hos)
                 } label: {
                     Image(systemName: "minus.circle")
                 }
                 .accessibilityLabel("Remove Reaction")
-                .disabled(appModel.reactions(for: president).isEmpty)
+                .disabled(appModel.reactions(for: hos).isEmpty)
             }
             .font(.title3)
 
             if showingAddPicker {
                 // Always all presets — repeats are allowed, so there's nothing to filter out here.
                 ReactionPickerStrip(
-                    options: PresidentReaction.presets,
+                    options: HOSReaction.presets,
                     onPick: addReaction,
                     onMore: { showingEmojiSheet = true }
                 )
@@ -104,8 +104,8 @@ struct PresidentDrawingEditorView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func addReaction(_ reaction: PresidentReaction) {
-        appModel.addReaction(reaction, for: president)
+    private func addReaction(_ reaction: HOSReaction) {
+        appModel.addReaction(reaction, for: hos)
         withAnimation(.easeOut(duration: 0.2)) {
             showingAddPicker = false
         }
@@ -114,10 +114,10 @@ struct PresidentDrawingEditorView: View {
     private func save() {
         guard let photo, let drawing = controller.imageSpaceDrawing() else { return }
         if drawing.strokes.isEmpty {
-            PresidentDrawingStore.delete(for: president.id)
-            appModel.setDrawingFileName(nil, for: president)
-        } else if let fileName = try? PresidentDrawingStore.save(drawing, imageSize: photo.size, for: president.id) {
-            appModel.setDrawingFileName(fileName, for: president)
+            HOSDrawingStore.delete(for: hos.id)
+            appModel.setDrawingFileName(nil, for: hos)
+        } else if let fileName = try? HOSDrawingStore.save(drawing, imageSize: photo.size, for: hos.id) {
+            appModel.setDrawingFileName(fileName, for: hos)
         }
     }
 }
@@ -141,12 +141,12 @@ final class DrawingCanvasController {
 private struct DrawingCanvas: UIViewRepresentable {
     let controller: DrawingCanvasController
     let imageSize: CGSize
-    let presidentID: President.ID
+    let hosID: HOS.ID
 
     func makeUIView(context: Context) -> PhotoDrawingCanvasView {
         let canvas = PhotoDrawingCanvasView()
         canvas.imageSize = imageSize
-        canvas.pendingDrawing = PresidentDrawingStore.loadDrawing(for: presidentID)
+        canvas.pendingDrawing = HOSDrawingStore.loadDrawing(for: hosID)
         controller.canvas = canvas
         return canvas
     }

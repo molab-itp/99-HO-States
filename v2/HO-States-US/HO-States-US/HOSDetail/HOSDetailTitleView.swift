@@ -4,8 +4,8 @@ import SwiftUI
 /// don't jiggle side-to-side as their digits change every tenth of a second.
 ///
 /// `navigationTitle(_:)` only accepts unstyled `Text`, so this styled title is rendered via a
-/// principal toolbar item instead (see `PresidentDetailView`'s `.toolbar`).
-struct PresidentDetailTitleView: View {
+/// principal toolbar item instead (see `HOSDetailView`'s `.toolbar`).
+struct HOSDetailTitleView: View {
     let order: Int
     let buildInfo: String
     /// `nil` when no slideshow is running; otherwise the countdown, in seconds, until the next

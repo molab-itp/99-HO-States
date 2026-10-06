@@ -1,6 +1,6 @@
 import Foundation
 
-/// Loads the external links shown in `SettingsView`, in the order listed in Links.json.
+/// Loads the external links shown in `LandingView`, in the order listed in Links.json.
 enum LinksRepository {
     static func loadAll() -> [AppLink] {
         guard let url = Bundle.main.url(forResource: "Links", withExtension: "json") else {

@@ -296,6 +296,6 @@ for president in presidents {
 let encoder = JSONEncoder()
 encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 let summaryData = try encoder.encode(summaries)
-try writeResourceJSON(named: "Presidents.json", jsonData: summaryData, in: resourcesURL)
+try writeResourceJSON(named: "HOS.json", jsonData: summaryData, in: resourcesURL)
 
 print("Done. Wrote \(summaries.count) president summaries and image sets.")

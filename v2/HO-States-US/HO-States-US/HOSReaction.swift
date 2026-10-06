@@ -1,9 +1,9 @@
 import Foundation
 
-/// A lightweight feedback reaction a user can attach to a president: a single emoji, either one
+/// A lightweight feedback reaction a user can attach to an HOS: a single emoji, either one
 /// of the quick-pick `presets` or any emoji chosen from `EmojiPickerSheet`. `AppModel` persists
-/// these keyed by `President.id`.
-struct PresidentReaction: Hashable, Codable {
+/// these keyed by `HOS.id`.
+struct HOSReaction: Hashable, Codable {
     let emoji: String
 
     init(_ emoji: String) {
@@ -11,7 +11,7 @@ struct PresidentReaction: Hashable, Codable {
     }
 
     /// The quick-pick choices shown in `ReactionPickerStrip`, ahead of its ★ "more" button.
-    static let presets: [PresidentReaction] = [ "👍🏾", "👎🏾","🫏", "🐘","🌗"].map(PresidentReaction.init)
+    static let presets: [HOSReaction] = [ "👍🏾", "👎🏾","🫏", "🐘","🌗"].map(HOSReaction.init)
 
     /// The Unicode name(s) of the emoji, e.g. "sun with rays" — VoiceOver reads the emoji fine on
     /// its own, but this gives `accessibilityLabel` a stable, readable value.
