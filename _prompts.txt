@@ -728,3 +728,16 @@ so that navigation can be previewed
 v05.110
 
 sync v05 with v2
+
+v02.111
+
+in v2 on LandingView.swift
+add to new button labeled News below Resume button
+to goto to new screen labeled News
+that is populated by JSON resource news.json
+that has these links:
+label: World Premiere of Ava DuVernay’s 14th Will Close the 64th New York Film Festival
+url: https://www.filmlinc.org/nyff2026/daily/world-premiere-of-ava-duvernays-14th-will-close-the-64th-new-york-film-festival/
+lable: Morning Report (10.05.26): The Enslavers' Republic, Student Protests, and the Election
+url: https://www.youtube.com/watch?v=R7KukjzZO1o
+allow for thumbnail entry from asset catalog that I will fill in later

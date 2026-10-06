@@ -20,7 +20,11 @@ struct AppLandingView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            LandingView(onShowList: { path = [.hosList] }, onShowDetail: showDetail)
+            LandingView(
+                onShowList: { path = [.hosList] },
+                onShowDetail: showDetail,
+                onShowNews: { path = [.news] }
+            )
                 .navigationDestination(for: AppScreen.self) { screen in
                     switch screen {
                     case .landing:
@@ -38,6 +42,8 @@ struct AppLandingView: View {
                                 : appModel.hosList[0],
                             startsPlaying: startsSlideshowOnOpen
                         )
+                    case .news:
+                        NewsView()
                     }
                 }
         }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The app's root screen: settings, app info, and the ways into `HOSDetailView` (Resume, Random
-/// Head, Start Slideshow) and `HOSListView`. Navigation itself is handed back to
+/// Head, Start Slideshow), `HOSListView` and `NewsView`. Navigation itself is handed back to
 /// `AppLandingView` through the callbacks.
 struct LandingView: View {
     @Environment(AppModel.self) private var appModel
@@ -10,6 +10,8 @@ struct LandingView: View {
     let onShowList: () -> Void
     /// Shows the detail view at `appModel.slideIndex`, with its slideshow playing if asked.
     let onShowDetail: (_ startSlideshow: Bool) -> Void
+    /// Shows the news screen.
+    let onShowNews: () -> Void
 
     /// External links listed at the bottom of the screen, from Links.json.
     private let links = LinksRepository.loadAll()
@@ -51,6 +53,14 @@ struct LandingView: View {
               .frame(maxWidth: .infinity)
           }
           .buttonStyle(.borderedProminent)
+
+          Button {
+            onShowNews()
+          } label: {
+            Label("News", systemImage: "newspaper")
+              .frame(maxWidth: .infinity)
+          }
+          .buttonStyle(.bordered)
 
           Button {
             onShowList()
@@ -141,7 +151,7 @@ struct LandingView: View {
 
 #Preview {
     NavigationStack {
-        LandingView(onShowList: {}, onShowDetail: { _ in })
+        LandingView(onShowList: {}, onShowDetail: { _ in }, onShowNews: {})
     }
     .environment(AppModel())
 }
