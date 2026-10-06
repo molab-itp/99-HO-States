@@ -2067,3 +2067,19 @@ warnings. No delete was run against a Supabase stack, and nothing is deployed. T
 was not bumped. Not yet committed.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-10-06 06:42 (v05: sync with v2 — HOS rename, Landing root screen, Resume)
+
+v05 now matches v2 as of v02.109. `President` is renamed `HOS` across files, code and CSS;
+storage keys are unchanged, so saved reactions, drawings and settings carry over. The Settings
+sheet is now `LandingScreen`, the root screen, with a new **Resume** button; the list and detail
+screens open from it, and the detail screen has Back in place of the info button. The last screen
+shown is saved and reopened on reload (`appScreen.js`). `links.json` is re-copied from v2 (adds
+the Guardian link). A first visit, or an older save, now opens on Landing.
+
+`scripts/smoke.mjs` is rewritten for the new flow and passes, as does the build. Version bumped
+to 0.1.20. Not yet committed.
+
+**Cost**: ~20 minutes.
