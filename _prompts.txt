@@ -718,6 +718,11 @@ in v2, restructure
 - create Views folder to hold LandingView and HOSDetailView
 - folder HOSDetail holds all other views that support HOSDetailView
 
+v02.109
 
+in v2, add new view AppLandingView 
+with view and data init code
+from HO_States_US_App.swift
+so that navigation can be previewed
 
 

@@ -33,7 +33,7 @@ final class AppModel {
     var slideIndex = 0
 
     /// The top-level screen currently showing, kept in sync with the navigation path by
-    /// `HO_States_US_App` and persisted so the next launch reopens on the same screen.
+    /// `AppLandingView` and persisted so the next launch reopens on the same screen.
     var screen: AppScreen = .landing
 
     /// User-picked emoji feedback per HOS (a preset like 🐘, or any emoji from the sheet), in
@@ -189,7 +189,7 @@ final class AppModel {
     // (not asked for, and would make "Reset Visit Count" behave inconsistently across launches).
     //
     // Deliberately *not* written on every mutation: `persistState()` is only ever called from
-    // `HO_States_US_App`'s `scenePhase` observer when the app backgrounds, so a slideshow ticking
+    // `AppLandingView`'s `scenePhase` observer when the app backgrounds, so a slideshow ticking
     // every 0.1s or a reaction pick doesn't each cause a disk write — only leaving the app does.
 
     private struct PersistedState: Codable {

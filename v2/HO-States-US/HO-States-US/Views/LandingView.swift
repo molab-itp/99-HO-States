@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The app's root screen: settings, app info, and the ways into `HOSDetailView` (Resume, Random
 /// Head, Start Slideshow) and `HOSListView`. Navigation itself is handed back to
-/// `HO_States_US_App` through the callbacks.
+/// `AppLandingView` through the callbacks.
 struct LandingView: View {
     @Environment(AppModel.self) private var appModel
 
