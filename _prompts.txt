@@ -741,3 +741,7 @@ url: https://www.filmlinc.org/nyff2026/daily/world-premiere-of-ava-duvernays-14t
 lable: Morning Report (10.05.26): The Enslavers' Republic, Student Protests, and the Election
 url: https://www.youtube.com/watch?v=R7KukjzZO1o
 allow for thumbnail entry from asset catalog that I will fill in later
+
+v02.112
+
+Ava-icon, Tad-icon
