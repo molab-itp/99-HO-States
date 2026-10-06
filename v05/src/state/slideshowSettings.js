@@ -1,7 +1,7 @@
-// Port of Swift's `SlideshowSettings`: persisted slideshow settings, chosen on Settings and used
+// Port of Swift's `SlideshowSettings`: persisted slideshow settings, chosen on Landing and used
 // by the detail screen. Seconds are the basic unit; the details delay is stored as a fraction of
 // the slideshow interval. The fade period is how long the header image cross-fades between
-// presidents during a slideshow.
+// heads of state during a slideshow.
 export const SlideshowSettings = {
   randomModeKey: 'ho-states-us.slideshowRandomMode',
   defaultRandomMode: false,

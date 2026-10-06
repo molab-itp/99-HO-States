@@ -16,8 +16,8 @@ function roundTenth(value) {
 }
 
 /**
- * Port of PresidentDrawingEditorView.swift: the portrait with a drawing surface laid exactly over
- * it. Shown as a full-screen layer on top of `PresidentDetailScreen` rather than pushed onto the
+ * Port of HOSDrawingEditorView.swift: the portrait with a drawing surface laid exactly over
+ * it. Shown as a full-screen layer on top of `HOSDetailScreen` rather than pushed onto the
  * navigation stack, since the stack only renders its top entry and a push would unmount the
  * detail screen (losing its slideshow position and history). The drawing is handed back through
  * `onClose` whenever the editor goes away (Done or Back), so there's no way to lose strokes by
@@ -25,8 +25,8 @@ function roundTenth(value) {
  * the photo never loaded, so there's nothing to write back. Reactions are added and removed here
  * too, with the controls above the photo and the emoji shown along the photo's bottom edge.
  */
-export default function PresidentDrawingEditor({
-  president,
+export default function HOSDrawingEditor({
+  hos,
   imageSrc,
   initialDrawing,
   onClose,
@@ -124,9 +124,9 @@ export default function PresidentDrawingEditor({
   const drawing = imageSize ? { width: imageSize.width, height: imageSize.height, strokes } : null;
 
   return (
-    <div className="drawing-editor" role="dialog" aria-label={`Draw on ${president.name}`}>
+    <div className="drawing-editor" role="dialog" aria-label={`Draw on ${hos.name}`}>
       <NavBar
-        title={president.name}
+        title={hos.name}
         onBack={close}
         trailing={
           <>
@@ -156,7 +156,7 @@ export default function PresidentDrawingEditor({
           <div className="drawing-editor-photo" ref={photoRef}>
             <img
               src={imageSrc}
-              alt={president.name}
+              alt={hos.name}
               draggable={false}
               onDragStart={(e) => e.preventDefault()}
               onLoad={(e) => {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
-// Every mounted hook for a key listens here, so a write from one instance (e.g. a picker in the
-// Settings sheet) updates the others (the detail screen underneath) the way every `@AppStorage`
+// Every mounted hook for a key listens here, so a write from one instance (e.g. a picker on
+// Landing) updates any others mounted at the same time, the way every `@AppStorage`
 // for the same key stays in sync in SwiftUI. Works without storage too, for the session.
 const listeners = new Map();
 

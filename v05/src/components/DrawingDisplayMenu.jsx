@@ -3,7 +3,7 @@ import Icon from './Icon.jsx';
 import { DRAWING_DISPLAY_MODES, drawingDisplayModeInfo } from '../data/drawingDisplayMode.js';
 
 /**
- * Port of PresidentDetailView.swift's eye toolbar item: a SwiftUI `Menu` wrapping a `Picker`.
+ * Port of HOSDetailView.swift's eye toolbar item: a SwiftUI `Menu` wrapping a `Picker`.
  * The bar button shows the current mode's icon; tapping it drops down the three modes with a
  * checkmark on the current one. Picking a mode, tapping outside, or Escape closes it.
  */

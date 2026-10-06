@@ -1,5 +1,5 @@
-// Port of PresidentDrawingStore.swift. The web has no PencilKit, so instead of a PNG plus
-// `PKDrawing` data this keeps each president's drawing as one JSON value of vector strokes:
+// Port of HOSDrawingStore.swift. The web has no PencilKit, so instead of a PNG plus
+// `PKDrawing` data this keeps each HOS's drawing as one JSON value of vector strokes:
 //
 //   { width, height, strokes: [{ color, size, points: [[x, y], ...] }] }
 //
@@ -27,15 +27,15 @@ function isValidDrawing(value) {
   );
 }
 
-/** Every saved drawing, keyed by `president.order`. */
-export function loadAllDrawings(presidents) {
+/** Every saved drawing, keyed by `hos.order`. */
+export function loadAllDrawings(hosList) {
   const drawings = {};
-  for (const president of presidents) {
+  for (const hos of hosList) {
     try {
-      const raw = window.localStorage.getItem(storageKey(president.order));
+      const raw = window.localStorage.getItem(storageKey(hos.order));
       if (!raw) continue;
       const drawing = JSON.parse(raw);
-      if (isValidDrawing(drawing)) drawings[president.order] = drawing;
+      if (isValidDrawing(drawing)) drawings[hos.order] = drawing;
     } catch {
       // Unreadable storage or a corrupt entry — treat as no drawing.
     }

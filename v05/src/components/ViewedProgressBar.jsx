@@ -1,5 +1,5 @@
-// Port of ViewedProgressBar.swift: one segment per president, at its own position (by order),
-// filled in once that president has been viewed, cycling green/red/yellow/black so progress
+// Port of ViewedProgressBar.swift: one segment per HOS, at its own position (by order),
+// filled in once that HOS has been viewed, cycling green/red/yellow/black so progress
 // reads as a strip of color rather than a single flat bar.
 const COLORS = ['#2e7d32', '#d0342c', '#f2c811', '#000000', '#d0342c', '#f2c811'];
 

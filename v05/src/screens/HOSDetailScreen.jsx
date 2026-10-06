@@ -6,29 +6,29 @@ import NavBar from '../components/NavBar.jsx';
 import ViewedProgressBar from '../components/ViewedProgressBar.jsx';
 import ZoomableHeaderImage from '../components/ZoomableHeaderImage.jsx';
 import Icon from '../components/Icon.jsx';
-import PresidentDrawingEditor from '../components/PresidentDrawingEditor.jsx';
+import HOSDrawingEditor from '../components/HOSDrawingEditor.jsx';
 import DrawingDisplayMenu from '../components/DrawingDisplayMenu.jsx';
 import { showsDrawing, showsPhoto } from '../data/drawingDisplayMode.js';
-import SettingsScreen from './SettingsScreen.jsx';
 import { useStoredBoolean } from '../state/useStoredBoolean.js';
 import { useStoredNumber } from '../state/useStoredNumber.js';
 import { SlideshowSettings } from '../state/slideshowSettings.js';
 
-const SLIDESHOW_TICK_SECS = 0.1; // matches PresidentDetailView's slideshowTickSecs
+const SLIDESHOW_TICK_SECS = 0.1; // matches HOSDetailView's slideshowTickSecs
 
 /**
- * Port of PresidentDetailView.swift — the app's start screen. `selected` is the president shown
- * at launch. The slideshow is always "on": Play/Pause just toggles whether its countdown
- * advances, and it starts paused so launching lands on a still president until Play is pressed.
- * Settings (list, Random Head, slideshow options) is a sheet opened from the info button.
+ * Port of HOSDetailView.swift. `selected` is the HOS shown when the screen opens (pushed from
+ * Landing or the list, or restored on reload). The slideshow is always "on": Play/Pause just
+ * toggles whether its countdown advances. It starts paused unless `startsPlaying` is set
+ * (Landing's Start Slideshow), so resuming lands on a still HOS until Play is pressed. `onBack`
+ * returns to Landing.
  */
-export default function PresidentDetailScreen({ selected }) {
+export default function HOSDetailScreen({ selected, startsPlaying = false, onBack }) {
   const {
-    presidents,
+    hosList,
     viewedIDs,
     buildInfo,
     markViewed,
-    nextRandomPresident,
+    nextRandomHOS,
     setSlideIndex,
     reactionsFor,
     addReaction,
@@ -42,11 +42,11 @@ export default function PresidentDetailScreen({ selected }) {
   } = useAppModel();
 
   const startIndex = (() => {
-    const found = presidents.findIndex((p) => p.order === selected.order);
+    const found = hosList.findIndex((p) => p.order === selected.order);
     return found >= 0 ? found : 0;
   })();
 
-  // Chosen in Settings; read-only here. Seconds to wait before fading in the details is the interval
+  // Chosen on Landing; read-only here. Seconds to wait before fading in the details is the interval
   // times the chosen fraction, matching Swift's computed `delaySecs`.
   const [slideshowIntervalSecs] = useStoredNumber(
     SlideshowSettings.intervalSecsKey,
@@ -60,29 +60,28 @@ export default function PresidentDetailScreen({ selected }) {
   const [fadePeriod] = useStoredNumber(SlideshowSettings.fadePeriodKey, SlideshowSettings.defaultFadePeriod);
 
   // The index whose details have been revealed. Derived rather than a boolean reset in the effect
-  // below, so a new president's text is hidden in the same render that shows it — an effect runs
+  // below, so a new HOS's text is hidden in the same render that shows it — an effect runs
   // after paint, which let the new text flash at full opacity first.
   const [revealedIndex, setRevealedIndex] = useState(null);
   const [isRandomMode] = useStoredBoolean(SlideshowSettings.randomModeKey, SlideshowSettings.defaultRandomMode);
-  const [isSlideshowPaused, setIsSlideshowPaused] = useState(true);
+  const [isSlideshowPaused, setIsSlideshowPaused] = useState(!startsPlaying);
   const isPlaying = !isSlideshowPaused;
   const [remainingSecs, setRemainingSecs] = useState(slideshowIntervalSecs);
   const [isDrawingEditorOpen, setIsDrawingEditorOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // `index` (which president is shown) and, in random mode, the walk's history/position all
-  // change together, so they're one state object updated atomically. The history restarts
-  // whenever Settings picks a president.
+  // `index` (which HOS is shown) and, in random mode, the walk's history/position all
+  // change together, so they're one state object updated atomically. The history starts
+  // over each time this screen is opened from Landing.
   const [nav, setNav] = useState({ index: startIndex, history: [startIndex], position: 0 });
   const index = nav.index;
-  const president = presidents[index];
+  const hos = hosList[index];
   const detailsVisible = revealedIndex === index;
 
   // Mirrors `.task(id: index)`: mark viewed immediately, then fade the text in after a delay
   // that's cancelled (never revealed) if `index` changes again first.
   useEffect(() => {
     let cancelled = false;
-    markViewed(president, isPlaying);
+    markViewed(hos, isPlaying);
     const timer = setTimeout(() => {
       if (!cancelled) setRevealedIndex(index);
     }, delaySecs * 1000);
@@ -94,13 +93,13 @@ export default function PresidentDetailScreen({ selected }) {
   }, [index]);
 
   // Port of the Swift ZStack + `.transition(.opacity)`: while the slideshow plays, the previous
-  // president's image stays on top of the new one and fades out over `fadePeriod` as the new one
+  // HOS's image stays on top of the new one and fades out over `fadePeriod` as the new one
   // fades in. Manual browsing (while paused) swaps the image instantly. The switch is made during
   // render (not in an effect) so the outgoing image's layer is never unmounted, not even for one
   // commit: remounting it made a fresh <img> that flashed blank while the browser decoded it.
-  const [fade, setFade] = useState({ shown: president, outgoing: null });
-  if (fade.shown.order !== president.order) {
-    setFade({ shown: president, outgoing: isPlaying ? fade.shown : null });
+  const [fade, setFade] = useState({ shown: hos, outgoing: null });
+  if (fade.shown.order !== hos.order) {
+    setFade({ shown: hos, outgoing: isPlaying ? fade.shown : null });
   }
   const outgoing = fade.outgoing;
   useEffect(() => {
@@ -111,8 +110,8 @@ export default function PresidentDetailScreen({ selected }) {
   }, [outgoing]);
 
   // Mirrors `index` into `appModel.slideIndex` on every change (including the initial mount), so
-  // it persists across this screen being unmounted and remounted — e.g. a sequential slideshow
-  // e.g. a reload resumes at the president last shown instead of always restarting at #1.
+  // it persists across this screen being unmounted and remounted — e.g. Back to Landing then
+  // Resume, or a reload, reopens at the HOS last shown instead of always restarting at #1.
   useEffect(() => {
     setSlideIndex(index);
   }, [index, setSlideIndex]);
@@ -123,13 +122,13 @@ export default function PresidentDetailScreen({ selected }) {
         const position = prevNav.position + 1;
         return { ...prevNav, index: prevNav.history[position], position };
       }
-      const next = nextRandomPresident();
-      const newIndex = next ? presidents.findIndex((p) => p.order === next.order) : -1;
+      const next = nextRandomHOS();
+      const newIndex = next ? hosList.findIndex((p) => p.order === next.order) : -1;
       if (newIndex < 0) return prevNav;
       const history = [...prevNav.history, newIndex];
       return { index: newIndex, history, position: history.length - 1 };
     }
-    const newIndex = prevNav.index === presidents.length - 1 ? 0 : prevNav.index + 1;
+    const newIndex = prevNav.index === hosList.length - 1 ? 0 : prevNav.index + 1;
     return { ...prevNav, index: newIndex };
   }
 
@@ -139,7 +138,7 @@ export default function PresidentDetailScreen({ selected }) {
       const position = prevNav.position - 1;
       return { ...prevNav, index: prevNav.history[position], position };
     }
-    const newIndex = prevNav.index === 0 ? presidents.length - 1 : prevNav.index - 1;
+    const newIndex = prevNav.index === 0 ? hosList.length - 1 : prevNav.index - 1;
     return { ...prevNav, index: newIndex };
   }
 
@@ -148,13 +147,12 @@ export default function PresidentDetailScreen({ selected }) {
   // updater is kept pure (just clamped decrement, no side effects) — React 18 StrictMode
   // intentionally double-invokes functional state updaters to catch impure ones, and an earlier
   // version of this that called `setNav(...)` from inside here had that side effect fire twice
-  // per tick, advancing the slideshow by 2 presidents instead of 1.
+  // per tick, advancing the slideshow by 2 heads of state instead of 1.
   const tickRef = useRef(() => {});
-  // The drawing editor and Settings also hold the countdown, so the president can't change
-  // mid-drawing or behind the sheet — matching the Swift `onDisappear` / `isSettingsPresented`
-  // checks.
+  // The drawing editor also holds the countdown, so the HOS can't change mid-drawing — matching
+  // the Swift `isDrawingEditorPresented` check.
   tickRef.current = () => {
-    if (!isPlaying || isDrawingEditorOpen || isSettingsOpen) return;
+    if (!isPlaying || isDrawingEditorOpen) return;
     setRemainingSecs((prev) => Math.max(0, prev - SLIDESHOW_TICK_SECS));
   };
 
@@ -184,28 +182,14 @@ export default function PresidentDetailScreen({ selected }) {
     setRemainingSecs(slideshowIntervalSecs);
   }
 
-  /** Shows a president picked in Settings (from the list or Random Head), starting a fresh
-   *  random-walk history from it. */
-  function showFromSettings(picked) {
-    const newIndex = presidents.findIndex((p) => p.order === picked.order);
-    if (newIndex < 0) return;
-    setNav({ index: newIndex, history: [newIndex], position: 0 });
-    setRemainingSecs(slideshowIntervalSecs);
-  }
-
-  function startSlideshow() {
-    setIsSlideshowPaused(false);
-    setRemainingSecs(slideshowIntervalSecs);
-  }
-
-  const orderText = String(president.order).padStart(2, '0');
+  const orderText = String(hos.order).padStart(2, '0');
   const title = isPlaying
     ? `#${orderText} · ${remainingSecs.toFixed(1).padStart(4, '0')}s ${buildInfo}`
     : `#${orderText} ${buildInfo}`;
 
-  const imageSrc = president.large || president.thumbnail;
-  const drawing = drawingFor(president);
-  const articleURL = wikipediaArticleURL(president);
+  const imageSrc = hos.large || hos.thumbnail;
+  const drawing = drawingFor(hos);
+  const articleURL = wikipediaArticleURL(hos);
 
   const isPreviousDisabled = isRandomMode && nav.position === 0;
 
@@ -214,32 +198,30 @@ export default function PresidentDetailScreen({ selected }) {
       <NavBar
         title={title}
         monospace
+        onBack={onBack}
         trailing={
           <>
             {drawing && (
               <DrawingDisplayMenu
-                mode={drawingDisplayModeFor(president)}
-                onChange={(mode) => setDrawingDisplayModeFor(mode, president)}
+                mode={drawingDisplayModeFor(hos)}
+                onChange={(mode) => setDrawingDisplayModeFor(mode, hos)}
               />
             )}
             <button className="nav-action" aria-label="Draw on Photo" onClick={() => setIsDrawingEditorOpen(true)}>
               <Icon name="pencil-square" size={18} />
             </button>
-            <button className="nav-action" aria-label="Settings" onClick={() => setIsSettingsOpen(true)}>
-              <Icon name="info-circle" size={19} />
-            </button>
           </>
         }
       />
       <div className="detail">
-        <ViewedProgressBar total={presidents.length} viewedIDs={viewedIDs} />
+        <ViewedProgressBar total={hosList.length} viewedIDs={viewedIDs} />
 
         <div className="header-fade" style={{ '--fade-period': `${fadePeriod}s` }}>
-          {/* Both layers are keyed by president, so when the current one becomes the outgoing one
+          {/* Both layers are keyed by HOS, so when the current one becomes the outgoing one
               React keeps its DOM (and its already-decoded <img>). The outgoing layer comes first
               so the incoming one is appended after it rather than moving it; z-index puts the
-              outgoing one on top. A fresh key per president also resets zoom/pan state. */}
-          {[outgoing, president].filter(Boolean).map((p) => {
+              outgoing one on top. A fresh key per HOS also resets zoom/pan state. */}
+          {[outgoing, hos].filter(Boolean).map((p) => {
             const isOutgoing = p === outgoing;
             const src = p.large || p.thumbnail;
             const layerDrawing = drawingFor(p);
@@ -266,12 +248,12 @@ export default function PresidentDetailScreen({ selected }) {
 
         <div className={detailsVisible ? 'detail-text visible' : 'detail-text'}>
           <h1 className="name-mono">
-            #{president.order} {president.name}
+            #{hos.order} {hos.name}
           </h1>
           <p className="subtitle">
-            {president.term} · {president.party}
+            {hos.term} · {hos.party}
           </p>
-          <p>{president.extract}</p>
+          <p>{hos.extract}</p>
           {articleURL && (
             <a className="wiki-link" href={articleURL} target="_blank" rel="noopener noreferrer">
               <Icon name="book" size={14} />
@@ -306,25 +288,17 @@ export default function PresidentDetailScreen({ selected }) {
         </button>
       </div>
 
-      {isSettingsOpen && (
-        <SettingsScreen
-          onSelect={showFromSettings}
-          onStartSlideshow={startSlideshow}
-          onClose={() => setIsSettingsOpen(false)}
-        />
-      )}
-
       {isDrawingEditorOpen && (
-        <PresidentDrawingEditor
-          president={president}
+        <HOSDrawingEditor
+          hos={hos}
           imageSrc={imageSrc ? assetUrl(imageSrc) : null}
           initialDrawing={drawing}
-          reactions={reactionsFor(president)}
-          onAddReaction={(emoji) => addReaction(emoji, president)}
-          onRemoveLastReaction={() => removeLastReaction(president)}
+          reactions={reactionsFor(hos)}
+          onAddReaction={(emoji) => addReaction(emoji, hos)}
+          onRemoveLastReaction={() => removeLastReaction(hos)}
           onClose={(result) => {
             setIsDrawingEditorOpen(false);
-            if (result !== undefined) setDrawingFor(result, president);
+            if (result !== undefined) setDrawingFor(result, hos);
           }}
         />
       )}

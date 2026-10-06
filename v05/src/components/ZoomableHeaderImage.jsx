@@ -22,11 +22,11 @@ function distance(a, b) {
 }
 
 /**
- * Port of ZoomableHeaderImage.swift: the president's portrait, with pinch-to-zoom, pan (once
+ * Port of ZoomableHeaderImage.swift: the HOS's portrait, with pinch-to-zoom, pan (once
  * zoomed), and double-tap to toggle between 1x and 2.5x. The caller gives this component a fresh
- * `key={president.order}` each time the president changes, so `scale`/`offset` start fresh from
- * `initialZoom` (this president's persisted zoom state, if any) instead of carrying over the
- * previous president's zoom/pan. `drawing`, when given, is the president's saved drawing, laid
+ * `key={hos.order}` each time the HOS changes, so `scale`/`offset` start fresh from
+ * `initialZoom` (this HOS's persisted zoom state, if any) instead of carrying over the
+ * previous HOS's zoom/pan. `drawing`, when given, is the HOS's saved drawing, laid
  * over the photo; `showsPhoto={false}` hides the photo under it (the eye menu's Drawing Only).
  * `reactions` are shown along the frame's bottom edge. `showsZoomControls` hides
  * the -/1×/+ buttons (e.g. while the slideshow plays); pinch, wheel and double-tap still work.

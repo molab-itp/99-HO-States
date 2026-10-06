@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { assetUrl } from '../data/assetUrl.js';
 import Icon from './Icon.jsx';
 
-/** Port of PresidentRow's `thumbnail`: falls back to a generic person glyph if the image 404s. */
-export default function PresidentThumb({ president }) {
+/** Port of HOSRow's `thumbnail`: falls back to a generic person glyph if the image 404s. */
+export default function HOSThumb({ hos }) {
   const [failed, setFailed] = useState(false);
-  const src = president.thumbnail;
+  const src = hos.thumbnail;
 
   if (!src || failed) {
     return (
-      <div className="president-thumb president-thumb-placeholder">
+      <div className="hos-thumb hos-thumb-placeholder">
         <Icon name="person-circle" size={22} />
       </div>
     );
@@ -17,7 +17,7 @@ export default function PresidentThumb({ president }) {
 
   return (
     <img
-      className="president-thumb"
+      className="hos-thumb"
       src={assetUrl(src)}
       alt=""
       loading="lazy"

@@ -1,6 +1,6 @@
 // Port of ZoomableHeaderImage.swift's `DrawingDisplayMode`: what the detail screen's header
 // shows — the portrait, the portrait with its saved drawing laid over it, or the drawing alone.
-// Chosen per president from the eye menu in `PresidentDetailScreen`'s nav bar and kept in
+// Chosen per HOS from the eye menu in `HOSDetailScreen`'s nav bar and kept in
 // `AppModel` (persisted by its raw string value, same as the Swift enum's Codable form).
 export const DrawingDisplayMode = {
   photo: 'photo',

@@ -20,7 +20,7 @@ export function strokePath(points) {
 }
 
 /**
- * A saved drawing (see `presidentDrawingStore.js`), drawn over the portrait it was made on. The
+ * A saved drawing (see `hosDrawingStore.js`), drawn over the portrait it was made on. The
  * viewBox is the portrait's natural size, so filling the image's box with the same aspect ratio
  * lines every stroke up with the photo underneath, the way the Swift app's same-aspect PNG does.
  */

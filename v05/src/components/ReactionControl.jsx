@@ -4,7 +4,7 @@ import EmojiPickerSheet from './EmojiPickerSheet.jsx';
 import Icon from './Icon.jsx';
 
 /**
- * Port of PresidentDrawingEditorView.swift's `reactionControl`: a + button that pops up
+ * Port of HOSDrawingEditorView.swift's `reactionControl`: a + button that pops up
  * `ReactionPickerStrip` (whose ★ opens `EmojiPickerSheet`), and a - button that always removes
  * whichever reaction was added most recently. The reactions themselves show on the photo (see
  * `ReactionOverlay`), not here. `onPickerToggle` reports whether the strip is open, so the editor

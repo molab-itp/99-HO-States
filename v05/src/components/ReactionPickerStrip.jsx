@@ -1,4 +1,4 @@
-import { PRESETS } from '../data/presidentReaction.js';
+import { PRESETS } from '../data/hosReaction.js';
 
 /**
  * Port of ReactionPickerStrip.swift: the horizontal strip of reaction choices that pops up from

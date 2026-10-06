@@ -48,54 +48,56 @@ async function main() {
   }
 
   try {
-    // Helpers for the Settings sheet (v2's SettingsView), opened from the detail screen's info
-    // button. Picking a president or starting the slideshow dismisses it.
-    async function openSettings() {
-      await page.click('button[aria-label="Settings"]');
+    // Helpers for moving between Landing (v2's LandingView, the root screen) and the detail
+    // screen shown on top of it.
+    async function backToLanding() {
+      await page.click('button[aria-label="Back"]');
       await page.waitForSelector('button:has-text("Start Slideshow")');
     }
-    async function closeSettings() {
-      await page.click('.settings-sheet button:has-text("Done")');
-      await page.waitForSelector('.settings-sheet', { state: 'detached' });
+    async function resume() {
+      await page.click('button:has-text("Resume")');
+      await page.waitForSelector('.detail-text h1');
     }
+    // From Landing: List of Heads -> the row whose name includes `orderText`.
     async function pickFromList(orderText) {
-      await openSettings();
       await page.click('text=List of Heads');
-      await page.waitForSelector('.president-list');
-      await page.locator('.president-row .name', { hasText: orderText }).click();
-      await page.waitForSelector('.settings-sheet', { state: 'detached' });
+      await page.waitForSelector('.hos-list');
+      await page.locator('.hos-row .name', { hasText: orderText }).click();
+      await page.waitForSelector('.detail-text h1');
     }
     async function title() {
       return page.locator('.nav-title-mono').textContent();
     }
 
-    console.log('App opens on the detail screen, paused...');
+    console.log('App opens on Landing...');
     await page.goto(url);
-    await page.waitForSelector('.detail-text h1');
+    await page.waitForSelector('button:has-text("Resume")');
+    await page.waitForSelector('text=USnA Heads');
+    assert(!(await page.isVisible('button[aria-label="Back"]')), 'Landing is the root screen: no back button');
+    const linkTitles = await page.locator('.source-link').allTextContents();
+    assert(linkTitles.length === 9, `Landing should list the links.json links: got ${linkTitles.length}`);
+    assertIncludes(linkTitles[0], 'Data Source: Wikipedia', 'links should keep links.json order');
+    assert(!linkTitles.some((t) => t.includes('Web App')), 'the web app should not link to itself');
+    await shot('landing');
+
+    console.log('Resume -> detail screen, paused...');
+    await resume();
     await page.waitForSelector('button[aria-label="Play"]');
     assert(!(await title()).includes('·'), 'paused detail title should not show a countdown');
-    assert(!(await page.isVisible('button[aria-label="Back"]')), 'start screen has no back button');
+    assert(await page.isVisible('button[aria-label="Back"]'), 'detail screen should have a back button');
     await shot('detail-start');
     await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
 
-    console.log('Settings sheet -> List of Heads -> pick #01...');
-    await openSettings();
-    await page.waitForSelector('text=USnA Heads');
-    const linkTitles = await page.locator('.source-link').allTextContents();
-    assert(linkTitles.length === 8, `Settings should list the links.json links: got ${linkTitles.length}`);
-    assertIncludes(linkTitles[0], 'Data Source: Wikipedia', 'links should keep links.json order');
-    assert(!linkTitles.some((t) => t.includes('Web App')), 'the web app should not link to itself');
-    await shot('settings');
+    console.log('Back -> List of Heads -> pick #01...');
+    await backToLanding();
     await page.click('text=List of Heads');
-    await page.waitForSelector('.president-list');
-    const firstRowName = await page.locator('.president-row .name').first().textContent();
+    await page.waitForSelector('.hos-list');
+    const firstRowName = await page.locator('.hos-row .name').first().textContent();
     assertIncludes(firstRowName, '#01', 'first list row should show its number');
     await shot('list');
     await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
-    await page.click('text=List of Heads');
-    await page.locator('.president-row').first().click();
-    await page.waitForSelector('.settings-sheet', { state: 'detached' });
+    await pickFromList('#01');
     assertIncludes(await title(), '#01', 'picking a list row should show it');
     await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
     await shot('detail-revealed');
@@ -103,7 +105,7 @@ async function main() {
     console.log('Next / Previous wrap while paused...');
     await page.click('button[aria-label="Previous"]');
     await page.waitForTimeout(100);
-    assert(!(await title()).startsWith('#01'), 'Previous from #01 should wrap to the last president');
+    assert(!(await title()).startsWith('#01'), 'Previous from #01 should wrap to the last HOS');
     await page.click('button[aria-label="Next"]');
     await page.waitForTimeout(100);
     assertIncludes(await title(), '#01', 'Previous then Next should return to #01');
@@ -129,7 +131,7 @@ async function main() {
     await page.waitForSelector('.drawing-overlay path');
     await shot('detail-with-drawing');
 
-    console.log('Photo / Photo + Drawing / Drawing Only menu, saved per president and across a reload...');
+    console.log('Photo / Photo + Drawing / Drawing Only menu, saved per HOS and across a reload...');
     async function pickDisplayMode(label) {
       await page.click('.nav-menu > button');
       await page.waitForSelector('.nav-menu-list');
@@ -155,17 +157,17 @@ async function main() {
     await page.waitForSelector('.nav-menu-list', { state: 'detached' });
     assert(await page.isVisible('button[aria-label="Drawing Only"]'), 'outside tap should keep Drawing Only');
     const drawnTitle = (await title()).split(' ')[0];
-    // Another president keeps its own (default) mode.
+    // Another HOS keeps its own (default) mode.
     await page.click('button[aria-label="Next"]');
     await page.waitForTimeout(100);
-    assert(!(await page.isVisible('.zoomable-content.drawing-only')), 'next president should show its photo');
+    assert(!(await page.isVisible('.zoomable-content.drawing-only')), 'next HOS should show its photo');
     await page.click('button[aria-label="Previous"]');
     await page.waitForSelector('.zoomable-content.drawing-only .drawing-overlay path');
     // Let the new slideIndex reach the pagehide save handler before reloading.
     await page.waitForTimeout(100);
     await page.reload();
     await page.waitForSelector('.zoomable-content.drawing-only .drawing-overlay path');
-    assertIncludes(await title(), drawnTitle, 'reload should resume at the last-shown president');
+    assertIncludes(await title(), drawnTitle, 'reload should reopen the detail screen at the last-shown HOS');
     await pickDisplayMode('Photo + Drawing');
     await page.waitForSelector('.drawing-overlay path');
     assert(!(await page.isVisible('.zoomable-content.drawing-only')), 'Photo + Drawing shows the photo again');
@@ -208,22 +210,20 @@ async function main() {
     await page.click('button:has-text("Done")');
     await page.waitForSelector('.reaction-overlay', { state: 'detached' });
 
-    console.log('Random Head from Settings...');
-    await openSettings();
+    console.log('Random Head from Landing...');
+    await backToLanding();
     await page.click('text=Random Head');
-    await page.waitForSelector('.settings-sheet', { state: 'detached' });
     await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
-    await shot('settings-random');
+    await shot('landing-random');
 
     console.log('Slide Interval / Fadein Delay pickers persist and drive the detail screen...');
-    await openSettings();
+    await backToLanding();
     await page.click('.segmented[aria-label="Slide Interval"] >> text=10s');
     const delayLabels = await page.locator('.segmented[aria-label="Fadein Delay"] .segment').allTextContents();
     assert(delayLabels.join(',') === '1.0s,2.0s,4.0s,5.0s', `delay labels should scale with a 10s interval: got ${delayLabels}`);
     await page.click('.segmented[aria-label="Fadein Delay"] >> text=1.0s');
     await page.reload();
-    await page.waitForSelector('.detail-text h1');
-    await openSettings();
+    await page.waitForSelector('button:has-text("Start Slideshow")');
     assert(
       (await page.locator('.segmented[aria-label="Slide Interval"] .segment.selected').textContent()) === '10s',
       'Slide Interval should survive a reload',
@@ -232,24 +232,21 @@ async function main() {
       (await page.locator('.segmented[aria-label="Fadein Delay"] .segment.selected').textContent()) === '1.0s',
       'Fadein Delay should survive a reload',
     );
-    await shot('settings-slideshow-settings');
+    await shot('landing-slideshow-settings');
     await page.click('button:has-text("Start Slideshow")');
-    await page.waitForSelector('.settings-sheet', { state: 'detached' });
     await page.waitForSelector('button[aria-label="Pause"]');
     const tenSecRemaining = parseFloat((await title()).split('· ')[1]);
     assert(tenSecRemaining > 5, `10s interval countdown should start above 5s: got ${tenSecRemaining}`);
 
-    console.log('Settings sheet holds the countdown...');
-    await openSettings();
-    await page.waitForTimeout(600);
-    await closeSettings();
-    const heldRemaining = parseFloat((await title()).split('· ')[1]);
-    assert(heldRemaining > 9, `countdown should not run behind Settings: got ${heldRemaining}`);
-    await page.click('button[aria-label="Pause"]');
+    console.log('Back to Landing, then Resume reopens the same HOS, paused...');
+    const playingOrder = (await title()).split(' ')[0];
+    await backToLanding();
+    await resume();
     await page.waitForSelector('button[aria-label="Play"]');
+    assertIncludes(await title(), playingOrder, 'Resume should reopen the HOS last shown');
 
     // Back to the defaults so the natural-tick test below waits out 5s, not 10s.
-    await openSettings();
+    await backToLanding();
     await page.click('.segmented[aria-label="Slide Interval"] >> text=5s');
     await page.click('.segmented[aria-label="Fadein Delay"] >> text=2.0s');
 
@@ -262,25 +259,23 @@ async function main() {
     );
     await page.click('.segmented[aria-label="Fade Period"] >> text="2s"');
     await page.reload();
-    await page.waitForSelector('.detail-text h1');
-    await openSettings();
+    await page.waitForSelector('button:has-text("Start Slideshow")');
     assert(
       (await page.locator('.segmented[aria-label="Fade Period"] .segment.selected').textContent()) === '2s',
       'Fade Period should survive a reload',
     );
     // Back to the 1s default for the cross-fade check below.
     await page.click('.segmented[aria-label="Fade Period"] >> text="1s"');
-    await closeSettings();
 
     // Sequential (Random Mode off) plays on from whatever is shown, so pick #01 first.
     console.log('Sequential slideshow (Random Mode off) from #01...');
     await pickFromList('#01');
-    await openSettings();
+    await backToLanding();
     await page.click('button:has-text("Start Slideshow")');
     await page.waitForSelector('button[aria-label="Pause"]');
     const runningTitle = await title();
     assertIncludes(runningTitle, '·', 'playing title should show a countdown');
-    assertIncludes(runningTitle, '#01', 'sequential slideshow should start from the shown president');
+    assertIncludes(runningTitle, '#01', 'sequential slideshow should start from the shown HOS');
     assert((await page.locator('.zoom-controls').count()) === 0, 'zoom controls should be hidden while playing');
     await shot('slideshow-running');
 
@@ -295,14 +290,14 @@ async function main() {
       { timeout: 6000 },
     );
     await page.waitForTimeout(150);
-    assertIncludes(await title(), '#02', 'one natural slideshow tick should advance by exactly 1 president');
+    assertIncludes(await title(), '#02', 'one natural slideshow tick should advance by exactly 1 HOS');
 
     console.log('Next while playing (should advance and keep playing)...');
     await page.click('button[aria-label="Next"]');
     await page.waitForTimeout(200);
     const afterNextTitle = await title();
     assertIncludes(afterNextTitle, '·', 'slideshow should still be playing after Next');
-    assertIncludes(afterNextTitle, '#03', 'sequential Next should move to the next president');
+    assertIncludes(afterNextTitle, '#03', 'sequential Next should move to the next HOS');
 
     console.log('Advance while playing cross-fades the header image over the 1s Fade Period...');
     assert((await page.locator('.fade-layer.fade-out').count()) === 1, 'outgoing image should be fading out');
@@ -320,7 +315,7 @@ async function main() {
     await page.click('button[aria-label="Pause"]');
 
     console.log('Random Mode slideshow...');
-    await openSettings();
+    await backToLanding();
     await page.click('text=Random Mode');
     await page.click('button:has-text("Start Slideshow")');
     await page.waitForSelector('button[aria-label="Pause"]');
@@ -332,13 +327,10 @@ async function main() {
     await page.waitForTimeout(200);
     assertIncludes(await title(), '·', 'random-mode slideshow should still be playing after Next/Previous');
     await page.click('button[aria-label="Pause"]');
-    await openSettings();
+    await backToLanding();
     await page.click('text=Random Mode');
-    await page.reload();
-    await page.waitForSelector('.detail-text h1');
 
     console.log('Reset Visit Count...');
-    await openSettings();
     const before = await page.locator('.visited-count').textContent();
     await page.click('text=Reset Visit Count');
     await page.waitForFunction(
@@ -354,6 +346,7 @@ async function main() {
     const phonePage = await phone.newPage();
     phonePage.on('pageerror', (err) => consoleErrors.push(String(err)));
     await phonePage.goto(url);
+    await phonePage.tap('button:has-text("Resume")');
     await phonePage.waitForSelector('.zoom-controls');
     assert(await phonePage.isVisible('button[aria-label="Zoom In"]'), 'zoom controls should show on a touch screen');
     await phonePage.tap('button[aria-label="Zoom In"]');

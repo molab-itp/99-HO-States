@@ -1,6 +1,6 @@
-// Port of PresidentReaction.swift: a lightweight feedback reaction a user can attach to a
-// president — a single emoji, either one of the quick-pick `PRESETS` or any emoji chosen from
-// `EmojiPickerSheet`. `AppModel` persists these (as bare emoji strings) keyed by president order,
+// Port of HOSReaction.swift: a lightweight feedback reaction a user can attach to a
+// HOS — a single emoji, either one of the quick-pick `PRESETS` or any emoji chosen from
+// `EmojiPickerSheet`. `AppModel` persists these (as bare emoji strings) keyed by HOS order,
 // same as the Swift version.
 
 // The quick-pick choices shown in `ReactionPickerStrip`, ahead of its ★ "more" button.

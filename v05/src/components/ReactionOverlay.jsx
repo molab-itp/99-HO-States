@@ -1,5 +1,5 @@
 /**
- * Port of ReactionOverlay.swift: a president's reactions as a layer over the portrait — one row of
+ * Port of ReactionOverlay.swift: an HOS's reactions as a layer over the portrait — one row of
  * emoji along the image's bottom edge, in the order added. The row shrinks to fit rather than
  * wrapping or clipping once there are more reactions than fit across. Ignores the pointer, so
  * gestures and pen strokes go through to the photo or drawing surface beneath.
