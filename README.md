@@ -8,9 +8,9 @@
 
 
 ```
-- Plan:
-
-- emoji edit in pencil view
-
+What will the USnA look like in 2028?
+Reflection and past a future Head of State
+HOS 48 is comming!
+8748 will see a new world
 ```
 
