@@ -5,6 +5,7 @@ export const AppScreen = {
   landing: 'landing',
   hosList: 'hosList',
   hosDetail: 'hosDetail',
+  news: 'news',
 };
 
 // A saved value this build doesn't know (or none at all, from an older save) falls back to Landing.

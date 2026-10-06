@@ -4,6 +4,7 @@ import { AppScreen } from './data/appScreen.js';
 import LandingScreen from './screens/LandingScreen.jsx';
 import HOSListScreen from './screens/HOSListScreen.jsx';
 import HOSDetailScreen from './screens/HOSDetailScreen.jsx';
+import NewsScreen from './screens/NewsScreen.jsx';
 
 /**
  * Port of AppLandingView.swift: the navigation that `LandingScreen` sits at the bottom of. There
@@ -52,8 +53,16 @@ function Root() {
           onBack={showLanding}
         />
       );
+    case AppScreen.news:
+      return <NewsScreen onBack={showLanding} />;
     default:
-      return <LandingScreen onShowList={() => setScreen(AppScreen.hosList)} onShowDetail={showDetail} />;
+      return (
+        <LandingScreen
+          onShowList={() => setScreen(AppScreen.hosList)}
+          onShowDetail={showDetail}
+          onShowNews={() => setScreen(AppScreen.news)}
+        />
+      );
   }
 }
 

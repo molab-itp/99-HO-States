@@ -745,3 +745,7 @@ allow for thumbnail entry from asset catalog that I will fill in later
 v02.112
 
 Ava-icon, Tad-icon
+
+v05.113
+
+sync v05 with v2

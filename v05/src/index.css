@@ -568,6 +568,43 @@ input {
   color: var(--tertiary-label);
 }
 
+/* News screen — the same inset-grouped list, with NewsRow's larger rounded-square thumbnail and
+   a headline that wraps instead of truncating. */
+.news-row {
+  padding: 10px 16px;
+}
+
+.news-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--thumb-bg);
+}
+
+.news-thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary-label);
+}
+
+.news-row .names {
+  gap: 4px;
+}
+
+.news-row .names .label {
+  font-weight: 590;
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.news-row .names .host {
+  font-size: 14px;
+  color: var(--secondary-label);
+}
+
 /* Detail screen */
 .detail {
   padding: 16px;

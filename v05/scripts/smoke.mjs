@@ -210,6 +210,27 @@ async function main() {
     await page.click('button:has-text("Done")');
     await page.waitForSelector('.reaction-overlay', { state: 'detached' });
 
+    console.log('News from Landing: news.json rows, each linking out with its thumbnail...');
+    await backToLanding();
+    await page.click('button:has-text("News")');
+    await page.waitForSelector('.news-list');
+    assert((await page.locator('.nav-title').textContent()) === 'News', 'news screen should be titled News');
+    const newsRows = page.locator('.news-row');
+    assert((await newsRows.count()) === 2, `News should list the news.json entries: got ${await newsRows.count()}`);
+    assertIncludes(await newsRows.first().locator('.label').textContent(), 'Ava DuVernay', 'news should keep news.json order');
+    assertIncludes(await newsRows.first().locator('.host').textContent(), 'www.filmlinc.org', 'news row should show its host');
+    assertIncludes(await newsRows.first().getAttribute('href'), 'https://www.filmlinc.org/', 'news row should link to its url');
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll('img.news-thumb')].length === 2 &&
+      [...document.querySelectorAll('img.news-thumb')].every((img) => img.complete && img.naturalWidth > 0),
+    );
+    await shot('news');
+    await page.reload();
+    await page.waitForSelector('.news-list');
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+    await resume();
+
     console.log('Random Head from Landing...');
     await backToLanding();
     await page.click('text=Random Head');

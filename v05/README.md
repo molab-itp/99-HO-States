@@ -11,17 +11,19 @@ navigator) is the only expected change to port further.
 
 - `src/state/AppModelContext.jsx` — port of `AppModel.swift` (shuffled random draws, viewed-set
   tracking, the current `screen` and `slideIndex`).
-- `src/App.jsx` — port of `AppLandingView`: shows `LandingScreen` as the root, with the list and
-  detail screens on top of it, and reopens on the persisted `screen` after a reload.
-- `src/screens/` — `LandingScreen` (port of `LandingView`: Resume, List of Heads, Random Head,
-  Start Slideshow, slideshow settings, links), `HOSListScreen`, and `HOSDetailScreen`
-  (Play/Pause slideshow, drawing, Back to Landing).
+- `src/App.jsx` — port of `AppLandingView`: shows `LandingScreen` as the root, with the list, detail
+  and news screens on top of it, and reopens on the persisted `screen` after a reload.
+- `src/screens/` — `LandingScreen` (port of `LandingView`: Resume, News, List of Heads, Random
+  Head, Start Slideshow, slideshow settings, links), `HOSListScreen`, `HOSDetailScreen`
+  (Play/Pause slideshow, drawing, Back to Landing), and `NewsScreen` (port of `NewsView`).
 - `src/data/appScreen.js` — port of `AppScreen.swift`, the top-level screen names.
 - `src/state/useStoredValue.js` — `@AppStorage` stand-in; instances for the same key stay in sync.
 - `src/data/hos.json` + `public/images/` — the same portrait images and generated summary
   data as v2's asset catalog / `Resources/HOS.json` (reused byte-for-byte from the `v3`
   extraction, see `v3/tools/migrate.js`).
 - `src/data/links.json` — copy of v2's `Resources/Links.json`.
+- `src/data/news.json` + `public/images/news/` — copy of v2's `Resources/news.json` and the
+  thumbnails it names in v2's asset catalog (`src/data/news.js` maps each name to its file).
 
 ## Running
 

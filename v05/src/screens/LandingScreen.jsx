@@ -8,12 +8,12 @@ import links from '../data/links.js';
 
 /**
  * Port of LandingView.swift — the app's root screen: settings, app info, and the ways into
- * `HOSDetailScreen` (Resume, Random Head, Start Slideshow) and `HOSListScreen`. Navigation itself
- * is handed back to `App` through the callbacks: `onShowList()` shows the list, and
+ * `HOSDetailScreen` (Resume, Random Head, Start Slideshow), `HOSListScreen` and `NewsScreen`.
+ * Navigation itself is handed back to `App` through the callbacks: `onShowList()` shows the list,
  * `onShowDetail(startSlideshow)` shows the detail screen at `slideIndex`, with its slideshow
- * playing if asked.
+ * playing if asked, and `onShowNews()` shows the news screen.
  */
-export default function LandingScreen({ onShowList, onShowDetail }) {
+export default function LandingScreen({ onShowList, onShowDetail, onShowNews }) {
   const { hosList, viewedIDs, nextRandomHOS, select, resetViewed, buildInfo } = useAppModel();
   const [isRandomMode, setIsRandomMode] = useStoredBoolean(
     SlideshowSettings.randomModeKey,
@@ -50,6 +50,10 @@ export default function LandingScreen({ onShowList, onShowDetail }) {
         <button className="btn btn-prominent" onClick={() => onShowDetail(false)}>
           <Icon name="redo" />
           Resume
+        </button>
+        <button className="btn btn-bordered" onClick={onShowNews}>
+          <Icon name="newspaper" />
+          News
         </button>
         <button className="btn btn-bordered" onClick={onShowList}>
           <Icon name="list-ul" />
