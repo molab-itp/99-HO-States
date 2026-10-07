@@ -772,3 +772,9 @@ that lists all sources and licences off photos and articles
 
 in v2 Credits
 make the caption below link to url source
+
+v02.116
+
+in v2 Credits
+have the categories Article, PHotos, News
+have hide/show toggle
