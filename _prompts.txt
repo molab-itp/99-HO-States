@@ -749,3 +749,26 @@ Ava-icon, Tad-icon
 v05.113
 
 sync v05 with v2
+
+v02.114
+
+in v2, from v2/HO-States-US/HO-States-US/Resources/Links.json
+move items 4 to the last entry
+to Links.json and suggest icon png file store in Log-screens
+and import into project assets
+
+Licences: the four photos are Creative Commons with attribution required
+(Richardson: Peter Stevens, CC BY 2.0; Wolff: Taggonius, CC BY 4.0; Reich:
+Cmichel67, CC BY-SA 4.0; Capitol: Tyler Merbler, CC BY 2.0). The app does not
+currently credit them anywhere. The Guardian wordmark is public domain as an
+image, but it is still their trademark.
+
+v02.115
+
+in v2 AppLandingView
+add Credits button below Web App link
+that open new view CreditsView
+that lists all sources and licences off photos and articles
+
+in v2 Credits
+make the caption below link to url source
