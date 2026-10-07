@@ -2083,3 +2083,47 @@ the Guardian link). A first visit, or an older save, now opens on Landing.
 to 0.1.20. Not yet committed.
 
 **Cost**: ~20 minutes.
+
+# --
+
+2026-10-07 13:07 (v2: Credits screen — sources and licences)
+
+Three requests. The first added a **Credits** button under the Web App link on the landing screen,
+opening a new `CreditsView` that lists the sources and licences of the articles and photos. The
+second made the caption under each title the link to its source. The third gave the three
+categories a hide/show toggle.
+
+`CreditsView` has three categories, each collapsible from its header (chevron on the right; all
+start shown and the state is not saved):
+
+- **Articles**: each head of state's Wikipedia article, with a footer linking the CC BY-SA 4.0
+  licence.
+- **Photos**: each portrait's author and licence, linking to its Wikimedia Commons file page.
+  46 are public domain; Franklin D. Roosevelt's is CC BY 2.0 (Leon Perskie).
+- **News**: each `news.json` item with its host, and a footer saying links and thumbnails belong
+  to their respective publishers.
+
+The pieces:
+
+- `v2/Tools/GenerateCredits/generate_credits.py`: new script that reads `HOS.json`, finds each
+  article's portrait (or the pinned Commons file for the two Cleveland and two Trump terms) and
+  writes `Resources/PhotoCredits.json` from the Commons licence metadata.
+- `PhotoCredit` model and `PhotoCreditsRepository`.
+- `CreditsView`, with private `CreditsSection` (collapsible) and `CreditRow` (title plus linked
+  caption).
+- `AppScreen.credits`, routed in `AppLandingView`; `LandingView` takes an `onShowCredits`
+  callback. Like News, Credits is reopened on relaunch if the app was left there.
+
+Caveats:
+
+- The script looks up the portrait each Wikipedia article uses today. If an article's lead image
+  has changed since the assets were generated, that credit describes the newer image.
+- Author text is as Commons gives it; a few are untidy (McKinley "Unknown authorUnknown author",
+  Clinton "Bob McNeely, The White House[1]") and need hand edits in the JSON.
+- The news thumbnails have no recorded source, so their footer is a generic statement, not a
+  licence.
+
+The app builds for the iOS Simulator. It was not run, so the screen is not visually checked. The
+build number was not bumped. Not yet committed.
+
+**Cost**: ~15 minutes.
