@@ -7,10 +7,52 @@ enum SpeechSettings {
     /// BCP 47 code (e.g. "en-US") of the device's current language, used until one is picked.
     static var defaultLanguage: String { AVSpeechSynthesisVoice.currentLanguageCode() }
 
-    /// Every language `AVSpeechSynthesizer` has a voice for, as BCP 47 codes sorted by display name.
-    static func supportedLanguages() -> [String] {
-        Set(AVSpeechSynthesisVoice.speechVoices().map(\.language))
+    /// A titled set of languages, as `SpeechSetupView` lists them.
+    struct LanguageGroup: Identifiable {
+        let title: String
+        let languages: [String]
+        var id: String { title }
+    }
+
+    /// How `SpeechSetupView` groups the languages, in display order. The last group also takes
+    /// any supported language not named here.
+    private static let languageGroups: [LanguageGroup] = [
+        LanguageGroup(title: "English", languages: ["en-US", "en-GB", "en-AU", "en-IE", "en-IN", "en-ZA"]),
+        LanguageGroup(title: "Spanish", languages: ["es-ES", "es-MX"]),
+        LanguageGroup(title: "French", languages: ["fr-FR", "fr-CA"]),
+        LanguageGroup(title: "German", languages: ["de-DE"]),
+        LanguageGroup(title: "Italian", languages: ["it-IT"]),
+        LanguageGroup(title: "Portuguese", languages: ["pt-BR", "pt-PT"]),
+        LanguageGroup(title: "Dutch", languages: ["nl-NL", "nl-BE"]),
+        LanguageGroup(title: "Chinese", languages: ["zh-CN", "zh-TW", "zh-HK"]),
+        LanguageGroup(title: "Japanese / Korean", languages: ["ja-JP", "ko-KR"]),
+        LanguageGroup(title: "Nordic", languages: ["da-DK", "fi-FI", "nb-NO", "sv-SE"]),
+        LanguageGroup(title: "Central/Eastern European", languages: ["bg-BG", "cs-CZ", "hr-HR", "hu-HU", "lt-LT", "pl-PL", "ro-RO", "ru-RU", "sk-SK", "sl-SI", "uk-UA"]),
+        LanguageGroup(title: "Indian languages", languages: ["hi-IN", "bn-IN", "kn-IN", "ta-IN", "te-IN"]),
+        LanguageGroup(title: "Middle East / Central Asia", languages: ["ar-001", "he-IL", "tr-TR", "kk-KZ"]),
+        LanguageGroup(title: "Southeast Asia", languages: ["id-ID", "ms-MY", "th-TH", "vi-VN"]),
+        LanguageGroup(title: "Other", languages: ["ca-ES", "el-GR"]),
+    ]
+
+    /// `languageGroups` narrowed to the languages `AVSpeechSynthesizer` has a voice for on this
+    /// device, with groups left empty by that dropped.
+    static func supportedLanguageGroups() -> [LanguageGroup] {
+        let supported = Set(AVSpeechSynthesisVoice.speechVoices().map(\.language))
+        let grouped = Set(languageGroups.flatMap(\.languages))
+        let ungrouped = supported.subtracting(grouped)
             .sorted { displayName(for: $0).localizedCaseInsensitiveCompare(displayName(for: $1)) == .orderedAscending }
+        return languageGroups.map { group in
+            var languages = group.languages.filter(supported.contains)
+            if group.id == languageGroups.last?.id {
+                languages += ungrouped
+            }
+            return LanguageGroup(title: group.title, languages: languages)
+        }
+        .filter { !$0.languages.isEmpty }
+    }
+
+    static func isEnglish(_ language: String) -> Bool {
+        language.hasPrefix("en")
     }
 
     static func displayName(for language: String) -> String {

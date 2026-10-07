@@ -787,14 +787,45 @@ v02.118
 
 in v2 add text to speech
 using AVSpeechSynthesizer
+
 add new button labeled "Speak" on credits on AppLandingView
 that opens new view SpeechSetupView
 when supported languages for AVSpeechSynthesizer
 are listed and one can be selected
 provide play back of sample text
 sample text defaults to: 
-"Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."
+"Four score and seven years ago our fathers brought forth 
+on this continent, a new nation, conceived in Liberty, 
+and dedicated to the proposition that all men are created equal."
 
 in HOSDetailView HOSSummaryView
-hos.extract
-hos.order hos.name
+add speech play button flush right of entry hos.order+hos.name
+that speaks the text in hos.extract
+speech button will toggle between play and pause
+speech should stop when view disappears
+
+v02.119
+
+make speech sample text editable
+and button to translate english text to the selected language
+and back.
+
+group language selection into following:
+| English | en-US, en-GB, en-AU, en-IE, en-IN, en-ZA |
+| Spanish | es-ES, es-MX |
+| French | fr-FR, fr-CA |
+| German | de-DE |
+| Italian | it-IT |
+| Portuguese | pt-BR, pt-PT |
+| Dutch | nl-NL, nl-BE |
+| Chinese | zh-CN (Mandarin), zh-TW (Mandarin), zh-HK (Cantonese) |
+| Japanese / Korean | ja-JP, ko-KR |
+| Nordic | da-DK, fi-FI, nb-NO, sv-SE |
+| Central/Eastern European | bg-BG, cs-CZ, hr-HR, hu-HU, lt-LT, pl-PL, ro-RO, ru-RU, sk-SK, sl-SI, uk-UA |
+| Indian languages | hi-IN, bn-IN, kn-IN, ta-IN, te-IN |
+| Middle East / Central Asia | ar-001, he-IL, tr-TR, kk-KZ |
+| Southeast Asia | id-ID, ms-MY, th-TH, vi-VN |
+| Other | ca-ES, el-GR |
+
+v02.120
+
