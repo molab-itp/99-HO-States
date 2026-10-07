@@ -8,12 +8,13 @@ import links from '../data/links.js';
 
 /**
  * Port of LandingView.swift — the app's root screen: settings, app info, and the ways into
- * `HOSDetailScreen` (Resume, Random Head, Start Slideshow), `HOSListScreen` and `NewsScreen`.
- * Navigation itself is handed back to `App` through the callbacks: `onShowList()` shows the list,
- * `onShowDetail(startSlideshow)` shows the detail screen at `slideIndex`, with its slideshow
- * playing if asked, and `onShowNews()` shows the news screen.
+ * `HOSDetailScreen` (Resume, Random Head, Start Slideshow), `HOSListScreen`, `NewsScreen` and
+ * `CreditsScreen`. Navigation itself is handed back to `App` through the callbacks: `onShowList()`
+ * shows the list, `onShowDetail(startSlideshow)` shows the detail screen at `slideIndex`, with its
+ * slideshow playing if asked, `onShowNews()` shows the news screen and `onShowCredits()` the
+ * credits screen.
  */
-export default function LandingScreen({ onShowList, onShowDetail, onShowNews }) {
+export default function LandingScreen({ onShowList, onShowDetail, onShowNews, onShowCredits }) {
   const { hosList, viewedIDs, nextRandomHOS, select, resetViewed, buildInfo } = useAppModel();
   const [isRandomMode, setIsRandomMode] = useStoredBoolean(
     SlideshowSettings.randomModeKey,
@@ -120,6 +121,10 @@ export default function LandingScreen({ onShowList, onShowDetail, onShowNews }) 
             {link.title}
           </a>
         ))}
+        <button className="source-link" onClick={onShowCredits}>
+          <Icon name="info-circle" size={14} />
+          Credits
+        </button>
       </div>
 
       <p className="build-info">{buildInfo}</p>

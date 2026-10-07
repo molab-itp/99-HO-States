@@ -74,8 +74,8 @@ async function main() {
     await page.waitForSelector('button:has-text("Resume")');
     await page.waitForSelector('text=USnA Heads');
     assert(!(await page.isVisible('button[aria-label="Back"]')), 'Landing is the root screen: no back button');
-    const linkTitles = await page.locator('.source-link').allTextContents();
-    assert(linkTitles.length === 9, `Landing should list the links.json links: got ${linkTitles.length}`);
+    const linkTitles = await page.locator('a.source-link').allTextContents();
+    assert(linkTitles.length === 2, `Landing should list the links.json links: got ${linkTitles.length}`);
     assertIncludes(linkTitles[0], 'Data Source: Wikipedia', 'links should keep links.json order');
     assert(!linkTitles.some((t) => t.includes('Web App')), 'the web app should not link to itself');
     await shot('landing');
@@ -216,17 +216,47 @@ async function main() {
     await page.waitForSelector('.news-list');
     assert((await page.locator('.nav-title').textContent()) === 'News', 'news screen should be titled News');
     const newsRows = page.locator('.news-row');
-    assert((await newsRows.count()) === 2, `News should list the news.json entries: got ${await newsRows.count()}`);
+    assert((await newsRows.count()) === 10, `News should list the news.json entries: got ${await newsRows.count()}`);
     assertIncludes(await newsRows.first().locator('.label').textContent(), 'Ava DuVernay', 'news should keep news.json order');
     assertIncludes(await newsRows.first().locator('.host').textContent(), 'www.filmlinc.org', 'news row should show its host');
     assertIncludes(await newsRows.first().getAttribute('href'), 'https://www.filmlinc.org/', 'news row should link to its url');
     await page.waitForFunction(() =>
-      [...document.querySelectorAll('img.news-thumb')].length === 2 &&
+      [...document.querySelectorAll('img.news-thumb')].length === 10 &&
       [...document.querySelectorAll('img.news-thumb')].every((img) => img.complete && img.naturalWidth > 0),
     );
     await shot('news');
     await page.reload();
     await page.waitForSelector('.news-list');
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+    await resume();
+
+    console.log('Credits from Landing: three sections, hidden until their header is tapped...');
+    await backToLanding();
+    await page.click('button:has-text("Credits")');
+    await page.waitForSelector('.credits');
+    assert((await page.locator('.nav-title').textContent()) === 'Credits', 'credits screen should be titled Credits');
+    const sectionTitles = await page.locator('.credits-header').allTextContents();
+    assert(sectionTitles.join(',') === 'Articles,Photos,News', `credits sections: got ${sectionTitles}`);
+    assert((await page.locator('.credit-row').count()) === 0, 'credits sections should start hidden');
+    // Each section in turn: show it, check its rows and first caption link, then hide it again.
+    async function checkSection(name, rowCount, firstTitle, firstHref) {
+      const section = page.locator('.credits-section', { has: page.locator(`.credits-header:has-text("${name}")`) });
+      await section.locator('.credits-header').click();
+      const rows = section.locator('.credit-row');
+      assert((await rows.count()) === rowCount, `${name} should list ${rowCount} credits: got ${await rows.count()}`);
+      assertIncludes(await rows.first().locator('.title').textContent(), firstTitle, `${name} first title`);
+      assertIncludes(await rows.first().locator('.caption').getAttribute('href'), firstHref, `${name} caption should link to its source`);
+      assert(await section.locator('.credits-footer').isVisible(), `${name} footer should show with its rows`);
+      if (name === 'Photos') await shot('credits-photos');
+      await section.locator('.credits-header').click();
+      assert((await rows.count()) === 0, `${name} should hide again`);
+    }
+    await checkSection('Articles', 47, '1. George Washington', 'https://en.wikipedia.org/wiki/George_Washington');
+    await checkSection('Photos', 47, '1. George Washington', 'https://commons.wikimedia.org/wiki/File:');
+    await checkSection('News', 10, 'Ava DuVernay', 'https://www.filmlinc.org/');
+    await page.reload();
+    await page.waitForSelector('.credits');
     await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
     await resume();

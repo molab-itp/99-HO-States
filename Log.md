@@ -2127,3 +2127,24 @@ The app builds for the iOS Simulator. It was not run, so the screen is not visua
 build number was not bumped. Not yet committed.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-10-07 13:11 (v05: sync with v2 — Credits screen, links moved to News)
+
+v05 now matches v2 as of v02.116. Three things came over:
+
+- **Credits**: a Credits button under the links on Landing opens the new `CreditsScreen`, a port
+  of `CreditsView`. Articles, Photos and News are each collapsible from their header and start
+  hidden, as in v2; the caption under each title links to its source. `photoCredits.json` is
+  copied from v2. Credits is reopened on reload if the app was left there.
+- **News**: `news.json` is re-copied and now has 10 entries, with six new thumbnails under
+  `public/images/news/`. The 99-black icon is scaled down from 848 px to 300 px wide to match
+  the others.
+- **Links**: `links.json` is re-copied; the seven links that moved to News are gone from Landing,
+  which now lists two (Wikipedia and Source Code).
+
+`scripts/smoke.mjs` covers the Credits screen and the new counts, and passes, as does the build.
+Version bumped to 0.1.22. Not yet committed.
+
+**Cost**: ~10 minutes.

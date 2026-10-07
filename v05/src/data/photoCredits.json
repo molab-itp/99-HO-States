@@ -1,0 +1,379 @@
+[
+  {
+    "author": "Gilbert Stuart",
+    "file": "Gilbert Stuart Williamstown Portrait of George Washington.jpg",
+    "license": "Public domain",
+    "name": "George Washington",
+    "order": 1,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Gilbert_Stuart_Williamstown_Portrait_of_George_Washington.jpg"
+  },
+  {
+    "author": "Gilbert Stuart",
+    "file": "John Adams Portrait.jpg",
+    "license": "Public domain",
+    "name": "John Adams",
+    "order": 2,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:John_Adams_Portrait.jpg"
+  },
+  {
+    "author": "Rembrandt Peale",
+    "file": "Official Presidential portrait of Thomas Jefferson (by Rembrandt Peale, 1800).jpg",
+    "license": "Public domain",
+    "name": "Thomas Jefferson",
+    "order": 3,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Official_Presidential_portrait_of_Thomas_Jefferson_(by_Rembrandt_Peale,_1800).jpg"
+  },
+  {
+    "author": "John Vanderlyn",
+    "file": "James Madison.jpg",
+    "license": "Public domain",
+    "name": "James Madison",
+    "order": 4,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:James_Madison.jpg"
+  },
+  {
+    "author": "Samuel Finley Breese Morse",
+    "file": "James Monroe White House portrait 1819 (cropped)(2).jpg",
+    "license": "Public domain",
+    "name": "James Monroe",
+    "order": 5,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:James_Monroe_White_House_portrait_1819_(cropped)(2).jpg"
+  },
+  {
+    "author": "Mathew Brady",
+    "file": "JQA Photo Crop (cropped).jpg",
+    "license": "Public domain",
+    "name": "John Quincy Adams",
+    "order": 6,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:JQA_Photo_Crop_(cropped).jpg"
+  },
+  {
+    "author": "Ralph Eleaser Whiteside Earl",
+    "file": "Andrew jackson head (cropped).jpg",
+    "license": "Public domain",
+    "name": "Andrew Jackson",
+    "order": 7,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Andrew_jackson_head_(cropped).jpg"
+  },
+  {
+    "author": "Mathew Benjamin Brady",
+    "file": "Martin Van Buren by Mathew Brady c1855-58-(4).jpg",
+    "license": "Public domain",
+    "name": "Martin Van Buren",
+    "order": 8,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Martin_Van_Buren_by_Mathew_Brady_c1855-58-(4).jpg"
+  },
+  {
+    "author": "Albert Gallatin Hoit",
+    "file": "William Henry Harrison crop.jpg",
+    "license": "Public domain",
+    "name": "William Henry Harrison",
+    "order": 9,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:William_Henry_Harrison_crop.jpg"
+  },
+  {
+    "author": "George Peter Alexander Healy",
+    "file": "Tyler, John, by Healy (1842, NPG 2019 13) (cropped).jpg",
+    "license": "Public domain",
+    "name": "John Tyler",
+    "order": 10,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Tyler,_John,_by_Healy_(1842,_NPG_2019_13)_(cropped).jpg"
+  },
+  {
+    "author": "James_Polk.jpg: Brady, Mathew B., 1823 (ca.)-1896, photographer. derivative work: Superwikifan (talk)",
+    "file": "James K. Polk restored (3x4 cropped).jpg",
+    "license": "Public domain",
+    "name": "James K. Polk",
+    "order": 11,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:James_K._Polk_restored_(3x4_cropped).jpg"
+  },
+  {
+    "author": "Zachary_Taylor_half_plate_daguerreotype_c1843-45.png: unknown, possibly Maguire of New Orleans derivative work: Beao",
+    "file": "Zachary Taylor restored and cropped (3.5x4.5 cropped) (2).jpg",
+    "license": "Public domain",
+    "name": "Zachary Taylor",
+    "order": 12,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Zachary_Taylor_restored_and_cropped_(3.5x4.5_cropped)_(2).jpg"
+  },
+  {
+    "author": "Mathew Benjamin Brady",
+    "file": "Millard Fillmore Better Crop (cropped).jpg",
+    "license": "Public domain",
+    "name": "Millard Fillmore",
+    "order": 13,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Millard_Fillmore_Better_Crop_(cropped).jpg"
+  },
+  {
+    "author": "Mathew Benjamin Brady / Adam Cuerden",
+    "file": "Mathew Brady - Franklin Pierce - alternate crop (cropped)(2).jpg",
+    "license": "Public domain",
+    "name": "Franklin Pierce",
+    "order": 14,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Mathew_Brady_-_Franklin_Pierce_-_alternate_crop_(cropped)(2).jpg"
+  },
+  {
+    "author": "From Brady daguerreotype (Mathew Brady) (1822-1896)",
+    "file": "James Buchanan (cropped).jpg",
+    "license": "Public domain",
+    "name": "James Buchanan",
+    "order": 15,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:James_Buchanan_(cropped).jpg"
+  },
+  {
+    "author": "Alexander Gardner",
+    "file": "Abraham Lincoln O-77 matte collodion print.jpg",
+    "license": "Public domain",
+    "name": "Abraham Lincoln",
+    "order": 16,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Abraham_Lincoln_O-77_matte_collodion_print.jpg"
+  },
+  {
+    "author": "Mathew Benjamin Brady",
+    "file": "Andrew Johnson photo portrait head and shoulders, c1870-1880-Edit1.jpg",
+    "license": "Public domain",
+    "name": "Andrew Johnson",
+    "order": 17,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Andrew_Johnson_photo_portrait_head_and_shoulders,_c1870-1880-Edit1.jpg"
+  },
+  {
+    "author": "Brady-Handy Photograph Collection, Library of Congress",
+    "file": "Ulysses S. Grant 1870-1880 (cropped).jpg",
+    "license": "Public domain",
+    "name": "Ulysses S. Grant",
+    "order": 18,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Ulysses_S._Grant_1870-1880_(cropped).jpg"
+  },
+  {
+    "author": "Mathew Benjamin Brady",
+    "file": "President Rutherford Hayes 1870 - 1880 Restored.jpg",
+    "license": "Public domain",
+    "name": "Rutherford B. Hayes",
+    "order": 19,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:President_Rutherford_Hayes_1870_-_1880_Restored.jpg"
+  },
+  {
+    "author": "Unknown; part of Brady-Handy Photograph Collection.",
+    "file": "James Abram Garfield, photo portrait seated.jpg",
+    "license": "Public domain",
+    "name": "James A. Garfield",
+    "order": 20,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:James_Abram_Garfield,_photo_portrait_seated.jpg"
+  },
+  {
+    "author": "Abraham Bogardus / Adam Cuerden",
+    "file": "Chester A. Arthur by Abraham Bogardus (cropped) (2).jpg",
+    "license": "Public domain",
+    "name": "Chester A. Arthur",
+    "order": 21,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Chester_A._Arthur_by_Abraham_Bogardus_(cropped)_(2).jpg"
+  },
+  {
+    "author": "Charles Milton Bell",
+    "file": "Grover Cleveland by Charles Milton Bell color change (3x4 cropped b).jpg",
+    "license": "Public domain",
+    "name": "Grover Cleveland",
+    "order": 22,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Grover_Cleveland_by_Charles_Milton_Bell_color_change_(3x4_cropped_b).jpg"
+  },
+  {
+    "author": "Adam Cuerden",
+    "file": "Pach Brothers - Benjamin Harrison (cropped) (cropped).jpg",
+    "license": "Public domain",
+    "name": "Benjamin Harrison",
+    "order": 23,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Pach_Brothers_-_Benjamin_Harrison_(cropped)_(cropped).jpg"
+  },
+  {
+    "author": "Napoleon Sarony",
+    "file": "StephenGroverCleveland.jpg",
+    "license": "Public domain",
+    "name": "Grover Cleveland",
+    "order": 24,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:StephenGroverCleveland.jpg"
+  },
+  {
+    "author": "Unknown authorUnknown author",
+    "file": "McKinley (cropped).jpg",
+    "license": "Public domain",
+    "name": "William McKinley",
+    "order": 25,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:McKinley_(cropped).jpg"
+  },
+  {
+    "author": "Adam Cuerden",
+    "file": "Theodore Roosevelt by the Pach Bros (4x5 cropped) (2).jpg",
+    "license": "Public domain",
+    "name": "Theodore Roosevelt",
+    "order": 26,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Theodore_Roosevelt_by_the_Pach_Bros_(4x5_cropped)_(2).jpg"
+  },
+  {
+    "author": "Pach Brothers, restored by Adam Cuerden",
+    "file": "William Howard Taft by Pach Brothers (3x4 ropped) (cropped).jpg",
+    "license": "Public domain",
+    "name": "William Howard Taft",
+    "order": 27,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:William_Howard_Taft_by_Pach_Brothers_(3x4_ropped)_(cropped).jpg"
+  },
+  {
+    "author": "Harris & Ewing, photographer",
+    "file": "President Woodrow Wilson Harris & Ewing (3x4 cropped b).jpg",
+    "license": "Public domain",
+    "name": "Woodrow Wilson",
+    "order": 28,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:President_Woodrow_Wilson_Harris_%26_Ewing_(3x4_cropped_b).jpg"
+  },
+  {
+    "author": "Harris & Ewing, photographer",
+    "file": "Warren G. Harding 1920s portrait (3x4 cropped).jpg",
+    "license": "Public domain",
+    "name": "Warren G. Harding",
+    "order": 29,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Warren_G._Harding_1920s_portrait_(3x4_cropped).jpg"
+  },
+  {
+    "author": "Harris & Ewing",
+    "file": "President Calvin Coolidge, 1924 portrait photograph (3x4 cropped 2).jpeg",
+    "license": "Public domain",
+    "name": "Calvin Coolidge",
+    "order": 30,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:President_Calvin_Coolidge,_1924_portrait_photograph_(3x4_cropped_2).jpeg"
+  },
+  {
+    "author": "Underwood & Underwood",
+    "file": "President Hoover portrait.jpg",
+    "license": "Public domain",
+    "name": "Herbert Hoover",
+    "order": 31,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:President_Hoover_portrait.jpg"
+  },
+  {
+    "author": "Leon Perskie",
+    "file": "FDR-1944-Campaign-Portrait (3x4 retouched, cropped).jpg",
+    "license": "CC BY 2.0",
+    "licenseURL": "https://creativecommons.org/licenses/by/2.0",
+    "name": "Franklin D. Roosevelt",
+    "order": 32,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:FDR-1944-Campaign-Portrait_(3x4_retouched,_cropped).jpg"
+  },
+  {
+    "author": "National Archives and Records Administration. Office of Presidential Libraries. Harry S. Truman Library.",
+    "file": "TRUMAN 58-766-06 (cropped).jpg",
+    "license": "Public domain",
+    "name": "Harry S. Truman",
+    "order": 33,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:TRUMAN_58-766-06_(cropped).jpg"
+  },
+  {
+    "author": "White House",
+    "file": "Dwight D. Eisenhower, official photo portrait, May 29, 1959 (cropped)(3).jpg",
+    "license": "Public domain",
+    "name": "Dwight D. Eisenhower",
+    "order": 34,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Dwight_D._Eisenhower,_official_photo_portrait,_May_29,_1959_(cropped)(3).jpg"
+  },
+  {
+    "author": "Cecil W. Stoughton",
+    "file": "John F. Kennedy, White House color photo portrait.jpg",
+    "license": "Public domain",
+    "name": "John F. Kennedy",
+    "order": 35,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:John_F._Kennedy,_White_House_color_photo_portrait.jpg"
+  },
+  {
+    "author": "Arnold Newman",
+    "file": "Lyndon B. Johnson, photo portrait, color (3x4 cropped)(2).jpg",
+    "license": "Public domain",
+    "name": "Lyndon B. Johnson",
+    "order": 36,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Lyndon_B._Johnson,_photo_portrait,_color_(3x4_cropped)(2).jpg"
+  },
+  {
+    "author": "Department of Defense. Department of the Army. Office of the Deputy Chief of Staff for Operations. U.S. Army Audiovisual Center. (ca. 1974 - 05/15/1984)",
+    "file": "Richard Nixon presidential portrait (1).jpg",
+    "license": "Public domain",
+    "name": "Richard Nixon",
+    "order": 37,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Richard_Nixon_presidential_portrait_(1).jpg"
+  },
+  {
+    "author": "David Hume Kennerly",
+    "file": "Gerald Ford presidential portrait (cropped).jpg",
+    "license": "Public domain",
+    "name": "Gerald Ford",
+    "order": 38,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Gerald_Ford_presidential_portrait_(cropped).jpg"
+  },
+  {
+    "author": "Department of Defense. Department of the Navy. Naval Photographic Center",
+    "file": "Jimmy Carter Official Portrait2 (3x4 cropped).jpg",
+    "license": "Public domain",
+    "name": "Jimmy Carter",
+    "order": 39,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Jimmy_Carter_Official_Portrait2_(3x4_cropped).jpg"
+  },
+  {
+    "author": "Michael Evans",
+    "file": "Official Portrait of President Reagan 1981.jpg",
+    "license": "Public domain",
+    "name": "Ronald Reagan",
+    "order": 40,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Official_Portrait_of_President_Reagan_1981.jpg"
+  },
+  {
+    "author": "David Valdez",
+    "file": "George H. W. Bush presidential portrait (cropped) (2).jpg",
+    "license": "Public domain",
+    "name": "George H. W. Bush",
+    "order": 41,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:George_H._W._Bush_presidential_portrait_(cropped)_(2).jpg"
+  },
+  {
+    "author": "Bob McNeely, The White House[1]",
+    "file": "Bill Clinton.jpg",
+    "license": "Public domain",
+    "name": "Bill Clinton",
+    "order": 42,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Bill_Clinton.jpg"
+  },
+  {
+    "author": "Eric Draper",
+    "file": "George-W-Bush.jpeg",
+    "license": "Public domain",
+    "name": "George W. Bush",
+    "order": 43,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:George-W-Bush.jpeg"
+  },
+  {
+    "author": "Official White House Photo by Pete Souza",
+    "file": "President Barack Obama.jpg",
+    "license": "Public domain",
+    "name": "Barack Obama",
+    "order": 44,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:President_Barack_Obama.jpg"
+  },
+  {
+    "author": "Shealeah Craighead",
+    "file": "Donald Trump official portrait (3x4a).jpg",
+    "license": "Public domain",
+    "name": "Donald Trump",
+    "order": 45,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Donald_Trump_official_portrait_(3x4a).jpg"
+  },
+  {
+    "author": "Adam Schultz",
+    "file": "Joe Biden presidential portrait.jpg",
+    "license": "Public domain",
+    "name": "Joe Biden",
+    "order": 46,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Joe_Biden_presidential_portrait.jpg"
+  },
+  {
+    "author": "Daniel Torok",
+    "file": "Official Presidential Portrait of President Donald J. Trump (2025).jpg",
+    "license": "Public domain",
+    "name": "Donald Trump",
+    "order": 47,
+    "sourceURL": "https://commons.wikimedia.org/wiki/File:Official_Presidential_Portrait_of_President_Donald_J._Trump_(2025).jpg"
+  }
+]

@@ -8,5 +8,45 @@
     "label" : "Morning Report (10.05.26): The Enslavers' Republic, Student Protests, and the Election",
     "url" : "https://www.youtube.com/watch?v=R7KukjzZO1o",
     "thumbnail" : "Tad-icon"
+  },
+  {
+    "label" : " 100 Greatest African Americans.",
+    "url" : "https://molab-itp.github.io/99-Black-Power/web/",
+    "thumbnail" : "99-black-icon"
+  },
+  {
+    "label" : "US Capitol attack ... News from the Guardian",
+    "url" : "https://www.theguardian.com/us-news/us-capitol-breach",
+    "thumbnail" : "Guardian-icon"
+  },
+  {
+    "label" : "Tad Stoermer",
+    "url" : "https://www.youtube.com/@tad.stoermer",
+    "thumbnail" : "Tad-icon"
+  },
+  {
+    "label" : "Richard D. Wolff",
+    "url" : "https://en.wikipedia.org/wiki/Richard_D._Wolff",
+    "thumbnail" : "Wolff-icon"
+  },
+  {
+    "label" : "Heather Cox Richardson",
+    "url" : "https://www.youtube.com/@heathercoxrichardson",
+    "thumbnail" : "HCR-icon"
+  },
+  {
+    "label" : "Robert Reich",
+    "url" : "https://www.youtube.com/@RBReich",
+    "thumbnail" : "Reich-icon"
+  },
+  {
+    "label" : "coup d'état Jan 6, 2021 video",
+    "url" : "https://www.youtube.com/watch?v=RnzQXD2_d38",
+    "thumbnail" : "Jan6-icon"
+  },
+  {
+    "label" : "coup d'état Jan 6, 2021",
+    "url" : "https://en.wikipedia.org/wiki/January_6_United_States_Capitol_attack",
+    "thumbnail" : "Jan6-icon"
   }
 ]

@@ -5,6 +5,7 @@ import LandingScreen from './screens/LandingScreen.jsx';
 import HOSListScreen from './screens/HOSListScreen.jsx';
 import HOSDetailScreen from './screens/HOSDetailScreen.jsx';
 import NewsScreen from './screens/NewsScreen.jsx';
+import CreditsScreen from './screens/CreditsScreen.jsx';
 
 /**
  * Port of AppLandingView.swift: the navigation that `LandingScreen` sits at the bottom of. There
@@ -55,12 +56,15 @@ function Root() {
       );
     case AppScreen.news:
       return <NewsScreen onBack={showLanding} />;
+    case AppScreen.credits:
+      return <CreditsScreen onBack={showLanding} />;
     default:
       return (
         <LandingScreen
           onShowList={() => setScreen(AppScreen.hosList)}
           onShowDetail={showDetail}
           onShowNews={() => setScreen(AppScreen.news)}
+          onShowCredits={() => setScreen(AppScreen.credits)}
         />
       );
   }

@@ -420,6 +420,14 @@ input {
   text-decoration: none;
 }
 
+.source-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
 .source-link:active {
   opacity: 0.5;
 }
@@ -603,6 +611,74 @@ input {
 .news-row .names .host {
   font-size: 14px;
   color: var(--secondary-label);
+}
+
+/* Credits screen — CreditsView's three collapsible sections: a header that toggles the rows and
+   footer below it, and rows whose caption is the link to the source. */
+.credits {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.credits-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 16px 7px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: var(--secondary-label);
+  cursor: pointer;
+}
+
+.credits-header .chevron {
+  transition: transform 0.2s ease;
+}
+
+.credits-header .chevron.expanded {
+  transform: rotate(90deg);
+}
+
+.credits-footer {
+  margin: 7px 16px 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--secondary-label);
+}
+
+.credits-footer a {
+  color: var(--tint);
+  text-decoration: none;
+}
+
+.credit-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 10px 16px;
+}
+
+.credit-row .title {
+  font-weight: 590;
+  font-size: 17px;
+}
+
+.credit-row .caption {
+  font-size: 15px;
+  color: var(--tint);
+  text-decoration: none;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.credit-row .caption:active {
+  opacity: 0.5;
 }
 
 /* Detail screen */
