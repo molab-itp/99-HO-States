@@ -782,3 +782,19 @@ have hide/show toggle
 v05.117
 
 sync v05 with v2
+
+v02.118
+
+in v2 add text to speech
+using AVSpeechSynthesizer
+add new button labeled "Speak" on credits on AppLandingView
+that opens new view SpeechSetupView
+when supported languages for AVSpeechSynthesizer
+are listed and one can be selected
+provide play back of sample text
+sample text defaults to: 
+"Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."
+
+in HOSDetailView HOSSummaryView
+hos.extract
+hos.order hos.name

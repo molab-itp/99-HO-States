@@ -24,7 +24,8 @@ struct AppLandingView: View {
                 onShowList: { path = [.hosList] },
                 onShowDetail: showDetail,
                 onShowNews: { path = [.news] },
-                onShowCredits: { path = [.credits] }
+                onShowCredits: { path = [.credits] },
+                onShowSpeechSetup: { path = [.speechSetup] }
             )
                 .navigationDestination(for: AppScreen.self) { screen in
                     switch screen {
@@ -47,6 +48,8 @@ struct AppLandingView: View {
                         NewsView()
                     case .credits:
                         CreditsView()
+                    case .speechSetup:
+                        SpeechSetupView()
                     }
                 }
         }

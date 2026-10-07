@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The app's root screen: settings, app info, and the ways into `HOSDetailView` (Resume, Random
-/// Head, Start Slideshow), `HOSListView`, `NewsView` and `CreditsView`. Navigation itself is handed back to
+/// Head, Start Slideshow), `HOSListView`, `NewsView`, `CreditsView` and `SpeechSetupView`. Navigation itself is handed back to
 /// `AppLandingView` through the callbacks.
 struct LandingView: View {
     @Environment(AppModel.self) private var appModel
@@ -14,6 +14,8 @@ struct LandingView: View {
     let onShowNews: () -> Void
     /// Shows the credits screen.
     let onShowCredits: () -> Void
+    /// Shows the text-to-speech setup screen.
+    let onShowSpeechSetup: () -> Void
 
     /// External links listed at the bottom of the screen, from Links.json.
     private let links = LinksRepository.loadAll()
@@ -146,6 +148,12 @@ struct LandingView: View {
             Label("Credits", systemImage: "info.circle")
               .font(.footnote)
           }
+          Button {
+            onShowSpeechSetup()
+          } label: {
+            Label("Speak", systemImage: "speaker.wave.2")
+              .font(.footnote)
+          }
         }
         Text(appModel.buildInfo)
           .font(.footnote.monospaced())
@@ -159,7 +167,7 @@ struct LandingView: View {
 
 #Preview {
     NavigationStack {
-        LandingView(onShowList: {}, onShowDetail: { _ in }, onShowNews: {}, onShowCredits: {})
+        LandingView(onShowList: {}, onShowDetail: { _ in }, onShowNews: {}, onShowCredits: {}, onShowSpeechSetup: {})
     }
     .environment(AppModel())
 }

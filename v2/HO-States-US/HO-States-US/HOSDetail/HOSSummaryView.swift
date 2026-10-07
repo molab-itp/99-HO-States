@@ -1,13 +1,19 @@
 import SwiftUI
 
-/// The HOS's name, term, party, biography extract, and Wikipedia link —
-/// the text content that `HOSDetailView` fades in a few seconds after appearing.
+/// The HOS's name (with a play/pause button that speaks the extract), term, party, biography
+/// extract, and Wikipedia link — the text content that `HOSDetailView` fades in a few seconds after appearing.
 struct HOSSummaryView: View {
     let hos: HOS
 
+    @State private var speechPlayer = SpeechPlayer()
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("#\(hos.order) \(hos.name)").font(.system(.body, design: .monospaced))
+            HStack {
+                Text("#\(hos.order) \(hos.name)").font(.system(.body, design: .monospaced))
+                Spacer()
+                SpeechPlayButton(player: speechPlayer, text: hos.extract)
+            }
             Text("\(hos.term) · \(hos.party)")
                 .font(.headline)
                 .foregroundStyle(.secondary)
@@ -19,6 +25,14 @@ struct HOSSummaryView: View {
                 }
                 .font(.callout)
             }
+        }
+        // This view outlives the HOS it shows (Next/Previous/slideshow just swap `hos`), so
+        // speech for the previous one has to be stopped here as well as on disappear.
+        .onChange(of: hos.id) {
+            speechPlayer.stop()
+        }
+        .onDisappear {
+            speechPlayer.stop()
         }
     }
 }

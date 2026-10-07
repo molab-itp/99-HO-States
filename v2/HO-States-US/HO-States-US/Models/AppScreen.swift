@@ -8,4 +8,5 @@ enum AppScreen: String, Hashable {
     case hosDetail
     case news
     case credits
+    case speechSetup
 }
