@@ -16,8 +16,12 @@ struct SpeechTranslatedPlayButton: View {
     @AppStorage(SpeechSettings.sampleTextLanguageKey)
     private var sampleTextLanguage = SpeechSettings.defaultSampleTextLanguage
 
-    /// Non-nil while a translation is running; setting it is what starts `translationTask`.
+    /// What `translationTask` runs on. Made by the first translation and then kept: the task
+    /// only runs when this changes, and setting it back to an equal value after `nil` doesn't
+    /// count, so each later translation is started by `invalidate()` instead.
     @State private var configuration: TranslationSession.Configuration?
+    /// True from asking for a translation until it has been spoken (or abandoned).
+    @State private var isTranslating = false
     /// `text` in `language`, kept so pause/continue and replays don't translate again.
     @State private var translatedText: String?
 
@@ -29,13 +33,13 @@ struct SpeechTranslatedPlayButton: View {
         Button {
             play()
         } label: {
-            if configuration != nil {
+            if isTranslating {
                 ProgressView()
             } else {
                 SpeechPlayLabel(isSpeaking: player.status == .speaking)
             }
         }
-        .disabled(text.isEmpty || configuration != nil)
+        .disabled(text.isEmpty || isTranslating)
         .translationTask(configuration) { session in
             let source = text
             let spoken: String
@@ -45,9 +49,10 @@ struct SpeechTranslatedPlayButton: View {
                 // Untranslatable (unsupported language, download declined): speak it as written.
                 spoken = source
             }
-            guard !Task.isCancelled, source == text else { return }
+            // `isTranslating` going false means the request was dropped (`reset`) while this ran.
+            guard !Task.isCancelled, source == text, isTranslating else { return }
             translatedText = spoken
-            configuration = nil
+            isTranslating = false
             player.toggle(spoken, language: language)
         }
         // A translation is only good for the text and language it was made from.
@@ -57,13 +62,17 @@ struct SpeechTranslatedPlayButton: View {
         .onChange(of: language) {
             reset()
         }
-        .onChange(of: configuration != nil) {
-            player.isPreparing = configuration != nil
+        .onChange(of: isTranslating) {
+            player.isPreparing = isTranslating
         }
         .onChange(of: autoPlays) {
-            if autoPlays, player.status == .idle, configuration == nil {
+            if autoPlays, player.status == .idle, !isTranslating {
                 play()
             }
+        }
+        // The translation task is cancelled when this goes off screen, so it won't finish.
+        .onDisappear {
+            reset()
         }
     }
 
@@ -75,15 +84,22 @@ struct SpeechTranslatedPlayButton: View {
         if let translatedText {
             player.toggle(translatedText, language: language)
         } else {
-            configuration = TranslationSession.Configuration(
-                source: SpeechSettings.translationLanguage(for: SpeechSettings.defaultSampleTextLanguage),
-                target: SpeechSettings.translationLanguage(for: language)
-            )
+            isTranslating = true
+            let target = SpeechSettings.translationLanguage(for: language)
+            if configuration == nil {
+                configuration = TranslationSession.Configuration(
+                    source: SpeechSettings.translationLanguage(for: SpeechSettings.defaultSampleTextLanguage),
+                    target: target
+                )
+            } else {
+                configuration?.target = target
+                configuration?.invalidate()
+            }
         }
     }
 
     private func reset() {
-        configuration = nil
+        isTranslating = false
         translatedText = nil
     }
 }

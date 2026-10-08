@@ -84,7 +84,14 @@ struct LandingView: View {
               .frame(maxWidth: .infinity)
           }
           .buttonStyle(.bordered)
-          
+          Button {
+            onShowSpeechSetup()
+          } label: {
+            Label("Speak", systemImage: "speaker.wave.2")
+              .frame(maxWidth: .infinity)
+          }
+          .buttonStyle(.bordered)
+
           Button {
             onShowDetail(true)
           } label: {
@@ -134,21 +141,11 @@ struct LandingView: View {
             appModel.resetViewed()
           }
           .buttonStyle(.bordered)
-          //          .font(.footnote)
-          Button {
-            onShowSpeechSetup()
-          } label: {
-            Label("Speak", systemImage: "speaker.wave.2")
-              .frame(maxWidth: .infinity)
-            //            .font(.footnote)
-          }
-          .buttonStyle(.bordered)
           Button {
             onShowCredits()
           } label: {
             Label("Credits", systemImage: "info.circle")
               .frame(maxWidth: .infinity)
-            //            .font(.footnote)
           }
           .buttonStyle(.bordered)
         }

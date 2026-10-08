@@ -851,3 +851,9 @@ v02.122
 SpeechTranslatedPlayButton 
     if configuration != nil {
         ProgressView()
+in v2, when in Auto Speak mode
+and in non-english translation
+start slideshow does not
+advance past the first hos slide
+second hos slide remains with SpeechTranslatedPlayButton
+in ProgressView
