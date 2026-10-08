@@ -221,10 +221,12 @@ struct HOSDetailView: View {
 
     private func tickSlideshow() {
         guard isPlaying, !isDrawingEditorPresented else { return }
-        slideshowRemainingSecs = max(0, slideshowRemainingSecs - Self.slideshowTickSecs)
+        // Not clamped at zero: while Auto Speak holds the advance below, this keeps counting
+        // down into negative numbers, so the title shows how long the slide has run over.
+        slideshowRemainingSecs -= Self.slideshowTickSecs
         // Half-tick tolerance absorbs floating-point drift from repeated subtraction.
         if slideshowRemainingSecs < Self.slideshowTickSecs / 2 {
-            // With Auto Speak on, the countdown sits at zero until the extract has been spoken.
+            // With Auto Speak on, the slide stays up until the extract has been spoken.
             if autoSpeak, speechPlayer.isBusy { return }
             advanceSlideshow()
             restartSlideshowCountdown()

@@ -9,14 +9,17 @@ struct HOSDetailTitleView: View {
     let order: Int
     let buildInfo: String
     /// `nil` when no slideshow is running; otherwise the countdown, in seconds, until the next
-    /// auto-advance.
+    /// auto-advance. Negative once the slide has run over its time (held for Auto Speak), in
+    /// which case it is how long it has run over.
     let slideshowRemainingSecs: Double?
 
     var body: some View {
         let orderText = String(format: "%02d", order)
         HStack {
             if let seconds = slideshowRemainingSecs {
-                let secondsText = String(format: "%04.1f", seconds)
+                // Anything that would round to zero shows as "00.0", never "-0.0".
+                let isOvertime = seconds <= -0.05
+                let secondsText = String(format: isOvertime ? "%05.1f" : "%04.1f", isOvertime ? seconds : max(0, seconds))
                 Text("#\(orderText) · \(secondsText)s \(buildInfo)").font(.system(.body, design: .monospaced))
             } else {
                 Text("#\(orderText) \(buildInfo)").font(.system(.body, design: .monospaced))

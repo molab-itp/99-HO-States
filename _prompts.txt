@@ -857,3 +857,12 @@ start slideshow does not
 advance past the first hos slide
 second hos slide remains with SpeechTranslatedPlayButton
 in ProgressView
+
+v02.123
+
+in v2, in slideshow mode
+and Auto Speak mode
+when slide time as expired
+rather that stick at displaying 0 in tickSlideshow,
+continue reporting time lapse time from stall
+expressed as a negative number
