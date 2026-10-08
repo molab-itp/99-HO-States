@@ -7,6 +7,7 @@ export const AppScreen = {
   hosDetail: 'hosDetail',
   news: 'news',
   credits: 'credits',
+  speechSetup: 'speechSetup',
 };
 
 // A saved value this build doesn't know (or none at all, from an older save) falls back to Landing.

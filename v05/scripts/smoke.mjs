@@ -39,6 +39,53 @@ async function main() {
     if (res.status() >= 400) consoleErrors.push(`HTTP ${res.status()} for ${res.url()}`);
   });
 
+  // Stand-ins for the browser's speech and translation, which a headless browser can't be relied
+  // on to have: speech "plays" for `window.__speech.durationMs` and is recorded in
+  // `window.__speech.spoken`; translation just tags the text with its target language.
+  await page.addInitScript(() => {
+    const state = { spoken: [], durationMs: 300 };
+    window.__speech = state;
+    let current = null;
+    let timer = null;
+    // Ends `utterance` if it is still the one playing (a cancelled one may already be replaced).
+    const finish = (utterance) => {
+      if (current === utterance) current = null;
+      utterance?.onend?.({});
+    };
+    const voices = ['en-US', 'en-GB', 'es-ES', 'fr-FR', 'cy-GB'].map((lang) => ({ lang, name: lang }));
+    Object.defineProperty(window, 'speechSynthesis', {
+      configurable: true,
+      value: {
+        getVoices: () => voices,
+        addEventListener() {},
+        removeEventListener() {},
+        speak(utterance) {
+          state.spoken.push({ text: utterance.text, lang: utterance.lang });
+          current = utterance;
+          timer = setTimeout(finish, state.durationMs, utterance);
+        },
+        cancel() {
+          clearTimeout(timer);
+          if (current) setTimeout(finish, 0, current);
+        },
+        pause() {
+          clearTimeout(timer);
+        },
+        resume() {
+          timer = setTimeout(finish, state.durationMs, current);
+        },
+      },
+    });
+    window.SpeechSynthesisUtterance = class {
+      constructor(text) {
+        this.text = text;
+      }
+    };
+    window.Translator = {
+      create: async ({ targetLanguage }) => ({ translate: async (text) => `[${targetLanguage}] ${text}` }),
+    };
+  });
+
   let step = 0;
   async function shot(name) {
     step += 1;
@@ -257,6 +304,86 @@ async function main() {
     await checkSection('News', 10, 'Ava DuVernay', 'https://www.filmlinc.org/');
     await page.reload();
     await page.waitForSelector('.credits');
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+    await resume();
+
+    console.log('Speak from Landing: languages in groups, sample text plays, Auto Speak persists...');
+    const lastSpoken = () => page.evaluate(() => window.__speech.spoken.at(-1));
+    const spokenCount = () => page.evaluate(() => window.__speech.spoken.length);
+    const setSpeechDuration = (ms) => page.evaluate((value) => { window.__speech.durationMs = value; }, ms);
+    async function showSpeak() {
+      await page.click('button:has-text("Speak")');
+      await page.waitForSelector('.speech-setup');
+    }
+    await backToLanding();
+    await showSpeak();
+    assert((await page.locator('.nav-title').textContent()) === 'Speak', 'speech setup screen should be titled Speak');
+    const groupTitles = await page.locator('h2.speech-section-title').allTextContents();
+    assert(groupTitles.join(',') === 'English,Spanish,French,Other', `language groups: got ${groupTitles}`);
+    assert((await page.locator('.language-row').count()) === 5, 'every voice language should be listed');
+    assertIncludes(await page.locator('.language-row[aria-pressed="true"]').textContent(), 'en-US', 'the browser language should start selected');
+    assert(!(await page.isChecked('.speech-setup .switch input')), 'Auto Speak should start off');
+    assert(await page.isDisabled('.speech-translate-btn'), 'Translate is off while the text and language are both English');
+    await page.click('.speech-sample button[aria-label="Play Speech"]');
+    await page.waitForSelector('.speech-sample button[aria-label="Pause Speech"]');
+    assertIncludes((await lastSpoken()).text, 'Four score', 'Play should speak the sample text');
+    assert((await lastSpoken()).lang === 'en-US', 'sample text should be spoken in the selected language');
+    await page.waitForSelector('.speech-sample button[aria-label="Play Speech"]');
+    await page.click('.speech-setup .toggle-row');
+    await shot('speak');
+    await page.reload();
+    await page.waitForSelector('.speech-setup');
+    assert(await page.isChecked('.speech-setup .switch input'), 'Auto Speak should survive a reload');
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+
+    console.log('Auto Speak: the slideshow speaks the extract and holds the slide until it is done...');
+    await pickFromList('#01');
+    assert((await spokenCount()) === 0, 'Auto Speak should stay quiet while the slideshow is paused');
+    await page.click('.detail-text button[aria-label="Play Speech"]');
+    await page.waitForSelector('.detail-text button[aria-label="Pause Speech"]');
+    assertIncludes((await lastSpoken()).text, 'George Washington', 'the detail speech button should speak the extract');
+    await page.waitForSelector('.detail-text button[aria-label="Play Speech"]');
+    await backToLanding();
+    // Longer than the 5s slide interval, so the slide has to wait for it.
+    await setSpeechDuration(5000);
+    await page.click('button:has-text("Start Slideshow")');
+    await page.waitForSelector('.detail-text button[aria-label="Pause Speech"]', { timeout: 4000 });
+    assert((await spokenCount()) === 2, 'the slideshow should start the speech by itself');
+    await page.waitForFunction(() => document.querySelector('.nav-title-mono')?.textContent?.includes('· -'), null, { timeout: 7000 });
+    assertIncludes(await title(), '#01', 'the slide should hold while its extract is still being spoken');
+    await shot('auto-speak-overtime');
+    await page.waitForFunction(() => document.querySelector('.nav-title-mono')?.textContent?.startsWith('#02'), null, { timeout: 4000 });
+    assert(!(await title()).includes('· -'), 'the countdown should restart for the next slide');
+    await page.click('button[aria-label="Pause"]');
+
+    console.log('Translation: translated sample text makes each extract translated before it is spoken...');
+    await setSpeechDuration(300);
+    await backToLanding();
+    await showSpeak();
+    await page.click('.language-row:has-text("es-ES")');
+    await page.click('.speech-translate-btn:has-text("Translate to Spanish (Spain)")');
+    await page.waitForFunction(() => document.querySelector('.speech-sample textarea')?.value.startsWith('[es] Four score'));
+    assertIncludes(await page.locator('.speech-translate-btn').textContent(), 'Translate to English', 'Translate should offer the way back');
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+    const spokenBefore = await spokenCount();
+    await page.click('button:has-text("Start Slideshow")');
+    // Two slides in a row: the second translation must start as well as the first.
+    await page.waitForFunction((count) => window.__speech.spoken.length >= count + 2, spokenBefore, { timeout: 12000 });
+    const translated = await page.evaluate((count) => window.__speech.spoken.slice(count), spokenBefore);
+    assert(translated.every((s) => s.text.startsWith('[es] ') && s.lang === 'es-ES'), `extracts should be spoken in Spanish: got ${JSON.stringify(translated.map((s) => [s.lang, s.text.slice(0, 12)]))}`);
+    assert(translated[0].text !== translated[1].text, 'each slide should speak its own extract');
+    await page.click('button[aria-label="Pause"]');
+    // Back to English and Auto Speak off for the rest of the run.
+    await backToLanding();
+    await showSpeak();
+    await page.click('button.speech-section-title:has-text("Sample Text")');
+    assert((await page.locator('.speech-sample textarea').inputValue()).startsWith('Four score'), 'the Sample Text header should restore the default text');
+    await page.click('.language-row:has-text("en-US")');
+    await page.click('.speech-setup .toggle-row');
+    assert(!(await page.isChecked('.speech-setup .switch input')), 'Auto Speak should turn off again');
     await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
     await resume();

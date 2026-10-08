@@ -12,12 +12,20 @@ navigator) is the only expected change to port further.
 - `src/state/AppModelContext.jsx` — port of `AppModel.swift` (shuffled random draws, viewed-set
   tracking, the current `screen` and `slideIndex`).
 - `src/App.jsx` — port of `AppLandingView`: shows `LandingScreen` as the root, with the list, detail,
-  news and credits screens on top of it, and reopens on the persisted `screen` after a reload.
+  news, credits and speech setup screens on top of it, and reopens on the persisted `screen` after
+  a reload.
 - `src/screens/` — `LandingScreen` (port of `LandingView`: Resume, News, List of Heads, Random
-  Head, Start Slideshow, slideshow settings, links, Credits), `HOSListScreen`, `HOSDetailScreen`
-  (Play/Pause slideshow, drawing, Back to Landing), `NewsScreen` (port of `NewsView`), and
-  `CreditsScreen` (port of `CreditsView`: article, photo and news sources, each section
-  collapsible).
+  Head, Speak, Start Slideshow, slideshow settings, Reset Visit Count, Credits, links),
+  `HOSListScreen`, `HOSDetailScreen` (Play/Pause slideshow, speech button, drawing, Back to
+  Landing), `NewsScreen` (port of `NewsView`), `CreditsScreen` (port of `CreditsView`: article,
+  photo and news sources, each section collapsible), and `SpeechSetupScreen` (port of
+  `SpeechSetupView`: Auto Speak, sample text, speech language).
+- `src/state/useSpeechPlayer.js` — port of `SpeechPlayer.swift` on the Web Speech API
+  (`speechSynthesis`); `src/state/speechSettings.js` is the port of `SpeechSettings`.
+- `src/components/SpeechPlayButton.jsx` — port of `SpeechPlayButton` and
+  `SpeechTranslatedPlayButton`. Translation (`src/data/translator.js`) uses the browser's built-in
+  Translator API where there is one (Chrome on desktop); elsewhere the Translate button is hidden
+  and text is spoken as written.
 - `src/data/appScreen.js` — port of `AppScreen.swift`, the top-level screen names.
 - `src/state/useStoredValue.js` — `@AppStorage` stand-in; instances for the same key stay in sync.
 - `src/data/hos.json` + `public/images/` — the same portrait images and generated summary

@@ -8,13 +8,13 @@ import links from '../data/links.js';
 
 /**
  * Port of LandingView.swift — the app's root screen: settings, app info, and the ways into
- * `HOSDetailScreen` (Resume, Random Head, Start Slideshow), `HOSListScreen`, `NewsScreen` and
- * `CreditsScreen`. Navigation itself is handed back to `App` through the callbacks: `onShowList()`
- * shows the list, `onShowDetail(startSlideshow)` shows the detail screen at `slideIndex`, with its
- * slideshow playing if asked, `onShowNews()` shows the news screen and `onShowCredits()` the
- * credits screen.
+ * `HOSDetailScreen` (Resume, Random Head, Start Slideshow), `HOSListScreen`, `NewsScreen`,
+ * `CreditsScreen` and `SpeechSetupScreen`. Navigation itself is handed back to `App` through the
+ * callbacks: `onShowList()` shows the list, `onShowDetail(startSlideshow)` shows the detail screen
+ * at `slideIndex`, with its slideshow playing if asked, `onShowNews()` shows the news screen,
+ * `onShowCredits()` the credits screen and `onShowSpeechSetup()` the text-to-speech setup screen.
  */
-export default function LandingScreen({ onShowList, onShowDetail, onShowNews, onShowCredits }) {
+export default function LandingScreen({ onShowList, onShowDetail, onShowNews, onShowCredits, onShowSpeechSetup }) {
   const { hosList, viewedIDs, nextRandomHOS, select, resetViewed, buildInfo } = useAppModel();
   const [isRandomMode, setIsRandomMode] = useStoredBoolean(
     SlideshowSettings.randomModeKey,
@@ -72,6 +72,10 @@ export default function LandingScreen({ onShowList, onShowDetail, onShowNews, on
           <Icon name="shuffle" />
           Random Head
         </button>
+        <button className="btn btn-bordered" onClick={onShowSpeechSetup}>
+          <Icon name="volume-up" />
+          Speak
+        </button>
         <button className="btn btn-bordered" onClick={() => onShowDetail(true)}>
           <Icon name="play-circle-fill" />
           Start Slideshow
@@ -109,8 +113,12 @@ export default function LandingScreen({ onShowList, onShowDetail, onShowNews, on
 
       <div className="visited">
         <p className="visited-count">{remainingCount} left to see</p>
-        <button className="btn-text-destructive" onClick={resetViewed}>
+        <button className="btn btn-bordered btn-destructive" onClick={resetViewed}>
           Reset Visit Count
+        </button>
+        <button className="btn btn-bordered" onClick={onShowCredits}>
+          <Icon name="info-circle" />
+          Credits
         </button>
       </div>
 
@@ -121,10 +129,6 @@ export default function LandingScreen({ onShowList, onShowDetail, onShowNews, on
             {link.title}
           </a>
         ))}
-        <button className="source-link" onClick={onShowCredits}>
-          <Icon name="info-circle" size={14} />
-          Credits
-        </button>
       </div>
 
       <p className="build-info">{buildInfo}</p>

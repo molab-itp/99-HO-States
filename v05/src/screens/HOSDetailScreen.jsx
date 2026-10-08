@@ -8,10 +8,13 @@ import ZoomableHeaderImage from '../components/ZoomableHeaderImage.jsx';
 import Icon from '../components/Icon.jsx';
 import HOSDrawingEditor from '../components/HOSDrawingEditor.jsx';
 import DrawingDisplayMenu from '../components/DrawingDisplayMenu.jsx';
+import SpeechPlayButton from '../components/SpeechPlayButton.jsx';
 import { showsDrawing, showsPhoto } from '../data/drawingDisplayMode.js';
 import { useStoredBoolean } from '../state/useStoredBoolean.js';
 import { useStoredNumber } from '../state/useStoredNumber.js';
 import { SlideshowSettings } from '../state/slideshowSettings.js';
+import { SpeechSettings } from '../state/speechSettings.js';
+import { useSpeechPlayer } from '../state/useSpeechPlayer.js';
 
 const SLIDESHOW_TICK_SECS = 0.1; // matches HOSDetailView's slideshowTickSecs
 
@@ -58,6 +61,10 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   );
   const delaySecs = slideshowIntervalSecs * delayFraction;
   const [fadePeriod] = useStoredNumber(SlideshowSettings.fadePeriodKey, SlideshowSettings.defaultFadePeriod);
+  const [autoSpeak] = useStoredBoolean(SpeechSettings.autoSpeakKey, SpeechSettings.defaultAutoSpeak);
+  // Owned here rather than by the speech button so the auto-advance below can hold until the
+  // extract has been spoken.
+  const speechPlayer = useSpeechPlayer();
 
   // The index whose details have been revealed. Derived rather than a boolean reset in the effect
   // below, so a new HOS's text is hidden in the same render that shows it — an effect runs
@@ -91,6 +98,14 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
+
+  // This screen outlives the HOS it shows (Next/Previous/slideshow just swap `index`), so speech
+  // for the previous one is stopped here. The drawing editor covers the summary, so it stops too.
+  const stopSpeech = speechPlayer.stop;
+  useEffect(() => stopSpeech, [index, stopSpeech]);
+  useEffect(() => {
+    if (isDrawingEditorOpen) stopSpeech();
+  }, [isDrawingEditorOpen, stopSpeech]);
 
   // Port of the Swift ZStack + `.transition(.opacity)`: while the slideshow plays, the previous
   // HOS's image stays on top of the new one and fades out over `fadePeriod` as the new one
@@ -144,7 +159,7 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
 
   // Auto-advance timer: always running (ticks are ignored while paused), uses a ref for the tick body so
   // the interval (set up once) always calls the latest closure instead of a stale one. The
-  // updater is kept pure (just clamped decrement, no side effects) — React 18 StrictMode
+  // updater is kept pure (just a decrement, no side effects) — React 18 StrictMode
   // intentionally double-invokes functional state updaters to catch impure ones, and an earlier
   // version of this that called `setNav(...)` from inside here had that side effect fire twice
   // per tick, advancing the slideshow by 2 heads of state instead of 1.
@@ -153,7 +168,9 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   // the Swift `isDrawingEditorPresented` check.
   tickRef.current = () => {
     if (!isPlaying || isDrawingEditorOpen) return;
-    setRemainingSecs((prev) => Math.max(0, prev - SLIDESHOW_TICK_SECS));
+    // Not clamped at zero: while Auto Speak holds the advance below, this keeps counting down
+    // into negative numbers, so the title shows how long the slide has run over.
+    setRemainingSecs((prev) => prev - SLIDESHOW_TICK_SECS);
   };
 
   useEffect(() => {
@@ -167,6 +184,9 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   // tolerance absorbs floating-point drift from repeated subtraction.
   useEffect(() => {
     if (remainingSecs >= SLIDESHOW_TICK_SECS / 2) return;
+    // With Auto Speak on, the slide stays up until the extract has been spoken. The countdown
+    // keeps ticking meanwhile, so this is checked again every tick.
+    if (autoSpeak && speechPlayer.isBusy) return;
     setNav((prevNav) => advanceForward(prevNav));
     setRemainingSecs(slideshowIntervalSecs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -183,9 +203,11 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   }
 
   const orderText = String(hos.order).padStart(2, '0');
-  const title = isPlaying
-    ? `#${orderText} · ${remainingSecs.toFixed(1).padStart(4, '0')}s ${buildInfo}`
-    : `#${orderText} ${buildInfo}`;
+  // Negative once the slide has run over its time (held for Auto Speak). Anything that would
+  // round to zero shows as "00.0", never "-0.0".
+  const isOvertime = remainingSecs <= -0.05;
+  const secondsText = `${isOvertime ? '-' : ''}${(isOvertime ? -remainingSecs : Math.max(0, remainingSecs)).toFixed(1).padStart(4, '0')}`;
+  const title = isPlaying ? `#${orderText} · ${secondsText}s ${buildInfo}` : `#${orderText} ${buildInfo}`;
 
   const imageSrc = hos.large || hos.thumbnail;
   const drawing = drawingFor(hos);
@@ -247,9 +269,18 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
         </div>
 
         <div className={detailsVisible ? 'detail-text visible' : 'detail-text'}>
-          <h1 className="name-mono">
-            #{hos.order} {hos.name}
-          </h1>
+          <div className="name-row">
+            <h1 className="name-mono">
+              #{hos.order} {hos.name}
+            </h1>
+            {/* Auto speech starts as the details fade in, so the extract is on screen for it. */}
+            <SpeechPlayButton
+              player={speechPlayer}
+              text={hos.extract}
+              translatesFirst
+              autoPlays={autoSpeak && isPlaying && detailsVisible}
+            />
+          </div>
           <p className="subtitle">
             {hos.term} · {hos.party}
           </p>

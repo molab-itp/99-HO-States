@@ -866,3 +866,7 @@ when slide time as expired
 rather that stick at displaying 0 in tickSlideshow,
 continue reporting time lapse time from stall
 expressed as a negative number
+
+v05.124
+
+sync v05 with v2

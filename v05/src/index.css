@@ -443,7 +443,9 @@ input {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
 }
 
 .visited-count {
@@ -460,18 +462,14 @@ input {
   color: var(--secondary-label);
 }
 
-.btn-text-destructive {
-  background: none;
-  border: none;
+/* SwiftUI's `.bordered` button with `role: .destructive` (Landing's Reset Visit Count). */
+.btn-bordered.btn-destructive {
+  background: color-mix(in srgb, var(--destructive) 13%, transparent);
   color: var(--destructive);
-  font-size: 15px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
 }
 
-.btn-text-destructive:active {
-  background: var(--fill-pressed);
+.btn-bordered.btn-destructive:active {
+  background: color-mix(in srgb, var(--destructive) 22%, transparent);
 }
 
 /* List screen — SwiftUI's default `List` on iOS renders inset-grouped (rounded card of rows on
@@ -679,6 +677,152 @@ input {
 
 .credit-row .caption:active {
   opacity: 0.5;
+}
+
+/* Speak setup screen (SpeechSetupView.swift): grouped sections of rows, like Credits. */
+.speech-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.speech-section-title {
+  display: block;
+  margin: 0;
+  padding: 0 16px 7px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--secondary-label);
+}
+
+button.speech-section-title {
+  cursor: pointer;
+}
+
+.speech-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+}
+
+.speech-sample {
+  align-items: flex-start;
+}
+
+.speech-sample textarea {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  resize: none;
+  background: none;
+  color: var(--label);
+  font-family: inherit;
+  font-size: 17px;
+  line-height: 1.35;
+  field-sizing: content;
+}
+
+.speech-translate-btn {
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 17px;
+  color: var(--tint);
+  cursor: pointer;
+}
+
+.speech-translate-btn:disabled {
+  color: var(--tertiary-label);
+  cursor: default;
+}
+
+.speech-error {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--destructive);
+}
+
+.language-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 17px;
+  color: var(--label);
+  text-align: left;
+  cursor: pointer;
+}
+
+.language-row:active {
+  background: var(--fill-pressed);
+}
+
+.language-row .names {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.language-row .code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--secondary-label);
+}
+
+.language-check {
+  color: var(--tint);
+}
+
+/* The speech buttons' play/pause icon (SpeechPlayLabel), or a spinner while translating. */
+.speech-play-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--tint);
+  cursor: pointer;
+}
+
+.speech-play-btn:active:not(:disabled) {
+  opacity: 0.5;
+}
+
+.speech-play-btn:disabled {
+  color: var(--tertiary-label);
+  cursor: default;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--tertiary-label);
+  border-top-color: var(--secondary-label);
+  border-radius: 50%;
+  animation: spinner-turn 0.8s linear infinite;
+}
+
+@keyframes spinner-turn {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Detail screen */
@@ -962,6 +1106,19 @@ input {
   font-size: 17px;
   font-weight: 400;
   letter-spacing: normal;
+}
+
+/* The name with its speech button at the trailing edge (HOSSummaryView's HStack). */
+.name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.name-row h1 {
+  margin: 0;
 }
 
 /* Port of HOSDrawingEditorView.swift's `reactionControl`, above the photo. */
