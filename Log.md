@@ -2188,3 +2188,73 @@ The app builds for the iOS Simulator. It was not run, so the behaviour is untest
 number was not bumped. Not yet committed.
 
 **Cost**: ~10 minutes.
+
+# --
+
+2026-10-07 23:15 (v2: Auto Speak fixes — stuck translation, overtime countdown)
+
+Two follow-up requests on Auto Speak.
+
+**Stuck on the second slide.** With Auto Speak on and a non-English translation, the slideshow
+stopped on the second slide with `SpeechTranslatedPlayButton` showing its `ProgressView`.
+
+- Likely cause: the button started every translation by setting its
+  `TranslationSession.Configuration` to `nil` and then to an equal value. `translationTask`
+  only runs when the configuration changes, so the second request never started; the spinner
+  stayed up and Auto Speak held the slide for a translation that was never coming.
+- Fix: the configuration is made once and kept, and each later translation is started with
+  `invalidate()`. A separate `isTranslating` flag drives the spinner and
+  `player.isPreparing`, and is cleared if the button goes off screen mid-translation.
+- Not reproduced here (the Simulator has no translation); the fix follows the likeliest cause.
+
+**Overtime countdown.** While Auto Speak holds a slide past its time, the title no longer sticks
+at 0: `tickSlideshow` stops clamping `slideshowRemainingSecs`, and `HOSDetailTitleView` shows
+the overrun as a negative number (e.g. `-03.2s`). Values that would round to zero show as
+`00.0`, never `-0.0`. The title is one character wider once it goes negative.
+
+The app builds for the iOS Simulator. Neither change was run. Committed by the user as v02.121
+to v02.123.
+
+**Cost**: ~10 minutes.
+
+# --
+
+2026-10-07 23:15 (v05: sync with v2 — Speak screen, Auto Speak, Landing buttons)
+
+v05 now matches v2 as of v02.123. v05 had no speech at all, so this was a full port:
+
+- **Speak screen**: a Speak button on Landing (after Random Head) opens the new
+  `SpeechSetupScreen`, a port of `SpeechSetupView`: the Auto Speak toggle, editable sample text
+  with play and Translate, and the language list in v2's groups. Reopened on reload if the app
+  was left there.
+- **Detail screen**: a play/pause button beside the name speaks the extract. With Auto Speak on,
+  the slideshow starts the speech as the details fade in and holds the slide until it is done,
+  counting into negative numbers meanwhile.
+- **Landing**: Reset Visit Count is a full-width destructive button, and Credits is a full-width
+  button under it instead of a small link below the links.
+
+The pieces:
+
+- `src/state/speechSettings.js` (port of `SpeechSettings`) and `src/state/useStoredString.js`.
+- `src/state/useSpeechPlayer.js`: port of `SpeechPlayer` on the Web Speech API
+  (`speechSynthesis`), plus `useSpeechVoices`.
+- `src/components/SpeechPlayButton.jsx`: port of `SpeechPlayButton` and
+  `SpeechTranslatedPlayButton` in one component (`translatesFirst`, `autoPlays`).
+- `src/data/translator.js`: translation through the browser's built-in Translator API.
+- `AppScreen.speechSetup`, routed in `App.jsx`; a `volume-up` icon; new CSS for the screen,
+  the speech button and the destructive bordered button.
+
+Where the web differs from iOS:
+
+- The language list is whatever voices the browser offers.
+- The Translator API exists only in desktop Chrome at the moment. Elsewhere the Translate button
+  is hidden and extracts are spoken in English.
+- If the browser refuses speech it was not asked for by a tap (Safari may), the slideshow carries
+  on without it.
+
+`scripts/smoke.mjs` covers the Speak screen, the Auto Speak hold and negative countdown, and two
+translated slides in a row (the case that hung in v2). It passes, as does the build, but it uses
+stand-ins for the browser's speech and translation, so real voices and real translation are
+untested. Version bumped to 0.1.23 and the README updated. Not yet committed.
+
+**Cost**: ~25 minutes.
