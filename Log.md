@@ -2281,3 +2281,29 @@ two groups.
 The app builds for the iOS Simulator. The change was not run. Not yet committed.
 
 **Cost**: ~5 minutes.
+
+# --
+
+2026-10-08 09:40 (v2: Speak screen — Auto Speak Summary / Name mode)
+
+Request: in v2 `SpeechSetupView`, expand Auto Speak with a segmented control below it to pick
+between Summary and Name. Summary mode speaks `hos.extract`; Name mode speaks `hos.order` +
+`hos.name`.
+
+- **Setting**: `SpeechSettings.AutoSpeakMode` (`summary`, `name`) saved under
+  `speechAutoSpeakMode`, defaulting to Summary (`SpeechPlayer.swift`).
+- **Speak screen**: a segmented Summary / Name picker under the Auto Speak toggle, shown only
+  while Auto Speak is on (Claude's reading of "expanded mode"). The footer text follows the mode.
+- **Detail screen**: `HOSDetailView` passes `speaksName` to `HOSSummaryView`, which speaks
+  `"<order> <name>"` (e.g. "1 George Washington") in place of the extract. The slideshow still
+  holds the slide until the speech is done.
+
+Not specified in the request:
+
+- With Auto Speak on in Name mode, the play button on a slide also speaks the name rather than
+  the extract, so the spoken text stays fixed per slide and the translation step stays simple.
+- With translation on, the order and name are translated like the extract.
+
+The app builds for the iOS Simulator. The change was not run. Not yet committed.
+
+**Cost**: ~10 minutes.

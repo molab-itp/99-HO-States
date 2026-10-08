@@ -880,3 +880,11 @@ default all groups to hidden, except for chinese
 break out Central/Eastern European into two groups
 Central Europea and Eastern European
 
+v02.126
+
+in v2 SpeechSetupView
+update Auto Speak, expaned mode
+below Auto Speak add segment view
+to select between Summary and Name
+in Auto Speak Summary mode hos.extract is spoken
+in Auto Speak Name mode hos.order+hos.name is spoken

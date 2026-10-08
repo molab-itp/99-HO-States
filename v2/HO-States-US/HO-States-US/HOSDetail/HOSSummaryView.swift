@@ -4,11 +4,17 @@ import SwiftUI
 /// `SpeechSetupView` has translation on), term, party, biography
 /// extract, and Wikipedia link — the text content that `HOSDetailView` fades in a few seconds after appearing.
 /// `HOSDetailView` owns `speechPlayer` so its slideshow can wait for the speech, and turns
-/// `autoSpeaks` on to have the extract spoken without the button being tapped.
+/// `autoSpeaks` on to have the extract spoken without the button being tapped. With `speaksName`
+/// on (Auto Speak's Name mode) the order and name are spoken in place of the extract.
 struct HOSSummaryView: View {
     let hos: HOS
     let speechPlayer: SpeechPlayer
     var autoSpeaks = false
+    var speaksName = false
+
+    private var speechText: String {
+        speaksName ? "\(hos.order) \(hos.name)" : hos.extract
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -16,9 +22,9 @@ struct HOSSummaryView: View {
                 Text("#\(hos.order) \(hos.name)").font(.system(.body, design: .monospaced))
                 Spacer()
                 if #available(iOS 18.0, *) {
-                    SpeechTranslatedPlayButton(player: speechPlayer, text: hos.extract, autoPlays: autoSpeaks)
+                    SpeechTranslatedPlayButton(player: speechPlayer, text: speechText, autoPlays: autoSpeaks)
                 } else {
-                    SpeechPlayButton(player: speechPlayer, text: hos.extract, autoPlays: autoSpeaks)
+                    SpeechPlayButton(player: speechPlayer, text: speechText, autoPlays: autoSpeaks)
                 }
             }
             Text("\(hos.term) · \(hos.party)")

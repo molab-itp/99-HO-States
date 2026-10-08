@@ -12,6 +12,26 @@ enum SpeechSettings {
     static let autoSpeakKey = "speechAutoSpeak"
     static let defaultAutoSpeak = false
 
+    /// What Auto Speak speaks for each slide.
+    enum AutoSpeakMode: String, CaseIterable, Identifiable {
+        /// The HOS's extract.
+        case summary
+        /// The HOS's order and name.
+        case name
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .summary: "Summary"
+            case .name: "Name"
+            }
+        }
+    }
+
+    static let autoSpeakModeKey = "speechAutoSpeakMode"
+    static let defaultAutoSpeakMode = AutoSpeakMode.summary
+
     /// The editable sample text on `SpeechSetupView`, and the speech language code it is
     /// currently written in: English until it is translated there.
     static let sampleTextKey = "speechSampleText"
@@ -43,18 +63,18 @@ enum SpeechSettings {
     /// any supported language not named here.
     private static let languageGroups: [LanguageGroup] = [
         LanguageGroup(title: "English", languages: ["en-US", "en-GB", "en-AU", "en-IE", "en-IN", "en-ZA"]),
+        LanguageGroup(title: "Chinese", languages: ["zh-CN", "zh-TW", "zh-HK"]),
+        LanguageGroup(title: "Central European", languages: ["cs-CZ", "hr-HR", "hu-HU", "pl-PL", "sk-SK", "sl-SI"]),
+        LanguageGroup(title: "Eastern European", languages: ["bg-BG", "lt-LT", "ro-RO", "ru-RU", "uk-UA"]),
+        LanguageGroup(title: "Indian languages", languages: ["hi-IN", "bn-IN", "kn-IN", "ta-IN", "te-IN"]),
         LanguageGroup(title: "Spanish", languages: ["es-ES", "es-MX"]),
         LanguageGroup(title: "French", languages: ["fr-FR", "fr-CA"]),
         LanguageGroup(title: "German", languages: ["de-DE"]),
         LanguageGroup(title: "Italian", languages: ["it-IT"]),
         LanguageGroup(title: "Portuguese", languages: ["pt-BR", "pt-PT"]),
         LanguageGroup(title: "Dutch", languages: ["nl-NL", "nl-BE"]),
-        LanguageGroup(title: "Chinese", languages: ["zh-CN", "zh-TW", "zh-HK"]),
         LanguageGroup(title: "Japanese / Korean", languages: ["ja-JP", "ko-KR"]),
         LanguageGroup(title: "Nordic", languages: ["da-DK", "fi-FI", "nb-NO", "sv-SE"]),
-        LanguageGroup(title: "Central European", languages: ["cs-CZ", "hr-HR", "hu-HU", "pl-PL", "sk-SK", "sl-SI"]),
-        LanguageGroup(title: "Eastern European", languages: ["bg-BG", "lt-LT", "ro-RO", "ru-RU", "uk-UA"]),
-        LanguageGroup(title: "Indian languages", languages: ["hi-IN", "bn-IN", "kn-IN", "ta-IN", "te-IN"]),
         LanguageGroup(title: "Middle East / Central Asia", languages: ["ar-001", "he-IL", "tr-TR", "kk-KZ"]),
         LanguageGroup(title: "Southeast Asia", languages: ["id-ID", "ms-MY", "th-TH", "vi-VN"]),
         LanguageGroup(title: "Other", languages: ["ca-ES", "el-GR"]),

@@ -41,6 +41,8 @@ struct HOSDetailView: View {
     private var fadePeriod = SlideshowSettings.defaultFadePeriod
     @AppStorage(SpeechSettings.autoSpeakKey)
     private var autoSpeak = SpeechSettings.defaultAutoSpeak
+    @AppStorage(SpeechSettings.autoSpeakModeKey)
+    private var autoSpeakMode = SpeechSettings.defaultAutoSpeakMode
     /// Seconds to wait after an HOS appears before fading in the details.
     private var delaySecs: Double { slideshowIntervalSecs * delayFraction }
 
@@ -104,7 +106,12 @@ struct HOSDetailView: View {
                 // Only advances while playing fade; manual browsing swaps the image instantly.
                 .animation(isPlaying ? .easeInOut(duration: fadePeriod) : nil, value: hos.id)
                 // Auto speech starts as the details fade in, so the extract is on screen for it.
-                HOSSummaryView(hos: hos, speechPlayer: speechPlayer, autoSpeaks: autoSpeak && isPlaying && detailsVisible)
+                HOSSummaryView(
+                    hos: hos,
+                    speechPlayer: speechPlayer,
+                    autoSpeaks: autoSpeak && isPlaying && detailsVisible,
+                    speaksName: autoSpeak && autoSpeakMode == .name
+                )
                     .opacity(detailsVisible ? 1 : 0)
             }
             .padding()
@@ -226,7 +233,7 @@ struct HOSDetailView: View {
         slideshowRemainingSecs -= Self.slideshowTickSecs
         // Half-tick tolerance absorbs floating-point drift from repeated subtraction.
         if slideshowRemainingSecs < Self.slideshowTickSecs / 2 {
-            // With Auto Speak on, the slide stays up until the extract has been spoken.
+            // With Auto Speak on, the slide stays up until the speech is done.
             if autoSpeak, speechPlayer.isBusy { return }
             advanceSlideshow()
             restartSlideshowCountdown()

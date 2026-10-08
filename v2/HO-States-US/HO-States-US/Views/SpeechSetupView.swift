@@ -4,7 +4,7 @@ import SwiftUI
 /// can each be shown or hidden, lets one be picked (used by `HOSSummaryView`'s speech button), and plays editable sample text back
 /// in it — optionally translated into that language first, which also turns on translation of
 /// the extract `HOSSummaryView` speaks. Also holds the Auto Speak toggle for `HOSDetailView`'s
-/// slideshow. Pushed from `LandingView`.
+/// slideshow, and the choice of what it speaks (summary or name). Pushed from `LandingView`.
 struct SpeechSetupView: View {
     @AppStorage(SpeechSettings.languageKey)
     private var language = SpeechSettings.defaultLanguage
@@ -16,6 +16,8 @@ struct SpeechSetupView: View {
     private var sampleTextLanguage = SpeechSettings.defaultSampleTextLanguage
     @AppStorage(SpeechSettings.autoSpeakKey)
     private var autoSpeak = SpeechSettings.defaultAutoSpeak
+    @AppStorage(SpeechSettings.autoSpeakModeKey)
+    private var autoSpeakMode = SpeechSettings.defaultAutoSpeakMode
     /// Titles of the language groups whose languages are showing, see `SpeechSettings.shownGroups`.
     @AppStorage(SpeechSettings.shownGroupsKey)
     private var shownGroups = SpeechSettings.defaultShownGroups
@@ -26,9 +28,23 @@ struct SpeechSetupView: View {
     var body: some View {
         List {
             Section {
-                Toggle("Auto Speak", isOn: $autoSpeak)
+                Toggle("Auto Speak", isOn: $autoSpeak.animation())
+                // Expanded: what gets spoken is only offered while Auto Speak is on.
+                if autoSpeak {
+                    Picker("Auto Speak", selection: $autoSpeakMode) {
+                        ForEach(SpeechSettings.AutoSpeakMode.allCases) { mode in
+                            Text(mode.title).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
             } footer: {
-                Text("While the slideshow plays, speaks each summary and waits for it to finish before advancing.")
+                switch autoSpeakMode {
+                case .summary:
+                    Text("While the slideshow plays, speaks each summary and waits for it to finish before advancing.")
+                case .name:
+                    Text("While the slideshow plays, speaks each number and name and waits for it to finish before advancing.")
+                }
             }
 
             Section {
