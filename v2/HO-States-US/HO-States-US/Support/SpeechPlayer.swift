@@ -7,6 +7,13 @@ enum SpeechSettings {
     /// BCP 47 code (e.g. "en-US") of the device's current language, used until one is picked.
     static var defaultLanguage: String { AVSpeechSynthesisVoice.currentLanguageCode() }
 
+    /// The editable sample text on `SpeechSetupView`, and the speech language code it is
+    /// currently written in: English until it is translated there.
+    static let sampleTextKey = "speechSampleText"
+    static let sampleTextLanguageKey = "speechSampleTextLanguage"
+    static let defaultSampleTextLanguage = "en-US"
+    static let defaultSampleText = "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."
+
     /// A titled set of languages, as `SpeechSetupView` lists them.
     struct LanguageGroup: Identifiable {
         let title: String
@@ -57,6 +64,25 @@ enum SpeechSettings {
 
     static func displayName(for language: String) -> String {
         Locale.current.localizedString(forIdentifier: language) ?? language
+    }
+
+    /// Whether English text is translated into `language` before it is spoken: on once the
+    /// sample text has been translated on `SpeechSetupView`, off again once it is back in English.
+    static func translatesBeforeSpeaking(sampleTextLanguage: String, language: String) -> Bool {
+        !isEnglish(sampleTextLanguage) && !isEnglish(language)
+    }
+
+    /// The Translation framework's language for a speech language code. Translation models are
+    /// per language rather than per region, except Chinese, which is split by script.
+    static func translationLanguage(for speechLanguage: String) -> Locale.Language {
+        switch speechLanguage {
+        case "zh-CN":
+            Locale.Language(identifier: "zh-Hans")
+        case "zh-TW", "zh-HK":
+            Locale.Language(identifier: "zh-Hant")
+        default:
+            Locale.Language(identifier: String(speechLanguage.prefix { $0 != "-" }))
+        }
     }
 }
 

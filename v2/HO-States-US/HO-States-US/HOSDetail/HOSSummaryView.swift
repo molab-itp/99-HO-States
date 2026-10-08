@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// The HOS's name (with a play/pause button that speaks the extract), term, party, biography
+/// The HOS's name (with a play/pause button that speaks the extract, translated first when
+/// `SpeechSetupView` has translation on), term, party, biography
 /// extract, and Wikipedia link — the text content that `HOSDetailView` fades in a few seconds after appearing.
 struct HOSSummaryView: View {
     let hos: HOS
@@ -12,7 +13,11 @@ struct HOSSummaryView: View {
             HStack {
                 Text("#\(hos.order) \(hos.name)").font(.system(.body, design: .monospaced))
                 Spacer()
-                SpeechPlayButton(player: speechPlayer, text: hos.extract)
+                if #available(iOS 18.0, *) {
+                    SpeechTranslatedPlayButton(player: speechPlayer, text: hos.extract)
+                } else {
+                    SpeechPlayButton(player: speechPlayer, text: hos.extract)
+                }
             }
             Text("\(hos.term) · \(hos.party)")
                 .font(.headline)

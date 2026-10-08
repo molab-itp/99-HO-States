@@ -829,3 +829,8 @@ group language selection into following:
 
 v02.120
 
+in v2 SpeechSetupView
+touch on Sample Text restores default text
+remember if translated to non-english
+when in non-english on HOSDetailView
+hos.extract is translated before speech to text

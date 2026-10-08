@@ -2,25 +2,24 @@ import SwiftUI
 
 /// Text-to-speech settings: lists the languages `AVSpeechSynthesizer` supports in groups, lets
 /// one be picked (used by `HOSSummaryView`'s speech button), and plays editable sample text back
-/// in it — optionally translated into that language first. Pushed from `LandingView`.
+/// in it — optionally translated into that language first, which also turns on translation of
+/// the extract `HOSSummaryView` speaks. Pushed from `LandingView`.
 struct SpeechSetupView: View {
     @AppStorage(SpeechSettings.languageKey)
     private var language = SpeechSettings.defaultLanguage
 
-    @State private var sampleText = Self.defaultSampleText
+    @AppStorage(SpeechSettings.sampleTextKey)
+    private var sampleText = SpeechSettings.defaultSampleText
     /// The language `sampleText` is currently written in: English until Translate is used.
-    @State private var sampleTextLanguage = Self.defaultSampleTextLanguage
+    @AppStorage(SpeechSettings.sampleTextLanguageKey)
+    private var sampleTextLanguage = SpeechSettings.defaultSampleTextLanguage
     @State private var player = SpeechPlayer()
 
     private let languageGroups = SpeechSettings.supportedLanguageGroups()
 
-    private static let defaultSampleTextLanguage = "en-US"
-
-    private static let defaultSampleText = "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."
-
     var body: some View {
         List {
-            Section("Sample Text") {
+            Section {
                 HStack(alignment: .top) {
                     TextField("Sample Text", text: $sampleText, axis: .vertical)
                     SpeechPlayButton(player: player, text: sampleText)
@@ -29,6 +28,14 @@ struct SpeechSetupView: View {
                 if #available(iOS 18.0, *) {
                     SpeechTranslateButton(text: $sampleText, textLanguage: $sampleTextLanguage, language: language)
                 }
+            } header: {
+                // Tapping the header puts back the default (English) sample text.
+                Button("Sample Text") {
+                    sampleText = SpeechSettings.defaultSampleText
+                    sampleTextLanguage = SpeechSettings.defaultSampleTextLanguage
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Restores the default text")
             }
 
             ForEach(languageGroups) { group in

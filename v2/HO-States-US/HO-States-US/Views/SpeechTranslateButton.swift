@@ -17,11 +17,9 @@ struct SpeechTranslateButton: View {
     @State private var pendingLanguage = ""
     @State private var errorMessage: String?
 
-    private static let english = "en-US"
-
     private var isTextEnglish: Bool { SpeechSettings.isEnglish(textLanguage) }
     /// Speech language code the button translates `text` into.
-    private var targetLanguage: String { isTextEnglish ? language : Self.english }
+    private var targetLanguage: String { isTextEnglish ? language : SpeechSettings.defaultSampleTextLanguage }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -56,21 +54,8 @@ struct SpeechTranslateButton: View {
     private func translate() {
         pendingLanguage = targetLanguage
         configuration = TranslationSession.Configuration(
-            source: Self.translationLanguage(for: textLanguage),
-            target: Self.translationLanguage(for: targetLanguage)
+            source: SpeechSettings.translationLanguage(for: textLanguage),
+            target: SpeechSettings.translationLanguage(for: targetLanguage)
         )
-    }
-
-    /// The Translation framework's language for a speech language code. Translation models are
-    /// per language rather than per region, except Chinese, which is split by script.
-    private static func translationLanguage(for speechLanguage: String) -> Locale.Language {
-        switch speechLanguage {
-        case "zh-CN":
-            Locale.Language(identifier: "zh-Hans")
-        case "zh-TW", "zh-HK":
-            Locale.Language(identifier: "zh-Hant")
-        default:
-            Locale.Language(identifier: String(speechLanguage.prefix { $0 != "-" }))
-        }
     }
 }

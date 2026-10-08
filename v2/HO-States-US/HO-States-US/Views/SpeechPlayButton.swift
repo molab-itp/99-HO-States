@@ -15,10 +15,19 @@ struct SpeechPlayButton: View {
         Button {
             player.toggle(text, language: language)
         } label: {
-            Label(isSpeaking ? "Pause Speech" : "Play Speech", systemImage: isSpeaking ? "pause.circle" : "play.circle")
-                .labelStyle(.iconOnly)
-                .font(.title2)
+            SpeechPlayLabel(isSpeaking: isSpeaking)
         }
         .disabled(text.isEmpty)
+    }
+}
+
+/// The play/pause icon shared by the speech buttons.
+struct SpeechPlayLabel: View {
+    let isSpeaking: Bool
+
+    var body: some View {
+        Label(isSpeaking ? "Pause Speech" : "Play Speech", systemImage: isSpeaking ? "pause.circle" : "play.circle")
+            .labelStyle(.iconOnly)
+            .font(.title2)
     }
 }
