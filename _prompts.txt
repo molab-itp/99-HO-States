@@ -834,3 +834,6 @@ touch on Sample Text restores default text
 remember if translated to non-english
 when in non-english on HOSDetailView
 hos.extract is translated before speech to text
+
+v02.121
+
