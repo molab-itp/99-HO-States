@@ -2,9 +2,11 @@ import SwiftUI
 
 /// A play/pause button that speaks `text` through `player` in the language picked on
 /// `SpeechSetupView`. The owner of `player` is responsible for stopping it (e.g. on disappear).
+/// Speech also starts by itself each time `autoPlays` turns on.
 struct SpeechPlayButton: View {
     let player: SpeechPlayer
     let text: String
+    var autoPlays = false
 
     @AppStorage(SpeechSettings.languageKey)
     private var language = SpeechSettings.defaultLanguage
@@ -18,6 +20,11 @@ struct SpeechPlayButton: View {
             SpeechPlayLabel(isSpeaking: isSpeaking)
         }
         .disabled(text.isEmpty)
+        .onChange(of: autoPlays) {
+            if autoPlays, player.status == .idle {
+                player.toggle(text, language: language)
+            }
+        }
     }
 }
 

@@ -3,7 +3,8 @@ import SwiftUI
 /// Text-to-speech settings: lists the languages `AVSpeechSynthesizer` supports in groups, lets
 /// one be picked (used by `HOSSummaryView`'s speech button), and plays editable sample text back
 /// in it — optionally translated into that language first, which also turns on translation of
-/// the extract `HOSSummaryView` speaks. Pushed from `LandingView`.
+/// the extract `HOSSummaryView` speaks. Also holds the Auto Speak toggle for `HOSDetailView`'s
+/// slideshow. Pushed from `LandingView`.
 struct SpeechSetupView: View {
     @AppStorage(SpeechSettings.languageKey)
     private var language = SpeechSettings.defaultLanguage
@@ -13,12 +14,20 @@ struct SpeechSetupView: View {
     /// The language `sampleText` is currently written in: English until Translate is used.
     @AppStorage(SpeechSettings.sampleTextLanguageKey)
     private var sampleTextLanguage = SpeechSettings.defaultSampleTextLanguage
+    @AppStorage(SpeechSettings.autoSpeakKey)
+    private var autoSpeak = SpeechSettings.defaultAutoSpeak
     @State private var player = SpeechPlayer()
 
     private let languageGroups = SpeechSettings.supportedLanguageGroups()
 
     var body: some View {
         List {
+            Section {
+                Toggle("Auto Speak", isOn: $autoSpeak)
+            } footer: {
+                Text("While the slideshow plays, speaks each summary and waits for it to finish before advancing.")
+            }
+
             Section {
                 HStack(alignment: .top) {
                     TextField("Sample Text", text: $sampleText, axis: .vertical)

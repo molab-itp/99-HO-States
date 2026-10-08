@@ -135,7 +135,6 @@ struct LandingView: View {
           }
           .buttonStyle(.bordered)
           //          .font(.footnote)
-          
           Button {
             onShowSpeechSetup()
           } label: {

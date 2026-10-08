@@ -39,6 +39,8 @@ struct HOSDetailView: View {
     private var delayFraction = SlideshowSettings.defaultDelayFraction
     @AppStorage(SlideshowSettings.fadePeriodKey)
     private var fadePeriod = SlideshowSettings.defaultFadePeriod
+    @AppStorage(SpeechSettings.autoSpeakKey)
+    private var autoSpeak = SpeechSettings.defaultAutoSpeak
     /// Seconds to wait after an HOS appears before fading in the details.
     private var delaySecs: Double { slideshowIntervalSecs * delayFraction }
 
@@ -56,6 +58,9 @@ struct HOSDetailView: View {
     // doesn't resubscribe (an unsubscribed `autoconnect` publisher never starts its timer).
     @State private var slideshowTicks = Timer.publish(every: slideshowTickSecs, on: .main, in: .common).autoconnect()
     @State private var slideshowRemainingSecs = 0.0
+    // Owned here rather than by `HOSSummaryView` so `tickSlideshow` can hold the advance until
+    // the extract has been spoken.
+    @State private var speechPlayer = SpeechPlayer()
 
     // Indices visited during the random walk (in random mode only), so Previous can step back
     // through them and Next can replay forward instead of always drawing a fresh card. Unlike
@@ -98,7 +103,8 @@ struct HOSDetailView: View {
                 }
                 // Only advances while playing fade; manual browsing swaps the image instantly.
                 .animation(isPlaying ? .easeInOut(duration: fadePeriod) : nil, value: hos.id)
-                HOSSummaryView(hos: hos)
+                // Auto speech starts as the details fade in, so the extract is on screen for it.
+                HOSSummaryView(hos: hos, speechPlayer: speechPlayer, autoSpeaks: autoSpeak && isPlaying && detailsVisible)
                     .opacity(detailsVisible ? 1 : 0)
             }
             .padding()
@@ -218,6 +224,8 @@ struct HOSDetailView: View {
         slideshowRemainingSecs = max(0, slideshowRemainingSecs - Self.slideshowTickSecs)
         // Half-tick tolerance absorbs floating-point drift from repeated subtraction.
         if slideshowRemainingSecs < Self.slideshowTickSecs / 2 {
+            // With Auto Speak on, the countdown sits at zero until the extract has been spoken.
+            if autoSpeak, speechPlayer.isBusy { return }
             advanceSlideshow()
             restartSlideshowCountdown()
         }

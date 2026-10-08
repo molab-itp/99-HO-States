@@ -837,3 +837,11 @@ hos.extract is translated before speech to text
 
 v02.121
 
+in v2 SpeechSetupView
+add Toggle labeled "Auto Speek" to control 
+initiate speek of 
+hos.extract when in slide show play mode
+in slide show play mode 
+play back should wait
+until hos.extract speek is done 
+before advancing to next slide.

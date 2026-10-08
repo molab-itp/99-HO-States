@@ -7,6 +7,11 @@ enum SpeechSettings {
     /// BCP 47 code (e.g. "en-US") of the device's current language, used until one is picked.
     static var defaultLanguage: String { AVSpeechSynthesisVoice.currentLanguageCode() }
 
+    /// Whether `HOSDetailView`'s slideshow speaks each extract as it plays, holding the advance
+    /// to the next slide until the speech is done.
+    static let autoSpeakKey = "speechAutoSpeak"
+    static let defaultAutoSpeak = false
+
     /// The editable sample text on `SpeechSetupView`, and the speech language code it is
     /// currently written in: English until it is translated there.
     static let sampleTextKey = "speechSampleText"
@@ -97,6 +102,11 @@ final class SpeechPlayer: NSObject, AVSpeechSynthesizerDelegate {
     }
 
     private(set) var status: Status = .idle
+    /// Set by a speech button while it gets text ready to speak (translating it), so `isBusy`
+    /// covers the gap between asking for speech and `status` leaving `.idle`.
+    var isPreparing = false
+    /// Whether speech is on its way or in progress (paused included).
+    var isBusy: Bool { isPreparing || status != .idle }
 
     @ObservationIgnored private let synthesizer = AVSpeechSynthesizer()
     /// The utterance `status` describes. A stopped utterance's cancel callback can arrive after
