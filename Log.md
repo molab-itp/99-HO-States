@@ -2258,3 +2258,26 @@ stand-ins for the browser's speech and translation, so real voices and real tran
 untested. Version bumped to 0.1.23 and the README updated. Not yet committed.
 
 **Cost**: ~25 minutes.
+
+# --
+
+2026-10-08 09:10 (v2: Speak screen — show/hide language groups, Central and Eastern European split)
+
+Request: in v2 `SpeechSetupView`, give each language group title a hide/show toggle saved in app
+storage, default every group to hidden except Chinese, and break Central/Eastern European into
+two groups.
+
+- **Toggle**: each group's title is now a button with a chevron that shows or hides the group's
+  languages (`groupHeader` in `SpeechSetupView`).
+- **Storage**: the titles of the shown groups are saved one per line under
+  `speechShownLanguageGroups`, defaulting to `Chinese` (`SpeechSettings.shownGroupsKey`,
+  `shownGroups`, `storedShownGroups` in `SpeechPlayer.swift`). A group added later starts hidden.
+- **Split**: the division was Claude's choice, not specified in the request.
+  - Central European: `cs-CZ`, `hr-HR`, `hu-HU`, `pl-PL`, `sk-SK`, `sl-SI`
+  - Eastern European: `bg-BG`, `lt-LT`, `ro-RO`, `ru-RU`, `uk-UA`
+- **Not asked for**: a hidden group shows a checkmark in its header when it holds the picked
+  language, so the selection stays visible while its group is collapsed.
+
+The app builds for the iOS Simulator. The change was not run. Not yet committed.
+
+**Cost**: ~5 minutes.

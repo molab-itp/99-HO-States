@@ -870,3 +870,13 @@ expressed as a negative number
 v05.124
 
 sync v05 with v2
+
+v02.125
+
+in v2 SpeechSetupView
+give each group.title in languageGroups hide and show toggle
+that is saved in app storage
+default all groups to hidden, except for chinese
+break out Central/Eastern European into two groups
+Central Europea and Eastern European
+

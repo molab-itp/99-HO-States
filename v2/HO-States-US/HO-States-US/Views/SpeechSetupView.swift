@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Text-to-speech settings: lists the languages `AVSpeechSynthesizer` supports in groups, lets
-/// one be picked (used by `HOSSummaryView`'s speech button), and plays editable sample text back
+/// Text-to-speech settings: lists the languages `AVSpeechSynthesizer` supports in groups that
+/// can each be shown or hidden, lets one be picked (used by `HOSSummaryView`'s speech button), and plays editable sample text back
 /// in it — optionally translated into that language first, which also turns on translation of
 /// the extract `HOSSummaryView` speaks. Also holds the Auto Speak toggle for `HOSDetailView`'s
 /// slideshow. Pushed from `LandingView`.
@@ -16,6 +16,9 @@ struct SpeechSetupView: View {
     private var sampleTextLanguage = SpeechSettings.defaultSampleTextLanguage
     @AppStorage(SpeechSettings.autoSpeakKey)
     private var autoSpeak = SpeechSettings.defaultAutoSpeak
+    /// Titles of the language groups whose languages are showing, see `SpeechSettings.shownGroups`.
+    @AppStorage(SpeechSettings.shownGroupsKey)
+    private var shownGroups = SpeechSettings.defaultShownGroups
     @State private var player = SpeechPlayer()
 
     private let languageGroups = SpeechSettings.supportedLanguageGroups()
@@ -43,15 +46,20 @@ struct SpeechSetupView: View {
                     sampleText = SpeechSettings.defaultSampleText
                     sampleTextLanguage = SpeechSettings.defaultSampleTextLanguage
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.bordered)
                 .accessibilityHint("Restores the default text")
             }
 
             ForEach(languageGroups) { group in
-                Section(group.title) {
-                    ForEach(group.languages, id: \.self) { code in
-                        languageRow(code)
+                let isShown = SpeechSettings.shownGroups(shownGroups).contains(group.title)
+                Section {
+                    if isShown {
+                        ForEach(group.languages, id: \.self) { code in
+                            languageRow(code)
+                        }
                     }
+                } header: {
+                    groupHeader(group, isShown: isShown)
                 }
             }
         }
@@ -66,6 +74,34 @@ struct SpeechSetupView: View {
         .onDisappear {
             player.stop()
         }
+    }
+
+    /// The group's title as a button that shows or hides its languages. While they are hidden,
+    /// a checkmark marks the group holding the picked language.
+    private func groupHeader(_ group: SpeechSettings.LanguageGroup, isShown: Bool) -> some View {
+        Button {
+            var titles = SpeechSettings.shownGroups(shownGroups)
+            if isShown {
+                titles.remove(group.title)
+            } else {
+                titles.insert(group.title)
+            }
+            withAnimation {
+                shownGroups = SpeechSettings.storedShownGroups(titles)
+            }
+        } label: {
+            HStack {
+                Text(group.title)
+                if !isShown && group.languages.contains(language) {
+                    Image(systemName: "checkmark")
+                }
+                Spacer()
+                Image(systemName: isShown ? "chevron.down" : "chevron.right")
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityValue(isShown ? "Expanded" : "Collapsed")
     }
 
     private func languageRow(_ code: String) -> some View {

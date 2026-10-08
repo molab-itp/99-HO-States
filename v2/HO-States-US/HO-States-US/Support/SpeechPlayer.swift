@@ -19,6 +19,19 @@ enum SpeechSettings {
     static let defaultSampleTextLanguage = "en-US"
     static let defaultSampleText = "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."
 
+    /// The titles of the language groups `SpeechSetupView` shows the languages of, one per line;
+    /// the rest are collapsed to their title.
+    static let shownGroupsKey = "speechShownLanguageGroups"
+    static let defaultShownGroups = "Chinese"
+
+    static func shownGroups(_ stored: String) -> Set<String> {
+        Set(stored.split(separator: "\n").map(String.init))
+    }
+
+    static func storedShownGroups(_ titles: Set<String>) -> String {
+        titles.sorted().joined(separator: "\n")
+    }
+
     /// A titled set of languages, as `SpeechSetupView` lists them.
     struct LanguageGroup: Identifiable {
         let title: String
@@ -39,7 +52,8 @@ enum SpeechSettings {
         LanguageGroup(title: "Chinese", languages: ["zh-CN", "zh-TW", "zh-HK"]),
         LanguageGroup(title: "Japanese / Korean", languages: ["ja-JP", "ko-KR"]),
         LanguageGroup(title: "Nordic", languages: ["da-DK", "fi-FI", "nb-NO", "sv-SE"]),
-        LanguageGroup(title: "Central/Eastern European", languages: ["bg-BG", "cs-CZ", "hr-HR", "hu-HU", "lt-LT", "pl-PL", "ro-RO", "ru-RU", "sk-SK", "sl-SI", "uk-UA"]),
+        LanguageGroup(title: "Central European", languages: ["cs-CZ", "hr-HR", "hu-HU", "pl-PL", "sk-SK", "sl-SI"]),
+        LanguageGroup(title: "Eastern European", languages: ["bg-BG", "lt-LT", "ro-RO", "ru-RU", "uk-UA"]),
         LanguageGroup(title: "Indian languages", languages: ["hi-IN", "bn-IN", "kn-IN", "ta-IN", "te-IN"]),
         LanguageGroup(title: "Middle East / Central Asia", languages: ["ar-001", "he-IL", "tr-TR", "kk-KZ"]),
         LanguageGroup(title: "Southeast Asia", languages: ["id-ID", "ms-MY", "th-TH", "vi-VN"]),
