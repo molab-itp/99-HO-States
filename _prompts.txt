@@ -845,3 +845,9 @@ in slide show play mode
 play back should wait
 until hos.extract speek is done 
 before advancing to next slide.
+
+v02.122
+
+SpeechTranslatedPlayButton 
+    if configuration != nil {
+        ProgressView()

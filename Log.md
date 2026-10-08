@@ -2148,3 +2148,43 @@ v05 now matches v2 as of v02.116. Three things came over:
 Version bumped to 0.1.22. Not yet committed.
 
 **Cost**: ~10 minutes.
+
+# --
+
+2026-10-07 21:55 (v2: Auto Speak in the slideshow)
+
+One request: add an "Auto Speek" toggle to `SpeechSetupView` so that, in slideshow play mode,
+each `hos.extract` is spoken and playback waits for the speech to finish before advancing.
+
+What it does:
+
+- **Toggle**: "Auto Speak" sits in its own section at the top of the Speak setup screen, off by
+  default, stored under `speechAutoSpeak`. Labelled "Speak" rather than "Speek" to match the
+  screen's title.
+- **Starting speech**: while the slideshow plays, the extract starts speaking as the details
+  fade in, not when the photo appears. It uses the same language and translation settings as
+  the play button.
+- **Waiting**: when the countdown reaches zero it holds there until the speech, including any
+  translation before it, is done, then advances. Speech that ends early does not shorten the
+  slide's interval.
+
+The pieces:
+
+- `SpeechSettings`: `autoSpeakKey` and `defaultAutoSpeak`.
+- `SpeechPlayer`: `isPreparing` (set by a button while it translates) and `isBusy`.
+- `SpeechPlayButton` and `SpeechTranslatedPlayButton`: an `autoPlays` parameter; speech starts
+  each time it turns on.
+- `HOSSummaryView`: takes `speechPlayer` and `autoSpeaks` instead of owning the player.
+- `HOSDetailView`: owns the `SpeechPlayer`, passes `autoSpeak && isPlaying && detailsVisible`
+  as `autoSpeaks`, and `tickSlideshow` returns without advancing while `speechPlayer.isBusy`.
+
+Caveats:
+
+- Pausing the speech with its button while the slideshow plays holds the slideshow on that
+  slide until the speech is resumed or Next is tapped.
+- Pausing the slideshow does not stop speech already in progress.
+
+The app builds for the iOS Simulator. It was not run, so the behaviour is untested. The build
+number was not bumped. Not yet committed.
+
+**Cost**: ~10 minutes.
