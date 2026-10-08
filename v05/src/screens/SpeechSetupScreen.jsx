@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Icon from '../components/Icon.jsx';
 import NavBar from '../components/NavBar.jsx';
+import SegmentedPicker from '../components/SegmentedPicker.jsx';
 import SpeechPlayButton from '../components/SpeechPlayButton.jsx';
 import { SpeechSettings } from '../state/speechSettings.js';
 import { useSpeechPlayer, useSpeechVoices } from '../state/useSpeechPlayer.js';
@@ -10,10 +11,11 @@ import { canTranslate, translateText } from '../data/translator.js';
 
 /**
  * Port of SpeechSetupView.swift — text-to-speech settings: lists the languages the browser has a
- * voice for in groups, lets one be picked (used by the detail screen's speech button), and plays
- * editable sample text back in it — optionally translated into that language first, which also
- * turns on translation of the extract the detail screen speaks. Also holds the Auto Speak toggle
- * for the detail screen's slideshow. Pushed from Landing.
+ * voice for in groups that can each be shown or hidden, lets one be picked (used by the detail
+ * screen's speech button), and plays editable sample text back in it — optionally translated into
+ * that language first, which also turns on translation of the extract the detail screen speaks.
+ * Also holds the Auto Speak toggle for the detail screen's slideshow, and the choice of what it
+ * speaks (summary or name). Pushed from Landing.
  */
 export default function SpeechSetupScreen({ onBack }) {
   const [language, setLanguage] = useStoredString(SpeechSettings.languageKey, SpeechSettings.defaultLanguage());
@@ -24,6 +26,16 @@ export default function SpeechSetupScreen({ onBack }) {
     SpeechSettings.defaultSampleTextLanguage,
   );
   const [autoSpeak, setAutoSpeak] = useStoredBoolean(SpeechSettings.autoSpeakKey, SpeechSettings.defaultAutoSpeak);
+  const [autoSpeakMode, setAutoSpeakMode] = useStoredString(
+    SpeechSettings.autoSpeakModeKey,
+    SpeechSettings.defaultAutoSpeakMode,
+  );
+  // Titles of the language groups whose languages are showing, see `SpeechSettings.shownGroups`.
+  const [storedShownGroups, setStoredShownGroups] = useStoredString(
+    SpeechSettings.shownGroupsKey,
+    SpeechSettings.defaultShownGroups,
+  );
+  const shownGroups = SpeechSettings.shownGroups(storedShownGroups);
   const player = useSpeechPlayer();
   const voices = useSpeechVoices();
   const languageGroups = useMemo(() => SpeechSettings.supportedLanguageGroups(voices), [voices]);
@@ -33,6 +45,12 @@ export default function SpeechSetupScreen({ onBack }) {
   useEffect(() => {
     stop();
   }, [language, sampleText, stop]);
+
+  function toggleGroup(title) {
+    const titles = new Set(shownGroups);
+    if (!titles.delete(title)) titles.add(title);
+    setStoredShownGroups(SpeechSettings.storedShownGroups(titles));
+  }
 
   return (
     <div className="screen-scroll list-screen">
@@ -50,16 +68,31 @@ export default function SpeechSetupScreen({ onBack }) {
                 </span>
               </label>
             </li>
+            {/* Expanded: what gets spoken is only offered while Auto Speak is on. */}
+            {autoSpeak && (
+              <li className="speech-row">
+                <SegmentedPicker
+                  label="Auto Speak"
+                  hidesLabel
+                  options={SpeechSettings.autoSpeakModes}
+                  value={autoSpeakMode}
+                  onChange={setAutoSpeakMode}
+                  formatOption={SpeechSettings.autoSpeakModeTitle}
+                />
+              </li>
+            )}
           </ul>
           <p className="credits-footer">
-            While the slideshow plays, speaks each summary and waits for it to finish before advancing.
+            {autoSpeakMode === 'name'
+              ? 'While the slideshow plays, speaks each number and name and waits for it to finish before advancing.'
+              : 'While the slideshow plays, speaks each summary and waits for it to finish before advancing.'}
           </p>
         </section>
 
         <section>
           {/* Tapping the header puts back the default (English) sample text. */}
           <button
-            className="speech-section-title"
+            className="speech-reset-btn"
             title="Restores the default text"
             onClick={() => {
               setSampleText(SpeechSettings.defaultSampleText);
@@ -96,28 +129,41 @@ export default function SpeechSetupScreen({ onBack }) {
         </section>
 
         {languageGroups.length === 0 && <p className="credits-footer">This browser has no speech voices.</p>}
-        {languageGroups.map((group) => (
-          <section key={group.title}>
-            <h2 className="speech-section-title">{group.title}</h2>
-            <ul className="hos-list">
-              {group.languages.map((code) => (
-                <li key={code}>
-                  <button
-                    className="language-row"
-                    aria-pressed={code === language}
-                    onClick={() => setLanguage(code)}
-                  >
-                    <span className="names">
-                      <span>{SpeechSettings.displayName(code)}</span>
-                      <span className="code">{code}</span>
-                    </span>
-                    {code === language && <Icon name="check" size={18} className="language-check" />}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+        {languageGroups.map((group) => {
+          const isShown = shownGroups.has(group.title);
+          return (
+            <section key={group.title}>
+              {/* The group's title as a button that shows or hides its languages. While they are
+                  hidden, a checkmark marks the group holding the picked language. */}
+              <button className="credits-header" aria-expanded={isShown} onClick={() => toggleGroup(group.title)}>
+                <span className="speech-group-title">
+                  {group.title}
+                  {!isShown && group.languages.includes(language) && <Icon name="check" size={14} />}
+                </span>
+                <Icon name="chevron-right" size={13} className={isShown ? 'chevron expanded' : 'chevron'} />
+              </button>
+              {isShown && (
+                <ul className="hos-list">
+                  {group.languages.map((code) => (
+                    <li key={code}>
+                      <button
+                        className="language-row"
+                        aria-pressed={code === language}
+                        onClick={() => setLanguage(code)}
+                      >
+                        <span className="names">
+                          <span>{SpeechSettings.displayName(code)}</span>
+                          <span className="code">{code}</span>
+                        </span>
+                        {code === language && <Icon name="check" size={18} className="language-check" />}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          );
+        })}
       </div>
     </div>
   );

@@ -686,21 +686,38 @@ input {
   gap: 20px;
 }
 
-.speech-section-title {
-  display: block;
-  margin: 0;
-  padding: 0 16px 7px;
-  background: none;
+/* SwiftUI's `.bordered` button in a section header (Sample Text, which restores the default). */
+.speech-reset-btn {
+  margin: 0 16px 7px;
+  padding: 5px 10px;
   border: none;
+  border-radius: 7px;
+  background: var(--tint-fill);
+  color: var(--tint);
   font-family: inherit;
   font-size: 13px;
-  font-weight: 400;
   text-transform: uppercase;
-  color: var(--secondary-label);
+  cursor: pointer;
 }
 
-button.speech-section-title {
-  cursor: pointer;
+.speech-reset-btn:active {
+  background: var(--tint-fill-pressed);
+}
+
+/* A language group's title, with a checkmark while it is hidden and holds the picked language. */
+.speech-group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Auto Speak's Summary / Name picker fills its row, as a segmented Picker does in a List. */
+.speech-row .segmented {
+  flex: 1;
+}
+
+.speech-row .segmented .segment {
+  flex: 1;
 }
 
 .speech-row {

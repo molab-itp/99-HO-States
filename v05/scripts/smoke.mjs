@@ -52,7 +52,7 @@ async function main() {
       if (current === utterance) current = null;
       utterance?.onend?.({});
     };
-    const voices = ['en-US', 'en-GB', 'es-ES', 'fr-FR', 'cy-GB'].map((lang) => ({ lang, name: lang }));
+    const voices = ['en-US', 'en-GB', 'zh-CN', 'es-ES', 'fr-FR', 'cy-GB'].map((lang) => ({ lang, name: lang }));
     Object.defineProperty(window, 'speechSynthesis', {
       configurable: true,
       value: {
@@ -319,11 +319,20 @@ async function main() {
     await backToLanding();
     await showSpeak();
     assert((await page.locator('.nav-title').textContent()) === 'Speak', 'speech setup screen should be titled Speak');
-    const groupTitles = await page.locator('h2.speech-section-title').allTextContents();
-    assert(groupTitles.join(',') === 'English,Spanish,French,Other', `language groups: got ${groupTitles}`);
-    assert((await page.locator('.language-row').count()) === 5, 'every voice language should be listed');
+    const groupHeader = (groupTitle) => page.locator('.speech-setup .credits-header', { hasText: groupTitle });
+    const groupTitles = await page.locator('.speech-setup .credits-header').allTextContents();
+    assert(groupTitles.join(',') === 'English,Chinese,Spanish,French,Other', `language groups: got ${groupTitles}`);
+    assert((await page.locator('.language-row').allTextContents()).join(',').endsWith('zh-CN'), 'only the Chinese group should start shown');
+    assert((await page.locator('.language-row').count()) === 1, 'the other groups should start hidden');
+    assert((await groupHeader('English').locator('.speech-group-title svg').count()) === 1, 'a hidden group holding the picked language should be checked');
+    for (const groupTitle of ['English', 'Spanish', 'French', 'Other']) await groupHeader(groupTitle).click();
+    assert((await page.locator('.language-row').count()) === 6, 'every voice language should be listed');
+    assert((await groupHeader('English').locator('.speech-group-title svg').count()) === 0, 'a shown group needs no checkmark in its header');
     assertIncludes(await page.locator('.language-row[aria-pressed="true"]').textContent(), 'en-US', 'the browser language should start selected');
+    await groupHeader('Chinese').click();
+    assert((await page.locator('.language-row').count()) === 5, 'a shown group should hide again');
     assert(!(await page.isChecked('.speech-setup .switch input')), 'Auto Speak should start off');
+    assert((await page.locator('.speech-setup .segmented').count()) === 0, 'Summary / Name is only offered while Auto Speak is on');
     assert(await page.isDisabled('.speech-translate-btn'), 'Translate is off while the text and language are both English');
     await page.click('.speech-sample button[aria-label="Play Speech"]');
     await page.waitForSelector('.speech-sample button[aria-label="Pause Speech"]');
@@ -331,10 +340,12 @@ async function main() {
     assert((await lastSpoken()).lang === 'en-US', 'sample text should be spoken in the selected language');
     await page.waitForSelector('.speech-sample button[aria-label="Play Speech"]');
     await page.click('.speech-setup .toggle-row');
+    assert((await page.locator('.speech-setup .segment.selected').textContent()) === 'Summary', 'Auto Speak should start in Summary mode');
     await shot('speak');
     await page.reload();
     await page.waitForSelector('.speech-setup');
     assert(await page.isChecked('.speech-setup .switch input'), 'Auto Speak should survive a reload');
+    assert((await page.locator('.language-row').count()) === 5, 'the shown language groups should survive a reload');
     await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
 
@@ -358,6 +369,28 @@ async function main() {
     assert(!(await title()).includes('· -'), 'the countdown should restart for the next slide');
     await page.click('button[aria-label="Pause"]');
 
+    console.log('Auto Speak Name mode: the order and name are spoken instead of the extract...');
+    await setSpeechDuration(300);
+    await backToLanding();
+    await showSpeak();
+    await page.click('.speech-setup .segment:has-text("Name")');
+    assertIncludes(await page.locator('.speech-setup .credits-footer').first().textContent(), 'number and name', 'the footer should follow the mode');
+    await page.reload();
+    await page.waitForSelector('.speech-setup');
+    assert((await page.locator('.speech-setup .segment.selected').textContent()) === 'Name', 'the Auto Speak mode should survive a reload');
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+    await pickFromList('#01');
+    await page.click('.detail-text button[aria-label="Play Speech"]');
+    await page.waitForSelector('.detail-text button[aria-label="Pause Speech"]');
+    assert((await lastSpoken()).text === '1 George Washington', `Name mode should speak the order and name: got ${(await lastSpoken()).text}`);
+    await backToLanding();
+    await showSpeak();
+    await page.click('.speech-setup .segment:has-text("Summary")');
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+    await resume();
+
     console.log('Translation: translated sample text makes each extract translated before it is spoken...');
     await setSpeechDuration(300);
     await backToLanding();
@@ -379,7 +412,7 @@ async function main() {
     // Back to English and Auto Speak off for the rest of the run.
     await backToLanding();
     await showSpeak();
-    await page.click('button.speech-section-title:has-text("Sample Text")');
+    await page.click('.speech-reset-btn:has-text("Sample Text")');
     assert((await page.locator('.speech-sample textarea').inputValue()).startsWith('Four score'), 'the Sample Text header should restore the default text');
     await page.click('.language-row:has-text("en-US")');
     await page.click('.speech-setup .toggle-row');

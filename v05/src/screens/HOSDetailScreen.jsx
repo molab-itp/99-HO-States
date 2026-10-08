@@ -12,6 +12,7 @@ import SpeechPlayButton from '../components/SpeechPlayButton.jsx';
 import { showsDrawing, showsPhoto } from '../data/drawingDisplayMode.js';
 import { useStoredBoolean } from '../state/useStoredBoolean.js';
 import { useStoredNumber } from '../state/useStoredNumber.js';
+import { useStoredString } from '../state/useStoredString.js';
 import { SlideshowSettings } from '../state/slideshowSettings.js';
 import { SpeechSettings } from '../state/speechSettings.js';
 import { useSpeechPlayer } from '../state/useSpeechPlayer.js';
@@ -62,8 +63,9 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   const delaySecs = slideshowIntervalSecs * delayFraction;
   const [fadePeriod] = useStoredNumber(SlideshowSettings.fadePeriodKey, SlideshowSettings.defaultFadePeriod);
   const [autoSpeak] = useStoredBoolean(SpeechSettings.autoSpeakKey, SpeechSettings.defaultAutoSpeak);
+  const [autoSpeakMode] = useStoredString(SpeechSettings.autoSpeakModeKey, SpeechSettings.defaultAutoSpeakMode);
   // Owned here rather than by the speech button so the auto-advance below can hold until the
-  // extract has been spoken.
+  // speech is done.
   const speechPlayer = useSpeechPlayer();
 
   // The index whose details have been revealed. Derived rather than a boolean reset in the effect
@@ -184,7 +186,7 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   // tolerance absorbs floating-point drift from repeated subtraction.
   useEffect(() => {
     if (remainingSecs >= SLIDESHOW_TICK_SECS / 2) return;
-    // With Auto Speak on, the slide stays up until the extract has been spoken. The countdown
+    // With Auto Speak on, the slide stays up until the speech is done. The countdown
     // keeps ticking meanwhile, so this is checked again every tick.
     if (autoSpeak && speechPlayer.isBusy) return;
     setNav((prevNav) => advanceForward(prevNav));
@@ -212,6 +214,8 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   const imageSrc = hos.large || hos.thumbnail;
   const drawing = drawingFor(hos);
   const articleURL = wikipediaArticleURL(hos);
+  // In Auto Speak's Name mode the order and name are spoken in place of the extract.
+  const speechText = autoSpeak && autoSpeakMode === 'name' ? `${hos.order} ${hos.name}` : hos.extract;
 
   const isPreviousDisabled = isRandomMode && nav.position === 0;
 
@@ -276,7 +280,7 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
             {/* Auto speech starts as the details fade in, so the extract is on screen for it. */}
             <SpeechPlayButton
               player={speechPlayer}
-              text={hos.extract}
+              text={speechText}
               translatesFirst
               autoPlays={autoSpeak && isPlaying && detailsVisible}
             />

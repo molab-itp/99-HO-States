@@ -888,3 +888,7 @@ below Auto Speak add segment view
 to select between Summary and Name
 in Auto Speak Summary mode hos.extract is spoken
 in Auto Speak Name mode hos.order+hos.name is spoken
+
+v05.127
+
+sync v05 with v2

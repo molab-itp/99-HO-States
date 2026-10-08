@@ -6,20 +6,18 @@
 // supported language not named here.
 const languageGroups = [
   { title: 'English', languages: ['en-US', 'en-GB', 'en-AU', 'en-IE', 'en-IN', 'en-ZA'] },
+  { title: 'Chinese', languages: ['zh-CN', 'zh-TW', 'zh-HK'] },
+  { title: 'Central European', languages: ['cs-CZ', 'hr-HR', 'hu-HU', 'pl-PL', 'sk-SK', 'sl-SI'] },
+  { title: 'Eastern European', languages: ['bg-BG', 'lt-LT', 'ro-RO', 'ru-RU', 'uk-UA'] },
+  { title: 'Indian languages', languages: ['hi-IN', 'bn-IN', 'kn-IN', 'ta-IN', 'te-IN'] },
   { title: 'Spanish', languages: ['es-ES', 'es-MX'] },
   { title: 'French', languages: ['fr-FR', 'fr-CA'] },
   { title: 'German', languages: ['de-DE'] },
   { title: 'Italian', languages: ['it-IT'] },
   { title: 'Portuguese', languages: ['pt-BR', 'pt-PT'] },
   { title: 'Dutch', languages: ['nl-NL', 'nl-BE'] },
-  { title: 'Chinese', languages: ['zh-CN', 'zh-TW', 'zh-HK'] },
   { title: 'Japanese / Korean', languages: ['ja-JP', 'ko-KR'] },
   { title: 'Nordic', languages: ['da-DK', 'fi-FI', 'nb-NO', 'sv-SE'] },
-  {
-    title: 'Central/Eastern European',
-    languages: ['bg-BG', 'cs-CZ', 'hr-HR', 'hu-HU', 'lt-LT', 'pl-PL', 'ro-RO', 'ru-RU', 'sk-SK', 'sl-SI', 'uk-UA'],
-  },
-  { title: 'Indian languages', languages: ['hi-IN', 'bn-IN', 'kn-IN', 'ta-IN', 'te-IN'] },
   { title: 'Middle East / Central Asia', languages: ['ar-001', 'he-IL', 'tr-TR', 'kk-KZ'] },
   { title: 'Southeast Asia', languages: ['id-ID', 'ms-MY', 'th-TH', 'vi-VN'] },
   { title: 'Other', languages: ['ca-ES', 'el-GR'] },
@@ -53,6 +51,13 @@ export const SpeechSettings = {
   autoSpeakKey: 'ho-states-us.speechAutoSpeak',
   defaultAutoSpeak: false,
 
+  // What Auto Speak speaks for each slide: 'summary' (the HOS's extract) or 'name' (its order
+  // and name).
+  autoSpeakModeKey: 'ho-states-us.speechAutoSpeakMode',
+  autoSpeakModes: ['summary', 'name'],
+  defaultAutoSpeakMode: 'summary',
+  autoSpeakModeTitle: (mode) => (mode === 'name' ? 'Name' : 'Summary'),
+
   // The editable sample text on `SpeechSetupScreen`, and the speech language code it is currently
   // written in: English until it is translated there.
   sampleTextKey: 'ho-states-us.speechSampleText',
@@ -60,6 +65,13 @@ export const SpeechSettings = {
   defaultSampleTextLanguage: 'en-US',
   defaultSampleText:
     'Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.',
+
+  // The titles of the language groups `SpeechSetupScreen` shows the languages of, one per line;
+  // the rest are collapsed to their title.
+  shownGroupsKey: 'ho-states-us.speechShownLanguageGroups',
+  defaultShownGroups: 'Chinese',
+  shownGroups: (stored) => new Set(stored.split('\n').filter(Boolean)),
+  storedShownGroups: (titles) => [...titles].sort().join('\n'),
 
   /**
    * `languageGroups` narrowed to the languages `voices` (the browser's speech voices) cover, with

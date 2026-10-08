@@ -2307,3 +2307,29 @@ Not specified in the request:
 The app builds for the iOS Simulator. The change was not run. Not yet committed.
 
 **Cost**: ~10 minutes.
+
+# --
+
+2026-10-08 11:43 (v05: sync with v2 — language group show/hide, Auto Speak Summary / Name)
+
+v05 now matches v2 as of v02.126. Two v2 changes were ported, both on the Speak screen:
+
+- **Language groups (v02.125)**: each group's title is a button with a chevron that shows or
+  hides its languages. The shown titles are saved under `ho-states-us.speechShownLanguageGroups`,
+  defaulting to Chinese. A hidden group shows a checkmark when it holds the picked language.
+  Central/Eastern European is split into two groups, and the groups are in v2's new order
+  (`src/state/speechSettings.js`, `src/screens/SpeechSetupScreen.jsx`).
+- **Auto Speak mode (v02.126)**: a Summary / Name segmented picker under the Auto Speak toggle,
+  shown only while Auto Speak is on and saved under `ho-states-us.speechAutoSpeakMode`. The
+  footer follows the mode. In Name mode with Auto Speak on, `HOSDetailScreen` speaks
+  `"<order> <name>"` in place of the extract.
+- **Sample Text header**: now a bordered button, as in v2.
+
+Supporting changes: `SegmentedPicker` takes `hidesLabel` for a picker with no label beside it,
+and the unused `.speech-section-title` style is gone.
+
+`scripts/smoke.mjs` now covers the group show/hide (including across a reload) and Name mode. It
+passes, as does the build. As before it uses stand-ins for the browser's speech and translation,
+so real voices are untested. Version bumped to 0.1.24 and the README updated. Not yet committed.
+
+**Cost**: ~15 minutes.
