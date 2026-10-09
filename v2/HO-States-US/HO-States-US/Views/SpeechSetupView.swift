@@ -57,13 +57,21 @@ struct SpeechSetupView: View {
                     SpeechTranslateButton(text: $sampleText, textLanguage: $sampleTextLanguage, language: language)
                 }
             } header: {
+              HStack() {
                 // Tapping the header puts back the default (English) sample text.
                 Button("Sample Text") {
-                    sampleText = SpeechSettings.defaultSampleText
-                    sampleTextLanguage = SpeechSettings.defaultSampleTextLanguage
+                  sampleText = SpeechSettings.defaultSampleText
+                  sampleTextLanguage = SpeechSettings.defaultSampleTextLanguage
                 }
                 .buttonStyle(.bordered)
                 .accessibilityHint("Restores the default text")
+                Spacer()
+                Link(destination: URL(string: "https://en.wikipedia.org/wiki/Gettysburg_Address")!) {
+                  Label("source", systemImage: "link")
+                    .font(.footnote)
+                }
+
+              }
             }
 
             ForEach(languageGroups) { group in
