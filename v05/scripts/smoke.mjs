@@ -334,6 +334,10 @@ async function main() {
     assert(!(await page.isChecked('.speech-setup .switch input')), 'Auto Speak should start off');
     assert((await page.locator('.speech-setup .segmented').count()) === 0, 'Summary / Name is only offered while Auto Speak is on');
     assert(await page.isDisabled('.speech-translate-btn'), 'Translate is off while the text and language are both English');
+    assert(
+      (await page.getAttribute('.speech-sample-header a:has-text("source")', 'href')) === 'https://en.wikipedia.org/wiki/Gettysburg_Address',
+      'the Sample Text header should link to the source of the text',
+    );
     await page.click('.speech-sample button[aria-label="Play Speech"]');
     await page.waitForSelector('.speech-sample button[aria-label="Pause Speech"]');
     assertIncludes((await lastSpoken()).text, 'Four score', 'Play should speak the sample text');

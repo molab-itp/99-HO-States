@@ -90,17 +90,28 @@ export default function SpeechSetupScreen({ onBack }) {
         </section>
 
         <section>
-          {/* Tapping the header puts back the default (English) sample text. */}
-          <button
-            className="speech-reset-btn"
-            title="Restores the default text"
-            onClick={() => {
-              setSampleText(SpeechSettings.defaultSampleText);
-              setSampleTextLanguage(SpeechSettings.defaultSampleTextLanguage);
-            }}
-          >
-            Sample Text
-          </button>
+          <div className="speech-sample-header">
+            {/* Tapping the header puts back the default (English) sample text. */}
+            <button
+              className="speech-reset-btn"
+              title="Restores the default text"
+              onClick={() => {
+                setSampleText(SpeechSettings.defaultSampleText);
+                setSampleTextLanguage(SpeechSettings.defaultSampleTextLanguage);
+              }}
+            >
+              Sample Text
+            </button>
+            <a
+              className="speech-source-link"
+              href={SpeechSettings.sampleTextSourceURL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Icon name="link-45deg" size={14} />
+              source
+            </a>
+          </div>
           <ul className="hos-list">
             <li className="speech-row speech-sample">
               <textarea

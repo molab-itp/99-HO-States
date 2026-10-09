@@ -19,8 +19,8 @@ navigator) is the only expected change to port further.
   `HOSListScreen`, `HOSDetailScreen` (Play/Pause slideshow, speech button, drawing, Back to
   Landing), `NewsScreen` (port of `NewsView`), `CreditsScreen` (port of `CreditsView`: article,
   photo and news sources, each section collapsible), and `SpeechSetupScreen` (port of
-  `SpeechSetupView`: Auto Speak and its Summary / Name mode, sample text, and the speech
-  languages in groups that can each be shown or hidden).
+  `SpeechSetupView`: Auto Speak and its Summary / Name mode, sample text with a link to its
+  source, and the speech languages in groups that can each be shown or hidden).
 - `src/state/useSpeechPlayer.js` — port of `SpeechPlayer.swift` on the Web Speech API
   (`speechSynthesis`); `src/state/speechSettings.js` is the port of `SpeechSettings`.
 - `src/components/SpeechPlayButton.jsx` — port of `SpeechPlayButton` and

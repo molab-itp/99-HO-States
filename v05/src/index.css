@@ -687,8 +687,28 @@ input {
 }
 
 /* SwiftUI's `.bordered` button in a section header (Sample Text, which restores the default). */
-.speech-reset-btn {
+/* The Sample Text header: the reset button, with the link to the text's source at the far end. */
+.speech-sample-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin: 0 16px 7px;
+}
+
+.speech-source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--tint);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.speech-source-link:active {
+  opacity: 0.5;
+}
+
+.speech-reset-btn {
   padding: 5px 10px;
   border: none;
   border-radius: 7px;

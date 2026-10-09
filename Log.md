@@ -2333,3 +2333,22 @@ passes, as does the build. As before it uses stand-ins for the browser's speech 
 so real voices are untested. Version bumped to 0.1.24 and the README updated. Not yet committed.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-10-09 13:30 (v05: sync with v2 — Sample Text source link)
+
+v05 now matches v2 as of v02.129. One v2 change was ported, on the Speak screen:
+
+- **Sample Text source link**: a "source" link at the far end of the Sample Text header opens the
+  Gettysburg Address article on Wikipedia in a new tab. The URL is
+  `SpeechSettings.sampleTextSourceURL` (`src/state/speechSettings.js`,
+  `src/screens/SpeechSetupScreen.jsx`, `src/index.css`).
+
+The v2 rename to HOS-USnA (v02.129) needed nothing more in v05: its README and `package.json`
+already name the new project, and the on-screen title is still "USnA Heads" in both.
+
+`scripts/smoke.mjs` now checks the link's address. It passes, as does the build. Version bumped to
+0.1.25 and the README updated. Not yet committed.
+
+**Cost**: ~10 minutes.

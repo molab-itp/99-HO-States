@@ -65,6 +65,8 @@ export const SpeechSettings = {
   defaultSampleTextLanguage: 'en-US',
   defaultSampleText:
     'Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.',
+  // Where the default sample text comes from, linked beside the Sample Text header.
+  sampleTextSourceURL: 'https://en.wikipedia.org/wiki/Gettysburg_Address',
 
   // The titles of the language groups `SpeechSetupScreen` shows the languages of, one per line;
   // the rest are collapsed to their title.
