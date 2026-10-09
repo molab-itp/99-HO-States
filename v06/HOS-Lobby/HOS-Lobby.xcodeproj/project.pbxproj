@@ -11,28 +11,28 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		EB89F154C1D19FF43DC0C415 /* HO-States-Users.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HO-States-Users.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB89F154C1D19FF43DC0C415 /* HOS-Lobby.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HOS-Lobby.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		A1C0FFEE0000000000000001 /* Exceptions for "HOStatesUsers" folder in "HO-States-Users" target */ = {
+		A1C0FFEE0000000000000001 /* Exceptions for "HOS_Lobby" folder in "HOS-Lobby" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 				Supabase.example.plist,
 				Supabase.plist,
 			);
-			target = 0848D0A74E72E56BB67B7AE2 /* HO-States-Users */;
+			target = 0848D0A74E72E56BB67B7AE2 /* HOS-Lobby */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		AB532D443065324100E718FD /* HOStatesUsers */ = {
+		AB532D443065324100E718FD /* HOS_Lobby */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				A1C0FFEE0000000000000001 /* Exceptions for "HOStatesUsers" folder in "HO-States-Users" target */,
+				A1C0FFEE0000000000000001 /* Exceptions for "HOS_Lobby" folder in "HOS-Lobby" target */,
 			);
-			path = HOStatesUsers;
+			path = HOS_Lobby;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -52,7 +52,7 @@
 		BBBCA7D0AA98DFD1812032D5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				EB89F154C1D19FF43DC0C415 /* HO-States-Users.app */,
+				EB89F154C1D19FF43DC0C415 /* HOS-Lobby.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -60,7 +60,7 @@
 		FE226FA7D131373B18698F09 = {
 			isa = PBXGroup;
 			children = (
-				AB532D443065324100E718FD /* HOStatesUsers */,
+				AB532D443065324100E718FD /* HOS_Lobby */,
 				BBBCA7D0AA98DFD1812032D5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -68,9 +68,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		0848D0A74E72E56BB67B7AE2 /* HO-States-Users */ = {
+		0848D0A74E72E56BB67B7AE2 /* HOS-Lobby */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E1776859B3A825D8EB471BB7 /* Build configuration list for PBXNativeTarget "HO-States-Users" */;
+			buildConfigurationList = E1776859B3A825D8EB471BB7 /* Build configuration list for PBXNativeTarget "HOS-Lobby" */;
 			buildPhases = (
 				D353D35198AEFB163FAEF5EE /* Sources */,
 				A1C0FFEE0000000000000002 /* Resources */,
@@ -82,14 +82,14 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AB532D443065324100E718FD /* HOStatesUsers */,
+				AB532D443065324100E718FD /* HOS_Lobby */,
 			);
-			name = "HO-States-Users";
+			name = "HOS-Lobby";
 			packageProductDependencies = (
 				82FD515D00AAB754E3538984 /* Supabase */,
 			);
-			productName = "HO-States-Users";
-			productReference = EB89F154C1D19FF43DC0C415 /* HO-States-Users.app */;
+			productName = "HOS-Lobby";
+			productReference = EB89F154C1D19FF43DC0C415 /* HOS-Lobby.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -106,7 +106,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 9C2B4933DB8DA5C68726BDCD /* Build configuration list for PBXProject "HO-States-Users" */;
+			buildConfigurationList = 9C2B4933DB8DA5C68726BDCD /* Build configuration list for PBXProject "HOS-Lobby" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -123,7 +123,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				0848D0A74E72E56BB67B7AE2 /* HO-States-Users */,
+				0848D0A74E72E56BB67B7AE2 /* HOS-Lobby */,
 			);
 		};
 /* End PBXProject section */
@@ -156,7 +156,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "SRC=\"${SRCROOT}/HOStatesUsers/Supabase.plist\"\nDST=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Supabase.plist\"\nif [ -f \"$SRC\" ]; then cp \"$SRC\" \"$DST\"; else rm -f \"$DST\"; fi\n";
+			shellScript = "SRC=\"${SRCROOT}/HOS_Lobby/Supabase.plist\"\nDST=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Supabase.plist\"\nif [ -f \"$SRC\" ]; then cp \"$SRC\" \"$DST\"; else rm -f \"$DST\"; fi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -238,14 +238,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = HOStatesUsers/HOStatesUsers.entitlements;
+				CODE_SIGN_ENTITLEMENTS = HOS_Lobby/HOS_Lobby.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1004;
+				CURRENT_PROJECT_VERSION = 1005;
 				DEVELOPMENT_TEAM = 3RCW2SSL8G;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = HOStatesUsers/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "HO Users";
+				INFOPLIST_FILE = HOS_Lobby/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "HOS-Lobby";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
@@ -255,7 +255,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.7;
+				MARKETING_VERSION = 0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jht1900.HO-States-Users";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -323,14 +323,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = HOStatesUsers/HOStatesUsers.entitlements;
+				CODE_SIGN_ENTITLEMENTS = HOS_Lobby/HOS_Lobby.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1004;
+				CURRENT_PROJECT_VERSION = 1005;
 				DEVELOPMENT_TEAM = 3RCW2SSL8G;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = HOStatesUsers/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "HO Users";
+				INFOPLIST_FILE = HOS_Lobby/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "HOS-Lobby";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
@@ -340,7 +340,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.7;
+				MARKETING_VERSION = 0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jht1900.HO-States-Users";
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -351,7 +351,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9C2B4933DB8DA5C68726BDCD /* Build configuration list for PBXProject "HO-States-Users" */ = {
+		9C2B4933DB8DA5C68726BDCD /* Build configuration list for PBXProject "HOS-Lobby" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3808C43AECB2D4914AD4365A /* Debug */,
@@ -360,7 +360,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		E1776859B3A825D8EB471BB7 /* Build configuration list for PBXNativeTarget "HO-States-Users" */ = {
+		E1776859B3A825D8EB471BB7 /* Build configuration list for PBXNativeTarget "HOS-Lobby" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B60A17401E353D94EDF41B05 /* Debug */,

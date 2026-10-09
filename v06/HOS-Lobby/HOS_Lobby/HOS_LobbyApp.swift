@@ -2,7 +2,7 @@ import Supabase
 import SwiftUI
 
 @main
-struct HOStatesUsersApp: App {
+struct HOS_LobbyApp: App {
     /// A failure until `Supabase.plist` is filled in; the app then shows what's wrong instead of
     /// crashing, so a fresh clone still builds and runs.
     @State private var auth: Result<AuthModel, SupabaseConfig.LoadError> = SupabaseConfig.load().map { config in

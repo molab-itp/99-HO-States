@@ -1,6 +1,6 @@
 # v06 — Supabase backend + email-code / Apple / guest sign-in (SwiftUI)
 
-`HO-States-Users/` is a small SwiftUI app. You sign in either with a 6-digit code that Supabase
+`HOS-Lobby/` is a small SwiftUI app. You sign in either with a 6-digit code that Supabase
 Auth emails you, with Sign in with Apple, or as a guest with no email at all. It
 lists every user who has signed on and when they were last active. It uses Supabase Auth on the
 Pro plan, plus a custom SMTP provider (Resend) for sending email. Apple sign-in is native (no web
@@ -16,10 +16,10 @@ v06/
     migrations/*.sql       ← generated from schemas/ (don't hand-edit, except auth.* triggers)
     functions/delete-user/ Edge Function: lets admins delete a user from the app
     seed.sql
-  HO-States-Users/
-    HO-States-Users.xcodeproj   folder-synced: files added under HOStatesUsers/ join the app
+  HOS-Lobby/
+    HOS-Lobby.xcodeproj   folder-synced: files added under HOS_Lobby/ join the app
     project.yml            old xcodegen spec, retired (running it undoes folder mode)
-    HOStatesUsers/         app sources; Supabase.plist (gitignored) holds URL + key
+    HOS_Lobby/         app sources; Supabase.plist (gitignored) holds URL + key
       Assets.xcassets/AppIcon.appiconset   app icon: one 1024×1024 PNG, no transparency
 ```
 
@@ -46,7 +46,7 @@ There are two layers.
    imageZoomStates) and v05's localStorage blob, goes here as-is. Adding or renaming a field is a
    change to the Swift `Codable` / JS object only, and needs **no migration**. v2 and v05 both use
    `app = 'ho-states'`, so the same row keeps iOS and web in sync.
-   [`AppStateStore.swift`](HO-States-Users/HOStatesUsers/Services/AppStateStore.swift) is the
+   [`AppStateStore.swift`](HOS-Lobby/HOS_Lobby/Services/AppStateStore.swift) is the
    ready-to-copy Swift client for this table.
 
    Promote a field out of the JSON into a typed table only once you need to query it across users
@@ -125,7 +125,7 @@ Any SMTP provider works (Postmark, Brevo, Amazon SES, …).
    `com.jht1900.HO-States-Users` (the app's bundle id) to **Client IDs**. The native flow sends
    Apple's ID token straight to Supabase, so the Services ID, secret key and callback URL fields
    aren't needed; they're only for web sign-in (v05 later).
-2. The app's `HOStatesUsers/HOStatesUsers.entitlements` has the
+2. The app's `HOS_Lobby/HOS_Lobby.entitlements` has the
    Sign in with Apple capability. With automatic signing, Xcode turns it on for the App ID in
    team `3RCW2SSL8G`. Otherwise enable it at developer.apple.com → Identifiers.
 3. Push the trigger change: `npx supabase db push` (`migrations/20260924000000_apple_sign_in.sql`).
@@ -157,11 +157,11 @@ key instead: `npx supabase secrets set SB_SECRET_KEY=sb_secret_…`.
 
 ### 9. iOS app
 ```sh
-cd v06/HO-States-Users
-cp HOStatesUsers/Supabase.example.plist HOStatesUsers/Supabase.plist   # fill in URL + publishable key
-open HO-States-Users.xcodeproj
+cd v06/HOS-Lobby
+cp HOS_Lobby/Supabase.example.plist HOS_Lobby/Supabase.plist   # fill in URL + publishable key
+open HOS-Lobby.xcodeproj
 ```
-The project uses Xcode's synchronized folder, so adding or removing files under `HOStatesUsers/`
+The project uses Xcode's synchronized folder, so adding or removing files under `HOS_Lobby/`
 needs no project change. It copies everything there into the app except `Info.plist` and
 `Supabase*.plist`, which are excluded in the target's folder exceptions. The "Copy Supabase.plist
 if present" build script bundles `Supabase.plist` only when it exists.

@@ -1,7 +1,7 @@
-# RETIRED: HO-States-Users.xcodeproj is now edited in Xcode and uses a synchronized folder.
+# RETIRED: HOS-Lobby.xcodeproj is now edited in Xcode and uses a synchronized folder.
 # Don't run `xcodegen generate`: it would overwrite the project and undo folder mode, the
 # Resources phase and the app icon setup. Kept only as a record of the original settings.
-name: HO-States-Users
+name: HOS-Lobby
 options:
   bundleIdPrefix: com.jht1900
   deploymentTarget:
@@ -11,23 +11,23 @@ packages:
     url: https://github.com/supabase/supabase-swift
     from: 2.55.0
 targets:
-  HO-States-Users:
+  HOS-Lobby:
     type: application
     platform: iOS
     sources:
-      - path: HOStatesUsers
+      - path: HOS_Lobby
         excludes:
           - "Supabase*.plist"
       # Listed so they're editable in Xcode's navigator, but not bundled here. The gitignored
       # Supabase.plist may not exist, so the "Copy Supabase.plist if present" script bundles it.
-      - path: HOStatesUsers/Supabase.plist
+      - path: HOS_Lobby/Supabase.plist
         optional: true
         buildPhase: none
-      - path: HOStatesUsers/Supabase.example.plist
+      - path: HOS_Lobby/Supabase.example.plist
         buildPhase: none
     # Merged with the generated Info.plist keys; registers the magic-link callback scheme.
     info:
-      path: HOStatesUsers/Info.plist
+      path: HOS_Lobby/Info.plist
       properties:
         CFBundleURLTypes:
           - CFBundleURLName: com.jht1900.HO-States-Users.auth
@@ -35,7 +35,7 @@ targets:
     # Written by xcodegen. Sign in with Apple also needs the capability on the App ID, which
     # automatic signing adds.
     entitlements:
-      path: HOStatesUsers/HOStatesUsers.entitlements
+      path: HOS_Lobby/HOS_Lobby.entitlements
       properties:
         com.apple.developer.applesignin: [Default]
     dependencies:
@@ -46,7 +46,7 @@ targets:
       - name: Copy Supabase.plist if present
         basedOnDependencyAnalysis: false
         script: |
-          SRC="${SRCROOT}/HOStatesUsers/Supabase.plist"
+          SRC="${SRCROOT}/HOS_Lobby/Supabase.plist"
           DST="${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Supabase.plist"
           if [ -f "$SRC" ]; then cp "$SRC" "$DST"; else rm -f "$DST"; fi
     settings:

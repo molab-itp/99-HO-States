@@ -892,3 +892,8 @@ in Auto Speak Name mode hos.order+hos.name is spoken
 v05.127
 
 sync v05 with v2
+
+v06.128
+
+in v05, rename HO-States-Users to HOS-Lobby,
+include rename HOStatesUsers to HOS_Lobby
