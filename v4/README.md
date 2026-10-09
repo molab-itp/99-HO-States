@@ -1,6 +1,6 @@
 # HO-States-US — v4 (React)
 
-A web port of the [v2](../v2/HO-States-US) SwiftUI app (`HO-States-US.xcodeproj`), built with React
+A web port of the [v2](../v2/HOS-USnA) SwiftUI app (`HOS-USnA.xcodeproj`), built with React
 + Vite. Structured to be React Native-friendly: navigation is a small in-memory stack (no
 `react-router`/URL coupling), app state lives in plain context providers, and screens are simple
 functional components with no DOM APIs outside of `NavBar`/image/link elements — swapping those

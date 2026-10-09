@@ -3,7 +3,7 @@ name: run-v4
 description: Launch and visually verify the v4 React app (headless Chromium via Playwright) — dev server, click-through, screenshots, console/network error check. Use when asked to run, test, or screenshot v4, or to confirm a v4 change works in the browser.
 ---
 
-# Running & verifying v4 (React port of HO-States-US)
+# Running & verifying v4 (React port of HOS-USnA)
 
 `v4/` is a Vite + React app with no server-side rendering, so "does it work" can only
 be answered by actually loading it in a browser. Playwright + a headless Chromium are

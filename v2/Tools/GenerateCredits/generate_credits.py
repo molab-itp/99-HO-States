@@ -15,7 +15,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-RESOURCES = Path(__file__).resolve().parents[2] / "HO-States-US/HO-States-US/Resources"
+RESOURCES = Path(__file__).resolve().parents[2] / "HOS-USnA/HOS-USnA/Resources"
 USER_AGENT = "HO-States-CreditsGenerator/1.0 (https://github.com/molab-itp/99-HO-States)"
 
 # Keep in sync with the `commonsFile` overrides in GenerateAssets/main.swift.

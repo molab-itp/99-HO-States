@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The app's root view: owns `AppModel` and the navigation stack that `LandingView` sits at the
-/// bottom of. Everything `HO_States_US_App` needs lives here rather than in the `App` itself so
+/// bottom of. Everything `HOS_USnA_App` needs lives here rather than in the `App` itself so
 /// the whole navigation flow can be run in a preview.
 struct AppLandingView: View {
     @State private var appModel: AppModel

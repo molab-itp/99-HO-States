@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "React (web, React Native-friendly) port of the v2 HO-States-US SwiftUI app.",
+  "description": "React (web, React Native-friendly) port of the v2 HOS-USnA SwiftUI app.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct HO_States_US_App: App {
+struct HOS_USnA_App: App {
     var body: some Scene {
         WindowGroup {
             AppLandingView()

@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		ABF9BB5E305BEB4000A294ED /* HO-States-US.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HO-States-US.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		ABF9BB5E305BEB4000A294ED /* HOS-USnA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HOS-USnA.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABF9BB90305BEB4000A294ED /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../../README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		ABF9BB60305BEB4000A294ED /* HO-States-US */ = {
+		ABF9BB60305BEB4000A294ED /* HOS-USnA */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "HO-States-US";
+			path = "HOS-USnA";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -34,7 +34,7 @@
 			isa = PBXGroup;
 			children = (
 				ABF9BB90305BEB4000A294ED /* README.md */,
-				ABF9BB60305BEB4000A294ED /* HO-States-US */,
+				ABF9BB60305BEB4000A294ED /* HOS-USnA */,
 				ABF9BB5F305BEB4000A294ED /* Products */,
 			);
 			sourceTree = "<group>";
@@ -42,7 +42,7 @@
 		ABF9BB5F305BEB4000A294ED /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				ABF9BB5E305BEB4000A294ED /* HO-States-US.app */,
+				ABF9BB5E305BEB4000A294ED /* HOS-USnA.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -50,9 +50,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		ABF9BB5D305BEB4000A294ED /* HO-States-US */ = {
+		ABF9BB5D305BEB4000A294ED /* HOS-USnA */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = ABF9BB69305BEB4100A294ED /* Build configuration list for PBXNativeTarget "HO-States-US" */;
+			buildConfigurationList = ABF9BB69305BEB4100A294ED /* Build configuration list for PBXNativeTarget "HOS-USnA" */;
 			buildPhases = (
 				ABF9BB5A305BEB4000A294ED /* Sources */,
 				ABF9BB5B305BEB4000A294ED /* Frameworks */,
@@ -63,13 +63,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				ABF9BB60305BEB4000A294ED /* HO-States-US */,
+				ABF9BB60305BEB4000A294ED /* HOS-USnA */,
 			);
-			name = "HO-States-US";
+			name = "HOS-USnA";
 			packageProductDependencies = (
 			);
 			productName = "US-Headers";
-			productReference = ABF9BB5E305BEB4000A294ED /* HO-States-US.app */;
+			productReference = ABF9BB5E305BEB4000A294ED /* HOS-USnA.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -87,7 +87,7 @@
 					};
 				};
 			};
-			buildConfigurationList = ABF9BB59305BEB4000A294ED /* Build configuration list for PBXProject "HO-States-US" */;
+			buildConfigurationList = ABF9BB59305BEB4000A294ED /* Build configuration list for PBXProject "HOS-USnA" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -101,7 +101,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				ABF9BB5D305BEB4000A294ED /* HO-States-US */,
+				ABF9BB5D305BEB4000A294ED /* HOS-USnA */,
 			);
 		};
 /* End PBXProject section */
@@ -321,7 +321,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		ABF9BB59305BEB4000A294ED /* Build configuration list for PBXProject "HO-States-US" */ = {
+		ABF9BB59305BEB4000A294ED /* Build configuration list for PBXProject "HOS-USnA" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				ABF9BB67305BEB4100A294ED /* Debug */,
@@ -330,7 +330,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		ABF9BB69305BEB4100A294ED /* Build configuration list for PBXNativeTarget "HO-States-US" */ = {
+		ABF9BB69305BEB4100A294ED /* Build configuration list for PBXNativeTarget "HOS-USnA" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				ABF9BB6A305BEB4100A294ED /* Debug */,

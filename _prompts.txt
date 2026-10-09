@@ -897,3 +897,8 @@ v06.128
 
 in v05, rename HO-States-Users to HOS-Lobby,
 include rename HOStatesUsers to HOS_Lobby
+
+v02.129
+
+in v2 rename HO-States-US to HOS-USnA,
+and related files
