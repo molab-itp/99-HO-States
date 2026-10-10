@@ -2352,3 +2352,57 @@ already name the new project, and the on-screen title is still "USnA Heads" in b
 0.1.25 and the README updated. Not yet committed.
 
 **Cost**: ~10 minutes.
+
+# --
+
+2026-10-10 09:13 (v05: page links — a bookmarkable address for every screen and each HOS)
+
+## Request
+
+In v05 add page link support, so it is possible to bookmark a location in the web app, e.g.
+`https://molab-itp.github.io/99-HO-States/v05/News` should go to the news page, and similarly
+each HOS should have a page.
+
+## What was built
+
+Every screen now has its own address under the app's base, `…/99-HO-States/v05/`:
+
+| Page              | Address                                  |
+| ----------------- | ---------------------------------------- |
+| Landing           | (the base itself)                        |
+| News              | `News`                                   |
+| List of Heads     | `List`                                   |
+| Credits           | `Credits`                                |
+| Speak setup       | `Speech`                                 |
+| One head of state | `HOS/01` … `HOS/47`, e.g. `HOS/16`       |
+
+- **`src/data/route.js`** (new): the paths, parsing an address into a screen (and HOS), and
+  writing the address and page title. Still no router: `screen` and `slideIndex` decide what
+  shows, and the address bar is kept in step with them.
+- **`src/state/AppModelContext.jsx`**: the address is read once on load, ahead of the saved
+  screen, and again on the browser's Back/Forward. Moving to another screen adds a history entry.
+  Stepping through heads (Next/Previous or the slideshow) rewrites the current entry, so Back is
+  not buried under one entry per slide.
+- **Page title**: follows the screen, so a bookmark gets a useful name, e.g.
+  "#16 Abraham Lincoln · HOS-USnA".
+- **`vite.config.js`**: the build writes a copy of `index.html` for every link (`News.html`,
+  `HOS/16.html`, …), which GitHub Pages serves for `/News` and `/HOS/16`. The deploy workflow
+  needed no change.
+
+Not specified in the request:
+
+- The base address still reopens the last screen shown, as before, and updates the address to
+  match. A link to a specific page always wins over the saved screen.
+- On GitHub Pages the links are case-sensitive and the head number is two digits, so `/v05/news`
+  or `/v05/HOS/1` will 404 there, though the app accepts them locally.
+
+`scripts/smoke.mjs` has a new page-links section (address follows the screen, browser Back, a
+link opens on its screen, the base restores the saved screen). It passes, as does the build. The
+built site was also loaded under `/99-HO-States/v05/` from a local server that serves files the
+way GitHub Pages does, and each link opened on its page. Not tried on the live site.
+
+`node_modules` was missing `unicode-emoji-json`, which broke the build, so `npm install` was run
+in `v05`; no tracked files changed from that. README updated. Version not bumped. Not yet
+committed.
+
+**Cost**: ~15 minutes.
