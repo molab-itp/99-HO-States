@@ -5,7 +5,8 @@ import { loadPersistedState, savePersistedState } from '../data/persistedState.j
 import { normalizeReactions } from '../data/hosReaction.js';
 import { deleteDrawing, loadAllDrawings, saveDrawing } from '../data/hosDrawingStore.js';
 import { DEFAULT_DRAWING_DISPLAY_MODE, normalizeDrawingDisplayModes } from '../data/drawingDisplayMode.js';
-import { normalizeAppScreen } from '../data/appScreen.js';
+import { AppScreen, normalizeAppScreen } from '../data/appScreen.js';
+import { routeFromLocation, showRoute } from '../data/route.js';
 
 const AppModelContext = createContext(null);
 
@@ -40,6 +41,12 @@ export function AppModelProvider({ children }) {
   }
   const persisted = persistedRef.current;
 
+  // The screen the page's address names (see `route.js`), if it names one: a bookmarked or shared
+  // link opens there, ahead of whatever screen was saved. Read once, like the saved state.
+  const initialRouteRef = useRef(undefined);
+  if (initialRouteRef.current === undefined) initialRouteRef.current = routeFromLocation(hosList);
+  const initialRoute = initialRouteRef.current;
+
   const shuffleRef = useRef(persisted ? persisted.shuffledIndexes : shuffledIndexes(hosList.length));
   // Walks `shuffleRef` in order, wrapping back to 0 once every index has been served. The
   // permutation itself is only ever redealt by `resetViewed()` (via `reshuffle()` below) — never
@@ -57,15 +64,40 @@ export function AppModelProvider({ children }) {
   // Lives here (rather than only as local state on the screen) so it survives that screen being
   // unmounted and remounted — e.g. a non-random slideshow that's stopped and later restarted
   // picks up from this index instead of always restarting at the first HOS.
-  const [slideIndex, setSlideIndex] = useState(() =>
-    persisted && hosList[persisted.slideIndex] ? persisted.slideIndex : 0,
-  );
+  const [slideIndex, setSlideIndex] = useState(() => {
+    if (initialRoute?.slideIndex !== undefined) return initialRoute.slideIndex;
+    return persisted && hosList[persisted.slideIndex] ? persisted.slideIndex : 0;
+  });
 
   // The top-level screen currently showing, set by `App`'s navigation and persisted so the next
   // launch reopens on the same screen. Read from the raw saved state rather than `persisted`: it
   // doesn't depend on the shuffle matching the current HOS count. Older saves without it (or
-  // with a screen this build doesn't know) fall back to Landing.
-  const [screen, setScreen] = useState(() => normalizeAppScreen(rawPersistedRef.current?.screen));
+  // with a screen this build doesn't know) fall back to Landing. A page link wins over both.
+  const [screen, setScreen] = useState(
+    () => initialRoute?.screen ?? normalizeAppScreen(rawPersistedRef.current?.screen),
+  );
+
+  // Keeps the address bar on the page link for what's showing. Moving to another screen adds a
+  // history entry; the first sync (which may be restoring the saved screen at the app's base
+  // address) and a change of HOS within the detail screen rewrite the current one.
+  const syncedScreenRef = useRef(null);
+  useEffect(() => {
+    const isNewScreen = syncedScreenRef.current !== null && syncedScreenRef.current !== screen;
+    syncedScreenRef.current = screen;
+    showRoute(screen, hosList[slideIndex], isNewScreen);
+  }, [screen, slideIndex]);
+
+  // The browser's Back/Forward: show whatever the address now names. `showRoute` then finds the
+  // address already matching and leaves the history alone.
+  useEffect(() => {
+    function handlePopState() {
+      const route = routeFromLocation(hosList);
+      if (route?.slideIndex !== undefined) setSlideIndex(route.slideIndex);
+      setScreen(route?.screen ?? AppScreen.landing);
+    }
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Makes `hos` the one `HOSDetailScreen` shows when it's next opened.
   const select = useCallback((hos) => {

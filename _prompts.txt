@@ -906,3 +906,12 @@ and related files
 v05.130
 
 sync v05 with v2
+
+v05.131
+
+in v05 add page link support
+so possible to bookmark location
+in the web app
+eg. https://molab-itp.github.io/99-HO-States/v05/News
+should go to the new page
+and similarly each HOS should have a page

@@ -28,6 +28,13 @@ navigator) is the only expected change to port further.
   Translator API where there is one (Chrome on desktop); elsewhere the Translate button is hidden
   and text is spoken as written.
 - `src/data/appScreen.js` — port of `AppScreen.swift`, the top-level screen names.
+- `src/data/route.js` — page links, so a location can be bookmarked: `News`, `List`, `Credits`,
+  `Speech` and `HOS/NN` (one per head of state) under the app's base, e.g.
+  `https://molab-itp.github.io/99-HO-States/v05/News` or `.../v05/HOS/16`. Still no router: the
+  address bar is kept in step with `screen`/`slideIndex` and read on load and on browser
+  Back/Forward. The base address itself reopens the last screen shown. The build
+  (`vite.config.js`) writes a copy of `index.html` for every link (`News.html`, `HOS/16.html`),
+  which is what lets GitHub Pages serve them.
 - `src/state/useStoredValue.js` — `@AppStorage` stand-in; instances for the same key stay in sync.
 - `src/data/hos.json` + `public/images/` — the same portrait images and generated summary
   data as v2's asset catalog / `Resources/HOS.json` (reused byte-for-byte from the `v3`

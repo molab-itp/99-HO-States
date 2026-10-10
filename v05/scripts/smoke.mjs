@@ -556,6 +556,35 @@ async function main() {
     console.log(`  "${before}" -> "${after}"`);
     await shot('after-reset');
 
+    console.log('Page links: the address follows the screen, and opens on the screen it names...');
+    const pathname = () => new URL(page.url()).pathname;
+    assert(pathname() === '/', `Landing should be at the base address: got ${pathname()}`);
+    await page.click('button:has-text("News")');
+    await page.waitForSelector('.news-list');
+    assert(pathname() === '/News', `News should be at /News: got ${pathname()}`);
+    await page.goBack();
+    await page.waitForSelector('button:has-text("Resume")');
+    assert(pathname() === '/', `browser Back from News should return to Landing: got ${pathname()}`);
+    await pickFromList('#16');
+    assert(pathname() === '/HOS/16', `a head of state should be at /HOS/NN: got ${pathname()}`);
+    await page.click('button[aria-label="Next"]');
+    await page.waitForFunction(() => window.location.pathname === '/HOS/17');
+    assertIncludes(await page.title(), '#17', 'the page title should name the head of state shown');
+    await page.goBack();
+    await page.waitForSelector('.hos-list');
+    assert(pathname() === '/List', `stepping to the next head should not add a history entry: got ${pathname()}`);
+    await page.goto(`${url}HOS/03`);
+    await page.waitForSelector('.detail-text h1');
+    assertIncludes(await title(), '#03', 'a page link to a head of state should open on them');
+    await page.goto(`${url}News`);
+    await page.waitForSelector('.news-list');
+    await page.goto(url);
+    await page.waitForSelector('.news-list');
+    assert(pathname() === '/News', `the base address should restore the saved screen and its link: got ${pathname()}`);
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('button:has-text("Resume")');
+    await shot('page-links');
+
     console.log('Zoom controls on a touch phone (no hover, coarse pointer): shown while paused...');
     const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const phonePage = await phone.newPage();
