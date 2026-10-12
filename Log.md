@@ -672,7 +672,7 @@ Unicode-character icons with real SVGs closer to SF Symbols.
   rendered bar. The user's own subsequent edit (found via a later file-changed notice) abandoned
   the flush-right layout in favor of a simpler inline append, and replaced the raw `cycleCount`
   display with a new `AppModel.buildInfo` computed property: `"[\(cycleCount)|\(bundleVersion)]"`
-  where `bundleVersion` reads `CFBundleVersion` from the app's Info.plist. Ported *that* final
+  where `bundleVersion` reads `CFBundleVersion` from the app's Info.plist. Ported _that_ final
   state into `v05`, not the intermediate flush-right version.
 
 ## v05: ported the v2 delta
@@ -719,7 +719,7 @@ reflected and `v2`'s current state, rather than re-deriving it from memory:
   Symbol each stands in for (`bank` ↔ `building.columns.fill`, `list-ul` ↔ `list.bullet`,
   `shuffle`, `play/stop-circle-fill`, `link-45deg` ↔ `link`, `chevron-left`/`-right`,
   `person-circle` ↔ `person.crop.circle`, `book`), fetched from `raw.githubusercontent.com/twbs/
-  icons` and inlined as path data (`fill="currentColor"` so each inherits tint/secondary/disabled
+icons` and inlined as path data (`fill="currentColor"` so each inherits tint/secondary/disabled
   color from its container, same as a `.foregroundStyle`d SF Symbol).
 - Replaced every emoji and the earlier plain-text `‹`/`›` stand-ins across `HomeScreen`, `NavBar`,
   `PresidentListScreen`, `PresidentThumb`, and `PresidentDetailScreen`; removed the CSS that only
@@ -748,7 +748,7 @@ reflected and `v2`'s current state, rather than re-deriving it from memory:
 Two follow-ups to the SF-Symbol-style icon work, both scoped to `v05`: (1) in
 `PresidentDetailScreen.jsx`, make Next/Previous/the back button icon-only (drop their text), and
 drop the word from the Random button too; in `HomeScreen.jsx`, change the bank icon and buttons'
-tint to match SwiftUI's light blue. (2) A follow-up correction: the *other* icons — the nav bar
+tint to match SwiftUI's light blue. (2) A follow-up correction: the _other_ icons — the nav bar
 back button, and the detail screen's Next/Random/Previous — should match SwiftUI's black, not the
 app's red/blue tint.
 
@@ -831,7 +831,7 @@ TestFlight"), this is App Store Connect/TestFlight submission prep for `v2`:
 ## Follow-up notes
 
 - This entry was reconstructed entirely from `git show`/`git log` on commits made outside this
-  conversation — treat it as a record of *what changed*, not *why* beyond the one-line note the
+  conversation — treat it as a record of _what changed_, not _why_ beyond the one-line note the
   user left in `_prompts.txt`. If the TestFlight upload is still failing, that's not something this
   session has visibility into.
 - The `hos/` asset-catalog reorganization and bundle-ID fix are `v2`-only; `v05`'s copied
@@ -894,7 +894,7 @@ Diffed the two v2 commits against v05 and ported both:
   `order` position if that ID is in `viewedPresidentIDs` — fixes segments being wrong when
   presidents are viewed out of order (Random/Previous). Ported the same change to
   `v05/src/components/ViewedProgressBar.jsx` (prop renamed `viewedCount` → `viewedIDs`, `isViewed =
-  viewedIDs.has(position + 1)`) and its call site in `PresidentDetailScreen.jsx`.
+viewedIDs.has(position + 1)`) and its call site in `PresidentDetailScreen.jsx`.
 - `v05/scripts/smoke.mjs` was asserting the old "US Presidents"/"List of Presidents"/"Random
   President" text (and had a stale header comment calling itself the "v4" script) — updated to
   match the renamed copy.
@@ -1074,7 +1074,7 @@ stopped and restarted picks up from where it left off instead of always restarti
   `nextShuffleIndex` in `AppModel`, not on replaying the exact prior walk).
 - `HomeView.swift`: the shared `navigationDestination(for: President.self)` closure (the single
   choke point for every fresh push — list tap, "Random Head", and slideshow start) now sets
-  `appModel.slideIndex = appModel.presidents.firstIndex(of: president) ?? 0` *before*
+  `appModel.slideIndex = appModel.presidents.firstIndex(of: president) ?? 0` _before_
   constructing `PresidentDetailView`, so its first render already shows the right president
   (avoids `@Environment` not being readable inside `PresidentDetailView`'s own `init`). Note this
   needed the `let _ = { ... }()` idiom, not a bare assignment statement — `ViewBuilder` tries to
@@ -1087,7 +1087,7 @@ stopped and restarted picks up from where it left off instead of always restarti
 
 `slideIndex` is a single, unified pointer — every fresh detail push (including plain list taps
 and the standalone "Random Head" button, not just slideshows) updates it. So a sequential
-slideshow resumes from wherever the president was *last displayed at all*, not only from where a
+slideshow resumes from wherever the president was _last displayed at all_, not only from where a
 prior slideshow specifically left off. This follows the request's literal instruction ("move
 index into AppModel") rather than introducing a second, slideshow-only index. Flagged here in
 case the user wants sequential resume scoped more narrowly.
@@ -1133,7 +1133,7 @@ per navigation (like an `init`). It doesn't: `HomeView.body` reads
 `appModel.viewedPresidentIDs.count` (via `remainingCount`), which changes on **every**
 `markViewed` call — i.e. on every single slideshow tick — forcing `HomeView.body` to recompute,
 which reconstructs the `.navigationDestination` modifier and re-invokes its closure with the
-*same, original* `president` value for that stack entry (navigation hadn't pushed a new value;
+_same, original_ `president` value for that stack entry (navigation hadn't pushed a new value;
 only `appModel.slideIndex` had changed). That re-invocation reset `appModel.slideIndex` right
 back to the original president's index — immediately after `advanceSlideshow()` had moved it
 forward — so the display never visibly advanced, in both modes (the reset logic didn't care about
@@ -1147,10 +1147,10 @@ naive read of the code would suggest.
 Moved persistence entirely into `PresidentDetailView`, off the fragile closure:
 
 - `PresidentDetailView.swift`: restored a local `@State private var index: Int` (seeded once per
-  view *identity* via `@State`'s `initialValue`, immune to `init` re-running on reconstruction —
+  view _identity_ via `@State`'s `initialValue`, immune to `init` re-running on reconstruction —
   unlike a plain class-property write, which has no such "first time only" protection). `index` is
   what actually drives rendering again (`president`, `.task(id:)`, toolbar disabled-state). Added
-  `private func setIndex(_ newValue: Int)`, now the *only* place that mutates navigation state —
+  `private func setIndex(_ newValue: Int)`, now the _only_ place that mutates navigation state —
   it sets `index` and mirrors the same value into `appModel.slideIndex` together, so the two never
   drift. All of `goToPrevious`/`goToNext`/`goToRandom`/`advanceSlideshow` now call it instead of
   assigning either value directly. Also added `appModel.slideIndex = index` inside `.onAppear`
@@ -1222,7 +1222,7 @@ Moved persistence entirely into `PresidentDetailView`, off the fragile closure:
 
 # --
 
-2026-09-22 04:38:00 (meta: stopped auto-appending to Log.md from unselected _prompts.txt text)
+2026-09-22 04:38:00 (meta: stopped auto-appending to Log.md from unselected \_prompts.txt text)
 
 User asked why Log.md kept getting updated without being asked. Cause: after one turn where the
 IDE selection itself included an "append to Log.md" line, later turns had me `tail`-reading past
@@ -1321,13 +1321,14 @@ behavior post-split wasn't exercised interactively.
 
 User granted VS Code Accessibility access (System Settings) after repeated "no assistive access"
 errors this session. Confirmed working for general System Events queries (frontmost-process
-query succeeded). Does *not* unlock Simulator UI automation, though: the device's on-screen app
+query succeeded). Does _not_ unlock Simulator UI automation, though: the device's on-screen app
 content isn't exposed as named accessibility elements via plain System Events (only hardware
 chrome — volume buttons, device labels — showed up); that bridging needs XCUITest or `idb`,
 neither set up here. Tried raw coordinate clicking (`click at {x, y}`) as a fallback — it hung
 indefinitely rather than working or erroring; killed it rather than dig further, since it was a
 stretch beyond what was actually asked. Net effect: still verifying `v2` changes via `xcodebuild`
-+ screenshots only, not scripted taps.
+
+- screenshots only, not scripted taps.
 
 **Cost**: ~10 minutes.
 
@@ -1348,7 +1349,7 @@ reactions) written only from `HO_States_US_App`'s `scenePhase` handler on `.back
 from any mutator, so a slideshow tick or reaction pick doesn't touch disk.
 
 Verified the entire flow live with `idb`: tapped "Add Reaction" → strip appeared with all 4
-correctly-labeled options → tapped "Heart" → button updated, confirmed `AppState.json` did *not*
+correctly-labeled options → tapped "Heart" → button updated, confirmed `AppState.json` did _not_
 exist yet → pressed Home → file appeared with exactly `{"reactions":{"1":"heart"},...}` → force-
 quit, relaunched, navigated back → reaction still read "Heart", loaded from disk.
 
@@ -1537,6 +1538,7 @@ link. The code screen is in `SignInView`; `AuthModel.verifyCode` calls
 and `config.toml` points the local stack at it. The README setup covers the Pro plan (needed to
 edit templates), Resend SMTP, and pasting the template into both Confirm signup and Magic Link.
 Problems fixed along the way:
+
 - An `@nyu.edu` sender was rejected by Resend (550, domain not verified), and NYU's DMARC policy
   (`p=reject`) blocks it anyway. Switched to `jht9629@jht1493.net`, whose domain is verified.
 - "The data couldn't be read because it is missing" after sign-in, as a guest too: the hosted
@@ -1744,7 +1746,7 @@ stays at 435px and the text starts at 0. Build and `npm run smoke` pass.
 
 2026-09-25 ~14:10 (bin/publish.sh: publish the current branch to main)
 
-New script bin/publish.sh. It reads the last `vNN.NN` entry in _prompts.txt (from that header
+New script bin/publish.sh. It reads the last `vNN.NN` entry in \_prompts.txt (from that header
 line to the end of the file) and uses it as the commit message. Revised over a few prompts, it
 now: stages everything (`git add -A`) and commits on the current branch if anything changed,
 pushes that branch, switches to main, merges the branch in, pushes main, and switches back (via
@@ -1771,7 +1773,7 @@ The two existing duplicates are left in place, since removing them would rewrite
 2026-09-25 ~14:50 (why the Pages deploy didn't run for v05.84)
 
 The push to main worked, but .github/workflows/deploy-pages.yml only runs on pushes that change
-v4/, v05/, pages/ or the workflow file itself. v05.84 only touched _prompts.txt and
+v4/, v05/, pages/ or the workflow file itself. v05.84 only touched \_prompts.txt and
 bin/publish.sh, so GitHub skipped it; the site had nothing new to build. A deploy can be forced
 with Run workflow on the Actions tab or `gh workflow run deploy-pages.yml` (gh isn't logged in on
 this machine yet). No changes made.
@@ -1838,7 +1840,7 @@ The iPhone and the Mac must be on the same Wi-Fi network.
 - iPhone: Settings → Apps → Safari → Advanced → Web Inspector on.
 - Connect the iPhone to the Mac by USB. In desktop Safari, turn on Settings → Advanced →
   "Show features for web developers".
-- Open Develop → *your iPhone* → the page, for the full inspector (console, elements,
+- Open Develop → _your iPhone_ → the page, for the full inspector (console, elements,
   breakpoints).
 
 **Testing the production build instead**
@@ -2367,14 +2369,14 @@ each HOS should have a page.
 
 Every screen now has its own address under the app's base, `…/99-HO-States/v05/`:
 
-| Page              | Address                                  |
-| ----------------- | ---------------------------------------- |
-| Landing           | (the base itself)                        |
-| News              | `News`                                   |
-| List of Heads     | `List`                                   |
-| Credits           | `Credits`                                |
-| Speak setup       | `Speech`                                 |
-| One head of state | `HOS/01` … `HOS/47`, e.g. `HOS/16`       |
+| Page              | Address                            |
+| ----------------- | ---------------------------------- |
+| Landing           | (the base itself)                  |
+| News              | `News`                             |
+| List of Heads     | `List`                             |
+| Credits           | `Credits`                          |
+| Speak setup       | `Speech`                           |
+| One head of state | `HOS/01` … `HOS/47`, e.g. `HOS/16` |
 
 - **`src/data/route.js`** (new): the paths, parsing an address into a screen (and HOS), and
   writing the address and page title. Still no router: `screen` and `slideIndex` decide what
