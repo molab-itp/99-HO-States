@@ -263,12 +263,12 @@ async function main() {
     await page.waitForSelector('.news-list');
     assert((await page.locator('.nav-title').textContent()) === 'News', 'news screen should be titled News');
     const newsRows = page.locator('.news-row');
-    assert((await newsRows.count()) === 10, `News should list the news.json entries: got ${await newsRows.count()}`);
+    assert((await newsRows.count()) === 12, `News should list the news.json entries: got ${await newsRows.count()}`);
     assertIncludes(await newsRows.first().locator('.label').textContent(), 'Ava DuVernay', 'news should keep news.json order');
     assertIncludes(await newsRows.first().locator('.host').textContent(), 'www.filmlinc.org', 'news row should show its host');
     assertIncludes(await newsRows.first().getAttribute('href'), 'https://www.filmlinc.org/', 'news row should link to its url');
     await page.waitForFunction(() =>
-      [...document.querySelectorAll('img.news-thumb')].length === 10 &&
+      [...document.querySelectorAll('img.news-thumb')].length === 12 &&
       [...document.querySelectorAll('img.news-thumb')].every((img) => img.complete && img.naturalWidth > 0),
     );
     await shot('news');
@@ -301,7 +301,7 @@ async function main() {
     }
     await checkSection('Articles', 47, '1. George Washington', 'https://en.wikipedia.org/wiki/George_Washington');
     await checkSection('Photos', 47, '1. George Washington', 'https://commons.wikimedia.org/wiki/File:');
-    await checkSection('News', 10, 'Ava DuVernay', 'https://www.filmlinc.org/');
+    await checkSection('News', 12, 'Ava DuVernay', 'https://www.filmlinc.org/');
     await page.reload();
     await page.waitForSelector('.credits');
     await page.click('button[aria-label="Back"]');
@@ -321,11 +321,11 @@ async function main() {
     assert((await page.locator('.nav-title').textContent()) === 'Speak', 'speech setup screen should be titled Speak');
     const groupHeader = (groupTitle) => page.locator('.speech-setup .credits-header', { hasText: groupTitle });
     const groupTitles = await page.locator('.speech-setup .credits-header').allTextContents();
-    assert(groupTitles.join(',') === 'English,Chinese,Spanish,French,Other', `language groups: got ${groupTitles}`);
+    assert(groupTitles.join(',') === 'English,Chinese,Romance languages,Other', `language groups: got ${groupTitles}`);
     assert((await page.locator('.language-row').allTextContents()).join(',').endsWith('zh-CN'), 'only the Chinese group should start shown');
     assert((await page.locator('.language-row').count()) === 1, 'the other groups should start hidden');
     assert((await groupHeader('English').locator('.speech-group-title svg').count()) === 1, 'a hidden group holding the picked language should be checked');
-    for (const groupTitle of ['English', 'Spanish', 'French', 'Other']) await groupHeader(groupTitle).click();
+    for (const groupTitle of ['English', 'Romance languages', 'Other']) await groupHeader(groupTitle).click();
     assert((await page.locator('.language-row').count()) === 6, 'every voice language should be listed');
     assert((await groupHeader('English').locator('.speech-group-title svg').count()) === 0, 'a shown group needs no checkmark in its header');
     assertIncludes(await page.locator('.language-row[aria-pressed="true"]').textContent(), 'en-US', 'the browser language should start selected');
