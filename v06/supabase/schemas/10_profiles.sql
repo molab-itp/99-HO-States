@@ -7,10 +7,13 @@ create table public.profiles (
   display_name text,
   avatar_url text,
   -- Photo the user uploaded in the app, as object paths in the public `avatars` bucket (see
-  -- 30_profile_photos.sql): the full-resolution original and a small square thumbnail for lists.
+  -- 30_profile_photos.sql): the full-resolution photo and a small square thumbnail for lists.
   -- Separate from `avatar_url`, which the auth trigger below overwrites on every sign-in.
   photo_path text,
   photo_thumb_path text,
+  -- The uncropped photo, set only while `photo_path` is a crop of it, so the user can re-crop or
+  -- restore it. Null when `photo_path` is itself the original.
+  photo_original_path text,
   -- Guests from "Continue as Guest" (`signInAnonymously()`). They're real users with their own
   -- id and `app_state`; adding an email later keeps both.
   is_anonymous boolean not null default false,

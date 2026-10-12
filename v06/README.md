@@ -253,6 +253,12 @@ start`) after changing a template.
   `photo_thumb_path` and deletes the previous pair. The list loads only the thumbnails. Storage
   policies (`schemas/30_profile_photos.sql`) limit each user to writing their own folder. Anyone
   with a file's URL can view it, but the file names are random.
+- **Cropping:** picking a photo opens `PhotoCropView`: drag a corner to resize the rectangle, drag
+  inside it to move it. **Crop** on your profile reopens it on the photo you already have. The
+  crop (and a thumbnail of it) becomes `photo_path` / `photo_thumb_path`, and the uncropped photo
+  stays in the bucket with `profiles.photo_original_path` pointing at it. Cropping again always
+  starts from that original, so a crop can be widened. **Restore Original** switches back to it
+  and deletes the crop. `photo_original_path` is null whenever the photo isn't cropped.
 
 Possible next steps:
 - **Guest upgrade:** let a guest add an email with `auth.updateUser(user: .init(email:))`. They

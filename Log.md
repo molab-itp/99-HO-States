@@ -2408,3 +2408,52 @@ in `v05`; no tracked files changed from that. README updated. Version not bumped
 committed.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-10-12 17:24 (v06: crop the profile photo, keep the original, restore it)
+
+## Request
+
+In v06 add the ability to crop the image selected for the profile. Keep the original image and
+allow restoring to the original.
+
+## What was built
+
+- **Picking a photo** now opens a full-screen cropper before anything uploads. Drag a corner to
+  resize the rectangle, drag inside it to move it, **Reset** to go back to the whole image.
+  **Cancel** drops the pick.
+- **Crop** on your own profile reopens the cropper on the photo you already have. It always
+  starts from the uncropped original, so an earlier crop can be widened.
+- **Restore Original** appears only while the photo is cropped. It switches back to the original
+  and deletes the crop.
+- **Remove** deletes the original too.
+
+Files, all under `v06/`:
+
+- **`HOS-Lobby/HOS_Lobby/Views/PhotoCropView.swift`** (new): the cropper. It returns the crop in
+  unit coordinates, or nothing when it covers the whole image.
+- **`Models/ProfilePhoto.swift`**: takes an optional crop; the thumbnail is made from the cropped
+  image.
+- **`Services/ProfilePhotoService.swift`**: upload with an optional original, apply a crop,
+  restore the original, download the original. One shared step uploads the new files, updates
+  the profile, then deletes whatever files it no longer points at.
+- **`Views/ProfileDetailView.swift`**: the **Crop** and **Restore Original** buttons and the
+  cropper sheet.
+- **`Models/Profile.swift`**, **`supabase/schemas/10_profiles.sql`** and a new migration,
+  `20261012000000_profile_photo_original.sql`: `profiles.photo_original_path`, which points at
+  the uncropped photo while `photo_path` is a crop of it, and is null otherwise.
+
+Not specified in the request:
+
+- The crop rectangle is free-form, not locked to a square. The list thumbnail is still a centre
+  square of whatever was cropped.
+- The rectangle itself isn't saved, so cropping again starts from the full image rather than the
+  last rectangle.
+
+The app builds for the simulator. It was not run, so the cropper gestures and the upload paths
+are untested. The migration has not been pushed: until `npx supabase db push` is run in `v06`,
+uploading, cropping and restoring fail, because each writes the new column. README updated.
+Version not bumped. Not yet committed.
+
+**Cost**: ~15 minutes.

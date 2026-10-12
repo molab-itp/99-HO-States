@@ -923,6 +923,10 @@ sync v05 with v2
 v06.133
 
 in v06
-add ablity to crop image select for profile
+add ablity to crop image selected for profile
+keep original image and allow for restore to original
+
+cd v06 && npx supabase db push
+
 
 

@@ -1,7 +1,8 @@
 import PhotosUI
 import SwiftUI
 
-/// One user, with their full-resolution photo. On your own profile you can choose or remove it.
+/// One user, with their full-resolution photo. On your own profile you can choose, crop or remove
+/// it; a cropped photo keeps its original, which you can crop again or restore.
 struct ProfileDetailView: View {
     let isCurrentUser: Bool
     /// Called after the photo changes, so the list can pick up the new thumbnail.
@@ -10,6 +11,7 @@ struct ProfileDetailView: View {
     @Environment(AuthModel.self) private var auth
     @State private var profile: Profile
     @State private var pickedItem: PhotosPickerItem?
+    @State private var cropSource: CropSource?
     @State private var isWorking = false
     @State private var errorMessage: String?
 
@@ -20,6 +22,16 @@ struct ProfileDetailView: View {
     }
 
     private var photos: ProfilePhotoService { ProfilePhotoService(client: auth.client) }
+
+    /// An uncropped photo waiting in the cropper.
+    private struct CropSource: Identifiable {
+        let id = UUID()
+        /// Upright JPEG, as `ProfilePhoto` encodes it.
+        let data: Data
+        let image: UIImage
+        /// Just picked, so not in the bucket yet.
+        let isNew: Bool
+    }
 
     var body: some View {
         ScrollView {
@@ -43,6 +55,17 @@ struct ProfileDetailView: View {
                         }
                     }
                     .disabled(isWorking)
+
+                    if profile.photoPath != nil {
+                        HStack {
+                            Button("Crop", systemImage: "crop", action: cropCurrentPhoto)
+                            if profile.photoOriginalPath != nil {
+                                Button("Restore Original", systemImage: "arrow.uturn.backward", action: restoreOriginal)
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(isWorking)
+                    }
                 }
 
                 if let errorMessage {
@@ -68,7 +91,15 @@ struct ProfileDetailView: View {
         .onChange(of: pickedItem) {
             guard let item = pickedItem else { return }
             pickedItem = nil
-            upload(item)
+            crop(picked: item)
+        }
+        .fullScreenCover(item: $cropSource) { source in
+            PhotoCropView(image: source.image) {
+                cropSource = nil
+            } onDone: { rect in
+                cropSource = nil
+                finishCrop(of: source, to: rect)
+            }
         }
     }
 
@@ -91,16 +122,67 @@ struct ProfileDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
-    private func upload(_ item: PhotosPickerItem) {
-        change {
+    /// Opens the cropper on a newly picked photo. Nothing is uploaded until the cropper is done.
+    private func crop(picked item: PhotosPickerItem) {
+        run {
             // The original bytes (often HEIC); `ProfilePhoto` re-encodes them as JPEG.
             guard let data = try await item.loadTransferable(type: Data.self) else {
                 throw ProfilePhoto.ProcessingError.unreadableImage
             }
-            let photo = try await Task.detached(priority: .userInitiated) {
+            let original = try await Task.detached(priority: .userInitiated) {
                 try ProfilePhoto(imageData: data)
             }.value
-            try await photos.upload(photo, replacing: profile)
+            try showCropper(for: original.full, isNew: true)
+        }
+    }
+
+    /// Opens the cropper on the stored photo. It always starts from the original, so an earlier
+    /// crop can be widened again.
+    private func cropCurrentPhoto() {
+        run {
+            guard let data = try await photos.originalData(of: profile) else { return }
+            try showCropper(for: data, isNew: false)
+        }
+    }
+
+    private func showCropper(for data: Data, isNew: Bool) throws {
+        guard let image = UIImage(data: data) else { throw ProfilePhoto.ProcessingError.unreadableImage }
+        cropSource = CropSource(data: data, image: image, isNew: isNew)
+    }
+
+    /// `rect` is the crop in unit coordinates, or `nil` for the whole photo.
+    private func finishCrop(of source: CropSource, to rect: CGRect?) {
+        // The whole of a stored photo is its original.
+        if rect == nil, !source.isNew {
+            if profile.photoOriginalPath != nil { restoreOriginal(from: source.data) }
+            return
+        }
+        change {
+            let photo = try await Task.detached(priority: .userInitiated) {
+                try ProfilePhoto(imageData: source.data, crop: rect)
+            }.value
+            if source.isNew {
+                try await photos.upload(photo, original: rect == nil ? nil : source.data, replacing: profile)
+            } else {
+                try await photos.applyCrop(photo, to: profile)
+            }
+        }
+    }
+
+    private func restoreOriginal() {
+        restoreOriginal(from: nil)
+    }
+
+    /// `data` is the original, if it's already downloaded.
+    private func restoreOriginal(from data: Data?) {
+        change {
+            var data = data
+            if data == nil { data = try await photos.originalData(of: profile) }
+            guard let data else { return }
+            let original = try await Task.detached(priority: .userInitiated) {
+                try ProfilePhoto(imageData: data)
+            }.value
+            try await photos.restoreOriginal(of: profile, originalThumb: original.thumb)
         }
     }
 
@@ -110,13 +192,20 @@ struct ProfileDetailView: View {
 
     /// Runs a photo change, then refetches the profile (for the new paths) and the list.
     private func change(_ operation: @escaping () async throws -> Void) {
+        run {
+            try await operation()
+            profile = try await ProfilesService(client: auth.client).fetch(id: profile.id)
+            await onPhotoChanged()
+        }
+    }
+
+    /// Runs `operation` with the spinner up, showing its error if it fails.
+    private func run(_ operation: @escaping () async throws -> Void) {
         isWorking = true
         errorMessage = nil
         Task {
             do {
                 try await operation()
-                profile = try await ProfilesService(client: auth.client).fetch(id: profile.id)
-                await onPhotoChanged()
             } catch {
                 errorMessage = error.localizedDescription
             }

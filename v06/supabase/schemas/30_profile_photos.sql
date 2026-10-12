@@ -2,8 +2,11 @@
 --
 -- Each user owns the folder named after their id: `avatars/<user id>/<random>-full.jpg` (full
 -- resolution) and `…-thumb.jpg` (256px square, for the users list). `profiles.photo_path` and
--- `profiles.photo_thumb_path` point at the current pair. Every upload gets fresh file names, so
--- CDN and device caches never serve a stale photo; the app deletes the previous pair afterwards.
+-- `profiles.photo_thumb_path` point at the current pair. When the user crops their photo, the
+-- crop becomes the pair and the uncropped photo stays in the folder (`…-original.jpg`, or the
+-- earlier `…-full.jpg`) with `profiles.photo_original_path` pointing at it. Every upload gets
+-- fresh file names, so CDN and device caches never serve a stale photo; the app deletes the files
+-- the profile no longer points at afterwards.
 --
 -- The bucket is public: anyone with a file's URL can fetch it without signing in, and the random
 -- file names make the URLs hard to guess. That keeps `AsyncImage` simple (no signed URLs to
