@@ -920,6 +920,9 @@ v02.132
 
 sync v05 with v2
 
+v06.133
 
+in v06
+add ablity to crop image select for profile
 
 
