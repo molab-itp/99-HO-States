@@ -935,3 +935,9 @@ create a new folder v07 for web app
 that is a mirror of v06
 a swiftui app converted to react
 to be hosted on github pages similar to v05
+
+Before it works on GitHub Pages
+
+gh variable set SUPABASE_URL --body "https://<ref>.supabase.co"
+gh variable set SUPABASE_PUBLISHABLE_KEY --body "sb_publishable_…"
+
