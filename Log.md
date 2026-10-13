@@ -2457,3 +2457,75 @@ uploading, cropping and restoring fail, because each writes the new column. READ
 Version not bumped. Not yet committed.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-10-12 20:29 (v07: HOS-Lobby as a React web app, a port of v06, for GitHub Pages)
+
+## Request
+
+Create a new folder v07 for a web app that is a mirror of v06, a SwiftUI app converted to React,
+to be hosted on GitHub Pages similar to v05.
+
+## What was built
+
+`v07/` is a React + Vite port of the v06 HOS-Lobby app, wired into the Pages deploy the same way
+as v05.
+
+- **Same features as v06:** email-code, Apple and guest sign-in; the live users list with
+  banners; profile photo choose / crop / restore / remove; admin delete.
+- **Same backend:** it uses v06's Supabase project as it is. Nothing under `v06/supabase/`
+  changed.
+- **Same file layout:** each file under `v07/src/` is a port of the Swift file of the same name.
+
+Files:
+
+- **`v07/src/App.jsx`**, **`supabaseConfig.js`**: create the Supabase client from
+  `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`, or show "Supabase not configured".
+- **`v07/src/models/`**: `profile.js` (display name, list order, "5 minutes ago"),
+  `profilePhoto.js` (JPEG re-encoding, crop and thumbnail, on a canvas), `userEvent.js`.
+- **`v07/src/services/`**: `AuthContext.jsx` (AuthModel, as `useAuth()`), `profilesService.js`
+  (profiles, Realtime, RPCs, the `delete-user` function), `profilePhotoService.js` (the `avatars`
+  bucket), `appStateStore.js` (unused, as in v06).
+- **`v07/src/views/`**: `RootView`, `SignInView`, `UsersListView`, `ProfileRow`,
+  `ProfileDetailView`, `PhotoCropView`, `SetupRequiredView`, `AppVersionLabel`, and
+  `useSelectedUser.js` for the profile's address.
+- **`v07/src/components/`**: `NavBar`, `Avatar`, `Spinner`, and `Icon` (Bootstrap Icons, as in
+  v05).
+- **`v07/public/`**: favicon and apple-touch-icon, resized from v06's app icon.
+- **`v07/scripts/smoke.mjs`**: the smoke test (below).
+- **`.github/workflows/deploy-pages.yml`**: builds v07 and publishes it at
+  `…/99-HO-States/v07/`. The Supabase URL and key come from repository variables.
+- **`pages/index.html`**, root **`README.md`**, **`v06/README.md`**: links to v07.
+- **`v07/README.md`**: running, setup, structure, differences from v06.
+- **`v07/.env.local`** (gitignored): created from v06's `Supabase.plist`, so `npm run dev` works.
+
+Differences from v06:
+
+- **Refresh** is a button in the nav bar, in place of pull-to-refresh.
+- **Admin delete** is a trash button on the row, in place of the swipe action.
+- A profile opens at `#/user/<id>`, so the browser's Back button returns to the list.
+- Photos longer than 4096 px on a side are scaled down to that, because browsers limit canvas
+  size.
+- HEIC photos only decode in Safari.
+- The version label shows `0.7.0` from `package.json`, with no build number.
+- Sign in with Apple leaves the page for Apple's and comes back, instead of the system sheet.
+
+How it was checked: the app builds, and `npm run smoke` passes. The smoke test drives the app in
+headless Chromium through sign-in, the list, live updates, admin delete and the photo flows. It
+answers every Supabase request from a stand-in inside the script, so it created no users in the
+real project. With the real `.env.local`, the page was only loaded as far as the sign-in screen.
+So the real database policies, email delivery, Storage and Realtime are untested from the web.
+
+Still to do before it works on GitHub Pages:
+
+1. Set the repository variables `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (`gh variable set`).
+   Until then the published page shows "Supabase not configured".
+2. Add `https://molab-itp.github.io/99-HO-States/v07/` to the Supabase dashboard's Redirect URLs.
+   Apple sign-in needs it; email code and guest do not.
+3. Sign in with Apple on the web needs an Apple Services ID and secret key in Supabase, which the
+   native flow didn't. Until then the button leads to a Supabase error page.
+
+Not yet committed.
+
+**Cost**: ~25 minutes.
