@@ -2570,3 +2570,35 @@ the workflow re-run) afterwards.
 No files changed.
 
 **Cost**: ~2 minutes.
+
+# --
+
+2026-10-12 21:45 (v07: variables set; next is to publish and try it on GitHub Pages)
+
+## Request
+
+Done: set the variables on github.com. What's the next step?
+
+## Answer
+
+v07 is still uncommitted, and the Pages build only runs when it reaches `main`.
+
+1. **Publish.** From the repo root, on the `prep` branch, run `bin/publish.sh`. It commits
+   everything with the last `vNN.NN` entry of `_prompts.txt` as the message, pushes `prep`,
+   and fast-forwards `main`. That entry is currently `v07.134` plus everything typed below it,
+   including the `gh` notes, so trim it first to keep those out of the commit message.
+2. **Watch the build.** The "Deploy Pages" run at
+   https://github.com/molab-itp/99-HO-States/actions takes a couple of minutes.
+3. **Open the page.** https://molab-itp.github.io/99-HO-States/v07/. The sign-in screen means the
+   variables were picked up. "Supabase not configured" means the variable names or the tab
+   (Variables, not Secrets) are off.
+4. **Try it for real.** Sign in with the email code or as a guest, then check the list, a photo
+   upload and a crop. This is the first time the web app meets the real database, Storage and
+   Realtime.
+
+Sign in with Apple will fail until the redirect URL and the Apple Services ID are set up (steps 2
+and 3 in `v07/README.md`). Email code and guest don't need either.
+
+No files changed. Nothing was published.
+
+**Cost**: ~1 minute.
