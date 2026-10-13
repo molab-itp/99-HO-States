@@ -32,6 +32,7 @@ users. It checks the app, not the database, its policies or the email.
 The app needs three things that v06 didn't. None of them is done yet.
 
 ### 1. Repository variables, for the Pages build
+
 The Supabase URL and key are baked into the build. The
 [Pages workflow](../.github/workflows/deploy-pages.yml) reads them from repository variables
 (**Settings → Secrets and variables → Actions → Variables**):
@@ -45,12 +46,14 @@ Until they're set, the published page shows "Supabase not configured". The publi
 meant to be public (it's in the page's JavaScript either way); RLS is what protects the data.
 
 ### 2. Redirect URL
+
 **Authentication → URL Configuration → Redirect URLs**: add
 `https://molab-itp.github.io/99-HO-States/v07/`, next to the `http://localhost:5173` that v06's
 setup lists for local development. Sign in with Apple returns to this address, and so would a sign-in link if a
 template ever adds one back. The email code and guest sign-in work without it.
 
 ### 3. Sign in with Apple, for the web
+
 v06's native flow needs only the app's bundle id. A web page goes through Apple's own sign-in
 page instead, which needs more:
 
