@@ -1,10 +1,13 @@
 // Port of Swift's `SlideshowSettings`: persisted slideshow settings, chosen on Landing and used
 // by the detail screen. Seconds are the basic unit; the details delay is stored as a fraction of
 // the slideshow interval. The fade period is how long the header image cross-fades between
-// heads of state during a slideshow.
+// heads of state during a slideshow. Animated has the header image zoom and pan into its saved
+// position as each head of state appears during a slideshow.
 export const SlideshowSettings = {
   randomModeKey: 'ho-states-us.slideshowRandomMode',
   defaultRandomMode: false,
+  animatedKey: 'ho-states-us.slideshowAnimated',
+  defaultAnimated: false,
   intervalSecsKey: 'ho-states-us.slideshowIntervalSecs',
   delayFractionKey: 'ho-states-us.slideshowDelayFraction',
   intervalSecsOptions: [5, 10, 15, 20],

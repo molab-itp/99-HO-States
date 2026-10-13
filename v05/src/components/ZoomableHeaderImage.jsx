@@ -30,6 +30,9 @@ function distance(a, b) {
  * over the photo; `showsPhoto={false}` hides the photo under it (the eye menu's Drawing Only).
  * `reactions` are shown along the frame's bottom edge. `showsZoomControls` hides
  * the -/1×/+ buttons (e.g. while the slideshow plays); pinch, wheel and double-tap still work.
+ * `zoomInSecs`, when set, has the photo first appear at 1x and animate to `initialZoom` over
+ * that many seconds, instead of appearing already zoomed; the detail screen sets it while the
+ * slideshow plays with Landing's Animated toggle on.
  */
 export default function ZoomableHeaderImage({
   imageSrc,
@@ -40,13 +43,19 @@ export default function ZoomableHeaderImage({
   showsPhoto = true,
   reactions = [],
   showsZoomControls = true,
+  zoomInSecs = null,
 }) {
-  const [scale, setScaleState] = useState(initialZoom?.scale ?? MIN_SCALE);
+  // Read once, on mount: only the first appearance animates, same as Swift's `hasAppeared`, so
+  // pressing Play on a HOS that is already showing doesn't replay it.
+  const zoomInRef = useRef(zoomInSecs != null && initialZoom ? { secs: zoomInSecs, target: initialZoom } : null);
+  const startZoom = zoomInRef.current ? null : initialZoom;
+  const [scale, setScaleState] = useState(startZoom?.scale ?? MIN_SCALE);
   const [offset, setOffsetState] = useState({
-    x: initialZoom?.offsetX ?? 0,
-    y: initialZoom?.offsetY ?? 0,
+    x: startZoom?.offsetX ?? 0,
+    y: startZoom?.offsetY ?? 0,
   });
   const [isInteracting, setIsInteracting] = useState(false);
+  const [isZoomingIn, setIsZoomingIn] = useState(zoomInRef.current !== null);
 
   // Mirror state into refs so gesture handlers (which read/write across many pointer events) can
   // always see the latest committed values, same role as Swift's `lastScale`/`lastOffset`.
@@ -83,6 +92,21 @@ export default function ZoomableHeaderImage({
       clearTimeout(wheelTimerRef.current);
     };
   }, [imageSrc]);
+
+  // The animated zoom-in: the photo has rendered at 1x, so moving to the saved zoom/pan here
+  // runs as a transition over `zoomInSecs` (see the `transition` style below).
+  useEffect(() => {
+    const zoomIn = zoomInRef.current;
+    if (!zoomIn) return undefined;
+    // Reading layout makes the browser take the 1x transform as the transition's start even if
+    // this effect runs before the first paint.
+    void frameRef.current?.offsetWidth;
+    setScale(zoomIn.target.scale);
+    setOffset({ x: zoomIn.target.offsetX ?? 0, y: zoomIn.target.offsetY ?? 0 });
+    const timer = setTimeout(() => setIsZoomingIn(false), zoomIn.secs * 1000);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function setScale(value) {
     scaleRef.current = value;
@@ -152,6 +176,7 @@ export default function ZoomableHeaderImage({
     }
     // No easing while the wheel is turning; save once it settles rather than on every event.
     setIsInteracting(true);
+    setIsZoomingIn(false);
     clearTimeout(wheelTimerRef.current);
     wheelTimerRef.current = setTimeout(() => {
       if (pointersRef.current.size === 0) setIsInteracting(false);
@@ -174,6 +199,7 @@ export default function ZoomableHeaderImage({
     }
     pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     setIsInteracting(true);
+    setIsZoomingIn(false);
 
     if (pointersRef.current.size === 2) {
       panRef.current = null;
@@ -271,7 +297,11 @@ export default function ZoomableHeaderImage({
         className={showsPhoto || !drawing ? 'zoomable-content' : 'zoomable-content drawing-only'}
         style={{
           transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
-          transition: isInteracting ? 'none' : 'transform 0.2s ease-out',
+          transition: isInteracting
+            ? 'none'
+            : isZoomingIn
+              ? `transform ${zoomInRef.current.secs}s ease-in-out`
+              : 'transform 0.2s ease-out',
         }}
       >
         <img

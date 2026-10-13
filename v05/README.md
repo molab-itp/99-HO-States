@@ -15,7 +15,8 @@ navigator) is the only expected change to port further.
   news, credits and speech setup screens on top of it, and reopens on the persisted `screen` after
   a reload.
 - `src/screens/` — `LandingScreen` (port of `LandingView`: Resume, News, List of Heads, Random
-  Head, Speak, Start Slideshow, slideshow settings, Reset Visit Count, Credits, links),
+  Head, Speak, Start Slideshow, slideshow settings including Random Mode and Animated, Reset
+  Visit Count, Credits, links),
   `HOSListScreen`, `HOSDetailScreen` (Play/Pause slideshow, speech button, drawing, Back to
   Landing), `NewsScreen` (port of `NewsView`), `CreditsScreen` (port of `CreditsView`: article,
   photo and news sources, each section collapsible), and `SpeechSetupScreen` (port of

@@ -20,6 +20,10 @@ export default function LandingScreen({ onShowList, onShowDetail, onShowNews, on
     SlideshowSettings.randomModeKey,
     SlideshowSettings.defaultRandomMode,
   );
+  const [isAnimated, setIsAnimated] = useStoredBoolean(
+    SlideshowSettings.animatedKey,
+    SlideshowSettings.defaultAnimated,
+  );
   const [slideshowIntervalSecs, setSlideshowIntervalSecs] = useStoredNumber(
     SlideshowSettings.intervalSecsKey,
     SlideshowSettings.defaultIntervalSecs,
@@ -84,6 +88,14 @@ export default function LandingScreen({ onShowList, onShowDetail, onShowNews, on
           <span>Random Mode</span>
           <span className="switch">
             <input type="checkbox" checked={isRandomMode} onChange={(e) => setIsRandomMode(e.target.checked)} />
+            <span className="switch-track" />
+            <span className="switch-thumb" />
+          </span>
+        </label>
+        <label className="toggle-row">
+          <span>Animated</span>
+          <span className="switch">
+            <input type="checkbox" checked={isAnimated} onChange={(e) => setIsAnimated(e.target.checked)} />
             <span className="switch-track" />
             <span className="switch-thumb" />
           </span>

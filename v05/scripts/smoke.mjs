@@ -545,6 +545,34 @@ async function main() {
     await backToLanding();
     await page.click('text=Random Mode');
 
+    console.log('Animated slideshow: the photo zooms from 1x into its saved zoom...');
+    await pickFromList('#01');
+    await page.click('button[aria-label="Zoom In"]');
+    await page.click('button[aria-label="Zoom In"]');
+    await backToLanding();
+    await page.click('text=Animated');
+    await page.click('button:has-text("Start Slideshow")');
+    await page.waitForSelector('button[aria-label="Pause"]');
+    // The scale currently on screen (mid-transition included), from the computed matrix.
+    const shownScale = () =>
+      page
+        .locator('.fade-layer:not(.fade-out) .zoomable-content')
+        .evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).a);
+    const zoomDuration = await page
+      .locator('.fade-layer:not(.fade-out) .zoomable-content')
+      .evaluate((el) => getComputedStyle(el).transitionDuration);
+    assert(zoomDuration === '2s', `zoom-in should take the 2s details delay, got ${zoomDuration}`);
+    const earlyScale = await shownScale();
+    assert(earlyScale < 2, `photo should start near 1x and still be zooming in, got ${earlyScale}`);
+    await shot('slideshow-animated-zooming');
+    await page.waitForTimeout(2300);
+    const settledScale = await shownScale();
+    assert(Math.abs(settledScale - 2.25) < 0.01, `photo should settle at its saved 2.25x, got ${settledScale}`);
+    await page.click('button[aria-label="Pause"]');
+    await page.click('button[aria-label="Reset Zoom"]');
+    await backToLanding();
+    await page.click('text=Animated');
+
     console.log('Reset Visit Count...');
     const before = await page.locator('.visited-count').textContent();
     await page.click('text=Reset Visit Count');

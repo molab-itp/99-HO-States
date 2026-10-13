@@ -73,6 +73,7 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   // after paint, which let the new text flash at full opacity first.
   const [revealedIndex, setRevealedIndex] = useState(null);
   const [isRandomMode] = useStoredBoolean(SlideshowSettings.randomModeKey, SlideshowSettings.defaultRandomMode);
+  const [isAnimated] = useStoredBoolean(SlideshowSettings.animatedKey, SlideshowSettings.defaultAnimated);
   const [isSlideshowPaused, setIsSlideshowPaused] = useState(!startsPlaying);
   const isPlaying = !isSlideshowPaused;
   const [remainingSecs, setRemainingSecs] = useState(slideshowIntervalSecs);
@@ -266,6 +267,8 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
                   showsPhoto={showsPhoto(layerMode)}
                   reactions={reactionsFor(p)}
                   showsZoomControls={!isPlaying}
+                  // Timed to the details delay, so the zoom settles as the details fade in.
+                  zoomInSecs={isAnimated && isPlaying ? delaySecs : null}
                 />
               </div>
             );
