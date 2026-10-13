@@ -6,6 +6,8 @@ import SwiftUI
 enum SlideshowSettings {
     static let randomModeKey = "slideshowRandomMode"
     static let defaultRandomMode = false
+    static let animatedKey = "slideshowAnimated"
+    static let defaultAnimated = false
     static let intervalSecsKey = "slideshowIntervalSecs"
     static let delayFractionKey = "slideshowDelayFraction"
     static let intervalSecsOptions: [Double] = [5, 10, 15, 20]
@@ -33,6 +35,8 @@ struct HOSDetailView: View {
 
     @AppStorage(SlideshowSettings.randomModeKey)
     private var isRandomMode = SlideshowSettings.defaultRandomMode
+    @AppStorage(SlideshowSettings.animatedKey)
+    private var isAnimated = SlideshowSettings.defaultAnimated
     @AppStorage(SlideshowSettings.intervalSecsKey)
     private var slideshowIntervalSecs = SlideshowSettings.defaultIntervalSecs
     @AppStorage(SlideshowSettings.delayFractionKey)
@@ -96,7 +100,12 @@ struct HOSDetailView: View {
                 // A ZStack so the outgoing and incoming images overlap while they cross-fade,
                 // instead of stacking vertically during the transition.
                 ZStack {
-                    ZoomableHeaderImage(hos: hos, displayMode: appModel.drawingDisplayMode(for: hos))
+                    ZoomableHeaderImage(
+                        hos: hos,
+                        displayMode: appModel.drawingDisplayMode(for: hos),
+                        // Timed to the details delay, so the zoom settles as the details fade in.
+                        zoomInSecs: isAnimated && isPlaying ? delaySecs : nil
+                    )
                         // Gives the image a fresh identity (and so fresh, reset zoom/pan state) each
                         // time the displayed HOS changes, since this view instance otherwise
                         // persists across Next/Previous/slideshow advances.

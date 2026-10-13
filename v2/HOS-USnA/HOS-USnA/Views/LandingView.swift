@@ -22,6 +22,8 @@ struct LandingView: View {
   
   @AppStorage(SlideshowSettings.randomModeKey)
   private var isRandomMode = SlideshowSettings.defaultRandomMode
+  @AppStorage(SlideshowSettings.animatedKey)
+  private var isAnimated = SlideshowSettings.defaultAnimated
   @AppStorage(SlideshowSettings.intervalSecsKey)
   private var slideshowIntervalSecs = SlideshowSettings.defaultIntervalSecs
   @AppStorage(SlideshowSettings.delayFractionKey)
@@ -102,6 +104,10 @@ struct LandingView: View {
           
           Toggle(isOn: $isRandomMode) {
             Label("Random Mode", systemImage: "shuffle")
+          }
+          
+          Toggle(isOn: $isAnimated) {
+            Label("Animated", systemImage: "plus.magnifyingglass")
           }
           
           LabeledContent("Slide Interval") {

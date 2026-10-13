@@ -39,12 +39,17 @@ struct ZoomableHeaderImage: View {
     let hos: HOS
     /// Whether the portrait and/or its saved drawing (if any) are shown.
     var displayMode: DrawingDisplayMode = .photoAndDrawing
+    /// When set, the portrait first appears at 1x and animates to its saved zoom/pan over
+    /// this many seconds, instead of appearing already zoomed. `HOSDetailView` sets it while
+    /// the slideshow plays with Landing's Animated toggle on.
+    var zoomInSecs: Double?
     @Environment(AppModel.self) private var appModel
 
     @State private var scale: CGFloat = 1
     @State private var lastScale: CGFloat = 1
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
+    @State private var hasAppeared = false
     private let minScale: CGFloat = 1
     private let maxScale: CGFloat = 30
 
@@ -92,7 +97,9 @@ struct ZoomableHeaderImage: View {
                 // Panning only makes sense once zoomed in; leaving the drag gesture off entirely at
                 // 1x (rather than just no-op'ing inside it) keeps the enclosing ScrollView's own
                 // vertical drag free to scroll the page normally when the image isn't zoomed.
-                if scale > minScale {
+                // An animated zoom-in counts as zoomed from the first frame: switching branches
+                // as it starts would replace the image (a fade) rather than animate its scale.
+                if scale > minScale || isAwaitingZoomIn {
                     scaledImage.gesture(magnifyGesture.simultaneously(with: panGesture))
                 } else {
                     scaledImage.gesture(magnifyGesture)
@@ -109,12 +116,22 @@ struct ZoomableHeaderImage: View {
             }
         }
         .onAppear {
+            // Only the first appearance animates; returning from the drawing editor doesn't replay it.
+            let animation = hasAppeared ? nil : zoomInSecs.map { Animation.easeInOut(duration: $0) }
+            hasAppeared = true
             guard let saved = appModel.imageZoomState(for: hos) else { return }
-            scale = saved.scale
+            withAnimation(animation) {
+                scale = saved.scale
+                offset = saved.offset
+            }
             lastScale = saved.scale
-            offset = saved.offset
             lastOffset = saved.offset
         }
+    }
+
+    /// Whether this is the frame before `onAppear` starts an animated zoom-in to a saved state.
+    private var isAwaitingZoomIn: Bool {
+        zoomInSecs != nil && !hasAppeared && appModel.imageZoomState(for: hos) != nil
     }
 
     private var magnifyGesture: some Gesture {

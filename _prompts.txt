@@ -968,3 +968,11 @@ v07.137
 
 https://github.com/molab-itp/99-HO-States/settings/variables/actions
 Repository variables
+
+v02.138
+
+in v2, add Animated toggle button
+below Random Mode
+that enables animation of the
+zoom and pan when a HOS appears in
+slideshow playback mode
