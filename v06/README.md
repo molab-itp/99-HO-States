@@ -6,6 +6,7 @@ lists every user who has signed on and when they were last active. It uses Supab
 Pro plan, plus a custom SMTP provider (Resend) for sending email. Apple sign-in is native (no web
 OAuth redirect).
 `supabase/` holds the database, which is set up so v2 (iOS) and v05 (web) can adopt it later.
+[v07](../v07) is the web port of this app, on the same database.
 
 ```
 v06/

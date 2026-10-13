@@ -6,6 +6,7 @@ on:
     paths:
       - 'v4/**'
       - 'v05/**'
+      - 'v07/**'
       - 'pages/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
@@ -32,6 +33,7 @@ jobs:
           cache-dependency-path: |
             v4/package-lock.json
             v05/package-lock.json
+            v07/package-lock.json
 
       - name: Build v4
         working-directory: v4
@@ -41,6 +43,19 @@ jobs:
 
       - name: Build v05
         working-directory: v05
+        run: |
+          npm ci
+          npm run build
+
+      # v07 talks to the v06 Supabase project, whose URL and publishable key are baked into the
+      # build. They come from repository variables (Settings > Secrets and variables > Actions >
+      # Variables); the publishable key is public by design, so these aren't secrets. Without
+      # them the build still succeeds and the page shows "Supabase not configured".
+      - name: Build v07
+        working-directory: v07
+        env:
+          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
         run: |
           npm ci
           npm run build
@@ -57,6 +72,8 @@ jobs:
           cp -r v4/dist/. _site/v4/
           mkdir -p _site/v05
           cp -r v05/dist/. _site/v05/
+          mkdir -p _site/v07
+          cp -r v07/dist/. _site/v07/
 
       - uses: actions/configure-pages@v5
 

@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.DS_Store
+playwright/screenshots/
+# Holds your project URL + key; copy from .env.example.
+.env.local

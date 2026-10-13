@@ -929,4 +929,9 @@ keep original image and allow for restore to original
 cd v06 && npx supabase db push
 
 
+v07.134
 
+create a new folder v07 for web app 
+that is a mirror of v06
+a swiftui app converted to react
+to be hosted on github pages similar to v05

@@ -1,0 +1,726 @@
+/* Design tokens follow Apple's Human Interface Guidelines system colors (systemBackground,
+   systemGroupedBackground, label/secondaryLabel, separator), as in v05, so the page reads as the
+   SwiftUI screens it ports. --tint is system blue: v06 sets no AccentColor. */
+:root {
+  color-scheme: light dark;
+
+  --tint: #007aff;
+  --tint-fill: rgba(0, 122, 255, 0.15);
+  --on-tint: #ffffff;
+  --destructive: #ff3b30;
+
+  --bg: #ffffff;
+  --grouped-bg: #f2f2f7;
+  --card-bg: #ffffff;
+  --bar-bg: rgba(249, 249, 249, 0.8);
+  --material-bg: rgba(250, 250, 250, 0.85);
+
+  --label: #000000;
+  --secondary-label: #6e6e73;
+  --tertiary-label: #c7c7cc;
+
+  --separator: rgba(60, 60, 67, 0.29);
+  --fill: rgba(120, 120, 128, 0.12);
+  --fill-pressed: rgba(60, 60, 67, 0.08);
+
+  --apple-bg: #000000;
+  --apple-label: #ffffff;
+
+  --radius-lg: 14px;
+  --radius-md: 12px;
+  --radius-sm: 10px;
+
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Roboto,
+    sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tint: #0a84ff;
+    --tint-fill: rgba(10, 132, 255, 0.2);
+    --destructive: #ff453a;
+
+    --bg: #000000;
+    --grouped-bg: #000000;
+    --card-bg: #1c1c1e;
+    --bar-bg: rgba(15, 15, 17, 0.78);
+    --material-bg: rgba(44, 44, 46, 0.85);
+
+    --label: #ffffff;
+    --secondary-label: #98989f;
+    --tertiary-label: #48484a;
+
+    --separator: rgba(84, 84, 88, 0.65);
+    --fill: rgba(120, 120, 128, 0.24);
+    --fill-pressed: rgba(120, 120, 128, 0.24);
+
+    /* `.signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)` */
+    --apple-bg: #ffffff;
+    --apple-label: #000000;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 17px;
+  background: var(--bg);
+  color: var(--label);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+svg {
+  flex-shrink: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+.app-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--grouped-bg);
+}
+
+/* --- Shared pieces --- */
+
+.error-text {
+  font-size: 13px;
+  color: var(--destructive);
+  text-align: center;
+}
+
+.version-label {
+  font-size: 13px;
+  color: var(--secondary-label);
+  text-align: center;
+}
+
+/* ContentUnavailableView, and the centered ProgressView. */
+.unavailable {
+  flex: 1;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px;
+  text-align: center;
+  color: var(--secondary-label);
+}
+
+.unavailable h1 {
+  font-size: 22px;
+  color: var(--label);
+}
+
+.unavailable p {
+  max-width: 420px;
+  font-size: 15px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid var(--tertiary-label);
+  border-top-color: var(--secondary-label);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner-large {
+  width: 32px;
+  height: 32px;
+  border-width: 3.5px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.avatar {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  color: var(--secondary-label);
+}
+
+.avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- Buttons: .borderedProminent, .bordered, and SignInWithAppleButton --- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.button-large {
+  width: 100%;
+  min-height: 50px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  font-size: 17px;
+}
+
+.button-prominent {
+  background: var(--tint);
+  color: var(--on-tint);
+}
+
+.button-bordered {
+  background: var(--tint-fill);
+  color: var(--tint);
+}
+
+.button-destructive-text {
+  background: color-mix(in srgb, var(--destructive) 15%, transparent);
+  color: var(--destructive);
+}
+
+.button-destructive {
+  background: var(--destructive);
+  color: var(--on-tint);
+}
+
+.button-apple {
+  background: var(--apple-bg);
+  color: var(--apple-label);
+  font-weight: 600;
+}
+
+.button:active {
+  opacity: 0.7;
+}
+
+.button:disabled,
+.button.disabled,
+fieldset:disabled .button {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.link-button {
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: var(--tint);
+  font-size: 13px;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* .textFieldStyle(.roundedBorder) */
+.text-field {
+  width: 100%;
+  padding: 9px 10px;
+  border: 0.5px solid var(--separator);
+  border-radius: 7px;
+  background: var(--card-bg);
+  font-size: 17px;
+}
+
+.text-field:focus-visible,
+.button:focus-visible,
+.nav-button:focus-visible,
+.link-button:focus-visible,
+.list-row:focus-visible,
+.list-delete:focus-visible {
+  outline: 2px solid var(--tint);
+  outline-offset: 2px;
+}
+
+/* --- Navigation bar --- */
+
+.nav-bar,
+.crop-bar {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 8px;
+}
+
+.nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 0.5px solid var(--separator);
+  background: var(--bar-bg);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* Equal sides keep the title centered whatever each holds. */
+.nav-leading,
+.nav-trailing {
+  flex: 1 0 0;
+  display: flex;
+  align-items: center;
+}
+
+.nav-trailing {
+  justify-content: flex-end;
+}
+
+.nav-title {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 17px;
+  text-align: center;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0 8px;
+  border: none;
+  background: none;
+  color: var(--tint);
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+.nav-button-strong {
+  font-weight: 600;
+}
+
+.nav-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* --- SignInView --- */
+
+.sign-in {
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.sign-in-content {
+  max-width: 440px;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sign-in-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.sign-in-icon {
+  color: var(--tint);
+}
+
+.sign-in-hero h1 {
+  font-size: 34px;
+}
+
+.sign-in-hero p {
+  color: var(--secondary-label);
+}
+
+.sign-in-step {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.code-field {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.sign-in-links {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* --- UsersListView: an inset-grouped List --- */
+
+.list-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+
+.list-error {
+  text-align: left;
+  padding: 0 4px;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  overflow: hidden;
+}
+
+.list-item {
+  display: flex;
+  align-items: stretch;
+}
+
+/* The separator starts at the text, past the avatar. */
+.list-item + .list-item {
+  background: linear-gradient(var(--separator), var(--separator)) no-repeat 72px 0 / 100% 0.5px;
+}
+
+.list-row {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+}
+
+.list-row:active {
+  background: var(--fill-pressed);
+}
+
+.list-chevron {
+  color: var(--tertiary-label);
+}
+
+.list-delete {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border: none;
+  background: none;
+  color: var(--destructive);
+}
+
+.profile-row {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-row-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profile-row-text > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-row-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profile-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+.you-badge {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--tint-fill);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.profile-email {
+  font-size: 15px;
+  color: var(--secondary-label);
+}
+
+.profile-active {
+  font-size: 12px;
+  color: var(--secondary-label);
+}
+
+/* The live-event banner: a capsule above the bottom edge. */
+.banner {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 32px);
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--material-bg);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  animation: banner-in 0.25s ease-out;
+}
+
+@keyframes banner-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 100%);
+  }
+}
+
+/* confirmationDialog */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.dialog {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background: var(--card-bg);
+  text-align: center;
+}
+
+.dialog h2 {
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.dialog p {
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--secondary-label);
+}
+
+/* --- ProfileDetailView --- */
+
+.detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg);
+}
+
+.detail-photo {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.detail-photo img {
+  display: block;
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: var(--radius-md);
+}
+
+.detail-photo-empty {
+  color: var(--secondary-label);
+}
+
+.detail-photo-spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-email {
+  color: var(--secondary-label);
+  overflow-wrap: anywhere;
+}
+
+.detail-active {
+  font-size: 13px;
+  color: var(--secondary-label);
+}
+
+/* --- PhotoCropView: always dark, like the full-screen cover --- */
+
+.crop-view {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  color: #fff;
+}
+
+.crop-view .nav-button {
+  color: #0a84ff;
+}
+
+.crop-bar {
+  justify-content: space-between;
+  background: #1c1c1e;
+}
+
+.crop-bar:last-child {
+  justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.crop-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crop-image {
+  position: relative;
+  flex-shrink: 0;
+  /* Dragging must not scroll or zoom the page. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.crop-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.crop-dim {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.crop-rect {
+  position: absolute;
+  outline: 1px solid #fff;
+  outline-offset: -1px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+  cursor: move;
+}
+
+/* A 44px touch target with a 16px dot in its middle. */
+.crop-handle {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  cursor: nwse-resize;
+}
+
+.crop-handle[data-corner='topRight'],
+.crop-handle[data-corner='bottomLeft'] {
+  cursor: nesw-resize;
+}
+
+.crop-handle::after {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  background: #fff;
+}
