@@ -941,3 +941,8 @@ Before it works on GitHub Pages
 gh variable set SUPABASE_URL --body "https://<ref>.supabase.co"
 gh variable set SUPABASE_PUBLISHABLE_KEY --body "sb_publishable_…"
 
+v07.135
+
+tried to use gh variable
+and use gh auth login, as directed
+but stalls on screen to Authorize your device

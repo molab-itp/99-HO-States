@@ -2529,3 +2529,44 @@ Still to do before it works on GitHub Pages:
 Not yet committed.
 
 **Cost**: ~25 minutes.
+
+# --
+
+2026-10-12 20:57 (v07: `gh auth login` stalls, so set the repository variables in the browser)
+
+## Request
+
+Tried to use `gh variable` and `gh auth login`, as directed, but it stalls on the screen to
+Authorize your device.
+
+## What was found
+
+`gh auth status` reports that `gh` (2.100.0) is not logged into any GitHub host, so the two
+repository variables for the v07 Pages build have not been set. Why the "Authorize your device"
+page hangs was not determined.
+
+`gh` isn't needed for this. The variables can be set on github.com:
+
+1. Open https://github.com/molab-itp/99-HO-States/settings/variables/actions
+2. Click **New repository variable** twice:
+   - `SUPABASE_URL` = the `VITE_SUPABASE_URL` value from `v07/.env.local`
+   - `SUPABASE_PUBLISHABLE_KEY` = the `VITE_SUPABASE_PUBLISHABLE_KEY` value from the same file
+
+They must be on the **Variables** tab, not Secrets, because the workflow reads `vars.…`. The
+page needs admin access to the repo.
+
+To fix `gh` instead, the usual causes of the stall (none confirmed here):
+
+- **Wrong account in the browser:** try https://github.com/login/device in a private window and
+  enter the one-time code from the terminal.
+- **Organization approval:** if `molab-itp` restricts OAuth apps, the authorize step waits for
+  an org owner to approve GitHub CLI.
+- **Skip the browser flow:** create a personal access token with the `repo` scope at
+  https://github.com/settings/tokens, then `gh auth login --with-token < token.txt`.
+
+The variables only take effect on the next Pages build, so v07 has to be pushed to `main` (or
+the workflow re-run) afterwards.
+
+No files changed.
+
+**Cost**: ~2 minutes.
