@@ -2602,3 +2602,39 @@ and 3 in `v07/README.md`). Email code and guest don't need either.
 No files changed. Nothing was published.
 
 **Cost**: ~1 minute.
+
+# --
+
+2026-10-13 11:24 (v2: Animated toggle — slideshow zooms and pans into each saved position)
+
+## Request
+
+In v2, add an Animated toggle button below Random Mode that enables animation of the zoom and
+pan when a HOS appears in slideshow playback mode.
+
+## What was built
+
+An **Animated** toggle on the landing screen, directly below Random Mode. With it on and the
+slideshow playing, a head that has a saved zoom/pan appears at 1x and eases into that saved
+position. Heads with no saved zoom look the same as before, and manual browsing (paused) still
+shows the saved zoom immediately.
+
+- `v2/HOS-USnA/HOS-USnA/Views/LandingView.swift`: the toggle, stored under the new
+  `slideshowAnimated` setting.
+- `v2/HOS-USnA/HOS-USnA/Views/HOSDetailView.swift`: the `SlideshowSettings.animatedKey` setting
+  (default off), and passes a zoom-in duration to the header image while playing with Animated on.
+- `v2/HOS-USnA/HOS-USnA/HOSDetail/ZoomableHeaderImage.swift`: new optional `zoomInSecs`. On first
+  appearance it animates scale and offset from 1x to the saved state. Returning from the drawing
+  editor doesn't replay it. The pan-gesture branch is chosen as "zoomed" from the first frame, so
+  the image animates its scale rather than being swapped out with a fade.
+
+Choices made, open to change:
+
+- **Duration:** the zoom runs for the Fadein Delay time, so it settles as the details fade in.
+  At a 5s interval with the 0.1 delay option that is only 0.5s, which may feel abrupt.
+- **Default:** the toggle starts off.
+
+The app builds for the iOS simulator. It was not run, so the animation itself has not been seen.
+Nothing was committed.
+
+**Cost**: ~5 minutes.
