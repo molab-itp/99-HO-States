@@ -946,3 +946,18 @@ v07.135
 tried to use gh variable
 and use gh auth login, as directed
 but stalls on screen to Authorize your device
+
+Set the variables on github.com (no gh)
+Open https://github.com/molab-itp/99-HO-States/settings/variables/actions
+Click New repository variable twice:
+SUPABASE_URL = the VITE_SUPABASE_URL value from v07/.env.local
+SUPABASE_PUBLISHABLE_KEY = the VITE_SUPABASE_PUBLISHABLE_KEY value from the same file
+
+done: Set the variables on github.com
+what's next step
+
+bin/publish.sh
+
+Open the page. Go to https://molab-itp.github.io/99-HO-States/v07/.
+
+
