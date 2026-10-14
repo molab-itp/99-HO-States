@@ -99,23 +99,28 @@ struct HOSDetailView: View {
                 ViewedProgressBar(total: hosList.count, viewedHOSIDs: appModel.viewedHOSIDs)
                 // A ZStack so the outgoing and incoming images overlap while they cross-fade,
                 // instead of stacking vertically during the transition.
+                // Only advances while playing fade; manual browsing swaps the image instantly.
+                // The incoming image runs its own fade-in (and then any zoom-in), each in its own
+                // transaction; an `.animation(_:value: hos.id)` here would override those and run
+                // the zoom alongside the fade. The outgoing image's fade-out is attached to its
+                // removal transition instead.
                 ZStack {
                     ZoomableHeaderImage(
                         hos: hos,
                         displayMode: appModel.drawingDisplayMode(for: hos),
-                        // Runs for the details delay, but only once the cross-fade below has
-                        // finished, so the photos fade first and then the new one pans/zooms.
-                        zoomInSecs: isAnimated && isPlaying ? delaySecs : nil,
-                        zoomInDelaySecs: fadePeriod
+                        fadeInSecs: isPlaying ? fadePeriod : nil,
+                        // Runs for the details delay, starting once the fade-in has finished.
+                        zoomInSecs: isAnimated && isPlaying ? delaySecs : nil
                     )
                         // Gives the image a fresh identity (and so fresh, reset zoom/pan state) each
                         // time the displayed HOS changes, since this view instance otherwise
                         // persists across Next/Previous/slideshow advances.
                         .id(hos.id)
-                        .transition(.opacity)
+                        .transition(.asymmetric(
+                            insertion: .identity,
+                            removal: isPlaying ? .opacity.animation(.easeInOut(duration: fadePeriod)) : .identity
+                        ))
                 }
-                // Only advances while playing fade; manual browsing swaps the image instantly.
-                .animation(isPlaying ? .easeInOut(duration: fadePeriod) : nil, value: hos.id)
                 // Auto speech starts as the details fade in, so the extract is on screen for it.
                 HOSSummaryView(
                     hos: hos,

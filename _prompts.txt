@@ -988,3 +988,17 @@ currenlty fade between photos
 happens with animated pan/zoom.
 Adjust so that fade occurs first,
 followed by animated pan/zoom.
+
+v02.140
+
+in v2, in animated mode
+slideshow is showing fade at same time as pan/zoom animation.
+In animated pan/zoom,
+the transition should be a fade to the full photo,
+then pan/zoom.
+If animation is off, transition should 
+be fadein to pan/zoomed view.
+Possible related to pre-existing bug
+where there is not fadein when in pan/zoomed photo
+in slideshow mode.
+

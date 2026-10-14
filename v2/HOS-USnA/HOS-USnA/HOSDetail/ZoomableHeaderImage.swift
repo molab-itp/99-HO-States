@@ -39,13 +39,14 @@ struct ZoomableHeaderImage: View {
     let hos: HOS
     /// Whether the portrait and/or its saved drawing (if any) are shown.
     var displayMode: DrawingDisplayMode = .photoAndDrawing
-    /// When set, the portrait first appears at 1x and animates to its saved zoom/pan over
-    /// this many seconds, instead of appearing already zoomed. `HOSDetailView` sets it while
-    /// the slideshow plays with Landing's Animated toggle on.
+    /// When set, the view fades in over this many seconds on first appearance instead of
+    /// appearing at once. `HOSDetailView` sets it while the slideshow plays, for the incoming
+    /// half of its cross-fade.
+    var fadeInSecs: Double?
+    /// When set, the portrait first appears at 1x and — once any fade-in has finished —
+    /// animates to its saved zoom/pan over this many seconds, instead of appearing already
+    /// zoomed. `HOSDetailView` sets it while the slideshow plays with Landing's Animated toggle on.
     var zoomInSecs: Double?
-    /// Seconds to hold at 1x before the animated zoom-in starts — `HOSDetailView` passes its
-    /// cross-fade period, so the incoming portrait finishes fading in before it pans/zooms.
-    var zoomInDelaySecs: Double = 0
     @Environment(AppModel.self) private var appModel
 
     @State private var scale: CGFloat = 1
@@ -53,6 +54,7 @@ struct ZoomableHeaderImage: View {
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
     @State private var hasAppeared = false
+    @State private var isRevealed = false
     private let minScale: CGFloat = 1
     private let maxScale: CGFloat = 30
 
@@ -97,16 +99,14 @@ struct ZoomableHeaderImage: View {
                     .contentShape(RoundedRectangle(cornerRadius: 12))
                     .onTapGesture(count: 2) { toggleZoom() }
 
-                // Panning only makes sense once zoomed in; leaving the drag gesture off entirely at
-                // 1x (rather than just no-op'ing inside it) keeps the enclosing ScrollView's own
+                // Panning only makes sense once zoomed in; disabling the drag gesture at 1x
+                // (rather than just no-op'ing inside it) keeps the enclosing ScrollView's own
                 // vertical drag free to scroll the page normally when the image isn't zoomed.
-                // An animated zoom-in counts as zoomed from the first frame: switching branches
-                // as it starts would replace the image (a fade) rather than animate its scale.
-                if scale > minScale || isAwaitingZoomIn {
-                    scaledImage.gesture(magnifyGesture.simultaneously(with: panGesture))
-                } else {
-                    scaledImage.gesture(magnifyGesture)
-                }
+                // Disabled via `isEnabled` rather than an if/else over two gesture setups: switching
+                // branches swaps in a new view, which skips the fade-in when a saved zoom is applied.
+                scaledImage
+                    .gesture(magnifyGesture)
+                    .simultaneousGesture(panGesture, isEnabled: scale > minScale)
             } else {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(.secondary.opacity(0.2))
@@ -118,25 +118,38 @@ struct ZoomableHeaderImage: View {
                     }
             }
         }
+        .opacity(fadeInSecs == nil || isRevealed ? 1 : 0)
         .onAppear {
-            // Only the first appearance animates; returning from the drawing editor doesn't replay it.
-            let animation = hasAppeared ? nil : zoomInSecs.map {
-                Animation.easeInOut(duration: $0).delay(zoomInDelaySecs)
-            }
+            // Only the first appearance fades/animates; returning from the drawing editor doesn't
+            // replay it. Each step sets its own transaction, so nothing inherited from the HOS
+            // change can merge the fade and the zoom into one animation.
+            let isFirstAppearance = !hasAppeared
             hasAppeared = true
-            guard let saved = appModel.imageZoomState(for: hos) else { return }
-            withAnimation(animation) {
-                scale = saved.scale
-                offset = saved.offset
+            let saved = appModel.imageZoomState(for: hos)
+            let animatesZoom = isFirstAppearance && zoomInSecs != nil
+            if let saved, !animatesZoom {
+                // Not animated: jump straight to the saved zoom, so the fade reveals the zoomed view.
+                withTransaction(Transaction(animation: nil)) {
+                    scale = saved.scale
+                    offset = saved.offset
+                }
             }
-            lastScale = saved.scale
-            lastOffset = saved.offset
+            if let saved {
+                lastScale = saved.scale
+                lastOffset = saved.offset
+            }
+            guard isFirstAppearance else { return }
+            if let fadeInSecs {
+                withAnimation(.easeInOut(duration: fadeInSecs)) { isRevealed = true }
+            }
+            if let saved, let zoomInSecs {
+                // Animated: fade in the full photo first, then pan/zoom to the saved view.
+                withAnimation(.easeInOut(duration: zoomInSecs).delay(fadeInSecs ?? 0)) {
+                    scale = saved.scale
+                    offset = saved.offset
+                }
+            }
         }
-    }
-
-    /// Whether this is the frame before `onAppear` starts an animated zoom-in to a saved state.
-    private var isAwaitingZoomIn: Bool {
-        zoomInSecs != nil && !hasAppeared && appModel.imageZoomState(for: hos) != nil
     }
 
     private var magnifyGesture: some Gesture {
