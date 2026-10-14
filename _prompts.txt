@@ -1002,3 +1002,7 @@ Possible related to pre-existing bug
 where there is not fadein when in pan/zoomed photo
 in slideshow mode.
 
+v05.141
+
+sync web app in v05 with changes to v2
+

@@ -32,7 +32,9 @@ function distance(a, b) {
  * the -/1×/+ buttons (e.g. while the slideshow plays); pinch, wheel and double-tap still work.
  * `zoomInSecs`, when set, has the photo first appear at 1x and animate to `initialZoom` over
  * that many seconds, instead of appearing already zoomed; the detail screen sets it while the
- * slideshow plays with Landing's Animated toggle on.
+ * slideshow plays with Landing's Animated toggle on. `zoomInDelaySecs` holds the photo at 1x that
+ * long before the zoom-in starts — the detail screen passes its cross-fade period, so the full
+ * photo fades in first and only then pans/zooms.
  */
 export default function ZoomableHeaderImage({
   imageSrc,
@@ -44,10 +46,13 @@ export default function ZoomableHeaderImage({
   reactions = [],
   showsZoomControls = true,
   zoomInSecs = null,
+  zoomInDelaySecs = 0,
 }) {
   // Read once, on mount: only the first appearance animates, same as Swift's `hasAppeared`, so
   // pressing Play on a HOS that is already showing doesn't replay it.
-  const zoomInRef = useRef(zoomInSecs != null && initialZoom ? { secs: zoomInSecs, target: initialZoom } : null);
+  const zoomInRef = useRef(
+    zoomInSecs != null && initialZoom ? { secs: zoomInSecs, delaySecs: zoomInDelaySecs, target: initialZoom } : null,
+  );
   const startZoom = zoomInRef.current ? null : initialZoom;
   const [scale, setScaleState] = useState(startZoom?.scale ?? MIN_SCALE);
   const [offset, setOffsetState] = useState({
@@ -94,7 +99,7 @@ export default function ZoomableHeaderImage({
   }, [imageSrc]);
 
   // The animated zoom-in: the photo has rendered at 1x, so moving to the saved zoom/pan here
-  // runs as a transition over `zoomInSecs` (see the `transition` style below).
+  // runs as a transition over `zoomInSecs`, after `zoomInDelaySecs` (see the `transition` style below).
   useEffect(() => {
     const zoomIn = zoomInRef.current;
     if (!zoomIn) return undefined;
@@ -103,7 +108,7 @@ export default function ZoomableHeaderImage({
     void frameRef.current?.offsetWidth;
     setScale(zoomIn.target.scale);
     setOffset({ x: zoomIn.target.offsetX ?? 0, y: zoomIn.target.offsetY ?? 0 });
-    const timer = setTimeout(() => setIsZoomingIn(false), zoomIn.secs * 1000);
+    const timer = setTimeout(() => setIsZoomingIn(false), (zoomIn.delaySecs + zoomIn.secs) * 1000);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -300,7 +305,7 @@ export default function ZoomableHeaderImage({
           transition: isInteracting
             ? 'none'
             : isZoomingIn
-              ? `transform ${zoomInRef.current.secs}s ease-in-out`
+              ? `transform ${zoomInRef.current.secs}s ease-in-out ${zoomInRef.current.delaySecs}s`
               : 'transform 0.2s ease-out',
         }}
       >

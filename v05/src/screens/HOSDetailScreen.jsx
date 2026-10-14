@@ -267,8 +267,10 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
                   showsPhoto={showsPhoto(layerMode)}
                   reactions={reactionsFor(p)}
                   showsZoomControls={!isPlaying}
-                  // Timed to the details delay, so the zoom settles as the details fade in.
+                  // Runs for the details delay, starting once the cross-fade has finished, so the
+                  // full photo fades in first and then pans/zooms (as in Swift).
                   zoomInSecs={isAnimated && isPlaying ? delaySecs : null}
+                  zoomInDelaySecs={outgoing ? fadePeriod : 0}
                 />
               </div>
             );
