@@ -103,8 +103,10 @@ struct HOSDetailView: View {
                     ZoomableHeaderImage(
                         hos: hos,
                         displayMode: appModel.drawingDisplayMode(for: hos),
-                        // Timed to the details delay, so the zoom settles as the details fade in.
-                        zoomInSecs: isAnimated && isPlaying ? delaySecs : nil
+                        // Runs for the details delay, but only once the cross-fade below has
+                        // finished, so the photos fade first and then the new one pans/zooms.
+                        zoomInSecs: isAnimated && isPlaying ? delaySecs : nil,
+                        zoomInDelaySecs: fadePeriod
                     )
                         // Gives the image a fresh identity (and so fresh, reset zoom/pan state) each
                         // time the displayed HOS changes, since this view instance otherwise

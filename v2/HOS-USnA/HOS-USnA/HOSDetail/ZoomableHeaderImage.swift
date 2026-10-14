@@ -43,6 +43,9 @@ struct ZoomableHeaderImage: View {
     /// this many seconds, instead of appearing already zoomed. `HOSDetailView` sets it while
     /// the slideshow plays with Landing's Animated toggle on.
     var zoomInSecs: Double?
+    /// Seconds to hold at 1x before the animated zoom-in starts — `HOSDetailView` passes its
+    /// cross-fade period, so the incoming portrait finishes fading in before it pans/zooms.
+    var zoomInDelaySecs: Double = 0
     @Environment(AppModel.self) private var appModel
 
     @State private var scale: CGFloat = 1
@@ -117,7 +120,9 @@ struct ZoomableHeaderImage: View {
         }
         .onAppear {
             // Only the first appearance animates; returning from the drawing editor doesn't replay it.
-            let animation = hasAppeared ? nil : zoomInSecs.map { Animation.easeInOut(duration: $0) }
+            let animation = hasAppeared ? nil : zoomInSecs.map {
+                Animation.easeInOut(duration: $0).delay(zoomInDelaySecs)
+            }
             hasAppeared = true
             guard let saved = appModel.imageZoomState(for: hos) else { return }
             withAnimation(animation) {
