@@ -8,6 +8,10 @@ enum SlideshowSettings {
     static let defaultRandomMode = false
     static let animatedKey = "slideshowAnimated"
     static let defaultAnimated = false
+    static let autoScrollKey = "slideshowAutoScroll"
+    static let defaultAutoScroll = false
+    /// Auto Scroll's speed, in points per second.
+    static let autoScrollSpeed: Double = 60
     static let intervalSecsKey = "slideshowIntervalSecs"
     static let delayFractionKey = "slideshowDelayFraction"
     static let intervalSecsOptions: [Double] = [5, 10, 15, 20]
@@ -37,6 +41,8 @@ struct HOSDetailView: View {
     private var isRandomMode = SlideshowSettings.defaultRandomMode
     @AppStorage(SlideshowSettings.animatedKey)
     private var isAnimated = SlideshowSettings.defaultAnimated
+    @AppStorage(SlideshowSettings.autoScrollKey)
+    private var isAutoScroll = SlideshowSettings.defaultAutoScroll
     @AppStorage(SlideshowSettings.intervalSecsKey)
     private var slideshowIntervalSecs = SlideshowSettings.defaultIntervalSecs
     @AppStorage(SlideshowSettings.delayFractionKey)
@@ -68,6 +74,19 @@ struct HOSDetailView: View {
     // the extract has been spoken.
     @State private var speechPlayer = SpeechPlayer()
 
+    // Auto Scroll: while playing, the details (down through the 100 Greatest of the period)
+    // scroll slowly to the bottom once they've faded in, and the slide holds until they get there.
+    // Driven from `tickSlideshow` with `scrollTo(contentID, anchor:)` — an anchor at fraction `t`
+    // aligns that point of the content with the same point of the viewport, so `t` from 0 to 1
+    // scrolls linearly from top to bottom (`ScrollPosition`'s point offsets need iOS 18).
+    private static let contentID = "content"
+    @State private var scrollProxy: ScrollViewProxy?
+    @State private var viewportHeight = 0.0
+    @State private var contentHeight = 0.0
+    @State private var autoScrollOffset = 0.0
+    private var scrollableHeight: Double { max(0, contentHeight - viewportHeight) }
+    private var isAutoScrollDone: Bool { autoScrollOffset >= scrollableHeight }
+
     // Indices visited during the random walk (in random mode only), so Previous can step back
     // through them and Next can replay forward instead of always drawing a fresh card. Unlike
     // `index`/`appModel.slideIndex`, this doesn't persist across launches — random mode instead
@@ -94,47 +113,57 @@ struct HOSDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                ViewedProgressBar(total: hosList.count, viewedHOSIDs: appModel.viewedHOSIDs)
-                // A ZStack so the outgoing and incoming images overlap while they cross-fade,
-                // instead of stacking vertically during the transition.
-                // Only advances while playing fade; manual browsing swaps the image instantly.
-                // The incoming image runs its own fade-in (and then any zoom-in), each in its own
-                // transaction; an `.animation(_:value: hos.id)` here would override those and run
-                // the zoom alongside the fade. The outgoing image's fade-out is attached to its
-                // removal transition instead.
-                ZStack {
-                    ZoomableHeaderImage(
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    ViewedProgressBar(total: hosList.count, viewedHOSIDs: appModel.viewedHOSIDs)
+                    // A ZStack so the outgoing and incoming images overlap while they cross-fade,
+                    // instead of stacking vertically during the transition.
+                    // Only advances while playing fade; manual browsing swaps the image instantly.
+                    // The incoming image runs its own fade-in (and then any zoom-in), each in its own
+                    // transaction; an `.animation(_:value: hos.id)` here would override those and run
+                    // the zoom alongside the fade. The outgoing image's fade-out is attached to its
+                    // removal transition instead.
+                    ZStack {
+                        ZoomableHeaderImage(
+                            hos: hos,
+                            displayMode: appModel.drawingDisplayMode(for: hos),
+                            fadeInSecs: isPlaying ? fadePeriod : nil,
+                            // Runs for the details delay, starting once the fade-in has finished.
+                            zoomInSecs: isAnimated && isPlaying ? delaySecs : nil
+                        )
+                            // Gives the image a fresh identity (and so fresh, reset zoom/pan state) each
+                            // time the displayed HOS changes, since this view instance otherwise
+                            // persists across Next/Previous/slideshow advances.
+                            .id(hos.id)
+                            .transition(.asymmetric(
+                                insertion: .identity,
+                                removal: isPlaying ? .opacity.animation(.easeInOut(duration: fadePeriod)) : .identity
+                            ))
+                    }
+                    // Auto speech starts as the details fade in, so the extract is on screen for it.
+                    HOSSummaryView(
                         hos: hos,
-                        displayMode: appModel.drawingDisplayMode(for: hos),
-                        fadeInSecs: isPlaying ? fadePeriod : nil,
-                        // Runs for the details delay, starting once the fade-in has finished.
-                        zoomInSecs: isAnimated && isPlaying ? delaySecs : nil
+                        speechPlayer: speechPlayer,
+                        autoSpeaks: autoSpeak && isPlaying && detailsVisible,
+                        speaksName: autoSpeak && autoSpeakMode == .name
                     )
-                        // Gives the image a fresh identity (and so fresh, reset zoom/pan state) each
-                        // time the displayed HOS changes, since this view instance otherwise
-                        // persists across Next/Previous/slideshow advances.
-                        .id(hos.id)
-                        .transition(.asymmetric(
-                            insertion: .identity,
-                            removal: isPlaying ? .opacity.animation(.easeInOut(duration: fadePeriod)) : .identity
-                        ))
+                        .opacity(detailsVisible ? 1 : 0)
                 }
-                // Auto speech starts as the details fade in, so the extract is on screen for it.
-                HOSSummaryView(
-                    hos: hos,
-                    speechPlayer: speechPlayer,
-                    autoSpeaks: autoSpeak && isPlaying && detailsVisible,
-                    speaksName: autoSpeak && autoSpeakMode == .name
-                )
-                    .opacity(detailsVisible ? 1 : 0)
+                .padding()
+                .id(Self.contentID)
+                .onGeometryChange(for: Double.self) { $0.size.height } action: { contentHeight = $0 }
             }
-            .padding()
+            .onGeometryChange(for: Double.self) { $0.size.height } action: { viewportHeight = $0 }
+            .onAppear { scrollProxy = proxy }
         }
         .task(id: index) {
             appModel.markViewed(hos, resetIfComplete: isPlaying)
             detailsVisible = false
+            if isAutoScroll {
+                autoScrollOffset = 0
+                scrollProxy?.scrollTo(Self.contentID, anchor: .top)
+            }
             try? await Task.sleep(for: .seconds(delaySecs))
             guard !Task.isCancelled else { return }
             withAnimation(.easeIn(duration: 0.5)) {
@@ -247,12 +276,25 @@ struct HOSDetailView: View {
         // Not clamped at zero: while Auto Speak holds the advance below, this keeps counting
         // down into negative numbers, so the title shows how long the slide has run over.
         slideshowRemainingSecs -= Self.slideshowTickSecs
+        if isAutoScroll { tickAutoScroll() }
         // Half-tick tolerance absorbs floating-point drift from repeated subtraction.
         if slideshowRemainingSecs < Self.slideshowTickSecs / 2 {
             // With Auto Speak on, the slide stays up until the speech is done.
             if autoSpeak, speechPlayer.isBusy { return }
+            // With Auto Scroll on, it stays up until the details have scrolled to the bottom.
+            if isAutoScroll, !isAutoScrollDone { return }
             advanceSlideshow()
             restartSlideshowCountdown()
+        }
+    }
+
+    /// Scrolls one tick's worth further down, once the details are showing.
+    private func tickAutoScroll() {
+        guard detailsVisible, !isAutoScrollDone, let scrollProxy else { return }
+        autoScrollOffset = min(scrollableHeight, autoScrollOffset + SlideshowSettings.autoScrollSpeed * Self.slideshowTickSecs)
+        let fraction = autoScrollOffset / scrollableHeight
+        withAnimation(.linear(duration: Self.slideshowTickSecs)) {
+            scrollProxy.scrollTo(Self.contentID, anchor: UnitPoint(x: 0, y: fraction))
         }
     }
 

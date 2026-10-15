@@ -26,6 +26,8 @@ struct LandingView: View {
   private var isRandomMode = SlideshowSettings.defaultRandomMode
   @AppStorage(SlideshowSettings.animatedKey)
   private var isAnimated = SlideshowSettings.defaultAnimated
+  @AppStorage(SlideshowSettings.autoScrollKey)
+  private var isAutoScroll = SlideshowSettings.defaultAutoScroll
   @AppStorage(SlideshowSettings.intervalSecsKey)
   private var slideshowIntervalSecs = SlideshowSettings.defaultIntervalSecs
   @AppStorage(SlideshowSettings.delayFractionKey)
@@ -118,6 +120,10 @@ struct LandingView: View {
           
           Toggle(isOn: $isAnimated) {
             Label("Animated", systemImage: "plus.magnifyingglass")
+          }
+          
+          Toggle(isOn: $isAutoScroll) {
+            Label("Auto Scroll", systemImage: "arrow.down.to.line")
           }
           
           LabeledContent("Slide Interval") {

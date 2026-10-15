@@ -1059,3 +1059,10 @@ v05.144
 
 sync web app in v05 with changes to v2
 
+v02.145
+
+in v2, add auto scroll button in LandingView
+that enables in slideshow mode
+scrolling to the bottom of the HOS details view
+of the related 100 Greatest 
+slide advances when scrolling is done.
