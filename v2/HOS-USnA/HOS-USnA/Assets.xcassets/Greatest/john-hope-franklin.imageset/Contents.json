@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "john-hope-franklin.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

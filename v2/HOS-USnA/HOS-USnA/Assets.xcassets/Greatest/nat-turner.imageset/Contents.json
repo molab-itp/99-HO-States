@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "nat-turner.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

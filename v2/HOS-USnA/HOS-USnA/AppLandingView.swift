@@ -24,6 +24,7 @@ struct AppLandingView: View {
                 onShowList: { path = [.hosList] },
                 onShowDetail: showDetail,
                 onShowNews: { path = [.news] },
+                onShowGreatest: { path = [.greatest] },
                 onShowCredits: { path = [.credits] },
                 onShowSpeechSetup: { path = [.speechSetup] }
             )
@@ -46,6 +47,8 @@ struct AppLandingView: View {
                         )
                     case .news:
                         NewsView()
+                    case .greatest:
+                        GreatestView()
                     case .credits:
                         CreditsView()
                     case .speechSetup:

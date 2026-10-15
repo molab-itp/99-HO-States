@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "amiri-baraka.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The app's root screen: settings, app info, and the ways into `HOSDetailView` (Resume, Random
-/// Head, Start Slideshow), `HOSListView`, `NewsView`, `CreditsView` and `SpeechSetupView`. Navigation itself is handed back to
+/// Head, Start Slideshow), `HOSListView`, `NewsView`, `GreatestView`, `CreditsView` and `SpeechSetupView`. Navigation itself is handed back to
 /// `AppLandingView` through the callbacks.
 struct LandingView: View {
   @Environment(AppModel.self) private var appModel
@@ -12,6 +12,8 @@ struct LandingView: View {
   let onShowDetail: (_ startSlideshow: Bool) -> Void
   /// Shows the news screen.
   let onShowNews: () -> Void
+  /// Shows the 100 Greatest African Americans listing.
+  let onShowGreatest: () -> Void
   /// Shows the credits screen.
   let onShowCredits: () -> Void
   /// Shows the text-to-speech setup screen.
@@ -64,6 +66,14 @@ struct LandingView: View {
             onShowNews()
           } label: {
             Label("News", systemImage: "newspaper")
+              .frame(maxWidth: .infinity)
+          }
+          .buttonStyle(.bordered)
+          
+          Button {
+            onShowGreatest()
+          } label: {
+            Label("100 Greatest", systemImage: "person.3")
               .frame(maxWidth: .infinity)
           }
           .buttonStyle(.bordered)
@@ -176,7 +186,7 @@ struct LandingView: View {
 
 #Preview {
   NavigationStack {
-    LandingView(onShowList: {}, onShowDetail: { _ in }, onShowNews: {}, onShowCredits: {}, onShowSpeechSetup: {})
+    LandingView(onShowList: {}, onShowDetail: { _ in }, onShowNews: {}, onShowGreatest: {}, onShowCredits: {}, onShowSpeechSetup: {})
   }
   .environment(AppModel())
 }

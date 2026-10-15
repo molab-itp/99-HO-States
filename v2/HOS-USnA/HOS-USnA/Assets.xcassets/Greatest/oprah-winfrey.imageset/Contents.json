@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "oprah-winfrey.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

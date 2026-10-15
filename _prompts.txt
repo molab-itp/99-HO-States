@@ -1007,3 +1007,29 @@ v05.141
 sync web app in v05 with changes to v2
 
 >> v2 build 1016
+
+v02.142
+
+in v2, integrate the 100 figures from the project:
+/Users/jht2/Documents/projects/_molab-repos/a/99-Black-Power/web/grid
+which is a listing of
+100 Greatest African Americans by Molefi Kete Asante
+sourced from Wikipedia, 
+sorted by birth year,
+and processed by this node script:
+/Users/jht2/Documents/projects/_molab-repos/a/99-Black-Power/prep/build.js
+
+the 100 greatest should appear in v2 
+on a new listing page accessible 
+from a button labeled "100 Greatest"
+on the main screen below the button "News"
+Add the new images to Assets catalog
+in a folder labeled "Greatest".
+add the json prep/data/people.json
+show the description in the listing
+
+add a source credit link to the main screen
+labeled "Greatest Source"
+above "Data Source: Wikipedia" link
+
+rename "Data Source: Wikipedia" link to "HOS Source"

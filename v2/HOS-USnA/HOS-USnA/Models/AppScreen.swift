@@ -7,6 +7,7 @@ enum AppScreen: String, Hashable {
     case hosList
     case hosDetail
     case news
+    case greatest
     case credits
     case speechSetup
 }

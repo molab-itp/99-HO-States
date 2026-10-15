@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "phillis-wheatley.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

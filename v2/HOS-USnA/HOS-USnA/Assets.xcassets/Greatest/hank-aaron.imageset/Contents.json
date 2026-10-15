@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "hank-aaron.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

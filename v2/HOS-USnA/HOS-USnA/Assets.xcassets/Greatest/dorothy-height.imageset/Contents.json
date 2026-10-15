@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "dorothy-height.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
