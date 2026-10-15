@@ -2710,3 +2710,37 @@ The app builds for the iOS simulator. It was not run, so neither screen has been
 was committed.
 
 **Cost**: ~6 minutes.
+
+# --
+
+2026-10-15 10:28 (v2: Previous/Next, slideshow and speech on Greatest detail)
+
+## Request
+
+In v2, on GreatestFigureView, add buttons for Previous/Next, slideshow play/pause and speech
+play/pause, working like the ones on HOSDetailView.
+
+## What was built
+
+- `Views/GreatestFigureView.swift`:
+  - `GreatestFigureView` takes an optional `speechPlayer`. With one, a speech play/pause
+    button sits next to the name (the translating button on iOS 18). It speaks the summary,
+    or the order and name in Auto Speak's Name mode.
+  - `GreatestDetailView` now takes `people` and `selected`. It uses `HOSDetailToolbar` for
+    Previous / Play-Pause / Next, and its title shows a countdown such as `#007 · 03.4s`
+    while playing.
+  - Previous/Next step through the list and wrap at either end.
+  - The slideshow starts paused and uses the interval set on Landing. With Auto Speak on, it
+    waits for the speech to finish before moving on.
+  - Auto Speak starts after the same details delay as on HOS detail. Speech stops on every
+    change of person and when leaving the screen.
+- `Views/GreatestView.swift`: rows open `GreatestDetailView` with the whole list.
+
+Unlike HOSDetailView, there is no random mode (the slideshow always goes in list order), no
+fades or zoom, and no viewed-progress tracking. The "100 Greatest of this period" list on HOS
+detail has no speech button.
+
+The app builds for the iOS simulator. It was not run, so the buttons have not been tried.
+Nothing was committed.
+
+**Cost**: ~4 minutes.
