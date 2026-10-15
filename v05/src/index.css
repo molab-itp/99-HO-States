@@ -1525,6 +1525,15 @@ input {
   font-weight: 600;
 }
 
+/* SwiftUI's `.disabled(_:)` look, e.g. Scroll Past Greatest while Auto Scroll is off. */
+.labeled-row.disabled {
+  opacity: 0.4;
+}
+
+.segment:disabled {
+  cursor: default;
+}
+
 /* Large portrait displays (e.g. a 1080×1920 kiosk screen): drop the phone-width column so the
    detail screen's photo and text fill most of the screen. The photo is sized by height so a
    long extract below it still fits; the wrapper shrinks to the photo so the drawing overlay and

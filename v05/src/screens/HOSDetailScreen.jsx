@@ -76,6 +76,11 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   const [revealedIndex, setRevealedIndex] = useState(null);
   const [isRandomMode] = useStoredBoolean(SlideshowSettings.randomModeKey, SlideshowSettings.defaultRandomMode);
   const [isAnimated] = useStoredBoolean(SlideshowSettings.animatedKey, SlideshowSettings.defaultAnimated);
+  const [isAutoScroll] = useStoredBoolean(SlideshowSettings.autoScrollKey, SlideshowSettings.defaultAutoScroll);
+  const [autoScrollGreatest] = useStoredNumber(
+    SlideshowSettings.autoScrollGreatestKey,
+    SlideshowSettings.defaultAutoScrollGreatest,
+  );
   const [isSlideshowPaused, setIsSlideshowPaused] = useState(!startsPlaying);
   const isPlaying = !isSlideshowPaused;
   const [remainingSecs, setRemainingSecs] = useState(slideshowIntervalSecs);
@@ -162,6 +167,60 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
     return { ...prevNav, index: newIndex };
   }
 
+  // Auto Scroll: while playing, the details scroll slowly down once they've faded in, until the
+  // first `autoScrollGreatest` of the period's 100 Greatest (or all of them, or the bottom if there
+  // are fewer) have come fully into view above the toolbar, and the slide holds until they get
+  // there. Swift steps a `ScrollPosition` from its 0.1s slideshow tick; here a requestAnimationFrame
+  // loop moves the window instead, since a 10 Hz step looks choppy in a browser. The stopping
+  // point is measured from the DOM each frame, so it follows lazy-loaded photos as they come in.
+  const greatestRefs = useRef([]);
+  const toolbarRef = useRef(null);
+  const autoScrollOffsetRef = useRef(0);
+  const greatestCount = greatestFor(hos).length;
+
+  function autoScrollTarget() {
+    const scrollable = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    if (autoScrollGreatest <= 0 || autoScrollGreatest >= greatestCount) return scrollable;
+    const figure = greatestRefs.current[autoScrollGreatest - 1];
+    if (!figure) return scrollable;
+    const bottom = figure.getBoundingClientRect().bottom + window.scrollY;
+    const visibleHeight = window.innerHeight - (toolbarRef.current?.offsetHeight ?? 0);
+    return Math.min(scrollable, Math.max(0, bottom - visibleHeight));
+  }
+
+  function isAutoScrollDone() {
+    return autoScrollOffsetRef.current >= autoScrollTarget();
+  }
+
+  // Back to the top for each new HOS, as `.task(id: index)` does.
+  useEffect(() => {
+    if (!isAutoScroll) return;
+    autoScrollOffsetRef.current = 0;
+    window.scrollTo(0, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
+  const isAutoScrolling = isAutoScroll && isPlaying && detailsVisible && !isDrawingEditorOpen;
+  const autoScrollTargetRef = useRef(autoScrollTarget);
+  autoScrollTargetRef.current = autoScrollTarget;
+  useEffect(() => {
+    if (!isAutoScrolling) return undefined;
+    let frame;
+    let last = performance.now();
+    const step = (now) => {
+      const target = autoScrollTargetRef.current();
+      const offset = autoScrollOffsetRef.current;
+      if (offset < target) {
+        autoScrollOffsetRef.current = Math.min(target, offset + (SlideshowSettings.autoScrollSpeed * (now - last)) / 1000);
+        window.scrollTo(0, autoScrollOffsetRef.current);
+      }
+      last = now;
+      frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [isAutoScrolling]);
+
   // Auto-advance timer: always running (ticks are ignored while paused), uses a ref for the tick body so
   // the interval (set up once) always calls the latest closure instead of a stale one. The
   // updater is kept pure (just a decrement, no side effects) — React 18 StrictMode
@@ -192,6 +251,8 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
     // With Auto Speak on, the slide stays up until the speech is done. The countdown
     // keeps ticking meanwhile, so this is checked again every tick.
     if (autoSpeak && speechPlayer.isBusy) return;
+    // With Auto Scroll on, it stays up until the details have scrolled past the chosen Greatest.
+    if (isAutoScroll && !isAutoScrollDone()) return;
     setNav((prevNav) => advanceForward(prevNav));
     setRemainingSecs(slideshowIntervalSecs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -307,15 +368,17 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
           {greatest.length > 0 && (
             <div className="period-greatest">
               <h2 className="period-greatest-title">100 Greatest of this period</h2>
-              {greatest.map((person) => (
-                <GreatestFigure key={person.id} person={person} />
+              {greatest.map((person, i) => (
+                <div key={person.id} ref={(el) => (greatestRefs.current[i] = el)}>
+                  <GreatestFigure person={person} />
+                </div>
               ))}
             </div>
           )}
         </div>
       </div>
 
-      <div className="detail-toolbar">
+      <div className="detail-toolbar" ref={toolbarRef}>
         <button
           className="toolbar-btn toolbar-btn-icon"
           aria-label="Previous"

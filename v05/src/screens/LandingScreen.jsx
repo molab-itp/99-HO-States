@@ -31,6 +31,14 @@ export default function LandingScreen({
     SlideshowSettings.animatedKey,
     SlideshowSettings.defaultAnimated,
   );
+  const [isAutoScroll, setIsAutoScroll] = useStoredBoolean(
+    SlideshowSettings.autoScrollKey,
+    SlideshowSettings.defaultAutoScroll,
+  );
+  const [autoScrollGreatest, setAutoScrollGreatest] = useStoredNumber(
+    SlideshowSettings.autoScrollGreatestKey,
+    SlideshowSettings.defaultAutoScrollGreatest,
+  );
   const [slideshowIntervalSecs, setSlideshowIntervalSecs] = useStoredNumber(
     SlideshowSettings.intervalSecsKey,
     SlideshowSettings.defaultIntervalSecs,
@@ -115,6 +123,22 @@ export default function LandingScreen({
             <span className="switch-thumb" />
           </span>
         </label>
+        <label className="toggle-row">
+          <span>Auto Scroll</span>
+          <span className="switch">
+            <input type="checkbox" checked={isAutoScroll} onChange={(e) => setIsAutoScroll(e.target.checked)} />
+            <span className="switch-track" />
+            <span className="switch-thumb" />
+          </span>
+        </label>
+        <SegmentedPicker
+          label="Scroll Past Greatest"
+          options={SlideshowSettings.autoScrollGreatestOptions}
+          value={autoScrollGreatest}
+          onChange={setAutoScrollGreatest}
+          formatOption={(count) => (count === 0 ? 'All' : `${count}`)}
+          disabled={!isAutoScroll}
+        />
         <SegmentedPicker
           label="Slide Interval"
           options={SlideshowSettings.intervalSecsOptions}

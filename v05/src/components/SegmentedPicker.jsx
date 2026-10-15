@@ -1,9 +1,18 @@
 /**
  * Stands in for a SwiftUI `Picker` with `.pickerStyle(.segmented)` inside a `LabeledContent`:
  * a label on the left and a row of mutually exclusive segments on the right. With `hidesLabel`
- * it is the bare Picker: just the segments, named by `label` for assistive technology.
+ * it is the bare Picker: just the segments, named by `label` for assistive technology. `disabled`
+ * stands in for SwiftUI's `.disabled(_:)`.
  */
-export default function SegmentedPicker({ label, options, value, onChange, formatOption, hidesLabel = false }) {
+export default function SegmentedPicker({
+  label,
+  options,
+  value,
+  onChange,
+  formatOption,
+  hidesLabel = false,
+  disabled = false,
+}) {
   const segments = (
     <div className="segmented" role="radiogroup" aria-label={label}>
       {options.map((option) => (
@@ -13,6 +22,7 @@ export default function SegmentedPicker({ label, options, value, onChange, forma
           role="radio"
           aria-checked={option === value}
           className={option === value ? 'segment selected' : 'segment'}
+          disabled={disabled}
           onClick={() => onChange(option)}
         >
           {formatOption(option)}
@@ -22,7 +32,7 @@ export default function SegmentedPicker({ label, options, value, onChange, forma
   );
   if (hidesLabel) return segments;
   return (
-    <div className="labeled-row">
+    <div className={disabled ? 'labeled-row disabled' : 'labeled-row'}>
       <span>{label}</span>
       {segments}
     </div>
