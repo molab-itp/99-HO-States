@@ -2638,3 +2638,37 @@ The app builds for the iOS simulator. It was not run, so the animation itself ha
 Nothing was committed.
 
 **Cost**: ~5 minutes.
+
+# --
+
+2026-10-15 09:29 (v2: 100 Greatest African Americans listing)
+
+## Request
+
+In v2, integrate the 100 figures from 99-Black-Power (100 Greatest African Americans by Molefi
+Kete Asante, sourced from Wikipedia, sorted by birth year, processed by `prep/build.js`). Add a
+"100 Greatest" button below "News" that opens a new listing showing each description. Put the
+images in an asset catalog folder "Greatest" and add `prep/data/people.json`. Add a
+"Greatest Source" link above "Data Source: Wikipedia", and rename that link to "HOS Source".
+
+## What was built
+
+- `v2/HOS-USnA/HOS-USnA/Resources/people.json`: copied from `99-Black-Power/prep/data/`.
+- `v2/HOS-USnA/HOS-USnA/Assets.xcassets/Greatest/`: 100 imagesets, one per person, named by
+  id (e.g. `crispus-attucks`). Only the 256px thumbnails (~1.7 MB total). The 26 MB of
+  full-size images were left out because the listing doesn't use them.
+- `Models/GreatestPerson.swift`, `Services/GreatestRepository.swift`: decode people.json.
+- `Views/GreatestView.swift`: the "100 Greatest" list. Each row has a round thumbnail,
+  "#001 Name" and the description, in birth-year order. Tapping a row opens the person's
+  Wikipedia article.
+- `Views/LandingView.swift`, `Models/AppScreen.swift`, `AppLandingView.swift`: the
+  "100 Greatest" button below News, and the new `.greatest` screen.
+- `Resources/Links.json`: added "Greatest Source"
+  (https://en.wikipedia.org/wiki/100_Greatest_African_Americans), and renamed
+  "Data Source: Wikipedia" to "HOS Source" with its URL unchanged.
+
+The app builds for the iOS simulator, and the built app contains people.json and the images.
+It was not run, so the screen has not been seen. Photo credits for the Greatest images are not
+yet in the Credits screen. Nothing was committed.
+
+**Cost**: ~6 minutes.
