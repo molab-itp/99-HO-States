@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The HOS's name (with a play/pause button that speaks the extract, translated first when
 /// `SpeechSetupView` has translation on), term, party, biography
-/// extract, and Wikipedia link — the text content that `HOSDetailView` fades in a few seconds after appearing.
+/// extract, Wikipedia link, and the Greatest figures alive during its term — the text content that `HOSDetailView` fades in a few seconds after appearing.
 /// `HOSDetailView` owns `speechPlayer` so its slideshow can wait for the speech, and turns
 /// `autoSpeaks` on to have the extract spoken without the button being tapped. With `speaksName`
 /// on (Auto Speak's Name mode) the order and name are spoken in place of the extract.
@@ -37,6 +37,17 @@ struct HOSSummaryView: View {
                     Label("Read on Wikipedia", systemImage: "book")
                 }
                 .font(.callout)
+            }
+            let greatest = GreatestRepository.people(for: hos)
+            if !greatest.isEmpty {
+                Divider()
+                Text("100 Greatest of this period")
+                    .font(.headline)
+                LazyVStack(alignment: .leading, spacing: 32) {
+                    ForEach(greatest) { person in
+                        GreatestFigureView(person: person)
+                    }
+                }
             }
         }
         // This view outlives the HOS it shows (Next/Previous/slideshow just swap `hos`), so

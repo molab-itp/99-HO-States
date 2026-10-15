@@ -1033,3 +1033,15 @@ labeled "Greatest Source"
 above "Data Source: Wikipedia" link
 
 rename "Data Source: Wikipedia" link to "HOS Source"
+
+v02.142
+
+in v2, add details view of Greatest figures 
+to Greatest listing that shows the full photo of the figure
+and the summary from the json.
+add full photo to Assets catalog in folder "Greatest"
+
+At the bottom of HOS Detail below link "Read on Wikipedia"
+include full photo + summary of all Greatest figures
+whose life time interect with the HOS period.
+On first HOS detail include first Greatest figure crispus-attucks

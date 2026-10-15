@@ -24,4 +24,15 @@ struct HOS: Identifiable, Codable, Hashable {
         let encodedTitle = wikipediaTitle.replacingOccurrences(of: " ", with: "_")
         return URL(string: "https://en.wikipedia.org/wiki/\(encodedTitle)")
     }
+
+    /// The years `term` spans, e.g. 1789...1797 for "1789–1797", 1841...1841 for "1841", and
+    /// through the current year for "2025–present". Nil if `term` has no year in it.
+    var termYears: ClosedRange<Int>? {
+        let years = term.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }
+        guard let start = years.first else { return nil }
+        let end = term.hasSuffix("present")
+            ? Calendar.current.component(.year, from: .now)
+            : years.last ?? start
+        return start...max(start, end)
+    }
 }

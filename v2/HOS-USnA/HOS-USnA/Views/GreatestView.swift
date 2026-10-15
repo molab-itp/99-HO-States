@@ -1,16 +1,17 @@
 import SwiftUI
 
 /// The 100 Greatest African Americans by Molefi Kete Asante, from people.json, sorted by birth
-/// year. Pushed from `LandingView`; tapping a row opens the person's Wikipedia article.
+/// year. Pushed from `LandingView`; tapping a row shows the person in `GreatestDetailView`.
 struct GreatestView: View {
-    private let people = GreatestRepository.loadAll()
+    private let people = GreatestRepository.all
 
     var body: some View {
         List(people) { person in
-            Link(destination: person.articleUrl) {
+            NavigationLink {
+                GreatestDetailView(person: person)
+            } label: {
                 GreatestRow(person: person)
             }
-            .foregroundStyle(.primary)
         }
         .navigationTitle("100 Greatest")
     }
@@ -38,7 +39,7 @@ private struct GreatestRow: View {
 
     @ViewBuilder
     private var thumbnail: some View {
-        if let image = imageIfAvailable(person.id) {
+        if let image = imageIfAvailable(person.thumbnailImageName) {
             image
                 .resizable()
                 .scaledToFill()

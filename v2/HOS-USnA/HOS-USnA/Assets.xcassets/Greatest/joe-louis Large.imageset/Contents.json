@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "joe-louis Large.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

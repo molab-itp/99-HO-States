@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "jack-johnson Large.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
