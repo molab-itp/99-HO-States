@@ -2672,3 +2672,41 @@ It was not run, so the screen has not been seen. Photo credits for the Greatest 
 yet in the Credits screen. Nothing was committed.
 
 **Cost**: ~6 minutes.
+
+# --
+
+2026-10-15 09:59 (v2: Greatest detail view, and Greatest figures on HOS detail)
+
+## Request
+
+In v2, add a detail view to the Greatest listing showing the figure's full photo and the
+summary from the JSON, with the full photos added to the asset catalog's "Greatest" folder. At
+the bottom of HOS Detail, below "Read on Wikipedia", show the full photo and summary of every
+Greatest figure whose lifetime intersects the HOS's term. The first HOS should include the first
+figure, Crispus Attucks.
+
+## What was built
+
+- `v2/HOS-USnA/HOS-USnA/Assets.xcassets/Greatest/`: 100 full-size imagesets named
+  `<id> Large`, matching the HOS naming. They add about 26 MB.
+- `Views/GreatestFigureView.swift`: `GreatestFigureView` (full photo, name, description,
+  summary, Read on Wikipedia link) and `GreatestDetailView`, which shows one figure on its own
+  screen.
+- `Views/GreatestView.swift`: rows now open `GreatestDetailView` instead of Wikipedia.
+- `Models/GreatestPerson.swift`: now also decodes born, died and summary, and has
+  `livedDuring(_:)`. Living figures count as alive through the current year.
+- `Models/HOS.swift`: `termYears`, parsed from `term` ("1841" is one year, and
+  "2025–present" runs to the current year).
+- `Services/GreatestRepository.swift`: `people(for:)` returns the figures alive during a
+  term. The first HOS also gets anyone who died before 1789, which is only Crispus Attucks.
+  The data is decoded once and shared.
+- `HOSDetail/HOSSummaryView.swift`: a "100 Greatest of this period" section below
+  Read on Wikipedia.
+
+Washington shows 8 figures. Terms from about 1913 to 1969 show 50–70 each (FDR has 70), so those
+pages get long. A collapsible section or thumbnail links could be used instead.
+
+The app builds for the iOS simulator. It was not run, so neither screen has been seen. Nothing
+was committed.
+
+**Cost**: ~6 minutes.
