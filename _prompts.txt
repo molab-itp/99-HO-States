@@ -1054,3 +1054,8 @@ add buttons:
     slideshow play/pause,
     speech play/pause
 with similar functionality as on HOSDetailView
+
+v05.144
+
+sync web app in v05 with changes to v2
+

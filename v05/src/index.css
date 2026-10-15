@@ -611,6 +611,28 @@ input {
   color: var(--secondary-label);
 }
 
+/* 100 Greatest screen — GreatestRow: the round thumbnail, then the order and name over the
+   description, both wrapping instead of truncating. */
+.greatest-row {
+  padding: 10px 16px;
+}
+
+.greatest-row .names {
+  gap: 2px;
+}
+
+.greatest-row .names .label {
+  font-weight: 590;
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.greatest-row .names .description {
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--secondary-label);
+}
+
 /* Credits screen — CreditsView's three collapsible sections: a header that toggles the rows and
    footer below it, and rows whose caption is the link to the source. */
 .credits {
@@ -1358,6 +1380,65 @@ input {
 
 .wiki-link:active {
   opacity: 0.5;
+}
+
+/* Port of GreatestFigureView: the full photo, then the name (with its speech button), the
+   description and summary. Shown alone on the Greatest detail screen and stacked under
+   "100 Greatest of this period" at the bottom of the HOS detail. */
+.greatest-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.greatest-photo {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  background: var(--thumb-bg);
+}
+
+.greatest-figure .name-row {
+  margin-bottom: 0;
+}
+
+.greatest-figure h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.greatest-figure p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--label);
+}
+
+.greatest-figure .greatest-description {
+  font-size: 17px;
+  font-weight: 590;
+  color: var(--secondary-label);
+}
+
+.period-greatest {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 0.5px solid var(--separator);
+}
+
+.period-greatest-title {
+  margin: 0 0 -20px;
+  font-size: 17px;
+  font-weight: 590;
+}
+
+.detail-text .greatest-figure p {
+  margin: 0;
 }
 
 /* Bottom toolbar — same translucent-blur treatment as the nav bar, matching a standard

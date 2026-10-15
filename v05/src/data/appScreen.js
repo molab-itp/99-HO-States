@@ -6,6 +6,8 @@ export const AppScreen = {
   hosList: 'hosList',
   hosDetail: 'hosDetail',
   news: 'news',
+  greatest: 'greatest',
+  greatestDetail: 'greatestDetail',
   credits: 'credits',
   speechSetup: 'speechSetup',
 };

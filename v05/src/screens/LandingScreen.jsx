@@ -9,12 +9,19 @@ import links from '../data/links.js';
 /**
  * Port of LandingView.swift — the app's root screen: settings, app info, and the ways into
  * `HOSDetailScreen` (Resume, Random Head, Start Slideshow), `HOSListScreen`, `NewsScreen`,
- * `CreditsScreen` and `SpeechSetupScreen`. Navigation itself is handed back to `App` through the
+ * `GreatestScreen`, `CreditsScreen` and `SpeechSetupScreen`. Navigation itself is handed back to `App` through the
  * callbacks: `onShowList()` shows the list, `onShowDetail(startSlideshow)` shows the detail screen
  * at `slideIndex`, with its slideshow playing if asked, `onShowNews()` shows the news screen,
- * `onShowCredits()` the credits screen and `onShowSpeechSetup()` the text-to-speech setup screen.
+ * `onShowGreatest()` the 100 Greatest African Americans listing, `onShowCredits()` the credits screen and `onShowSpeechSetup()` the text-to-speech setup screen.
  */
-export default function LandingScreen({ onShowList, onShowDetail, onShowNews, onShowCredits, onShowSpeechSetup }) {
+export default function LandingScreen({
+  onShowList,
+  onShowDetail,
+  onShowNews,
+  onShowGreatest,
+  onShowCredits,
+  onShowSpeechSetup,
+}) {
   const { hosList, viewedIDs, nextRandomHOS, select, resetViewed, buildInfo } = useAppModel();
   const [isRandomMode, setIsRandomMode] = useStoredBoolean(
     SlideshowSettings.randomModeKey,
@@ -44,11 +51,15 @@ export default function LandingScreen({ onShowList, onShowDetail, onShowNews, on
       <div className="icon">
         <Icon name="bank" size={64} />
       </div>
-      <h1>USnA Heads</h1>
+      <h1>USnA Heads and 100 Greatest</h1>
       <p className="subtitle">
+        Who defines a nation?
+        <br />
         Browse portraits and biographies of every Head of State
         <br />
         of the United States of north America
+        <br />
+        supplemented with 100 of the greatest African Americans
       </p>
 
       <div className="actions">
@@ -59,6 +70,10 @@ export default function LandingScreen({ onShowList, onShowDetail, onShowNews, on
         <button className="btn btn-bordered" onClick={onShowNews}>
           <Icon name="newspaper" />
           News
+        </button>
+        <button className="btn btn-bordered" onClick={onShowGreatest}>
+          <Icon name="people" />
+          100 Greatest
         </button>
         <button className="btn btn-bordered" onClick={onShowList}>
           <Icon name="list-ul" />

@@ -5,16 +5,19 @@ import LandingScreen from './screens/LandingScreen.jsx';
 import HOSListScreen from './screens/HOSListScreen.jsx';
 import HOSDetailScreen from './screens/HOSDetailScreen.jsx';
 import NewsScreen from './screens/NewsScreen.jsx';
+import GreatestScreen from './screens/GreatestScreen.jsx';
+import GreatestDetailScreen from './screens/GreatestDetailScreen.jsx';
+import greatestList from './data/greatest.js';
 import CreditsScreen from './screens/CreditsScreen.jsx';
 import SpeechSetupScreen from './screens/SpeechSetupScreen.jsx';
 
 /**
  * Port of AppLandingView.swift: the navigation that `LandingScreen` sits at the bottom of. There
- * is no router — `appModel.screen` stands in for the `NavigationStack` path (which only ever
- * holds one pushed screen), and is persisted so the last screen shown is restored on reload.
+ * is no router — `appModel.screen` stands in for the `NavigationStack` path (which holds one
+ * pushed screen, or two for a Greatest figure over the Greatest list), and is persisted so the last screen shown is restored on reload.
  */
 function Root() {
-  const { hosList, slideIndex, screen, setScreen, select } = useAppModel();
+  const { hosList, slideIndex, screen, setScreen, select, setGreatestIndex } = useAppModel();
   // Whether the next `HOSDetailScreen` shown should open with its slideshow playing (Landing's
   // Start Slideshow) rather than paused.
   const [startsSlideshowOnOpen, setStartsSlideshowOnOpen] = useState(false);
@@ -57,6 +60,19 @@ function Root() {
       );
     case AppScreen.news:
       return <NewsScreen onBack={showLanding} />;
+    case AppScreen.greatest:
+      return (
+        <GreatestScreen
+          onSelect={(person) => {
+            setGreatestIndex(greatestList.indexOf(person));
+            setScreen(AppScreen.greatestDetail);
+          }}
+          onBack={showLanding}
+        />
+      );
+    case AppScreen.greatestDetail:
+      // Pushed over the Greatest list, so Back returns there rather than to Landing.
+      return <GreatestDetailScreen onBack={() => setScreen(AppScreen.greatest)} />;
     case AppScreen.credits:
       return <CreditsScreen onBack={showLanding} />;
     case AppScreen.speechSetup:
@@ -67,6 +83,7 @@ function Root() {
           onShowList={() => setScreen(AppScreen.hosList)}
           onShowDetail={showDetail}
           onShowNews={() => setScreen(AppScreen.news)}
+          onShowGreatest={() => setScreen(AppScreen.greatest)}
           onShowCredits={() => setScreen(AppScreen.credits)}
           onShowSpeechSetup={() => setScreen(AppScreen.speechSetup)}
         />

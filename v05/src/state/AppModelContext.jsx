@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import hosList from '../data/hosList.js';
+import greatestList from '../data/greatest.js';
 import { version as appVersion } from '../../package.json';
 import { loadPersistedState, savePersistedState } from '../data/persistedState.js';
 import { normalizeReactions } from '../data/hosReaction.js';
@@ -69,6 +70,14 @@ export function AppModelProvider({ children }) {
     return persisted && hosList[persisted.slideIndex] ? persisted.slideIndex : 0;
   });
 
+  // Which figure `GreatestDetailScreen` is showing, as an index into the Greatest list — kept here
+  // like `slideIndex` so its page link names the figure and a reload reopens on it.
+  const [greatestIndex, setGreatestIndex] = useState(() => {
+    if (initialRoute?.greatestIndex !== undefined) return initialRoute.greatestIndex;
+    const saved = rawPersistedRef.current?.greatestIndex;
+    return greatestList[saved] ? saved : 0;
+  });
+
   // The top-level screen currently showing, set by `App`'s navigation and persisted so the next
   // launch reopens on the same screen. Read from the raw saved state rather than `persisted`: it
   // doesn't depend on the shuffle matching the current HOS count. Older saves without it (or
@@ -84,8 +93,9 @@ export function AppModelProvider({ children }) {
   useEffect(() => {
     const isNewScreen = syncedScreenRef.current !== null && syncedScreenRef.current !== screen;
     syncedScreenRef.current = screen;
-    showRoute(screen, hosList[slideIndex], isNewScreen);
-  }, [screen, slideIndex]);
+    const item = screen === AppScreen.greatestDetail ? greatestList[greatestIndex] : hosList[slideIndex];
+    showRoute(screen, item, isNewScreen);
+  }, [screen, slideIndex, greatestIndex]);
 
   // The browser's Back/Forward: show whatever the address now names. `showRoute` then finds the
   // address already matching and leaves the history alone.
@@ -93,6 +103,7 @@ export function AppModelProvider({ children }) {
     function handlePopState() {
       const route = routeFromLocation(hosList);
       if (route?.slideIndex !== undefined) setSlideIndex(route.slideIndex);
+      if (route?.greatestIndex !== undefined) setGreatestIndex(route.greatestIndex);
       setScreen(route?.screen ?? AppScreen.landing);
     }
     window.addEventListener('popstate', handlePopState);
@@ -253,6 +264,7 @@ export function AppModelProvider({ children }) {
   const persistNow = useCallback(() => {
     savePersistedState({
       slideIndex,
+      greatestIndex,
       screen,
       shuffledIndexes: shuffleRef.current,
       nextShuffleIndex: nextShuffleIndexRef.current,
@@ -260,7 +272,7 @@ export function AppModelProvider({ children }) {
       imageZoomStates,
       drawingDisplayModes,
     });
-  }, [slideIndex, screen, reactions, imageZoomStates, drawingDisplayModes]);
+  }, [slideIndex, greatestIndex, screen, reactions, imageZoomStates, drawingDisplayModes]);
 
   useEffect(() => {
     function handleVisibilityChange() {
@@ -282,6 +294,8 @@ export function AppModelProvider({ children }) {
       buildInfo,
       slideIndex,
       setSlideIndex,
+      greatestIndex,
+      setGreatestIndex,
       screen,
       setScreen,
       select,
@@ -303,6 +317,7 @@ export function AppModelProvider({ children }) {
       cycleCount,
       buildInfo,
       slideIndex,
+      greatestIndex,
       screen,
       select,
       nextRandomHOS,

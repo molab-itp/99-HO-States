@@ -9,6 +9,8 @@ import Icon from '../components/Icon.jsx';
 import HOSDrawingEditor from '../components/HOSDrawingEditor.jsx';
 import DrawingDisplayMenu from '../components/DrawingDisplayMenu.jsx';
 import SpeechPlayButton from '../components/SpeechPlayButton.jsx';
+import GreatestFigure from '../components/GreatestFigure.jsx';
+import { greatestFor } from '../data/greatest.js';
 import { showsDrawing, showsPhoto } from '../data/drawingDisplayMode.js';
 import { useStoredBoolean } from '../state/useStoredBoolean.js';
 import { useStoredNumber } from '../state/useStoredNumber.js';
@@ -219,6 +221,7 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   const speechText = autoSpeak && autoSpeakMode === 'name' ? `${hos.order} ${hos.name}` : hos.extract;
 
   const isPreviousDisabled = isRandomMode && nav.position === 0;
+  const greatest = greatestFor(hos);
 
   return (
     <div className="screen-scroll">
@@ -299,6 +302,15 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
               <Icon name="book" size={14} />
               Read on Wikipedia
             </a>
+          )}
+          {/* HOSSummaryView's Greatest figures alive during the term. */}
+          {greatest.length > 0 && (
+            <div className="period-greatest">
+              <h2 className="period-greatest-title">100 Greatest of this period</h2>
+              {greatest.map((person) => (
+                <GreatestFigure key={person.id} person={person} />
+              ))}
+            </div>
           )}
         </div>
       </div>

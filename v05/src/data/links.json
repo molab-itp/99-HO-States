@@ -1,6 +1,10 @@
 [
   {
-    "title" : "Data Source: Wikipedia",
+    "title" : "Greatest Source",
+    "url" : "https://en.wikipedia.org/wiki/100_Greatest_African_Americans"
+  },
+  {
+    "title" : "HOS Source",
     "url" : "https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States"
   },
   {

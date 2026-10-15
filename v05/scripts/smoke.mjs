@@ -122,8 +122,9 @@ async function main() {
     await page.waitForSelector('text=USnA Heads');
     assert(!(await page.isVisible('button[aria-label="Back"]')), 'Landing is the root screen: no back button');
     const linkTitles = await page.locator('a.source-link').allTextContents();
-    assert(linkTitles.length === 2, `Landing should list the links.json links: got ${linkTitles.length}`);
-    assertIncludes(linkTitles[0], 'Data Source: Wikipedia', 'links should keep links.json order');
+    assert(linkTitles.length === 3, `Landing should list the links.json links: got ${linkTitles.length}`);
+    assertIncludes(linkTitles[0], 'Greatest Source', 'links should keep links.json order');
+    assertIncludes(linkTitles[1], 'HOS Source', 'links should keep links.json order');
     assert(!linkTitles.some((t) => t.includes('Web App')), 'the web app should not link to itself');
     await shot('landing');
 
@@ -277,6 +278,55 @@ async function main() {
     await page.click('button[aria-label="Back"]');
     await page.waitForSelector('button:has-text("Start Slideshow")');
     await resume();
+
+    console.log('100 Greatest from Landing: people.json rows, then a figure with Previous/Play/Next...');
+    await backToLanding();
+    await page.click('button:has-text("100 Greatest")');
+    await page.waitForSelector('.greatest-list');
+    assert((await page.locator('.nav-title').textContent()) === '100 Greatest', 'listing should be titled 100 Greatest');
+    const greatestRows = page.locator('.greatest-row');
+    assert((await greatestRows.count()) === 100, `should list 100 people: got ${await greatestRows.count()}`);
+    assertIncludes(await greatestRows.first().locator('.label').textContent(), '#001 Crispus Attucks', 'rows keep people.json order');
+    assertIncludes(await greatestRows.first().locator('.description').textContent(), 'Boston Massacre', 'rows show the description');
+    await shot('greatest-list');
+    await greatestRows.first().click();
+    await page.waitForSelector('.greatest-figure');
+    assert(new URL(page.url()).pathname === '/Greatest/001', `a figure should be at /Greatest/NNN: got ${page.url()}`);
+    assertIncludes(await title(), '#001', 'figure title should show its order');
+    assertIncludes(await page.locator('.greatest-figure h2').textContent(), 'Crispus Attucks', 'figure should show its name');
+    await page.waitForFunction(() => {
+      const img = document.querySelector('img.greatest-photo');
+      return img && img.complete && img.naturalWidth > 0;
+    });
+    await shot('greatest-detail');
+    await page.click('button[aria-label="Previous"]');
+    await page.waitForFunction(() => window.location.pathname === '/Greatest/100');
+    await page.click('button[aria-label="Next"]');
+    await page.click('button[aria-label="Next"]');
+    await page.waitForFunction(() => window.location.pathname === '/Greatest/002');
+    await page.click('button[aria-label="Play"]');
+    await page.waitForFunction(() => document.querySelector('.nav-title-mono')?.textContent.includes('·'));
+    await page.click('button[aria-label="Pause"]');
+    await page.click('button[aria-label="Play Speech"]');
+    await page.waitForFunction(() => window.__speech.spoken.length > 0);
+    await page.reload();
+    await page.waitForSelector('.greatest-figure');
+    assertIncludes(await title(), '#002', 'a reload should reopen on the figure shown');
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('.greatest-list');
+    await page.click('button[aria-label="Back"]');
+    await page.waitForSelector('button:has-text("Start Slideshow")');
+
+    console.log('HOS detail lists the Greatest figures alive during its term...');
+    await pickFromList('#01');
+    await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
+    const periodNames = await page.locator('.period-greatest .greatest-figure h2').allTextContents();
+    assert(periodNames[0] === 'Crispus Attucks', `#01 should start with Crispus Attucks: got ${periodNames}`);
+    assert(periodNames.includes('Benjamin Banneker'), `#01 should include Benjamin Banneker: got ${periodNames}`);
+    await backToLanding();
+    await pickFromList('#47');
+    await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
+    assert((await page.locator('.period-greatest .greatest-figure').count()) > 0, 'the current term should list living figures');
 
     console.log('Credits from Landing: three sections, hidden until their header is tapped...');
     await backToLanding();

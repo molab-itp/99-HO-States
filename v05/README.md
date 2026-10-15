@@ -14,11 +14,14 @@ navigator) is the only expected change to port further.
 - `src/App.jsx` — port of `AppLandingView`: shows `LandingScreen` as the root, with the list, detail,
   news, credits and speech setup screens on top of it, and reopens on the persisted `screen` after
   a reload.
-- `src/screens/` — `LandingScreen` (port of `LandingView`: Resume, News, List of Heads, Random
-  Head, Speak, Start Slideshow, slideshow settings including Random Mode and Animated, Reset
+- `src/screens/` — `LandingScreen` (port of `LandingView`: Resume, News, 100 Greatest, List of
+  Heads, Random Head, Speak, Start Slideshow, slideshow settings including Random Mode and Animated, Reset
   Visit Count, Credits, links),
-  `HOSListScreen`, `HOSDetailScreen` (Play/Pause slideshow, speech button, drawing, Back to
-  Landing), `NewsScreen` (port of `NewsView`), `CreditsScreen` (port of `CreditsView`: article,
+  `HOSListScreen`, `HOSDetailScreen` (Play/Pause slideshow, speech button, drawing, the 100
+  Greatest figures alive during the term, Back to Landing), `NewsScreen` (port of `NewsView`),
+  `GreatestScreen` (port of `GreatestView`) and `GreatestDetailScreen` (port of
+  `GreatestDetailView`: one figure with Previous / Play-Pause slideshow / Next and a speech
+  button; Back returns to the list), `CreditsScreen` (port of `CreditsView`: article,
   photo and news sources, each section collapsible), and `SpeechSetupScreen` (port of
   `SpeechSetupView`: Auto Speak and its Summary / Name mode, sample text with a link to its
   source, and the speech languages in groups that can each be shown or hidden).
@@ -29,8 +32,8 @@ navigator) is the only expected change to port further.
   Translator API where there is one (Chrome on desktop); elsewhere the Translate button is hidden
   and text is spoken as written.
 - `src/data/appScreen.js` — port of `AppScreen.swift`, the top-level screen names.
-- `src/data/route.js` — page links, so a location can be bookmarked: `News`, `List`, `Credits`,
-  `Speech` and `HOS/NN` (one per head of state) under the app's base, e.g.
+- `src/data/route.js` — page links, so a location can be bookmarked: `News`, `List`, `Greatest`,
+  `Credits`, `Speech`, `HOS/NN` (one per head of state) and `Greatest/NNN` (one per figure) under the app's base, e.g.
   `https://molab-itp.github.io/99-HO-States/v05/News` or `.../v05/HOS/16`. Still no router: the
   address bar is kept in step with `screen`/`slideIndex` and read on load and on browser
   Back/Forward. The base address itself reopens the last screen shown. The build
@@ -43,6 +46,10 @@ navigator) is the only expected change to port further.
 - `src/data/links.json` — copy of v2's `Resources/Links.json`.
 - `src/data/news.json` + `public/images/news/` — copy of v2's `Resources/news.json` and the
   thumbnails it names in v2's asset catalog (`src/data/news.js` maps each name to its file).
+- `src/data/people.json` + `public/images/greatest/` — copy of v2's `Resources/people.json` (the
+  100 Greatest African Americans by Molefi Kete Asante) and the thumbnail (`<id>-thumb.jpg`) and
+  full photo (`<id>-large.jpg`) of each from v2's asset catalog `Greatest` folder;
+  `src/data/greatest.js` ports `GreatestRepository`, including which figures belong to a HOS term.
 - `src/data/photoCredits.json` — copy of v2's generated `Resources/PhotoCredits.json`.
 
 ## Running
