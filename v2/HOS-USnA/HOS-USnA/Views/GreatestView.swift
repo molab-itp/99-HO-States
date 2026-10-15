@@ -8,7 +8,7 @@ struct GreatestView: View {
     var body: some View {
         List(people) { person in
             NavigationLink {
-                GreatestDetailView(person: person)
+                GreatestDetailView(people: people, selected: person)
             } label: {
                 GreatestRow(person: person)
             }

@@ -43,10 +43,10 @@ struct LandingView: View {
           .font(.system(size: 72))
           .foregroundStyle(.tint)
         
-        Text("USnA Heads")
+        Text("USnA Heads and 100 Greatest")
           .font(.largeTitle.bold())
         
-        Text("Browse portraits and biographies of every Head of State\n of the United States of north America")
+        Text("Who defines a nation?\nBrowse portraits and biographies of every Head of State\n of the United States of north America\n supplemented with 100 of the greatest African Americans")
           .font(.subheadline)
           .foregroundStyle(.secondary)
           .multilineTextAlignment(.center)

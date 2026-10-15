@@ -1045,3 +1045,12 @@ At the bottom of HOS Detail below link "Read on Wikipedia"
 include full photo + summary of all Greatest figures
 whose life time interect with the HOS period.
 On first HOS detail include first Greatest figure crispus-attucks
+
+v02.143
+
+in v2, on GreatestFigureView
+add buttons:
+    next/previous, 
+    slideshow play/pause,
+    speech play/pause
+with similar functionality as on HOSDetailView
