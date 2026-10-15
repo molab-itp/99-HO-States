@@ -30,11 +30,7 @@ struct GreatestFigureView: View {
                     .font(.title2.bold())
                 if let speechPlayer {
                     Spacer()
-                    if #available(iOS 18.0, *) {
-                        SpeechTranslatedPlayButton(player: speechPlayer, text: speechText, autoPlays: autoSpeaks)
-                    } else {
-                        SpeechPlayButton(player: speechPlayer, text: speechText, autoPlays: autoSpeaks)
-                    }
+                    SpeechTranslatedPlayButton(player: speechPlayer, text: speechText, autoPlays: autoSpeaks)
                 }
             }
             Text(person.description)

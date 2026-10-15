@@ -3,7 +3,6 @@ import Translation
 
 /// Translates `text` in place: from English into the selected speech `language`, or — once it
 /// has been translated — back into English. `textLanguage` tracks which of the two `text` is in.
-@available(iOS 18.0, *)
 struct SpeechTranslateButton: View {
     @Binding var text: String
     /// Speech language code (e.g. "es-ES") `text` is currently written in.

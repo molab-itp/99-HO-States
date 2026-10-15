@@ -12,6 +12,10 @@ enum SlideshowSettings {
     static let defaultAutoScroll = false
     /// Auto Scroll's speed, in points per second.
     static let autoScrollSpeed: Double = 60
+    /// How many of the period's 100 Greatest Auto Scroll shows before the slide advances; 0 is all.
+    static let autoScrollGreatestKey = "slideshowAutoScrollGreatest"
+    static let autoScrollGreatestOptions = [1, 2, 0]
+    static let defaultAutoScrollGreatest = 1
     static let intervalSecsKey = "slideshowIntervalSecs"
     static let delayFractionKey = "slideshowDelayFraction"
     static let intervalSecsOptions: [Double] = [5, 10, 15, 20]
@@ -43,6 +47,8 @@ struct HOSDetailView: View {
     private var isAnimated = SlideshowSettings.defaultAnimated
     @AppStorage(SlideshowSettings.autoScrollKey)
     private var isAutoScroll = SlideshowSettings.defaultAutoScroll
+    @AppStorage(SlideshowSettings.autoScrollGreatestKey)
+    private var autoScrollGreatest = SlideshowSettings.defaultAutoScrollGreatest
     @AppStorage(SlideshowSettings.intervalSecsKey)
     private var slideshowIntervalSecs = SlideshowSettings.defaultIntervalSecs
     @AppStorage(SlideshowSettings.delayFractionKey)
@@ -74,18 +80,29 @@ struct HOSDetailView: View {
     // the extract has been spoken.
     @State private var speechPlayer = SpeechPlayer()
 
-    // Auto Scroll: while playing, the details (down through the 100 Greatest of the period)
-    // scroll slowly to the bottom once they've faded in, and the slide holds until they get there.
-    // Driven from `tickSlideshow` with `scrollTo(contentID, anchor:)` — an anchor at fraction `t`
-    // aligns that point of the content with the same point of the viewport, so `t` from 0 to 1
-    // scrolls linearly from top to bottom (`ScrollPosition`'s point offsets need iOS 18).
-    private static let contentID = "content"
-    @State private var scrollProxy: ScrollViewProxy?
+    // Auto Scroll: while playing, the details scroll slowly down once they've faded in, until the
+    // first `autoScrollGreatest` of the period's 100 Greatest (or all of them, or the bottom if
+    // there are fewer) have come fully into view, and the slide holds until they get there.
+    // Driven from `tickSlideshow` by stepping `scrollPosition` to `autoScrollOffset`.
+    private static let contentSpace = "content"
+    @State private var scrollPosition = ScrollPosition(edge: .top)
     @State private var viewportHeight = 0.0
     @State private var contentHeight = 0.0
     @State private var autoScrollOffset = 0.0
+    /// Where each Greatest figure ends, in `contentSpace`, keyed by HOS id and then figure index
+    /// — by HOS id so a figure not yet laid out for this HOS can't be mistaken for the last one's.
+    @State private var greatestBottoms: [Int: [Int: Double]] = [:]
     private var scrollableHeight: Double { max(0, contentHeight - viewportHeight) }
-    private var isAutoScrollDone: Bool { autoScrollOffset >= scrollableHeight }
+    /// The offset Auto Scroll stops at: the bottom of the last Greatest figure to show lined up
+    /// with the bottom of the viewport. Until that figure has been laid out, the very bottom.
+    private var autoScrollTarget: Double {
+        let greatestCount = GreatestRepository.people(for: hos).count
+        guard autoScrollGreatest > 0, autoScrollGreatest < greatestCount,
+              let bottom = greatestBottoms[hos.id]?[autoScrollGreatest - 1]
+        else { return scrollableHeight }
+        return min(scrollableHeight, max(0, bottom - viewportHeight))
+    }
+    private var isAutoScrollDone: Bool { autoScrollOffset >= autoScrollTarget }
 
     // Indices visited during the random walk (in random mode only), so Previous can step back
     // through them and Next can replay forward instead of always drawing a fresh card. Unlike
@@ -113,56 +130,57 @@ struct HOSDetailView: View {
     }
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    ViewedProgressBar(total: hosList.count, viewedHOSIDs: appModel.viewedHOSIDs)
-                    // A ZStack so the outgoing and incoming images overlap while they cross-fade,
-                    // instead of stacking vertically during the transition.
-                    // Only advances while playing fade; manual browsing swaps the image instantly.
-                    // The incoming image runs its own fade-in (and then any zoom-in), each in its own
-                    // transaction; an `.animation(_:value: hos.id)` here would override those and run
-                    // the zoom alongside the fade. The outgoing image's fade-out is attached to its
-                    // removal transition instead.
-                    ZStack {
-                        ZoomableHeaderImage(
-                            hos: hos,
-                            displayMode: appModel.drawingDisplayMode(for: hos),
-                            fadeInSecs: isPlaying ? fadePeriod : nil,
-                            // Runs for the details delay, starting once the fade-in has finished.
-                            zoomInSecs: isAnimated && isPlaying ? delaySecs : nil
-                        )
-                            // Gives the image a fresh identity (and so fresh, reset zoom/pan state) each
-                            // time the displayed HOS changes, since this view instance otherwise
-                            // persists across Next/Previous/slideshow advances.
-                            .id(hos.id)
-                            .transition(.asymmetric(
-                                insertion: .identity,
-                                removal: isPlaying ? .opacity.animation(.easeInOut(duration: fadePeriod)) : .identity
-                            ))
-                    }
-                    // Auto speech starts as the details fade in, so the extract is on screen for it.
-                    HOSSummaryView(
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                ViewedProgressBar(total: hosList.count, viewedHOSIDs: appModel.viewedHOSIDs)
+                // A ZStack so the outgoing and incoming images overlap while they cross-fade,
+                // instead of stacking vertically during the transition.
+                // Only advances while playing fade; manual browsing swaps the image instantly.
+                // The incoming image runs its own fade-in (and then any zoom-in), each in its own
+                // transaction; an `.animation(_:value: hos.id)` here would override those and run
+                // the zoom alongside the fade. The outgoing image's fade-out is attached to its
+                // removal transition instead.
+                ZStack {
+                    ZoomableHeaderImage(
                         hos: hos,
-                        speechPlayer: speechPlayer,
-                        autoSpeaks: autoSpeak && isPlaying && detailsVisible,
-                        speaksName: autoSpeak && autoSpeakMode == .name
+                        displayMode: appModel.drawingDisplayMode(for: hos),
+                        fadeInSecs: isPlaying ? fadePeriod : nil,
+                        // Runs for the details delay, starting once the fade-in has finished.
+                        zoomInSecs: isAnimated && isPlaying ? delaySecs : nil
                     )
-                        .opacity(detailsVisible ? 1 : 0)
+                        // Gives the image a fresh identity (and so fresh, reset zoom/pan state) each
+                        // time the displayed HOS changes, since this view instance otherwise
+                        // persists across Next/Previous/slideshow advances.
+                        .id(hos.id)
+                        .transition(.asymmetric(
+                            insertion: .identity,
+                            removal: isPlaying ? .opacity.animation(.easeInOut(duration: fadePeriod)) : .identity
+                        ))
                 }
-                .padding()
-                .id(Self.contentID)
-                .onGeometryChange(for: Double.self) { $0.size.height } action: { contentHeight = $0 }
+                // Auto speech starts as the details fade in, so the extract is on screen for it.
+                HOSSummaryView(
+                    hos: hos,
+                    speechPlayer: speechPlayer,
+                    autoSpeaks: autoSpeak && isPlaying && detailsVisible,
+                    speaksName: autoSpeak && autoSpeakMode == .name,
+                    coordinateSpace: .named(Self.contentSpace)
+                ) { [hosID = hos.id] index, maxY in
+                    greatestBottoms[hosID, default: [:]][index] = maxY
+                }
+                    .opacity(detailsVisible ? 1 : 0)
             }
-            .onGeometryChange(for: Double.self) { $0.size.height } action: { viewportHeight = $0 }
-            .onAppear { scrollProxy = proxy }
+            .padding()
+            .coordinateSpace(.named(Self.contentSpace))
+            .onGeometryChange(for: Double.self) { $0.size.height } action: { contentHeight = $0 }
         }
+        .scrollPosition($scrollPosition)
+        .onGeometryChange(for: Double.self) { $0.size.height } action: { viewportHeight = $0 }
         .task(id: index) {
             appModel.markViewed(hos, resetIfComplete: isPlaying)
             detailsVisible = false
             if isAutoScroll {
                 autoScrollOffset = 0
-                scrollProxy?.scrollTo(Self.contentID, anchor: .top)
+                scrollPosition.scrollTo(edge: .top)
             }
             try? await Task.sleep(for: .seconds(delaySecs))
             guard !Task.isCancelled else { return }
@@ -290,11 +308,10 @@ struct HOSDetailView: View {
 
     /// Scrolls one tick's worth further down, once the details are showing.
     private func tickAutoScroll() {
-        guard detailsVisible, !isAutoScrollDone, let scrollProxy else { return }
-        autoScrollOffset = min(scrollableHeight, autoScrollOffset + SlideshowSettings.autoScrollSpeed * Self.slideshowTickSecs)
-        let fraction = autoScrollOffset / scrollableHeight
+        guard detailsVisible, !isAutoScrollDone else { return }
+        autoScrollOffset = min(autoScrollTarget, autoScrollOffset + SlideshowSettings.autoScrollSpeed * Self.slideshowTickSecs)
         withAnimation(.linear(duration: Self.slideshowTickSecs)) {
-            scrollProxy.scrollTo(Self.contentID, anchor: UnitPoint(x: 0, y: fraction))
+            scrollPosition.scrollTo(y: autoScrollOffset)
         }
     }
 

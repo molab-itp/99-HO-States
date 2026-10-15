@@ -53,9 +53,7 @@ struct SpeechSetupView: View {
                     SpeechPlayButton(player: player, text: sampleText)
                         .buttonStyle(.borderless)
                 }
-                if #available(iOS 18.0, *) {
-                    SpeechTranslateButton(text: $sampleText, textLanguage: $sampleTextLanguage, language: language)
-                }
+                SpeechTranslateButton(text: $sampleText, textLanguage: $sampleTextLanguage, language: language)
             } header: {
               HStack() {
                 // Tapping the header puts back the default (English) sample text.

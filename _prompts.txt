@@ -1066,3 +1066,13 @@ that enables in slideshow mode
 scrolling to the bottom of the HOS details view
 of the related 100 Greatest 
 slide advances when scrolling is done.
+
+v02.146
+
+in v2, update min deploy to iOS 18 to use ScrollPosition
+in LandingView
+below Auto Scroll button
+add to selection for 1, 2 or all related 100 Greatest
+to scroll past before advancing.
+default to 1.
+

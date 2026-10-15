@@ -28,6 +28,8 @@ struct LandingView: View {
   private var isAnimated = SlideshowSettings.defaultAnimated
   @AppStorage(SlideshowSettings.autoScrollKey)
   private var isAutoScroll = SlideshowSettings.defaultAutoScroll
+  @AppStorage(SlideshowSettings.autoScrollGreatestKey)
+  private var autoScrollGreatest = SlideshowSettings.defaultAutoScrollGreatest
   @AppStorage(SlideshowSettings.intervalSecsKey)
   private var slideshowIntervalSecs = SlideshowSettings.defaultIntervalSecs
   @AppStorage(SlideshowSettings.delayFractionKey)
@@ -125,6 +127,16 @@ struct LandingView: View {
           Toggle(isOn: $isAutoScroll) {
             Label("Auto Scroll", systemImage: "arrow.down.to.line")
           }
+          
+          LabeledContent("Scroll Past Greatest") {
+            Picker("Scroll Past Greatest", selection: $autoScrollGreatest) {
+              ForEach(SlideshowSettings.autoScrollGreatestOptions, id: \.self) { count in
+                Text(count == 0 ? "All" : "\(count)").tag(count)
+              }
+            }
+            .pickerStyle(.segmented)
+          }
+          .disabled(!isAutoScroll)
           
           LabeledContent("Slide Interval") {
             Picker("Slide Interval", selection: $slideshowIntervalSecs) {

@@ -5,7 +5,6 @@ import Translation
 /// been translated into a non-English language, translates `text` into the selected speech
 /// language before speaking it. Otherwise it speaks `text` as is. Speech also starts by itself
 /// each time `autoPlays` turns on.
-@available(iOS 18.0, *)
 struct SpeechTranslatedPlayButton: View {
     let player: SpeechPlayer
     let text: String
