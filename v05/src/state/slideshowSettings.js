@@ -4,7 +4,8 @@
 // heads of state during a slideshow. Animated has the header image zoom and pan into its saved
 // position as each head of state appears during a slideshow. Auto Scroll has the details scroll
 // slowly down during a slideshow, past the first `autoScrollGreatest` of the period's 100 Greatest
-// (0 is all of them), and holds the slide until they have.
+// (0 is all of them), and holds the slide until they have and then for the Fadein Delay. While it's
+// on, nothing fades.
 export const SlideshowSettings = {
   randomModeKey: 'ho-states-us.slideshowRandomMode',
   defaultRandomMode: false,
@@ -14,6 +15,8 @@ export const SlideshowSettings = {
   defaultAutoScroll: false,
   // Auto Scroll's speed, in pixels per second.
   autoScrollSpeed: 60,
+  // Over this many pixels before its stopping point, Auto Scroll eases down to a gentle stop.
+  autoScrollEaseDistance: 48,
   autoScrollGreatestKey: 'ho-states-us.slideshowAutoScrollGreatest',
   autoScrollGreatestOptions: [1, 2, 0],
   defaultAutoScrollGreatest: 1,

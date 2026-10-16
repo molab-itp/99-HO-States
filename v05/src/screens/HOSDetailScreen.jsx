@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAppModel } from '../state/AppModelContext.jsx';
 import { wikipediaArticleURL } from '../data/wikipedia.js';
 import { assetUrl } from '../data/assetUrl.js';
@@ -92,13 +92,21 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   const [nav, setNav] = useState({ index: startIndex, history: [startIndex], position: 0 });
   const index = nav.index;
   const hos = hosList[index];
-  const detailsVisible = revealedIndex === index;
+  // Auto Scroll replaces the slideshow's fades and details delay with a hold at the end: while it
+  // plays, the details are shown with the new HOS, in the same render.
+  const fades = isPlaying && !isAutoScroll;
+  const detailsVisible = revealedIndex === index || (isAutoScroll && isPlaying);
 
   // Mirrors `.task(id: index)`: mark viewed immediately, then fade the text in after a delay
   // that's cancelled (never revealed) if `index` changes again first.
   useEffect(() => {
     let cancelled = false;
     markViewed(hos, isPlaying);
+    // Revealed at once under Auto Scroll, so pausing doesn't hide the details again.
+    if (isAutoScroll && isPlaying) {
+      setRevealedIndex(index);
+      return undefined;
+    }
     const timer = setTimeout(() => {
       if (!cancelled) setRevealedIndex(index);
     }, delaySecs * 1000);
@@ -124,7 +132,7 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   // commit: remounting it made a fresh <img> that flashed blank while the browser decoded it.
   const [fade, setFade] = useState({ shown: hos, outgoing: null });
   if (fade.shown.order !== hos.order) {
-    setFade({ shown: hos, outgoing: isPlaying ? fade.shown : null });
+    setFade({ shown: hos, outgoing: fades ? fade.shown : null });
   }
   const outgoing = fade.outgoing;
   useEffect(() => {
@@ -170,12 +178,15 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   // Auto Scroll: while playing, the details scroll slowly down once they've faded in, until the
   // first `autoScrollGreatest` of the period's 100 Greatest (or all of them, or the bottom if there
   // are fewer) have come fully into view above the toolbar, and the slide holds until they get
-  // there. Swift steps a `ScrollPosition` from its 0.1s slideshow tick; here a requestAnimationFrame
-  // loop moves the window instead, since a 10 Hz step looks choppy in a browser. The stopping
-  // point is measured from the DOM each frame, so it follows lazy-loaded photos as they come in.
+  // there and then for the Fadein Delay more. A requestAnimationFrame loop moves the window once
+  // per display frame (Swift's `FrameTicker`). The stopping point is measured from the DOM each
+  // frame, so it follows lazy-loaded photos as they come in.
   const greatestRefs = useRef([]);
   const toolbarRef = useRef(null);
   const autoScrollOffsetRef = useRef(0);
+  // When Auto Scroll reached its stopping point for this HOS (`performance.now()`), timing the
+  // hold there before the slide advances.
+  const autoScrollDoneTimeRef = useRef(null);
   const greatestCount = greatestFor(hos).length;
 
   function autoScrollTarget() {
@@ -192,10 +203,12 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
     return autoScrollOffsetRef.current >= autoScrollTarget();
   }
 
-  // Back to the top for each new HOS, as `.task(id: index)` does.
-  useEffect(() => {
+  // Back to the top for each new HOS before it's painted, so it's never drawn at the last one's
+  // scroll offset (Swift's `setIndex`).
+  useLayoutEffect(() => {
     if (!isAutoScroll) return;
     autoScrollOffsetRef.current = 0;
+    autoScrollDoneTimeRef.current = null;
     window.scrollTo(0, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
@@ -207,11 +220,20 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
     if (!isAutoScrolling) return undefined;
     let frame;
     let last = performance.now();
+    // Slows over the last `autoScrollEaseDistance` pixels so it settles at the stopping point
+    // instead of halting mid-stride, and notes when it gets there.
     const step = (now) => {
       const target = autoScrollTargetRef.current();
-      const offset = autoScrollOffsetRef.current;
-      if (offset < target) {
-        autoScrollOffsetRef.current = Math.min(target, offset + (SlideshowSettings.autoScrollSpeed * (now - last)) / 1000);
+      const remaining = target - autoScrollOffsetRef.current;
+      if (remaining <= 0) {
+        if (autoScrollDoneTimeRef.current === null) autoScrollDoneTimeRef.current = now;
+      } else {
+        // A photo loading late can push the stopping point further down after it was reached.
+        autoScrollDoneTimeRef.current = null;
+        const ease = Math.min(1, Math.max(0.15, remaining / SlideshowSettings.autoScrollEaseDistance));
+        const delta = (SlideshowSettings.autoScrollSpeed * ease * (now - last)) / 1000;
+        // Within half a pixel of the end it just lands there.
+        autoScrollOffsetRef.current = remaining - delta < 0.5 ? target : autoScrollOffsetRef.current + delta;
         window.scrollTo(0, autoScrollOffsetRef.current);
       }
       last = now;
@@ -251,8 +273,12 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
     // With Auto Speak on, the slide stays up until the speech is done. The countdown
     // keeps ticking meanwhile, so this is checked again every tick.
     if (autoSpeak && speechPlayer.isBusy) return;
-    // With Auto Scroll on, it stays up until the details have scrolled past the chosen Greatest.
-    if (isAutoScroll && !isAutoScrollDone()) return;
+    // With Auto Scroll on, it stays up until the details have scrolled past the chosen Greatest,
+    // and then for the Fadein Delay.
+    if (isAutoScroll) {
+      const doneTime = autoScrollDoneTimeRef.current;
+      if (!isAutoScrollDone() || doneTime === null || performance.now() - doneTime < delaySecs * 1000) return;
+    }
     setNav((prevNav) => advanceForward(prevNav));
     setRemainingSecs(slideshowIntervalSecs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -341,7 +367,7 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
           })}
         </div>
 
-        <div className={detailsVisible ? 'detail-text visible' : 'detail-text'}>
+        <div className={`detail-text${detailsVisible ? ' visible' : ''}${isAutoScroll && isPlaying ? ' no-fade' : ''}`}>
           <div className="name-row">
             <h1 className="name-mono">
               #{hos.order} {hos.name}

@@ -2776,3 +2776,42 @@ The app builds for the iOS simulator. It was not run, so the scrolling has not b
 Nothing was committed.
 
 **Cost**: ~6 minutes.
+
+# --
+
+2026-10-16 08:34 (v05: sync frame-rate Auto Scroll, hold at end, no fades from v2)
+
+## Request
+
+Sync the web app in v05 with the changes to v2.
+
+## What was built
+
+This brings over v2's frame-rate Auto Scroll change (v02.147). v05 already scrolled once per
+display frame with `requestAnimationFrame`. These are the other parts:
+
+- `src/state/slideshowSettings.js`: added `autoScrollEaseDistance` (48 px).
+- `src/screens/HOSDetailScreen.jsx`:
+  - Auto Scroll slows down over the last 48 px and settles on its stopping point. Within half a
+    pixel of the end it lands there.
+  - It notes the time it got there. The slide then stays up for the Fadein Delay before moving
+    on, and Auto Speak can still hold it longer. If a late photo pushes the stopping point down,
+    the scroll starts again and the hold restarts.
+  - The jump back to the top is now a `useLayoutEffect`, so it happens before the next HOS is
+    painted. That HOS is never shown at the last one's scroll offset.
+  - While Auto Scroll is on and playing, the image doesn't cross-fade and the details show at
+    once, with no delay and no fade. Pausing doesn't hide them again.
+- `src/index.css`: a `no-fade` class on `.detail-text` turns off its fade-in.
+
+Paused browsing and slideshows without Auto Scroll work as before.
+
+The build passes. A headless Chromium run (5s interval, Auto Scroll past 1 Greatest) showed:
+- The details are fully visible right away.
+- The scroll moves at about 60 px/s and slows over the last few pixels.
+- It holds for about 2s at the end.
+- Each next HOS starts at the top, with no cross-fade layer.
+- There were no console errors.
+
+Nothing was committed.
+
+**Cost**: ~6 minutes.

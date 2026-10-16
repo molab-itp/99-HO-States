@@ -1151,6 +1151,11 @@ input {
   transition: opacity 0.5s ease-in;
 }
 
+/* While Auto Scroll plays, the details are in place at once. */
+.detail-text.visible.no-fade {
+  transition: none;
+}
+
 .detail-text h1 {
   margin: 0 0 6px;
   font-size: 28px;
