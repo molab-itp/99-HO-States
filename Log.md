@@ -2744,3 +2744,35 @@ The app builds for the iOS simulator. It was not run, so the buttons have not be
 Nothing was committed.
 
 **Cost**: ~4 minutes.
+
+# --
+
+2026-10-16 08:15 (v2: frame-rate Auto Scroll, hold at end, no fades)
+
+## Request
+
+In v2, make Auto Scroll as smooth as v05's by timing it to the display's frame rate. Fix the
+abrupt jump at the end of the scroll. At the end, pause for the Fadein Delay, then jump to the
+top with the next photo already in place. While Auto Scroll is on, nothing fades.
+
+## What was built
+
+- `Support/FrameTicker.swift` (new): a `CADisplayLink` that sends the time since the last frame
+  through a Combine publisher. It only runs while Auto Scroll is moving.
+- `Views/HOSDetailView.swift`:
+  - Auto Scroll moves a little on every display frame. Before, it moved in 0.1s animated steps
+    from the slideshow tick.
+  - It slows down over the last 48 points and settles on its stopping point instead of
+    stopping mid-stride.
+  - After it gets there, the slide stays up for the Fadein Delay before moving on. The slide
+    interval and Auto Speak can still hold it longer.
+  - On advance, the scroll goes back to the top in the same update that shows the next HOS. The
+    next HOS is never drawn at the last one's scroll offset.
+  - While Auto Scroll is on and playing, the image doesn't cross-fade and the details show at
+    once, with no delay and no fade.
+  - Paused browsing and slideshows without Auto Scroll work as before.
+
+The app builds for the iOS simulator. It was not run, so the scrolling has not been seen.
+Nothing was committed.
+
+**Cost**: ~6 minutes.

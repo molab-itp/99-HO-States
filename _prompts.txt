@@ -1079,3 +1079,23 @@ default to 1.
 v05.147
 
 sync web app in v05 with changes to v2
+
+v02.147
+
+in v2, 
+- make scrolling smoother as is in v05: 
+ ie. timed to display frame rate
+- adjust auto scroll timing fix abrupt jump at end of scroll
+- at end of scroll, pause for FadeIn Delay seconds
+- then jump to top with next image in place no fadein
+- ie. when in auto scroll no fade is performed
+- and after scroll the jump to top shows next photo
+append this chat to Log.md with date and time stamp
+with approximate time cost
+
+v05.148
+
+sync web app in v05 with changes to v2
+append this chat to Log.md with date and time stamp
+with approximate time cost
+

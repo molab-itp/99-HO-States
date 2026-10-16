@@ -1,4 +1,5 @@
 import Combine
+import QuartzCore
 import SwiftUI
 
 /// Persisted slideshow settings, chosen on `LandingView` and used by `HOSDetailView`. Seconds
@@ -12,6 +13,8 @@ enum SlideshowSettings {
     static let defaultAutoScroll = false
     /// Auto Scroll's speed, in points per second.
     static let autoScrollSpeed: Double = 60
+    /// Over this many points before its stopping point, Auto Scroll eases down to a gentle stop.
+    static let autoScrollEaseDistance: Double = 48
     /// How many of the period's 100 Greatest Auto Scroll shows before the slide advances; 0 is all.
     static let autoScrollGreatestKey = "slideshowAutoScrollGreatest"
     static let autoScrollGreatestOptions = [1, 2, 0]
@@ -82,13 +85,19 @@ struct HOSDetailView: View {
 
     // Auto Scroll: while playing, the details scroll slowly down once they've faded in, until the
     // first `autoScrollGreatest` of the period's 100 Greatest (or all of them, or the bottom if
-    // there are fewer) have come fully into view, and the slide holds until they get there.
-    // Driven from `tickSlideshow` by stepping `scrollPosition` to `autoScrollOffset`.
+    // there are fewer) have come fully into view, and the slide holds until they get there and
+    // then for the Fadein Delay more. Driven once per display frame by `frameTicker` (a 0.1s step
+    // from `tickSlideshow` looked choppy), moving `scrollPosition` to `autoScrollOffset`. While it's
+    // on, nothing fades: the next HOS appears at the top with its image and details in place.
     private static let contentSpace = "content"
     @State private var scrollPosition = ScrollPosition(edge: .top)
     @State private var viewportHeight = 0.0
     @State private var contentHeight = 0.0
     @State private var autoScrollOffset = 0.0
+    @State private var frameTicker = FrameTicker()
+    /// When Auto Scroll reached its stopping point for this HOS (`CACurrentMediaTime`), timing the
+    /// hold there before the slide advances.
+    @State private var autoScrollDoneTime: CFTimeInterval?
     /// Where each Greatest figure ends, in `contentSpace`, keyed by HOS id and then figure index
     /// — by HOS id so a figure not yet laid out for this HOS can't be mistaken for the last one's.
     @State private var greatestBottoms: [Int: [Int: Double]] = [:]
@@ -103,6 +112,11 @@ struct HOSDetailView: View {
         return min(scrollableHeight, max(0, bottom - viewportHeight))
     }
     private var isAutoScrollDone: Bool { autoScrollOffset >= autoScrollTarget }
+    private var isAutoScrolling: Bool {
+        isAutoScroll && isPlaying && detailsVisible && !isDrawingEditorPresented
+    }
+    /// Auto Scroll replaces the slideshow's fades and details delay with a hold at the end.
+    private var fades: Bool { isPlaying && !isAutoScroll }
 
     // Indices visited during the random walk (in random mode only), so Previous can step back
     // through them and Next can replay forward instead of always drawing a fresh card. Unlike
@@ -125,6 +139,13 @@ struct HOSDetailView: View {
     /// method below must go through this (never assign `index` or `appModel.slideIndex`
     /// directly) — it's the one place that keeps the two in sync.
     private func setIndex(_ newValue: Int) {
+        // Back to the top in the same update that shows the new HOS, so it's never drawn at the
+        // last one's scroll offset.
+        if isAutoScroll {
+            autoScrollOffset = 0
+            autoScrollDoneTime = nil
+            scrollPosition.scrollTo(edge: .top)
+        }
         index = newValue
         appModel.slideIndex = newValue
     }
@@ -144,7 +165,7 @@ struct HOSDetailView: View {
                     ZoomableHeaderImage(
                         hos: hos,
                         displayMode: appModel.drawingDisplayMode(for: hos),
-                        fadeInSecs: isPlaying ? fadePeriod : nil,
+                        fadeInSecs: fades ? fadePeriod : nil,
                         // Runs for the details delay, starting once the fade-in has finished.
                         zoomInSecs: isAnimated && isPlaying ? delaySecs : nil
                     )
@@ -154,7 +175,7 @@ struct HOSDetailView: View {
                         .id(hos.id)
                         .transition(.asymmetric(
                             insertion: .identity,
-                            removal: isPlaying ? .opacity.animation(.easeInOut(duration: fadePeriod)) : .identity
+                            removal: fades ? .opacity.animation(.easeInOut(duration: fadePeriod)) : .identity
                         ))
                 }
                 // Auto speech starts as the details fade in, so the extract is on screen for it.
@@ -177,11 +198,11 @@ struct HOSDetailView: View {
         .onGeometryChange(for: Double.self) { $0.size.height } action: { viewportHeight = $0 }
         .task(id: index) {
             appModel.markViewed(hos, resetIfComplete: isPlaying)
-            detailsVisible = false
-            if isAutoScroll {
-                autoScrollOffset = 0
-                scrollPosition.scrollTo(edge: .top)
+            if isAutoScroll, isPlaying {
+                detailsVisible = true
+                return
             }
+            detailsVisible = false
             try? await Task.sleep(for: .seconds(delaySecs))
             guard !Task.isCancelled else { return }
             withAnimation(.easeIn(duration: 0.5)) {
@@ -196,8 +217,15 @@ struct HOSDetailView: View {
             appModel.slideIndex = index
             restartSlideshowCountdown()
         }
+        .onDisappear { frameTicker.stop() }
         .onReceive(slideshowTicks) { _ in
             tickSlideshow()
+        }
+        .onChange(of: isAutoScrolling, initial: true) { _, isOn in
+            if isOn { frameTicker.start() } else { frameTicker.stop() }
+        }
+        .onReceive(frameTicker.frames) { elapsedSecs in
+            stepAutoScroll(elapsedSecs: elapsedSecs)
         }
         .navigationBarTitleDisplayMode(.inline)
         // `tickSlideshow` holds the countdown while the editor is up so the HOS can't change
@@ -294,25 +322,39 @@ struct HOSDetailView: View {
         // Not clamped at zero: while Auto Speak holds the advance below, this keeps counting
         // down into negative numbers, so the title shows how long the slide has run over.
         slideshowRemainingSecs -= Self.slideshowTickSecs
-        if isAutoScroll { tickAutoScroll() }
         // Half-tick tolerance absorbs floating-point drift from repeated subtraction.
         if slideshowRemainingSecs < Self.slideshowTickSecs / 2 {
             // With Auto Speak on, the slide stays up until the speech is done.
             if autoSpeak, speechPlayer.isBusy { return }
-            // With Auto Scroll on, it stays up until the details have scrolled to the bottom.
-            if isAutoScroll, !isAutoScrollDone { return }
+            // With Auto Scroll on, it stays up until the details have scrolled to the bottom,
+            // and then for the Fadein Delay.
+            if isAutoScroll {
+                guard isAutoScrollDone, let autoScrollDoneTime,
+                      CACurrentMediaTime() - autoScrollDoneTime >= delaySecs
+                else { return }
+            }
             advanceSlideshow()
             restartSlideshowCountdown()
         }
     }
 
-    /// Scrolls one tick's worth further down, once the details are showing.
-    private func tickAutoScroll() {
-        guard detailsVisible, !isAutoScrollDone else { return }
-        autoScrollOffset = min(autoScrollTarget, autoScrollOffset + SlideshowSettings.autoScrollSpeed * Self.slideshowTickSecs)
-        withAnimation(.linear(duration: Self.slideshowTickSecs)) {
-            scrollPosition.scrollTo(y: autoScrollOffset)
+    /// Scrolls one display frame's worth further down, slowing over the last
+    /// `autoScrollEaseDistance` points so it settles at the stopping point instead of halting
+    /// mid-stride. Notes when it gets there, which starts the hold before the slide advances.
+    private func stepAutoScroll(elapsedSecs: Double) {
+        let target = autoScrollTarget
+        let remaining = target - autoScrollOffset
+        guard remaining > 0 else {
+            if autoScrollDoneTime == nil { autoScrollDoneTime = CACurrentMediaTime() }
+            return
         }
+        // A photo loading late can push the stopping point further down after it was reached.
+        if autoScrollDoneTime != nil { autoScrollDoneTime = nil }
+        let ease = min(1, max(0.15, remaining / SlideshowSettings.autoScrollEaseDistance))
+        let step = SlideshowSettings.autoScrollSpeed * ease * elapsedSecs
+        // Within half a point of the end it just lands there.
+        autoScrollOffset = remaining - step < 0.5 ? target : autoScrollOffset + step
+        scrollPosition.scrollTo(y: autoScrollOffset)
     }
 
     private func restartSlideshowCountdown() {
