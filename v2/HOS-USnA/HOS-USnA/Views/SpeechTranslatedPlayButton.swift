@@ -64,7 +64,11 @@ struct SpeechTranslatedPlayButton: View {
         .onChange(of: isTranslating) {
             player.isPreparing = isTranslating
         }
-        .onChange(of: autoPlays) {
+        // Keyed on `text` too, so a slideshow advancing while `autoPlays` stays on (Auto Scroll
+        // keeps the details visible between slides) speaks each new slide. A task rather than
+        // `onChange` so it runs after this update's other handlers, including `HOSSummaryView`
+        // stopping the previous slide's speech.
+        .task(id: autoPlays ? text : nil) {
             if autoPlays, player.status == .idle, !isTranslating {
                 play()
             }
