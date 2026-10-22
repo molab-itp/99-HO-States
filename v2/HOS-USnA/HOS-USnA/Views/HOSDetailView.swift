@@ -98,6 +98,9 @@ struct HOSDetailView: View {
     /// When Auto Scroll reached its stopping point for this HOS (`CACurrentMediaTime`), timing the
     /// hold there before the slide advances.
     @State private var autoScrollDoneTime: CFTimeInterval?
+    /// The HOS Auto Scroll is holding at the top for, with Animated on, while its portrait zooms
+    /// in over the Fadein Delay — so the view stays put for that long before scrolling.
+    @State private var autoScrollHoldHOSID: HOS.ID?
     /// Where each Greatest figure ends, in `contentSpace`, keyed by HOS id and then figure index
     /// — by HOS id so a figure not yet laid out for this HOS can't be mistaken for the last one's.
     @State private var greatestBottoms: [Int: [Int: Double]] = [:]
@@ -114,6 +117,7 @@ struct HOSDetailView: View {
     private var isAutoScrollDone: Bool { autoScrollOffset >= autoScrollTarget }
     private var isAutoScrolling: Bool {
         isAutoScroll && isPlaying && detailsVisible && !isDrawingEditorPresented
+            && autoScrollHoldHOSID != hos.id
     }
     /// Auto Scroll replaces the slideshow's fades and details delay with a hold at the end.
     private var fades: Bool { isPlaying && !isAutoScroll }
@@ -145,6 +149,9 @@ struct HOSDetailView: View {
             autoScrollOffset = 0
             autoScrollDoneTime = nil
             scrollPosition.scrollTo(edge: .top)
+            // Held from the same update, so the details left visible from the last HOS can't
+            // scroll a frame before the `.task` below starts the hold.
+            if isAnimated, isPlaying { autoScrollHoldHOSID = hosList[newValue].id }
         }
         index = newValue
         appModel.slideIndex = newValue
@@ -213,6 +220,14 @@ struct HOSDetailView: View {
             appModel.markViewed(hos, resetIfComplete: isPlaying)
             if isAutoScroll, isPlaying {
                 detailsVisible = true
+                // With Animated on, hold at the top while the portrait zooms in (no fade), and
+                // only then start scrolling.
+                guard isAnimated else { return }
+                let holdID = hos.id
+                autoScrollHoldHOSID = holdID
+                try? await Task.sleep(for: .seconds(delaySecs))
+                guard !Task.isCancelled, autoScrollHoldHOSID == holdID else { return }
+                autoScrollHoldHOSID = nil
                 return
             }
             detailsVisible = false
