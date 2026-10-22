@@ -2924,3 +2924,36 @@ The build passes. A headless Chromium run showed:
 Nothing was committed.
 
 **Cost**: ~12 minutes.
+
+# --
+
+2026-10-22 19:55 (v2: Auto Scroll pauses for Auto Speak on the summary and each Greatest)
+
+## Request
+
+In v2, in the slideshow with Auto Scroll and Auto Speak on, pause the scroll once the HOS summary
+is fully visible until it has been spoken. Then continue scrolling and speak each Greatest as it
+scrolls on, with a similar pause when its text is fully visible and the speech isn't done yet.
+
+## What was built
+
+- `Views/HOSDetailView.swift`:
+  - `speechStage` tracks what's being spoken: 0 for the HOS, then each Greatest in turn, up to
+    the Scroll Past Greatest setting. It moves to the next stage when the speech that stage
+    started finishes (`speakingStage`), so a slide advance stopping the last HOS's speech
+    doesn't count.
+  - `speechPauseOffset` is where Auto Scroll pauses: the bottom of the extract, or of the
+    current Greatest, lined up with the bottom of the screen. `stepAutoScroll` stops there, but
+    only reaching the real stopping point starts the end-of-slide hold.
+  - `autoSpokenGreatest` speaks the current Greatest once its top has scrolled on screen.
+- `HOSDetail/HOSSummaryView.swift`: reports where the extract ends (`onExtractBottom`) and where
+  each Greatest starts and ends (`onGreatestFrame`). Passes the speech player to each Greatest,
+  so each now shows a speak button. Name mode and translation apply to them as to the HOS.
+- `Support/SpeechPlayer.swift` and `Views/SpeechTranslatedPlayButton.swift`: the player records
+  the `text` it's speaking. Buttons sharing one player show "speaking" only for their own text,
+  and a tap while another is speaking stops that one and starts this one.
+
+The app builds for the iOS Simulator. I didn't run it to check the speech and scroll timing.
+Nothing was committed.
+
+**Cost**: ~12 minutes.
