@@ -101,16 +101,19 @@ struct HOSDetailView: View {
     /// The HOS Auto Scroll is holding at the top for, with Animated on, while its portrait zooms
     /// in over the Fadein Delay — so the view stays put for that long before scrolling.
     @State private var autoScrollHoldHOSID: HOS.ID?
-    /// Where each Greatest figure ends, in `contentSpace`, keyed by HOS id and then figure index
-    /// — by HOS id so a figure not yet laid out for this HOS can't be mistaken for the last one's.
-    @State private var greatestBottoms: [Int: [Int: Double]] = [:]
+    /// Where each Greatest figure starts and ends, in `contentSpace`, keyed by HOS id and then
+    /// figure index — by HOS id so a figure not yet laid out for this HOS can't be mistaken for
+    /// the last one's.
+    @State private var greatestFrames: [Int: [Int: ClosedRange<Double>]] = [:]
+    /// Where each HOS's extract ends, in `contentSpace`, keyed by HOS id.
+    @State private var extractBottoms: [Int: Double] = [:]
     private var scrollableHeight: Double { max(0, contentHeight - viewportHeight) }
     /// The offset Auto Scroll stops at: the bottom of the last Greatest figure to show lined up
     /// with the bottom of the viewport. Until that figure has been laid out, the very bottom.
     private var autoScrollTarget: Double {
         let greatestCount = GreatestRepository.people(for: hos).count
         guard autoScrollGreatest > 0, autoScrollGreatest < greatestCount,
-              let bottom = greatestBottoms[hos.id]?[autoScrollGreatest - 1]
+              let bottom = greatestFrames[hos.id]?[autoScrollGreatest - 1]?.upperBound
         else { return scrollableHeight }
         return min(scrollableHeight, max(0, bottom - viewportHeight))
     }
@@ -119,6 +122,46 @@ struct HOSDetailView: View {
         isAutoScroll && isPlaying && detailsVisible && !isDrawingEditorPresented
             && autoScrollHoldHOSID != hos.id
     }
+    /// How many of the Greatest Auto Scroll shows, so with Auto Speak on, speaks.
+    private var autoScrollGreatestCount: Int {
+        let greatestCount = GreatestRepository.people(for: hos).count
+        return autoScrollGreatest > 0 ? min(autoScrollGreatest, greatestCount) : greatestCount
+    }
+
+    // Auto Scroll with Auto Speak: the HOS's extract is spoken and then, one after another, each
+    // Greatest figure Auto Scroll shows, each starting as the figure scrolls on. The scroll pauses
+    // wherever the text being spoken has come fully into view, until it's been spoken.
+    private var speaksAsScrolling: Bool { autoSpeak && isAutoScroll && isPlaying }
+    /// What's being spoken: 0 for the HOS, then 1 + the index of the Greatest figure.
+    @State private var speechStage = 0
+    private struct SpeechStage: Equatable {
+        let hosID: HOS.ID
+        let stage: Int
+    }
+    /// The stage whose speech was last started, so only its speech finishing (not the last HOS's
+    /// being stopped by the slide advancing) moves on to the next stage.
+    @State private var speakingStage: SpeechStage?
+    /// The offset Auto Scroll pauses at while the current stage is spoken: its text's bottom
+    /// lined up with the bottom of the viewport. Until the extract has been laid out, the top.
+    private var speechPauseOffset: Double? {
+        guard speaksAsScrolling, speechStage <= autoScrollGreatestCount else { return nil }
+        let bottom = speechStage == 0
+            ? extractBottoms[hos.id] ?? 0
+            : greatestFrames[hos.id]?[speechStage - 1]?.upperBound
+        guard let bottom else { return nil }
+        return max(0, bottom - viewportHeight)
+    }
+    /// The Greatest figure to speak now: the current stage's, once its top has scrolled on.
+    private var autoSpokenGreatest: Int? {
+        guard speaksAsScrolling, detailsVisible, speechStage > 0 else { return nil }
+        let index = speechStage - 1
+        guard index < autoScrollGreatestCount,
+              let top = greatestFrames[hos.id]?[index]?.lowerBound,
+              top < autoScrollOffset + viewportHeight
+        else { return nil }
+        return index
+    }
+
     /// Auto Scroll replaces the slideshow's fades and details delay with a hold at the end.
     private var fades: Bool { isPlaying && !isAutoScroll }
 
@@ -153,6 +196,7 @@ struct HOSDetailView: View {
             // scroll a frame before the `.task` below starts the hold.
             if isAnimated, isPlaying { autoScrollHoldHOSID = hosList[newValue].id }
         }
+        speechStage = 0
         index = newValue
         appModel.slideIndex = newValue
         advanceGreatest()
@@ -202,11 +246,16 @@ struct HOSDetailView: View {
                 HOSSummaryView(
                     hos: hos,
                     speechPlayer: speechPlayer,
-                    autoSpeaks: autoSpeak && isPlaying && detailsVisible,
+                    autoSpeaks: autoSpeak && isPlaying && detailsVisible
+                        && !(speaksAsScrolling && speechStage > 0),
+                    autoSpokenGreatest: autoSpokenGreatest,
                     speaksName: autoSpeak && autoSpeakMode == .name,
-                    coordinateSpace: .named(Self.contentSpace)
-                ) { [hosID = hos.id] index, maxY in
-                    greatestBottoms[hosID, default: [:]][index] = maxY
+                    coordinateSpace: .named(Self.contentSpace),
+                    onExtractBottom: { [hosID = hos.id] maxY in
+                        extractBottoms[hosID] = maxY
+                    }
+                ) { [hosID = hos.id] index, frame in
+                    greatestFrames[hosID, default: [:]][index] = frame
                 }
                     .opacity(detailsVisible ? 1 : 0)
             }
@@ -255,6 +304,14 @@ struct HOSDetailView: View {
         }
         .onReceive(frameTicker.frames) { elapsedSecs in
             stepAutoScroll(elapsedSecs: elapsedSecs)
+        }
+        .onChange(of: speechPlayer.isBusy) { _, isBusy in
+            let current = SpeechStage(hosID: hos.id, stage: speechStage)
+            if isBusy {
+                speakingStage = current
+            } else if speaksAsScrolling, speakingStage == current {
+                speechStage += 1
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         // `tickSlideshow` holds the countdown while the editor is up so the HOS can't change
@@ -368,13 +425,14 @@ struct HOSDetailView: View {
     }
 
     /// Scrolls one display frame's worth further down, slowing over the last
-    /// `autoScrollEaseDistance` points so it settles at the stopping point instead of halting
-    /// mid-stride. Notes when it gets there, which starts the hold before the slide advances.
+    /// `autoScrollEaseDistance` points so it settles at the stopping point (or a pause for speech)
+    /// instead of halting mid-stride. Notes when it gets to the stopping point, which starts the
+    /// hold before the slide advances.
     private func stepAutoScroll(elapsedSecs: Double) {
-        let target = autoScrollTarget
+        let target = min(autoScrollTarget, speechPauseOffset ?? .infinity)
         let remaining = target - autoScrollOffset
         guard remaining > 0 else {
-            if autoScrollDoneTime == nil {
+            if isAutoScrollDone, autoScrollDoneTime == nil {
                 autoScrollDoneTime = CACurrentMediaTime()
                 appModel.markGreatestShown(for: hos, count: autoScrollGreatest)
             }

@@ -1147,3 +1147,15 @@ when Slideshow mode pause
 and Animated on
 pause for Fadein Delay (no fade is perform)
 view holds for that period before scrolling
+
+v02.154
+
+in v2,
+when Slideshow mode pause
+and Auto Speak on
+pause scroll when summary is fully visible
+until HOS summary is finish
+when HOS summary finished, continue scroll
+and begin speaking each Greatest as
+they scroll on with a similar pause
+when each text is fully visible and speaking is not yet done.

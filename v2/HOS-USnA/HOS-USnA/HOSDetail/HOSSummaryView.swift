@@ -7,16 +7,20 @@ import SwiftUI
 /// `HOSDetailView` owns `speechPlayer` so its slideshow can wait for the speech, and turns
 /// `autoSpeaks` on to have the extract spoken without the button being tapped. With `speaksName`
 /// on (Auto Speak's Name mode) the order and name are spoken in place of the extract.
-/// `onGreatestBottom` reports where each Greatest figure ends (by its index), in the
-/// `coordinateSpace` the caller names, so Auto Scroll knows how far to go to scroll past it.
+/// `autoSpokenGreatest` has the Greatest figure at that index spoken the same way.
+/// `onExtractBottom` reports where the extract ends, and `onGreatestFrame` where each Greatest
+/// figure starts and ends (by its index), in the `coordinateSpace` the caller names, so Auto
+/// Scroll knows how far to go to bring them into view.
 struct HOSSummaryView: View {
     @Environment(AppModel.self) private var appModel
     let hos: HOS
     let speechPlayer: SpeechPlayer
     var autoSpeaks = false
+    var autoSpokenGreatest: Int? = nil
     var speaksName = false
     var coordinateSpace: NamedCoordinateSpace = .scrollView
-    var onGreatestBottom: (_ index: Int, _ maxY: Double) -> Void = { _, _ in }
+    var onExtractBottom: (_ maxY: Double) -> Void = { _ in }
+    var onGreatestFrame: (_ index: Int, _ frame: ClosedRange<Double>) -> Void = { _, _ in }
 
     private var speechText: String {
         speaksName ? "\(hos.order) \(hos.name)" : hos.extract
@@ -34,6 +38,11 @@ struct HOSSummaryView: View {
                 .foregroundStyle(.secondary)
             Text(hos.extract)
                 .font(.body)
+                .onGeometryChange(for: Double.self) {
+                    $0.frame(in: coordinateSpace).maxY
+                } action: {
+                    onExtractBottom($0)
+                }
             if let articleURL = hos.wikipediaArticleURL {
                 Link(destination: articleURL) {
                     Label("Read on Wikipedia", systemImage: "book")
@@ -47,11 +56,17 @@ struct HOSSummaryView: View {
                     .font(.headline)
                 LazyVStack(alignment: .leading, spacing: 32) {
                     ForEach(Array(greatest.enumerated()), id: \.element.id) { index, person in
-                        GreatestFigureView(person: person)
-                            .onGeometryChange(for: Double.self) {
-                                $0.frame(in: coordinateSpace).maxY
+                        GreatestFigureView(
+                            person: person,
+                            speechPlayer: speechPlayer,
+                            autoSpeaks: autoSpokenGreatest == index,
+                            speaksName: speaksName
+                        )
+                            .onGeometryChange(for: ClosedRange<Double>.self) {
+                                let frame = $0.frame(in: coordinateSpace)
+                                return frame.minY...frame.maxY
                             } action: {
-                                onGreatestBottom(index, $0)
+                                onGreatestFrame(index, $0)
                             }
                     }
                 }

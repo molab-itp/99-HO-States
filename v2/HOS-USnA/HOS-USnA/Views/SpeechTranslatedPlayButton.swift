@@ -4,7 +4,8 @@ import Translation
 /// A `SpeechPlayButton` for English `text` that, when the sample text on `SpeechSetupView` has
 /// been translated into a non-English language, translates `text` into the selected speech
 /// language before speaking it. Otherwise it speaks `text` as is. Speech also starts by itself
-/// each time `autoPlays` turns on.
+/// each time `autoPlays` turns on. Several of these can share `player`: each shows only its own
+/// text's speech, and a tap while another's is under way stops that and speaks this one's.
 struct SpeechTranslatedPlayButton: View {
     let player: SpeechPlayer
     let text: String
@@ -35,7 +36,7 @@ struct SpeechTranslatedPlayButton: View {
             if isTranslating {
                 ProgressView()
             } else {
-                SpeechPlayLabel(isSpeaking: player.status == .speaking)
+                SpeechPlayLabel(isSpeaking: player.status == .speaking && isPlayersText)
             }
         }
         .disabled(text.isEmpty || isTranslating)
@@ -79,7 +80,13 @@ struct SpeechTranslatedPlayButton: View {
         }
     }
 
+    /// Whether `player` is speaking (or paused on) this button's text.
+    private var isPlayersText: Bool {
+        player.text != nil && (player.text == text || player.text == translatedText)
+    }
+
     private func play() {
+        if player.text != nil, !isPlayersText { player.stop() }
         guard translates else {
             player.toggle(text, language: language)
             return

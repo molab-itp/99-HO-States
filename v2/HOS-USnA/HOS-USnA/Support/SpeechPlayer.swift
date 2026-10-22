@@ -137,6 +137,9 @@ final class SpeechPlayer: NSObject, AVSpeechSynthesizerDelegate {
     }
 
     private(set) var status: Status = .idle
+    /// What's being spoken (or paused), so of several buttons sharing this player, only the one
+    /// that started it shows it as theirs.
+    private(set) var text: String?
     /// Set by a speech button while it gets text ready to speak (translating it), so `isBusy`
     /// covers the gap between asking for speech and `status` leaving `.idle`.
     var isPreparing = false
@@ -171,6 +174,7 @@ final class SpeechPlayer: NSObject, AVSpeechSynthesizerDelegate {
 
     func stop() {
         currentUtteranceID = nil
+        text = nil
         status = .idle
         synthesizer.stopSpeaking(at: .immediate)
     }
@@ -182,6 +186,7 @@ final class SpeechPlayer: NSObject, AVSpeechSynthesizerDelegate {
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: language)
         currentUtteranceID = ObjectIdentifier(utterance)
+        self.text = text
         status = .speaking
         synthesizer.speak(utterance)
     }
@@ -189,6 +194,7 @@ final class SpeechPlayer: NSObject, AVSpeechSynthesizerDelegate {
     private func utteranceEnded(_ id: ObjectIdentifier) {
         guard id == currentUtteranceID else { return }
         currentUtteranceID = nil
+        text = nil
         status = .idle
     }
 
