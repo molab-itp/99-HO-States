@@ -2852,3 +2852,75 @@ The app builds for the iOS Simulator. I didn't run it to check the rotation on s
 Nothing was committed.
 
 **Cost**: ~6 minutes.
+
+# --
+
+2026-10-22 14:37 (v2: one shared Greatest record, no repeats until Reset Visit Count)
+
+## Request
+
+In v2, stop tracking the Greatest per HOS. Instead, don't repeat a Greatest shown with an HOS
+until Reset Visit Count is pressed, and never show the same Greatest on the next HOS. A follow-up
+asked that the Greatest Auto Scroll scrolls past also count as shown.
+
+## What was built
+
+This replaces the per-HOS rotation from the previous entry, which was never committed.
+
+- `AppModel.swift`:
+  - `greatestShownAt` records when each Greatest was last shown, across all HOS. Neighbouring
+    HOS share most of their Greatest, so per-HOS tracking had led several HOS in a row with the
+    same figure.
+  - `advanceGreatest(for:)` orders an HOS's Greatest each time it's shown. Greatest not yet shown
+    come first, in list order. Greatest already shown come after, the one shown longest ago
+    first. The first in the list is marked as shown. The order is kept in `greatestVisit` and
+    stays fixed while you're on that HOS.
+  - `markGreatestShown(for:count:)` marks the first `count` Greatest (0 for all) as shown. It
+    skips any already marked on this HOS, because a late-loading photo can make Auto Scroll
+    reach its stopping point twice.
+  - `resetVisitCount()` clears the record. The record is saved with the app's other state
+    (`greatestShownAt`).
+- `HOSDetailView.swift`: when Auto Scroll first reaches its stopping point for an HOS, it calls
+  `markGreatestShown` with the Scroll Past Greatest setting.
+
+The app builds for the iOS Simulator. I didn't run it to check the order on screen.
+
+**Cost**: ~10 minutes.
+
+# --
+
+2026-10-22 14:52 (v05: sync shared Greatest record and Reset Visit Count from v2)
+
+## Request
+
+Sync the web app in v05 with the changes to v2.
+
+## What was built
+
+- `src/state/AppModelContext.jsx`:
+  - Ports v2's shared Greatest record: `greatestShownAt` and the lead counter (held in refs),
+    plus `greatestVisit` (state), `greatestPeopleFor`, `advanceGreatest`, `markGreatestShown`
+    and `resetVisitCount`.
+  - `greatestShownAt` is saved with the rest of the app state and read back from the raw saved
+    state.
+- `src/screens/HOSDetailScreen.jsx`:
+  - A `useLayoutEffect` keyed on `index` picks the order before the HOS is painted. A ref stops
+    StrictMode's repeated mount effect from picking a second time.
+  - The summary lists `greatestPeopleFor(hos)`.
+  - When Auto Scroll first reaches its stopping point, it calls
+    `markGreatestShown(hos, autoScrollGreatest)`.
+- `src/screens/LandingScreen.jsx`: Reset Visit Count calls `resetVisitCount`.
+- `src/data/persistedState.js`: comment lists the new saved field.
+
+The build passes. A headless Chromium run showed:
+- Next from #10 through #16 led every HOS with a different Greatest.
+- Going back to #10 led with a Greatest not yet shown.
+- Reset Visit Count started the slideshow at #1, and #10 led with its first Greatest again.
+- The record carried over a reload.
+- With Auto Scroll set to scroll past 2, the 2nd Greatest scrolled past on #10 moved to the end
+  of #11's list.
+- There were no console errors.
+
+Nothing was committed.
+
+**Cost**: ~12 minutes.

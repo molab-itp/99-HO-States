@@ -1,7 +1,7 @@
 {
   "name": "ho-states-us-web",
   "private": true,
-  "version": "0.1.27",
+  "version": "0.1.28",
   "type": "module",
   "description": "React (web, React Native-friendly) port of the v2 HOS-USnA SwiftUI app.",
   "scripts": {

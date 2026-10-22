@@ -45,6 +45,9 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
     setDrawingDisplayModeFor,
     drawingFor,
     setDrawingFor,
+    greatestPeopleFor,
+    advanceGreatest,
+    markGreatestShown,
   } = useAppModel();
 
   const startIndex = (() => {
@@ -142,6 +145,17 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [outgoing]);
 
+  // Has the app model pick the Greatest order for each HOS shown (Swift's `advanceGreatest()`),
+  // before it's painted so its summary never draws in an unpicked order first. The ref keeps
+  // StrictMode's repeated mount effect from picking again and marking another lead as shown.
+  const greatestAdvancedForRef = useRef(null);
+  useLayoutEffect(() => {
+    if (greatestAdvancedForRef.current === hos.order) return;
+    greatestAdvancedForRef.current = hos.order;
+    advanceGreatest(hos);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
   // Mirrors `index` into `appModel.slideIndex` on every change (including the initial mount), so
   // it persists across this screen being unmounted and remounted — e.g. Back to Landing then
   // Resume, or a reload, reopens at the HOS last shown instead of always restarting at #1.
@@ -216,6 +230,9 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   const isAutoScrolling = isAutoScroll && isPlaying && detailsVisible && !isDrawingEditorOpen;
   const autoScrollTargetRef = useRef(autoScrollTarget);
   autoScrollTargetRef.current = autoScrollTarget;
+  // Greatest Auto Scroll has scrolled past count as shown.
+  const onAutoScrollDoneRef = useRef(null);
+  onAutoScrollDoneRef.current = () => markGreatestShown(hos, autoScrollGreatest);
   useEffect(() => {
     if (!isAutoScrolling) return undefined;
     let frame;
@@ -226,7 +243,10 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
       const target = autoScrollTargetRef.current();
       const remaining = target - autoScrollOffsetRef.current;
       if (remaining <= 0) {
-        if (autoScrollDoneTimeRef.current === null) autoScrollDoneTimeRef.current = now;
+        if (autoScrollDoneTimeRef.current === null) {
+          autoScrollDoneTimeRef.current = now;
+          onAutoScrollDoneRef.current();
+        }
       } else {
         // A photo loading late can push the stopping point further down after it was reached.
         autoScrollDoneTimeRef.current = null;
@@ -308,7 +328,7 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   const speechText = autoSpeak && autoSpeakMode === 'name' ? `${hos.order} ${hos.name}` : hos.extract;
 
   const isPreviousDisabled = isRandomMode && nav.position === 0;
-  const greatest = greatestFor(hos);
+  const greatest = greatestPeopleFor(hos);
 
   return (
     <div className="screen-scroll">

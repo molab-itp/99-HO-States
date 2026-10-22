@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import hosList from '../data/hosList.js';
-import greatestList from '../data/greatest.js';
+import greatestList, { greatestFor } from '../data/greatest.js';
 import { version as appVersion } from '../../package.json';
 import { loadPersistedState, savePersistedState } from '../data/persistedState.js';
 import { normalizeReactions } from '../data/hosReaction.js';
@@ -133,6 +133,69 @@ export function AppModelProvider({ children }) {
   // the strokes themselves are held here rather than a file name pointing at a PNG.
   const [drawings, setDrawings] = useState(() => loadAllDrawings(hosList));
 
+  // Port of `AppModel.swift`'s Greatest tracking. When each Greatest figure (by id) last led an
+  // HOS's list, as a running count of leads (higher is more recent), across all HOS rather than
+  // per HOS — neighbouring HOS share most of their period's Greatest, so per-HOS tracking would
+  // lead several in a row with the same figure. No entry means not shown since the last Reset
+  // Visit Count. Refs, since nothing renders from them directly; read from the raw saved state,
+  // like `screen`, as it doesn't depend on the shuffle matching the HOS count.
+  const greatestShownAtRef = useRef(rawPersistedRef.current?.greatestShownAt ?? {});
+  const greatestLeadCountRef = useRef(Math.max(0, ...Object.values(greatestShownAtRef.current)));
+
+  // The order `advanceGreatest` picked for the HOS now showing, held fixed for the visit (marking
+  // the lead as shown would otherwise send it to the back of its own list). State so the
+  // summary re-renders in it; mirrored to a ref for `markGreatestShown`.
+  const [greatestVisit, setGreatestVisit] = useState(null);
+  const greatestVisitRef = useRef(null);
+
+  // The Greatest figures of `hos`'s period, in the order picked for this visit by
+  // `advanceGreatest`, or in list order if it hasn't been called for `hos`.
+  const greatestPeopleFor = useCallback(
+    (hos) => {
+      const people = greatestFor(hos);
+      if (greatestVisit?.hosOrder !== hos.order) return people;
+      return greatestVisit.ids.map((id) => people.find((p) => p.id === id)).filter(Boolean);
+    },
+    [greatestVisit],
+  );
+
+  // Picks the Greatest order for a visit to `hos`: figures not yet shown since the last Reset
+  // Visit Count first (in list order), then the shown ones least recently shown first — so a
+  // figure only repeats once all of `hos`'s have been shown, and never leads two HOS in a row
+  // unless it's the next HOS's only one. Marks the lead as shown.
+  const advanceGreatest = useCallback((hos) => {
+    const shownAt = greatestShownAtRef.current;
+    const people = greatestFor(hos);
+    const ids = people
+      .map((person, i) => ({ id: person.id, i, at: shownAt[person.id] ?? -1 }))
+      .sort((a, b) => a.at - b.at || a.i - b.i)
+      .map((entry) => entry.id);
+    const visit = { hosOrder: hos.order, ids };
+    greatestVisitRef.current = visit;
+    setGreatestVisit(visit);
+    if (ids.length > 0) {
+      greatestLeadCountRef.current += 1;
+      shownAt[ids[0]] = greatestLeadCountRef.current;
+    }
+  }, []);
+
+  // Marks the first `count` (0 for all) of this visit's Greatest for `hos` as shown, in order —
+  // called once Auto Scroll has scrolled past them. The lead was already marked when picked.
+  const markGreatestShown = useCallback((hos, count) => {
+    const visit = greatestVisitRef.current;
+    if (visit?.hosOrder !== hos.order || visit.ids.length === 0) return;
+    const shownAt = greatestShownAtRef.current;
+    const leadAt = shownAt[visit.ids[0]] ?? 0;
+    const shown = count > 0 ? visit.ids.slice(0, count) : visit.ids;
+    // Skips any already marked after the lead, i.e. earlier this visit — Auto Scroll can reach
+    // its stopping point again if a late photo pushes it down.
+    for (const id of shown.slice(1)) {
+      if ((shownAt[id] ?? 0) > leadAt) continue;
+      greatestLeadCountRef.current += 1;
+      shownAt[id] = greatestLeadCountRef.current;
+    }
+  }, []);
+
   const nextRandomHOS = useCallback(() => {
     if (hosList.length === 0) return null;
 
@@ -160,6 +223,16 @@ export function AppModelProvider({ children }) {
     setViewedIDs(new Set());
     reshuffle();
   }, [reshuffle]);
+
+  // Landing's Reset Visit Count: everything `resetViewed()` does (including rewinding the
+  // slideshow to the first HOS), plus forgetting which Greatest have been shown. Kept apart from
+  // `resetViewed()` so a slideshow finishing a lap goes on to unshown Greatest instead of
+  // repeating the same ones.
+  const resetVisitCount = useCallback(() => {
+    resetViewed();
+    greatestShownAtRef.current = {};
+    greatestLeadCountRef.current = 0;
+  }, [resetViewed]);
 
   const markViewed = useCallback((hos, resetIfComplete = false) => {
     const next = new Set(viewedIDsRef.current);
@@ -271,6 +344,7 @@ export function AppModelProvider({ children }) {
       reactions,
       imageZoomStates,
       drawingDisplayModes,
+      greatestShownAt: greatestShownAtRef.current,
     });
   }, [slideIndex, greatestIndex, screen, reactions, imageZoomStates, drawingDisplayModes]);
 
@@ -302,6 +376,7 @@ export function AppModelProvider({ children }) {
       nextRandomHOS,
       markViewed,
       resetViewed,
+      resetVisitCount,
       reactionsFor,
       addReaction,
       removeLastReaction,
@@ -311,6 +386,9 @@ export function AppModelProvider({ children }) {
       setDrawingDisplayModeFor,
       drawingFor,
       setDrawingFor,
+      greatestPeopleFor,
+      advanceGreatest,
+      markGreatestShown,
     }),
     [
       viewedIDs,
@@ -323,6 +401,7 @@ export function AppModelProvider({ children }) {
       nextRandomHOS,
       markViewed,
       resetViewed,
+      resetVisitCount,
       reactionsFor,
       addReaction,
       removeLastReaction,
@@ -332,6 +411,9 @@ export function AppModelProvider({ children }) {
       setDrawingDisplayModeFor,
       drawingFor,
       setDrawingFor,
+      greatestPeopleFor,
+      advanceGreatest,
+      markGreatestShown,
     ],
   );
 

@@ -22,7 +22,7 @@ export default function LandingScreen({
   onShowCredits,
   onShowSpeechSetup,
 }) {
-  const { hosList, viewedIDs, nextRandomHOS, select, resetViewed, buildInfo } = useAppModel();
+  const { hosList, viewedIDs, nextRandomHOS, select, resetVisitCount, buildInfo } = useAppModel();
   const [isRandomMode, setIsRandomMode] = useStoredBoolean(
     SlideshowSettings.randomModeKey,
     SlideshowSettings.defaultRandomMode,
@@ -164,7 +164,7 @@ export default function LandingScreen({
 
       <div className="visited">
         <p className="visited-count">{remainingCount} left to see</p>
-        <button className="btn btn-bordered btn-destructive" onClick={resetViewed}>
+        <button className="btn btn-bordered btn-destructive" onClick={resetVisitCount}>
           Reset Visit Count
         </button>
         <button className="btn btn-bordered" onClick={onShowCredits}>

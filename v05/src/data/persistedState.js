@@ -1,6 +1,6 @@
 // Port of AppModel.swift's `PersistedState`/`persistState()`/`loadPersistedState()`, backed by
 // localStorage instead of a JSON file in the app support directory. Same fields (`slideIndex`,
-// `screen`, the shuffle state, `reactions`, `imageZoomStates`, `drawingDisplayModes`) and the same "not
+// `screen`, the shuffle state, `reactions`, `imageZoomStates`, `drawingDisplayModes`, `greatestShownAt`) and the same "not
 // `viewedIDs`/`cycleCount`" omission, for the same reason: enough to resume browsing and keep
 // feedback across reloads, without making "Reset Visit Count" behave inconsistently across sessions.
 // One addition, `greatestIndex`: the figure `GreatestDetailScreen` reopens on, which v2 doesn't keep.

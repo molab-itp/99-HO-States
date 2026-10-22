@@ -59,11 +59,20 @@ final class AppModel {
     /// what tells views reading `drawingImage(for:)` that the image behind that name changed.
     private var drawingRevision = 0
 
-    /// Per-HOS index of the Greatest figure listed first, into `GreatestRepository.people(for:)`.
-    /// `advanceGreatest(for:)` steps it on each revisit, so returning to an HOS with more than
-    /// one Greatest of its period leads with the next one. No entry means the HOS hasn't been
-    /// visited since the last Reset Visit Count, and it starts at the first.
-    private(set) var greatestStarts: [HOS.ID: Int] = [:]
+    /// When each Greatest figure last led an HOS's list, as a running count of leads (higher is
+    /// more recent), across all HOS rather than per HOS — neighbouring HOS share most of their
+    /// period's Greatest, so per-HOS tracking would lead several in a row with the same figure.
+    /// No entry means not shown since the last Reset Visit Count.
+    private var greatestShownAt: [GreatestPerson.ID: Int] = [:]
+    private var greatestLeadCount = 0
+
+    /// The order `advanceGreatest(for:)` picked for the HOS now showing, held fixed for the
+    /// visit (marking the lead as shown would otherwise send it to the back of its own list).
+    private struct GreatestVisit {
+        let hosID: HOS.ID
+        let order: [GreatestPerson.ID]
+    }
+    private var greatestVisit: GreatestVisit?
     @ObservationIgnored private var drawingImageCache: [HOS.ID: UIImage] = [:]
 
     var buildInfo:String {
@@ -148,18 +157,41 @@ final class AppModel {
         persistState()
     }
 
-    /// The Greatest figures of `hos`'s period, rotated to begin at its `greatestStarts` entry.
+    /// The Greatest figures of `hos`'s period, in the order picked for this visit by
+    /// `advanceGreatest(for:)`, or in list order if it hasn't been called for `hos`.
     func greatestPeople(for hos: HOS) -> [GreatestPerson] {
         let people = GreatestRepository.people(for: hos)
-        guard !people.isEmpty else { return [] }
-        let start = (greatestStarts[hos.id] ?? 0) % people.count
-        return Array(people[start...] + people[..<start])
+        guard let visit = greatestVisit, visit.hosID == hos.id else { return people }
+        return visit.order.compactMap { id in people.first { $0.id == id } }
     }
 
-    /// Records a visit to `hos` for Greatest selection: the first visit leads with the first
-    /// figure, each later one with the next (wrapping via `greatestPeople(for:)`).
+    /// Picks the Greatest order for a visit to `hos`: figures not yet shown since the last Reset
+    /// Visit Count first (in list order), then the shown ones least recently shown first — so a
+    /// figure only repeats once all of `hos`'s have been shown, and never leads two HOS in a row
+    /// unless it's the next HOS's only one. Marks the lead as shown.
     func advanceGreatest(for hos: HOS) {
-        greatestStarts[hos.id] = greatestStarts[hos.id].map { $0 + 1 } ?? 0
+        let people = GreatestRepository.people(for: hos)
+        let order = people.indices.sorted {
+            (greatestShownAt[people[$0].id] ?? -1, $0) < (greatestShownAt[people[$1].id] ?? -1, $1)
+        }.map { people[$0].id }
+        greatestVisit = GreatestVisit(hosID: hos.id, order: order)
+        if let lead = order.first {
+            greatestLeadCount += 1
+            greatestShownAt[lead] = greatestLeadCount
+        }
+    }
+
+    /// Marks the first `count` (0 for all) of this visit's Greatest for `hos` as shown, in order —
+    /// called once Auto Scroll has scrolled past them. The lead was already marked when picked.
+    func markGreatestShown(for hos: HOS, count: Int) {
+        guard let visit = greatestVisit, visit.hosID == hos.id else { return }
+        let shown = count > 0 ? visit.order.prefix(count) : visit.order[...]
+        // Skips any already marked after the lead, i.e. earlier this visit — Auto Scroll can
+        // reach its stopping point again if a late photo pushes it down.
+        for id in shown.dropFirst() where greatestShownAt[id] ?? 0 <= greatestShownAt[visit.order[0]] ?? 0 {
+            greatestLeadCount += 1
+            greatestShownAt[id] = greatestLeadCount
+        }
     }
 
     /// Returns the next HOS in the current shuffle order, wrapping back to its start once
@@ -202,18 +234,19 @@ final class AppModel {
     }
 
     /// Landing's Reset Visit Count: everything `resetViewed()` does (including rewinding the
-    /// slideshow to the first HOS), plus starting every HOS's Greatest selection over. Kept
-    /// apart from `resetViewed()` so a slideshow finishing a lap keeps stepping through each
-    /// HOS's Greatest instead of repeating the same ones.
+    /// slideshow to the first HOS), plus forgetting which Greatest have been shown. Kept apart
+    /// from `resetViewed()` so a slideshow finishing a lap goes on to unshown Greatest instead
+    /// of repeating the same ones.
     func resetVisitCount() {
         resetViewed()
-        greatestStarts.removeAll()
+        greatestShownAt.removeAll()
+        greatestLeadCount = 0
     }
 
     // MARK: - Persistence
     //
     // Only `slideIndex`, `screen`, the shuffle state (`shuffledIndexes`/`nextShuffleIndex`), `reactions`,
-    // `imageZoomStates`, `drawingDisplayModes`, `drawingFileNames`, and `greatestStarts` survive across app launches — enough to resume browsing where the user left
+    // `imageZoomStates`, `drawingDisplayModes`, `drawingFileNames`, and `greatestShownAt` survive across app launches — enough to resume browsing where the user left
     // off and keep their feedback, without also persisting `viewedHOSIDs`/`cycleCount`
     // (not asked for, and would make "Reset Visit Count" behave inconsistently across launches).
     //
@@ -240,8 +273,8 @@ final class AppModel {
         /// `AppScreen` raw value. Optional for older state files, and a plain string so a screen
         /// this build doesn't know falls back to Landing instead of failing the whole decode.
         var screen: String?
-        /// String-keyed like `reactions`; optional like `drawingFileNames`, for older state files.
-        var greatestStarts: [String: Int]?
+        /// Optional like `drawingFileNames`, for older state files.
+        var greatestShownAt: [GreatestPerson.ID: Int]?
     }
 
     private static func stateFileURL() -> URL {
@@ -277,9 +310,8 @@ final class AppModel {
         drawingDisplayModes = Dictionary(uniqueKeysWithValues: (state.drawingDisplayModes ?? [:]).compactMap { key, value in
             Int(key).map { ($0, value) }
         })
-        greatestStarts = Dictionary(uniqueKeysWithValues: (state.greatestStarts ?? [:]).compactMap { key, value in
-            Int(key).map { ($0, value) }
-        })
+        greatestShownAt = state.greatestShownAt ?? [:]
+        greatestLeadCount = greatestShownAt.values.max() ?? 0
     }
 
     /// Writes the current resumable state to disk. See the note above `PersistedState` — call
@@ -294,7 +326,7 @@ final class AppModel {
             drawingFileNames: Dictionary(uniqueKeysWithValues: drawingFileNames.map { (String($0.key), $0.value) }),
             drawingDisplayModes: Dictionary(uniqueKeysWithValues: drawingDisplayModes.map { (String($0.key), $0.value) }),
             screen: screen.rawValue,
-            greatestStarts: Dictionary(uniqueKeysWithValues: greatestStarts.map { (String($0.key), $0.value) })
+            greatestShownAt: greatestShownAt
         )
         guard let data = try? JSONEncoder().encode(state) else { return }
         try? data.write(to: Self.stateFileURL(), options: .atomic)

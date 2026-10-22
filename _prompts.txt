@@ -1100,8 +1100,7 @@ append this chat to Log.md with date and time stamp
 with approximate time cost
 
 v02.149
-2026-10-22 14:04:00
-2026-10-22 14:06:08
+
 in v2, 
 expand what Greatest image is shown with the HOS
 do this by keeping track of which Greatest 
@@ -1113,3 +1112,23 @@ The Reset Visit Count will reset this
 tracking of Greatest selection.
 Reset Visit Count should also reset slideshow 
 to start from first HOS.
+2026-10-22 14:04:00
+2026-10-22 14:06:08
+
+v02.150
+
+in v2, adjust display logic of Greatest
+so that it's not tracked per HOS.
+Instead avoid repeating an associated Greatest
+for a HOS until Reset Visit Count event.
+A Greatest should not be repeated when
+next HOS is shown.
+
+v05.151
+
+sync web app in v05 with changes to v2
+append this chat to Log.md with date and time stamp
+with approximate time cost
+
+update v05 version
+0.1.28

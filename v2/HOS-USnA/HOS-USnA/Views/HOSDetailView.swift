@@ -151,12 +151,12 @@ struct HOSDetailView: View {
         advanceGreatest()
     }
 
-    /// The HOS whose Greatest selection this view last advanced, so returning from the drawing
-    /// editor (which re-fires `onAppear`) isn't counted as a revisit.
+    /// The HOS whose Greatest order this view last picked, so returning from the drawing editor
+    /// (which re-fires `onAppear`) doesn't pick again and mark another lead as shown.
     @State private var greatestAdvancedFor: HOS.ID?
 
-    /// Steps `appModel`'s Greatest selection for the HOS now showing, in the same update that
-    /// shows it so its summary never draws with the last visit's lead figure first.
+    /// Has `appModel` pick the Greatest order for the HOS now showing, in the same update that
+    /// shows it so its summary never draws in an unpicked order first.
     private func advanceGreatest() {
         guard greatestAdvancedFor != hos.id else { return }
         greatestAdvancedFor = hos.id
@@ -359,7 +359,10 @@ struct HOSDetailView: View {
         let target = autoScrollTarget
         let remaining = target - autoScrollOffset
         guard remaining > 0 else {
-            if autoScrollDoneTime == nil { autoScrollDoneTime = CACurrentMediaTime() }
+            if autoScrollDoneTime == nil {
+                autoScrollDoneTime = CACurrentMediaTime()
+                appModel.markGreatestShown(for: hos, count: autoScrollGreatest)
+            }
             return
         }
         // A photo loading late can push the stopping point further down after it was reached.
