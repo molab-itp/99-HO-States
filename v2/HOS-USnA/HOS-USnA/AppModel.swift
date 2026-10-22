@@ -58,6 +58,12 @@ final class AppModel {
     /// Bumped on every drawing save/clear. A re-saved drawing keeps the same file name, so this is
     /// what tells views reading `drawingImage(for:)` that the image behind that name changed.
     private var drawingRevision = 0
+
+    /// Per-HOS index of the Greatest figure listed first, into `GreatestRepository.people(for:)`.
+    /// `advanceGreatest(for:)` steps it on each revisit, so returning to an HOS with more than
+    /// one Greatest of its period leads with the next one. No entry means the HOS hasn't been
+    /// visited since the last Reset Visit Count, and it starts at the first.
+    private(set) var greatestStarts: [HOS.ID: Int] = [:]
     @ObservationIgnored private var drawingImageCache: [HOS.ID: UIImage] = [:]
 
     var buildInfo:String {
@@ -142,6 +148,20 @@ final class AppModel {
         persistState()
     }
 
+    /// The Greatest figures of `hos`'s period, rotated to begin at its `greatestStarts` entry.
+    func greatestPeople(for hos: HOS) -> [GreatestPerson] {
+        let people = GreatestRepository.people(for: hos)
+        guard !people.isEmpty else { return [] }
+        let start = (greatestStarts[hos.id] ?? 0) % people.count
+        return Array(people[start...] + people[..<start])
+    }
+
+    /// Records a visit to `hos` for Greatest selection: the first visit leads with the first
+    /// figure, each later one with the next (wrapping via `greatestPeople(for:)`).
+    func advanceGreatest(for hos: HOS) {
+        greatestStarts[hos.id] = greatestStarts[hos.id].map { $0 + 1 } ?? 0
+    }
+
     /// Returns the next HOS in the current shuffle order, wrapping back to its start once
     /// every index has been served. Never reshuffles — only `resetViewed()` deals a new
     /// permutation — so resuming a random-mode slideshow just continues walking the same order.
@@ -181,10 +201,19 @@ final class AppModel {
         slideIndex = 0
     }
 
+    /// Landing's Reset Visit Count: everything `resetViewed()` does (including rewinding the
+    /// slideshow to the first HOS), plus starting every HOS's Greatest selection over. Kept
+    /// apart from `resetViewed()` so a slideshow finishing a lap keeps stepping through each
+    /// HOS's Greatest instead of repeating the same ones.
+    func resetVisitCount() {
+        resetViewed()
+        greatestStarts.removeAll()
+    }
+
     // MARK: - Persistence
     //
     // Only `slideIndex`, `screen`, the shuffle state (`shuffledIndexes`/`nextShuffleIndex`), `reactions`,
-    // `imageZoomStates`, `drawingDisplayModes`, and `drawingFileNames` survive across app launches — enough to resume browsing where the user left
+    // `imageZoomStates`, `drawingDisplayModes`, `drawingFileNames`, and `greatestStarts` survive across app launches — enough to resume browsing where the user left
     // off and keep their feedback, without also persisting `viewedHOSIDs`/`cycleCount`
     // (not asked for, and would make "Reset Visit Count" behave inconsistently across launches).
     //
@@ -211,6 +240,8 @@ final class AppModel {
         /// `AppScreen` raw value. Optional for older state files, and a plain string so a screen
         /// this build doesn't know falls back to Landing instead of failing the whole decode.
         var screen: String?
+        /// String-keyed like `reactions`; optional like `drawingFileNames`, for older state files.
+        var greatestStarts: [String: Int]?
     }
 
     private static func stateFileURL() -> URL {
@@ -246,6 +277,9 @@ final class AppModel {
         drawingDisplayModes = Dictionary(uniqueKeysWithValues: (state.drawingDisplayModes ?? [:]).compactMap { key, value in
             Int(key).map { ($0, value) }
         })
+        greatestStarts = Dictionary(uniqueKeysWithValues: (state.greatestStarts ?? [:]).compactMap { key, value in
+            Int(key).map { ($0, value) }
+        })
     }
 
     /// Writes the current resumable state to disk. See the note above `PersistedState` — call
@@ -259,7 +293,8 @@ final class AppModel {
             imageZoomStates: Dictionary(uniqueKeysWithValues: imageZoomStates.map { (String($0.key), $0.value) }),
             drawingFileNames: Dictionary(uniqueKeysWithValues: drawingFileNames.map { (String($0.key), $0.value) }),
             drawingDisplayModes: Dictionary(uniqueKeysWithValues: drawingDisplayModes.map { (String($0.key), $0.value) }),
-            screen: screen.rawValue
+            screen: screen.rawValue,
+            greatestStarts: Dictionary(uniqueKeysWithValues: greatestStarts.map { (String($0.key), $0.value) })
         )
         guard let data = try? JSONEncoder().encode(state) else { return }
         try? data.write(to: Self.stateFileURL(), options: .atomic)

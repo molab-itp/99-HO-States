@@ -172,7 +172,7 @@ struct LandingView: View {
           Text("\(remainingCount) left to see")
             .font(.callout.weight(.medium))
           Button("Reset Visit Count", role: .destructive) {
-            appModel.resetViewed()
+            appModel.resetVisitCount()
           }
           .buttonStyle(.bordered)
           Button {

@@ -2,13 +2,15 @@ import SwiftUI
 
 /// The HOS's name (with a play/pause button that speaks the extract, translated first when
 /// `SpeechSetupView` has translation on), term, party, biography
-/// extract, Wikipedia link, and the Greatest figures alive during its term — the text content that `HOSDetailView` fades in a few seconds after appearing.
+/// extract, Wikipedia link, and the Greatest figures alive during its term (led by the one
+/// `AppModel` picked for this visit) — the text content that `HOSDetailView` fades in a few seconds after appearing.
 /// `HOSDetailView` owns `speechPlayer` so its slideshow can wait for the speech, and turns
 /// `autoSpeaks` on to have the extract spoken without the button being tapped. With `speaksName`
 /// on (Auto Speak's Name mode) the order and name are spoken in place of the extract.
 /// `onGreatestBottom` reports where each Greatest figure ends (by its index), in the
 /// `coordinateSpace` the caller names, so Auto Scroll knows how far to go to scroll past it.
 struct HOSSummaryView: View {
+    @Environment(AppModel.self) private var appModel
     let hos: HOS
     let speechPlayer: SpeechPlayer
     var autoSpeaks = false
@@ -38,7 +40,7 @@ struct HOSSummaryView: View {
                 }
                 .font(.callout)
             }
-            let greatest = GreatestRepository.people(for: hos)
+            let greatest = appModel.greatestPeople(for: hos)
             if !greatest.isEmpty {
                 Divider()
                 Text("100 Greatest of this period")

@@ -148,6 +148,19 @@ struct HOSDetailView: View {
         }
         index = newValue
         appModel.slideIndex = newValue
+        advanceGreatest()
+    }
+
+    /// The HOS whose Greatest selection this view last advanced, so returning from the drawing
+    /// editor (which re-fires `onAppear`) isn't counted as a revisit.
+    @State private var greatestAdvancedFor: HOS.ID?
+
+    /// Steps `appModel`'s Greatest selection for the HOS now showing, in the same update that
+    /// shows it so its summary never draws with the last visit's lead figure first.
+    private func advanceGreatest() {
+        guard greatestAdvancedFor != hos.id else { return }
+        greatestAdvancedFor = hos.id
+        appModel.advanceGreatest(for: hos)
     }
 
     var body: some View {
@@ -215,6 +228,7 @@ struct HOSDetailView: View {
             // `appModel.slideIndex`, covering the case where an HOS is viewed but never
             // advanced past before the user backs out.
             appModel.slideIndex = index
+            advanceGreatest()
             restartSlideshowCountdown()
         }
         .onDisappear { frameTicker.stop() }

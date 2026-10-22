@@ -2815,3 +2815,40 @@ The build passes. A headless Chromium run (5s interval, Auto Scroll past 1 Great
 Nothing was committed.
 
 **Cost**: ~6 minutes.
+
+# --
+
+2026-10-22 14:06 (v2: rotate the Greatest shown with each HOS on revisit)
+
+## Request
+
+In v2, widen which Greatest is shown with each HOS. When an HOS has more than one Greatest,
+keep track of which one was shown. Each time the HOS is revisited, show the next one in its
+list. Reset Visit Count clears this tracking and also starts the slideshow again from the first
+HOS.
+
+## What was built
+
+- `AppModel.swift`:
+  - Added `greatestStarts`, which records for each HOS which of its Greatest comes first.
+  - `greatestPeople(for:)` returns the period's Greatest in order, starting from that one and
+    wrapping round to the start.
+  - `advanceGreatest(for:)` leads with the first Greatest on the first visit and with the next
+    one on each later visit.
+  - Added `resetVisitCount()`. It does everything `resetViewed()` does, including going back to
+    the first HOS, and also clears `greatestStarts`. When a slideshow finishes a full pass it
+    still calls only `resetViewed()`, so the next pass moves on to new Greatest instead of
+    repeating the same ones.
+  - `greatestStarts` is saved with the rest of the app's state (as an optional field, so older
+    save files still load).
+- `HOSSummaryView.swift`: shows `appModel.greatestPeople(for:)` instead of the fixed list.
+- `HOSDetailView.swift`: moves the selection forward in `setIndex` and `onAppear`, in the same
+  update that shows the HOS, so the list never appears in the previous visit's order. It
+  remembers the HOS it last moved forward for, so coming back from the drawing editor doesn't
+  count as a revisit.
+- `LandingView.swift`: Reset Visit Count calls `resetVisitCount()`.
+
+The app builds for the iOS Simulator. I didn't run it to check the rotation on screen.
+Nothing was committed.
+
+**Cost**: ~6 minutes.
