@@ -1165,3 +1165,10 @@ v06.155
 in v06
 Add display at top to show total users 
 and number of users active in last 24 hours
+
+v02.156
+
+in v2,
+In slideshow mode, 
+add delay of Fadein Delay secs
+before scrolling starts when displaying HOS.

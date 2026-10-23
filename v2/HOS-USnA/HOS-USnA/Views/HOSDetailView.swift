@@ -98,8 +98,8 @@ struct HOSDetailView: View {
     /// When Auto Scroll reached its stopping point for this HOS (`CACurrentMediaTime`), timing the
     /// hold there before the slide advances.
     @State private var autoScrollDoneTime: CFTimeInterval?
-    /// The HOS Auto Scroll is holding at the top for, with Animated on, while its portrait zooms
-    /// in over the Fadein Delay — so the view stays put for that long before scrolling.
+    /// The HOS Auto Scroll is holding at the top for over the Fadein Delay (while, with Animated
+    /// on, its portrait zooms in) — so the view stays put for that long before scrolling.
     @State private var autoScrollHoldHOSID: HOS.ID?
     /// Where each Greatest figure starts and ends, in `contentSpace`, keyed by HOS id and then
     /// figure index — by HOS id so a figure not yet laid out for this HOS can't be mistaken for
@@ -194,7 +194,7 @@ struct HOSDetailView: View {
             scrollPosition.scrollTo(edge: .top)
             // Held from the same update, so the details left visible from the last HOS can't
             // scroll a frame before the `.task` below starts the hold.
-            if isAnimated, isPlaying { autoScrollHoldHOSID = hosList[newValue].id }
+            if isPlaying { autoScrollHoldHOSID = hosList[newValue].id }
         }
         speechStage = 0
         index = newValue
@@ -269,9 +269,8 @@ struct HOSDetailView: View {
             appModel.markViewed(hos, resetIfComplete: isPlaying)
             if isAutoScroll, isPlaying {
                 detailsVisible = true
-                // With Animated on, hold at the top while the portrait zooms in (no fade), and
-                // only then start scrolling.
-                guard isAnimated else { return }
+                // Hold at the top for the Fadein Delay (while, with Animated on, the portrait
+                // zooms in; no fade), and only then start scrolling.
                 let holdID = hos.id
                 autoScrollHoldHOSID = holdID
                 try? await Task.sleep(for: .seconds(delaySecs))
