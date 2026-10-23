@@ -43,8 +43,13 @@ struct UsersListView: View {
                         }
                     }
                 } footer: {
+                  VStack {
                     AppVersionLabel()
-                        .frame(maxWidth: .infinity)
+                      .frame(maxWidth: .infinity)
+                    if hasLoaded && !profiles.isEmpty {
+                      UserCountsView(profiles: profiles)
+                    }
+                  }
                 }
             }
             .overlay {
@@ -189,5 +194,38 @@ struct UsersListView: View {
     private func announce(_ kind: UserEvent.Kind, _ profile: Profile) {
         guard profile.id != currentUserID else { return }
         banner = UserEvent(kind: kind, name: profile.name)
+    }
+}
+
+/// Totals shown above the list: every user, and those seen in the last 24 hours. Ticks each
+/// minute so users drop out of the 24-hour count without a reload.
+private struct UserCountsView: View {
+    let profiles: [Profile]
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 60)) { context in
+            let cutoff = context.date.addingTimeInterval(-24 * 60 * 60)
+            let activeCount = profiles.filter { ($0.lastSeenAt ?? .distantPast) > cutoff }.count
+            HStack {
+                stat("Total Users", profiles.count)
+                Divider()
+                stat("Active in 24h", activeCount)
+            }
+        }
+    }
+
+    private func stat(_ title: String, _ value: Int) -> some View {
+        HStack(spacing: 2) {
+            Text(value, format: .number)
+//            .font(.title2.weight(.semibold))
+            .font(.caption)
+                .monospacedDigit()
+                .contentTransition(.numericText())
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 }
