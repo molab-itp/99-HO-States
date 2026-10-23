@@ -56,8 +56,15 @@ struct HOSSummaryView: View {
             let greatest = appModel.greatestPeople(for: hos)
             if !greatest.isEmpty {
                 Divider()
-                Text("100 Greatest of this period")
-                    .font(.headline)
+                HStack {
+                    Text("100 Greatest of this period")
+                        .font(.headline)
+                    Spacer()
+                    Link(destination: URL(string: "https://en.wikipedia.org/wiki/100_Greatest_African_Americans")!) {
+                        Label("Wikipedia", systemImage: "book")
+                    }
+                    .font(.callout)
+                }
                 LazyVStack(alignment: .leading, spacing: 32) {
                     ForEach(Array(greatest.enumerated()), id: \.element.id) { index, person in
                         GreatestFigureView(

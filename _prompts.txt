@@ -1192,3 +1192,11 @@ v05 is now version 0.1.29
 v07.159
 
 sync web app v07 with SwiftUI app v06
+
+v02.160
+
+in v2, on view HOS detail
+flush right to "100 Greatest of this period"
+add link to 100 Greatest wikipedia article.
+
+

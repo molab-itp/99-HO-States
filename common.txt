@@ -6,3 +6,5 @@ with approximate time cost
 sync web app in v05 with changes to v2
 
 sync web app v07 with SwiftUI app v06
+
+add an entry to Log.md
