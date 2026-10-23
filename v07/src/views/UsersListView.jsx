@@ -199,6 +199,7 @@ export default function UsersListView({ currentUserID }) {
               </ul>
             )}
             <AppVersionLabel />
+            {hasLoaded && profiles.length > 0 && <UserCounts profiles={profiles} />}
           </div>
         </>
       )}
@@ -225,5 +226,35 @@ export default function UsersListView({ currentUserID }) {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Totals shown under the list: every user, and those seen in the last 24 hours. Ticks each
+ * minute so users drop out of the 24-hour count without a reload.
+ */
+function UserCounts({ profiles }) {
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const cutoff = now - 24 * 60 * 60 * 1000;
+  const activeCount = profiles.filter((p) => timeOf(p.last_seen_at) > cutoff).length;
+  return (
+    <div className="user-counts">
+      <UserCount title="Total Users" value={profiles.length} />
+      <div className="user-counts-divider" />
+      <UserCount title="Active in 24h" value={activeCount} />
+    </div>
+  );
+}
+
+function UserCount({ title, value }) {
+  return (
+    <p className="user-count">
+      <span className="user-count-value">{value.toLocaleString()}</span> {title}
+    </p>
   );
 }

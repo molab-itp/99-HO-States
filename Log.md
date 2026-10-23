@@ -3047,3 +3047,32 @@ these changes: the check was written before the Greatest list started rotating.
 I didn't listen to real browser speech. Version bumped to 0.1.29. Nothing was committed.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-10-23 14:20 (v07: sync user counts from v06)
+
+## Request
+
+Sync the web app v07 with the SwiftUI app v06.
+
+## What was built
+
+v07 was last synced at v07.134. Since then the only change to v06's app has been v06.155: a
+footer that shows the total number of users and how many were active in the last 24 hours.
+
+- `src/views/UsersListView.jsx`: added `UserCounts`, a port of v06's `UserCountsView`. It sits
+  under the version label once the list has loaded and isn't empty. It ticks each minute, as v06's
+  `TimelineView` does, so users drop out of the 24-hour count without a reload. Users who have
+  never been seen don't count as active.
+- `src/index.css`: styles for the counts. They're caption-sized grey text with the number in the
+  label color and a thin divider between the two counts.
+- `scripts/smoke.mjs`: checks that the list shows "3 Total Users | 2 Active in 24h" (the test
+  guest was last seen 26 hours ago), and "4 | 2" after a never-seen user joins.
+
+The build passes and `npm run smoke` passes with no console errors. The light and dark
+screenshots show the counts under the version label. The smoke test uses a stand-in for
+Supabase, so this hasn't been tried against the real project. Version bumped to 0.7.1.
+Nothing was committed.
+
+**Cost**: ~6 minutes.

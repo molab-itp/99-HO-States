@@ -309,6 +309,9 @@ async function main() {
     await page.getByText('Active yesterday').waitFor();
     await page.getByText('ada@example.com').waitFor();
     await page.waitForFunction(() => !document.querySelector('.error-text'));
+    // v06.155's totals: the guest was last seen 26 hours ago.
+    const counts = async () => (await page.locator('.user-count').allTextContents()).join('|');
+    assert((await counts()) === '3 Total Users|2 Active in 24h', `user counts: ${await counts()}`);
     await shot(page, 'list');
     console.log('ok  users list');
 
@@ -318,6 +321,7 @@ async function main() {
     await page.getByRole('status').getByText('new@example.com joined').waitFor();
     await shot(page, 'banner-joined');
     assert((await page.locator('.profile-name').last().textContent()) === 'new@example.com', 'a never-seen user goes last');
+    assert((await counts()) === '4 Total Users|2 Active in 24h', `user counts after a join: ${await counts()}`);
     const ada = db.profiles.find((p) => p.id === ADA);
     supabase.push('UPDATE', { ...ada, last_seen_at: new Date().toISOString() });
     await page.waitForFunction(() => document.querySelector('.profile-name')?.textContent === 'Ada Lovelace');

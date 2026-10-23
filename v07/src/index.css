@@ -128,6 +128,30 @@ p {
   text-align: center;
 }
 
+/* v06's UserCountsView: two stats side by side, split by a Divider. */
+.user-counts {
+  display: flex;
+  align-items: stretch;
+}
+
+.user-count {
+  flex: 1;
+  margin: 0;
+  font-size: 12px;
+  color: var(--secondary-label);
+  text-align: center;
+}
+
+.user-count-value {
+  color: var(--label);
+  font-variant-numeric: tabular-nums;
+}
+
+.user-counts-divider {
+  width: 1px;
+  background: var(--separator);
+}
+
 /* ContentUnavailableView, and the centered ProgressView. */
 .unavailable {
   flex: 1;
