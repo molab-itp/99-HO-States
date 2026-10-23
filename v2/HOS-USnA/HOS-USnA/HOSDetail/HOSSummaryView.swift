@@ -5,8 +5,8 @@ import SwiftUI
 /// extract, Wikipedia link, and the Greatest figures alive during its term (led by one
 /// `AppModel` hasn't shown lately) — the text content that `HOSDetailView` fades in a few seconds after appearing.
 /// `HOSDetailView` owns `speechPlayer` so its slideshow can wait for the speech, and turns
-/// `autoSpeaks` on to have the extract spoken without the button being tapped. With `speaksName`
-/// on (Auto Speak's Name mode) the order and name are spoken in place of the extract.
+/// `autoSpeaks` on to have the extract spoken without the button being tapped. `speechMode` (Auto
+/// Speak's mode) swaps the extract for the order and name, or for the extract's first sentence.
 /// `autoSpokenGreatest` has the Greatest figure at that index spoken the same way.
 /// `onExtractBottom` reports where the extract ends, and `onGreatestFrame` where each Greatest
 /// figure starts and ends (by its index), in the `coordinateSpace` the caller names, so Auto
@@ -17,13 +17,17 @@ struct HOSSummaryView: View {
     let speechPlayer: SpeechPlayer
     var autoSpeaks = false
     var autoSpokenGreatest: Int? = nil
-    var speaksName = false
+    var speechMode = SpeechSettings.AutoSpeakMode.summary
     var coordinateSpace: NamedCoordinateSpace = .scrollView
     var onExtractBottom: (_ maxY: Double) -> Void = { _ in }
     var onGreatestFrame: (_ index: Int, _ frame: ClosedRange<Double>) -> Void = { _, _ in }
 
     private var speechText: String {
-        speaksName ? "\(hos.order) \(hos.name)" : hos.extract
+        switch speechMode {
+        case .summary: hos.extract
+        case .name: "\(hos.order) \(hos.name)"
+        case .caption: SpeechSettings.firstSentence(of: hos.extract)
+        }
     }
 
     var body: some View {
@@ -60,7 +64,7 @@ struct HOSSummaryView: View {
                             person: person,
                             speechPlayer: speechPlayer,
                             autoSpeaks: autoSpokenGreatest == index,
-                            speaksName: speaksName
+                            speechMode: speechMode
                         )
                             .onGeometryChange(for: ClosedRange<Double>.self) {
                                 let frame = $0.frame(in: coordinateSpace)

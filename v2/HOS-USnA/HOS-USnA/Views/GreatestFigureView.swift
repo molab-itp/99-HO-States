@@ -4,16 +4,20 @@ import SwiftUI
 /// A Greatest figure's full photo, name, dates, description, summary and Wikipedia link. The body
 /// of `GreatestDetailView`, and repeated for each figure at the bottom of `HOSSummaryView`.
 /// Given a `speechPlayer` (as `GreatestDetailView` does), a play/pause button by the name speaks
-/// the summary — or, with `speaksName` on, the order and name — and `autoSpeaks` turning on starts
+/// the summary — or, per `speechMode`, the order and name, or the name and description — and `autoSpeaks` turning on starts
 /// it without a tap. The owner of `speechPlayer` stops it when the person changes.
 struct GreatestFigureView: View {
     let person: GreatestPerson
     var speechPlayer: SpeechPlayer? = nil
     var autoSpeaks = false
-    var speaksName = false
+    var speechMode = SpeechSettings.AutoSpeakMode.summary
 
     private var speechText: String {
-        speaksName ? "\(person.order) \(person.name)" : person.summary
+        switch speechMode {
+        case .summary: person.summary
+        case .name: "\(person.order) \(person.name)"
+        case .caption: "\(person.name). \(person.description)"
+        }
     }
 
     var body: some View {
@@ -89,7 +93,7 @@ struct GreatestDetailView: View {
                 person: person,
                 speechPlayer: speechPlayer,
                 autoSpeaks: autoSpeak && isPlaying && isSpeechArmed,
-                speaksName: autoSpeak && autoSpeakMode == .name
+                speechMode: autoSpeak ? autoSpeakMode : .summary
             )
             .padding()
         }

@@ -15,7 +15,7 @@ import { canTranslate, translateText } from '../data/translator.js';
  * screen's speech button), and plays editable sample text back in it — optionally translated into
  * that language first, which also turns on translation of the extract the detail screen speaks.
  * Also holds the Auto Speak toggle for the detail screen's slideshow, and the choice of what it
- * speaks (summary or name). Pushed from Landing.
+ * speaks (summary, name or caption). Pushed from Landing.
  */
 export default function SpeechSetupScreen({ onBack }) {
   const [language, setLanguage] = useStoredString(SpeechSettings.languageKey, SpeechSettings.defaultLanguage());
@@ -85,7 +85,9 @@ export default function SpeechSetupScreen({ onBack }) {
           <p className="credits-footer">
             {autoSpeakMode === 'name'
               ? 'While the slideshow plays, speaks each number and name and waits for it to finish before advancing.'
-              : 'While the slideshow plays, speaks each summary and waits for it to finish before advancing.'}
+              : autoSpeakMode === 'caption'
+                ? 'While the slideshow plays, speaks the first sentence of each summary (name and description for the Greatest) and waits for it to finish before advancing.'
+                : 'While the slideshow plays, speaks each summary and waits for it to finish before advancing.'}
           </p>
         </section>
 

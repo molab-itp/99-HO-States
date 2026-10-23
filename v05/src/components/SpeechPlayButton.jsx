@@ -10,7 +10,9 @@ import { canTranslate, translateText } from '../data/translator.js';
  * `translatesFirst`, English `text` is translated into that language before it is spoken, when
  * the sample text on `SpeechSetupScreen` has been translated into a non-English language (and the
  * browser can translate); otherwise `text` is spoken as is. Speech also starts by itself each
- * time `autoPlays` turns on. The owner of `player` is responsible for stopping it.
+ * time `autoPlays` turns on. Several of these can share `player`: each shows only its own text's
+ * speech, and a tap while another's is under way stops that and speaks this one's. The owner of
+ * `player` is responsible for stopping it.
  */
 export default function SpeechPlayButton({ player, text, translatesFirst = false, autoPlays = false }) {
   const [language] = useStoredString(SpeechSettings.languageKey, SpeechSettings.defaultLanguage());
@@ -21,8 +23,11 @@ export default function SpeechPlayButton({ player, text, translatesFirst = false
   const translates =
     translatesFirst && canTranslate() && SpeechSettings.translatesBeforeSpeaking(sampleTextLanguage, language);
 
-  // `text` in `language`, kept so pause/continue and replays don't translate again.
-  const [translatedText, setTranslatedText] = useState(null);
+  // `text` in `language`, kept so pause/continue and replays don't translate again. Stored with
+  // what it was made from, so the render that brings new `text` never sees the old translation.
+  const [translation, setTranslation] = useState(null);
+  const translatedText =
+    translation && translation.text === text && translation.language === language ? translation.spoken : null;
   // True from asking for a translation until it has been spoken (or abandoned).
   const [isTranslating, setIsTranslating] = useState(false);
   // Bumped whenever a running translation should be dropped, so its result is ignored.
@@ -32,7 +37,6 @@ export default function SpeechPlayButton({ player, text, translatesFirst = false
   useEffect(() => {
     requestRef.current += 1;
     setIsTranslating(false);
-    setTranslatedText(null);
   }, [text, language]);
 
   const { setIsPreparing } = player;
@@ -47,7 +51,11 @@ export default function SpeechPlayButton({ player, text, translatesFirst = false
     [setIsPreparing],
   );
 
+  // Whether `player` is speaking (or paused on) this button's text.
+  const isPlayersText = player.text !== null && (player.text === text || player.text === translatedText);
+
   function play() {
+    if (player.text !== null && !isPlayersText) player.stop();
     if (!translates) {
       player.toggle(text, language);
       return;
@@ -64,18 +72,22 @@ export default function SpeechPlayButton({ player, text, translatesFirst = false
       .catch(() => text)
       .then((spoken) => {
         if (requestRef.current !== request) return;
-        setTranslatedText(spoken);
+        setTranslation({ text, language, spoken });
         setIsTranslating(false);
         player.toggle(spoken, language);
       });
   }
 
+  // Keyed on `text` too, so a slideshow advancing while `autoPlays` stays on (Auto Scroll keeps
+  // the details visible between slides) speaks each new slide. The status is read as of now,
+  // since the owner's effect stopping the previous slide's speech runs in the same commit.
+  const autoPlayText = autoPlays ? text : null;
   useEffect(() => {
-    if (autoPlays && player.status === 'idle' && !isTranslating) play();
+    if (autoPlayText !== null && player.currentStatus() === 'idle' && !isTranslating) play();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoPlays]);
+  }, [autoPlayText]);
 
-  const isSpeaking = player.status === 'speaking';
+  const isSpeaking = player.status === 'speaking' && isPlayersText;
   return (
     <button
       type="button"

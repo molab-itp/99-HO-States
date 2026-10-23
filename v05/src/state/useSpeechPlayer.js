@@ -16,6 +16,9 @@ export function useSpeechPlayer() {
   // Set by a speech button while it gets text ready to speak (translating it), so `isBusy` covers
   // the gap between asking for speech and `status` leaving 'idle'.
   const [isPreparing, setIsPreparing] = useState(false);
+  // What's being spoken (or paused), so of several buttons sharing this player, only the one
+  // that started it shows it as theirs.
+  const [text, setText] = useState(null);
   // Mirrors `status` so `toggle` can be called from a stale closure (a finished translation).
   const statusRef = useRef('idle');
   // The utterance `status` describes. A stopped utterance's end event can arrive after the next
@@ -29,6 +32,7 @@ export function useSpeechPlayer() {
 
   const stop = useCallback(() => {
     utteranceRef.current = null;
+    setText(null);
     setStatus('idle');
     synthesizer()?.cancel();
   }, [setStatus]);
@@ -59,11 +63,13 @@ export function useSpeechPlayer() {
       const ended = () => {
         if (utteranceRef.current !== utterance) return;
         utteranceRef.current = null;
+        setText(null);
         setStatus('idle');
       };
       utterance.onend = ended;
       utterance.onerror = ended;
       utteranceRef.current = utterance;
+      setText(text);
       setStatus('speaking');
       synth.speak(utterance);
     },
@@ -81,14 +87,19 @@ export function useSpeechPlayer() {
   return useMemo(
     () => ({
       status,
+      text,
       isPreparing,
       setIsPreparing,
       /** Whether speech is on its way or in progress (paused included). */
       isBusy: isPreparing || status !== 'idle',
+      /** Whether the browser can speak at all. */
+      isAvailable: Boolean(synthesizer()),
+      /** `status` as of now, for effects running in the same commit as a `stop`. */
+      currentStatus: () => statusRef.current,
       toggle,
       stop,
     }),
-    [status, isPreparing, toggle, stop],
+    [status, text, isPreparing, toggle, stop],
   );
 }
 

@@ -4,7 +4,7 @@ import SwiftUI
 /// can each be shown or hidden, lets one be picked (used by `HOSSummaryView`'s speech button), and plays editable sample text back
 /// in it — optionally translated into that language first, which also turns on translation of
 /// the extract `HOSSummaryView` speaks. Also holds the Auto Speak toggle for `HOSDetailView`'s
-/// slideshow, and the choice of what it speaks (summary or name). Pushed from `LandingView`.
+/// slideshow, and the choice of what it speaks (summary, name or caption). Pushed from `LandingView`.
 struct SpeechSetupView: View {
     @AppStorage(SpeechSettings.languageKey)
     private var language = SpeechSettings.defaultLanguage
@@ -44,6 +44,8 @@ struct SpeechSetupView: View {
                     Text("While the slideshow plays, speaks each summary and waits for it to finish before advancing.")
                 case .name:
                     Text("While the slideshow plays, speaks each number and name and waits for it to finish before advancing.")
+                case .caption:
+                    Text("While the slideshow plays, speaks the first sentence of each summary (name and description for the Greatest) and waits for it to finish before advancing.")
                 }
             }
 

@@ -196,26 +196,86 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   // per display frame (Swift's `FrameTicker`). The stopping point is measured from the DOM each
   // frame, so it follows lazy-loaded photos as they come in.
   const greatestRefs = useRef([]);
+  const extractRef = useRef(null);
   const toolbarRef = useRef(null);
   const autoScrollOffsetRef = useRef(0);
   // When Auto Scroll reached its stopping point for this HOS (`performance.now()`), timing the
   // hold there before the slide advances.
   const autoScrollDoneTimeRef = useRef(null);
+  // Until when (`performance.now()`) Auto Scroll holds at the top of a new HOS: the Fadein Delay
+  // (while, with Animated on, the portrait zooms in), and only then starts scrolling.
+  const autoScrollHoldUntilRef = useRef(0);
   const greatestCount = greatestFor(hos).length;
+  // How many of the Greatest Auto Scroll shows, so with Auto Speak on, speaks.
+  const autoScrollGreatestCount = autoScrollGreatest > 0 ? Math.min(autoScrollGreatest, greatestCount) : greatestCount;
+
+  function visibleHeight() {
+    return window.innerHeight - (toolbarRef.current?.offsetHeight ?? 0);
+  }
+
+  function pageBottom(el) {
+    return el.getBoundingClientRect().bottom + window.scrollY;
+  }
 
   function autoScrollTarget() {
     const scrollable = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
     if (autoScrollGreatest <= 0 || autoScrollGreatest >= greatestCount) return scrollable;
     const figure = greatestRefs.current[autoScrollGreatest - 1];
     if (!figure) return scrollable;
-    const bottom = figure.getBoundingClientRect().bottom + window.scrollY;
-    const visibleHeight = window.innerHeight - (toolbarRef.current?.offsetHeight ?? 0);
-    return Math.min(scrollable, Math.max(0, bottom - visibleHeight));
+    return Math.min(scrollable, Math.max(0, pageBottom(figure) - visibleHeight()));
   }
 
   function isAutoScrollDone() {
     return autoScrollOffsetRef.current >= autoScrollTarget();
   }
+
+  // Auto Scroll with Auto Speak: the HOS's extract is spoken and then, one after another, each
+  // Greatest figure Auto Scroll shows, each starting as the figure scrolls on. The scroll pauses
+  // wherever the text being spoken has come fully into view, until it's been spoken.
+  const speaksAsScrolling = autoSpeak && isAutoScroll && isPlaying && speechPlayer.isAvailable;
+  // What's being spoken: 0 for the HOS, then 1 + the index of the Greatest figure. Kept with the
+  // HOS it's for, so a new HOS starts at 0 in the render that shows it.
+  const [speechStageState, setSpeechStageState] = useState({ order: hos.order, stage: 0 });
+  const speechStage = speechStageState.order === hos.order ? speechStageState.stage : 0;
+  // The stage whose speech was last started, so only its speech finishing (not the last HOS's
+  // being stopped by the slide advancing) moves on to the next stage.
+  const speakingStageRef = useRef(null);
+  useEffect(() => {
+    if (speechPlayer.isBusy) {
+      speakingStageRef.current = { order: hos.order, stage: speechStage };
+    } else if (
+      speaksAsScrolling &&
+      speakingStageRef.current?.order === hos.order &&
+      speakingStageRef.current.stage === speechStage
+    ) {
+      setSpeechStageState({ order: hos.order, stage: speechStage + 1 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speechPlayer.isBusy]);
+
+  // The offset Auto Scroll pauses at while the current stage is spoken: its text's bottom lined
+  // up with the bottom of the visible area. Until the extract has been laid out, the top.
+  function speechPauseOffset() {
+    if (!speaksAsScrolling || speechStage > autoScrollGreatestCount) return null;
+    if (speechStage === 0) {
+      return extractRef.current ? Math.max(0, pageBottom(extractRef.current) - visibleHeight()) : 0;
+    }
+    const figure = greatestRefs.current[speechStage - 1];
+    return figure ? Math.max(0, pageBottom(figure) - visibleHeight()) : null;
+  }
+
+  // How many Greatest figures have had their top scrolled on, for this HOS; set from the scroll loop.
+  const [greatestOnScreen, setGreatestOnScreen] = useState({ order: hos.order, count: 0 });
+  // The Greatest figure to speak now: the current stage's, once its top has scrolled on.
+  const autoSpokenGreatest =
+    speaksAsScrolling &&
+    detailsVisible &&
+    speechStage > 0 &&
+    speechStage - 1 < autoScrollGreatestCount &&
+    greatestOnScreen.order === hos.order &&
+    speechStage - 1 < greatestOnScreen.count
+      ? speechStage - 1
+      : null;
 
   // Back to the top for each new HOS before it's painted, so it's never drawn at the last one's
   // scroll offset (Swift's `setIndex`).
@@ -223,6 +283,7 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
     if (!isAutoScroll) return;
     autoScrollOffsetRef.current = 0;
     autoScrollDoneTimeRef.current = null;
+    autoScrollHoldUntilRef.current = isPlaying ? performance.now() + delaySecs * 1000 : 0;
     window.scrollTo(0, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
@@ -230,6 +291,22 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   const isAutoScrolling = isAutoScroll && isPlaying && detailsVisible && !isDrawingEditorOpen;
   const autoScrollTargetRef = useRef(autoScrollTarget);
   autoScrollTargetRef.current = autoScrollTarget;
+  const speechPauseOffsetRef = useRef(speechPauseOffset);
+  speechPauseOffsetRef.current = speechPauseOffset;
+  // Counts the Greatest whose top is above the bottom of the visible area.
+  const updateGreatestOnScreenRef = useRef(null);
+  updateGreatestOnScreenRef.current = () => {
+    const limit = autoScrollOffsetRef.current + visibleHeight();
+    let count = 0;
+    while (count < autoScrollGreatestCount) {
+      const figure = greatestRefs.current[count];
+      if (!figure || figure.getBoundingClientRect().top + window.scrollY >= limit) break;
+      count += 1;
+    }
+    if (greatestOnScreen.order !== hos.order || greatestOnScreen.count !== count) {
+      setGreatestOnScreen({ order: hos.order, count });
+    }
+  };
   // Greatest Auto Scroll has scrolled past count as shown.
   const onAutoScrollDoneRef = useRef(null);
   onAutoScrollDoneRef.current = () => markGreatestShown(hos, autoScrollGreatest);
@@ -237,13 +314,18 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
     if (!isAutoScrolling) return undefined;
     let frame;
     let last = performance.now();
-    // Slows over the last `autoScrollEaseDistance` pixels so it settles at the stopping point
-    // instead of halting mid-stride, and notes when it gets there.
+    // Slows over the last `autoScrollEaseDistance` pixels so it settles at the stopping point (or
+    // a pause for speech) instead of halting mid-stride, and notes when it gets to the stopping
+    // point, which starts the hold before the slide advances.
     const step = (now) => {
-      const target = autoScrollTargetRef.current();
+      updateGreatestOnScreenRef.current();
+      const fullTarget = autoScrollTargetRef.current();
+      const target = Math.min(fullTarget, speechPauseOffsetRef.current() ?? Infinity);
       const remaining = target - autoScrollOffsetRef.current;
-      if (remaining <= 0) {
-        if (autoScrollDoneTimeRef.current === null) {
+      if (now < autoScrollHoldUntilRef.current) {
+        // Holding at the top of a new HOS.
+      } else if (remaining <= 0) {
+        if (autoScrollOffsetRef.current >= fullTarget && autoScrollDoneTimeRef.current === null) {
           autoScrollDoneTimeRef.current = now;
           onAutoScrollDoneRef.current();
         }
@@ -324,8 +406,14 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
   const imageSrc = hos.large || hos.thumbnail;
   const drawing = drawingFor(hos);
   const articleURL = wikipediaArticleURL(hos);
-  // In Auto Speak's Name mode the order and name are spoken in place of the extract.
-  const speechText = autoSpeak && autoSpeakMode === 'name' ? `${hos.order} ${hos.name}` : hos.extract;
+  // Auto Speak's mode swaps the extract for the order and name, or for the extract's first sentence.
+  const speechMode = autoSpeak ? autoSpeakMode : 'summary';
+  const speechText =
+    speechMode === 'name'
+      ? `${hos.order} ${hos.name}`
+      : speechMode === 'caption'
+        ? SpeechSettings.firstSentence(hos.extract)
+        : hos.extract;
 
   const isPreviousDisabled = isRandomMode && nav.position === 0;
   const greatest = greatestPeopleFor(hos);
@@ -397,13 +485,13 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
               player={speechPlayer}
               text={speechText}
               translatesFirst
-              autoPlays={autoSpeak && isPlaying && detailsVisible}
+              autoPlays={autoSpeak && isPlaying && detailsVisible && !(speaksAsScrolling && speechStage > 0)}
             />
           </div>
           <p className="subtitle">
             {hos.term} · {hos.party}
           </p>
-          <p>{hos.extract}</p>
+          <p ref={extractRef}>{hos.extract}</p>
           {articleURL && (
             <a className="wiki-link" href={articleURL} target="_blank" rel="noopener noreferrer">
               <Icon name="book" size={14} />
@@ -416,7 +504,12 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
               <h2 className="period-greatest-title">100 Greatest of this period</h2>
               {greatest.map((person, i) => (
                 <div key={person.id} ref={(el) => (greatestRefs.current[i] = el)}>
-                  <GreatestFigure person={person} />
+                  <GreatestFigure
+                    person={person}
+                    speechPlayer={speechPlayer}
+                    autoSpeaks={autoSpokenGreatest === i}
+                    speechMode={speechMode}
+                  />
                 </div>
               ))}
             </div>

@@ -2957,3 +2957,93 @@ The app builds for the iOS Simulator. I didn't run it to check the speech and sc
 Nothing was committed.
 
 **Cost**: ~12 minutes.
+
+# --
+
+2026-10-23 13:25 (v2: Caption option for Auto Speak)
+
+## Request
+
+In v2, add a Caption option to the Auto Speak picker, next to Summary and Name. With Caption, a
+HOS should speak the first line of its `extract`, and a Greatest figure its `name` plus
+`description`.
+
+## What was built
+
+- `Support/SpeechPlayer.swift`: added `AutoSpeakMode.caption` ("Caption") and
+  `SpeechSettings.firstSentence(of:)`. The extracts contain no line breaks, so "first line" is
+  taken to mean the first sentence. `NLTokenizer` finds it, so abbreviations like "c." or "F."
+  don't cut it short. On real extracts it gives, for example, "George Washington was a Founding
+  Father and the first president of the United States, serving from 1789 to 1797."
+- `HOSDetail/HOSSummaryView.swift` and `Views/GreatestFigureView.swift`: the `speaksName` flag is
+  replaced by `speechMode`. Caption speaks the extract's first sentence for a HOS, and
+  "name. description" for a Greatest figure (for example "Crispus Attucks. Boston Massacre victim
+  (1723–1770)").
+- `Views/HOSDetailView.swift` and `GreatestDetailView`: these pass
+  `autoSpeak ? autoSpeakMode : .summary`, so with Auto Speak off the button still speaks the full
+  text.
+- `Views/SpeechSetupView.swift`: added a footer line explaining Caption.
+
+The app builds for the iOS Simulator. I didn't run it to hear Caption mode.
+Nothing was committed.
+
+**Cost**: ~6 minutes.
+
+# --
+
+2026-10-23 13:37 (v05: sync Auto Speak scroll pauses, Fadein hold and Caption mode from v2)
+
+## Request
+
+Sync the web app in v05 with the changes to v2.
+
+## What was built
+
+This brings over v02.152 to v02.156 and the uncommitted Caption option (v05 was last synced at
+v05.151):
+
+- `src/components/SpeechPlayButton.jsx` (v02.152, v02.154):
+  - Autoplay is keyed on the text as well as `autoPlays`, so under Auto Scroll every slide is
+    spoken, not only the first. It reads the player's status as of now, because the screen stops
+    the last slide's speech in the same commit.
+  - Each button shows "speaking" only for its own text. A tap while another button's text is
+    speaking stops that one and starts this one.
+  - The translation is stored together with the text it came from, so new text never plays the
+    previous slide's translation.
+- `src/state/useSpeechPlayer.js`: the player keeps the `text` it is speaking and adds
+  `currentStatus()` and `isAvailable`.
+- `src/screens/HOSDetailScreen.jsx`:
+  - v02.153/156: when a new HOS comes up while playing, Auto Scroll waits at the top for the
+    Fadein Delay before it starts scrolling.
+  - v02.154: added `speechStage`, `speechPauseOffset` and `autoSpokenGreatest`, as in v2. The
+    scroll stops when the extract's bottom, or the current Greatest's bottom, reaches the bottom
+    of the visible area, and waits there until that text has been spoken.
+  - Each Greatest starts speaking once its top scrolls on screen. Only reaching the real stopping
+    point starts the end-of-slide hold.
+  - Every Greatest figure now has a speak button.
+  - If the browser has no speech synthesis, the scroll doesn't pause for speech, so the
+    slideshow can't get stuck.
+- Caption mode:
+  - `src/state/speechSettings.js` adds `'caption'` and `firstSentence`, which uses
+    `Intl.Segmenter`. On its own, `Intl.Segmenter` ends the sentence after "Ulysses S." and
+    "Harry S.", so a segment that ends in an initial or a common abbreviation is joined to the
+    next one. All 47 extracts now give a full first sentence.
+  - `GreatestFigure.jsx`, `GreatestDetailScreen.jsx` and `HOSDetailScreen.jsx` replace
+    `speaksName` with a speech mode. Caption speaks "name. description" for a Greatest figure.
+  - `SpeechSetupScreen.jsx` has the Caption footer text.
+
+The build passes. I tested in headless Chromium with speech stubbed so each utterance lasts 12 s,
+Auto Scroll on, and scrolling past 2 Greatest:
+- The view waited 2 s at the top (the Fadein Delay).
+- The scroll stopped at the bottom of Washington's extract until it had been spoken.
+- Crispus Attucks and Benjamin Banneker were each spoken as they scrolled on.
+- The slide advanced only after the last speech and the Fadein Delay.
+- John Adams was spoken and paused the same way.
+- Caption mode spoke "Crispus Attucks. Boston Massacre victim (1723–1770)".
+- There were no console errors.
+
+`npm run smoke` stops at "#01 should start with Crispus Attucks". It fails the same way without
+these changes: the check was written before the Greatest list started rotating.
+I didn't listen to real browser speech. Version bumped to 0.1.29. Nothing was committed.
+
+**Cost**: ~15 minutes.

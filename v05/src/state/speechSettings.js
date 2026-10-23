@@ -32,6 +32,9 @@ function displayName(language) {
   }
 }
 
+// Text ending in an initial or abbreviation, where `Intl.Segmenter` wrongly ends a sentence.
+const sentenceAbbreviation = /(?:^|[\s(])(?:[A-Z]|c|ca|Jr|Sr|Dr|Mr|Mrs|St|Gen|Lt|Col|Capt)\.\s*$/;
+
 function isEnglish(language) {
   return language.startsWith('en');
 }
@@ -46,12 +49,29 @@ export const SpeechSettings = {
   autoSpeakKey: 'ho-states-us.speechAutoSpeak',
   defaultAutoSpeak: false,
 
-  // What Auto Speak speaks for each slide: 'summary' (the HOS's extract) or 'name' (its order
-  // and name).
+  // What Auto Speak speaks for each slide: 'summary' (the HOS's extract), 'name' (its order
+  // and name) or 'caption' (the extract's first sentence; a Greatest figure's name and
+  // description).
   autoSpeakModeKey: 'ho-states-us.speechAutoSpeakMode',
-  autoSpeakModes: ['summary', 'name'],
+  autoSpeakModes: ['summary', 'name', 'caption'],
   defaultAutoSpeakMode: 'summary',
-  autoSpeakModeTitle: (mode) => (mode === 'name' ? 'Name' : 'Summary'),
+  autoSpeakModeTitle: (mode) => ({ name: 'Name', caption: 'Caption' })[mode] ?? 'Summary',
+
+  /**
+   * The first sentence of `text` (the extracts have no line breaks, so this stands in for their
+   * first line), or all of it if no sentence boundary is found. `Intl.Segmenter` breaks after an
+   * initial or abbreviation ("Harry S."), which Swift's `NLTokenizer` doesn't, so those
+   * segments are joined to the next.
+   */
+  firstSentence(text) {
+    if (typeof Intl === 'undefined' || !Intl.Segmenter) return text;
+    let sentence = '';
+    for (const { segment } of new Intl.Segmenter('en', { granularity: 'sentence' }).segment(text)) {
+      sentence += segment;
+      if (!sentenceAbbreviation.test(sentence)) break;
+    }
+    return sentence.trim() || text;
+  },
 
   // The editable sample text on `SpeechSetupScreen`, and the speech language code it is currently
   // written in: English until it is translated there.

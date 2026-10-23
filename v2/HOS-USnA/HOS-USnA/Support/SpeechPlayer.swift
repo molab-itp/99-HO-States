@@ -1,4 +1,5 @@
 import AVFoundation
+import NaturalLanguage
 import Observation
 
 /// Persisted text-to-speech settings, chosen on `SpeechSetupView` and used by `HOSSummaryView`.
@@ -18,6 +19,8 @@ enum SpeechSettings {
         case summary
         /// The HOS's order and name.
         case name
+        /// The HOS's first extract sentence; a Greatest figure's name and description.
+        case caption
 
         var id: String { rawValue }
 
@@ -25,8 +28,20 @@ enum SpeechSettings {
             switch self {
             case .summary: "Summary"
             case .name: "Name"
+            case .caption: "Caption"
             }
         }
+    }
+
+    /// The first sentence of `text` (the extracts have no line breaks, so this stands in for
+    /// their first line), or all of it if no sentence boundary is found.
+    static func firstSentence(of text: String) -> String {
+        let tokenizer = NLTokenizer(unit: .sentence)
+        tokenizer.string = text
+        guard !text.isEmpty else { return text }
+        let range = tokenizer.tokenRange(at: text.startIndex)
+        guard !range.isEmpty else { return text }
+        return text[range].trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     static let autoSpeakModeKey = "speechAutoSpeakMode"

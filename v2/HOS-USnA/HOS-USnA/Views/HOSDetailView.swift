@@ -249,7 +249,7 @@ struct HOSDetailView: View {
                     autoSpeaks: autoSpeak && isPlaying && detailsVisible
                         && !(speaksAsScrolling && speechStage > 0),
                     autoSpokenGreatest: autoSpokenGreatest,
-                    speaksName: autoSpeak && autoSpeakMode == .name,
+                    speechMode: autoSpeak ? autoSpeakMode : .summary,
                     coordinateSpace: .named(Self.contentSpace),
                     onExtractBottom: { [hosID = hos.id] maxY in
                         extractBottoms[hosID] = maxY

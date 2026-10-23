@@ -1172,3 +1172,19 @@ in v2,
 In slideshow mode, 
 add delay of Fadein Delay secs
 before scrolling starts when displaying HOS.
+
+v02.157
+
+in v2,
+For Auto Speak toggle
+add Caption option to existing summary, name picker
+for Caption option HOS should say first line of JSON property extract,
+for Greatest should say JSON properties name plus description
+
+v05.158
+
+sync web app in v05 with changes to v2
+append this chat to Log.md with date and time stamp
+with approximate time cost
+bump the version
+v05 is now version 0.1.29 

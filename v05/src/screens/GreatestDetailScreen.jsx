@@ -111,7 +111,7 @@ export default function GreatestDetailScreen({ onBack }) {
           person={person}
           speechPlayer={speechPlayer}
           autoSpeaks={autoSpeak && isPlaying && isSpeechArmed}
-          speaksName={autoSpeak && autoSpeakMode === 'name'}
+          speechMode={autoSpeak ? autoSpeakMode : 'summary'}
         />
       </div>
 
