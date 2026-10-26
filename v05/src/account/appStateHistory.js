@@ -19,14 +19,16 @@ export async function exportAppState(client, snapshot) {
 }
 
 /**
- * The most recent export by this user from any device, as `{ key, snapshot, savedAt }` (`savedAt`
- * a Date, stamped by the database), or `null` if there's none.
+ * The most recent export by user `userId` from any device, as `{ key, snapshot, savedAt }`
+ * (`savedAt` a Date, stamped by the database), or `null` if there's none. Filtered by user here
+ * because RLS lets every signed-in user read every user's exports.
  */
-export async function latestAppState(client) {
+export async function latestAppState(client, userId) {
   const rows = unwrap(
     await client
       .from('app_state')
       .select('app,key,data,schema_version,updated_at')
+      .eq('user_id', userId)
       .eq('app', APP)
       .like('key', `${KEY_PREFIX}%`)
       .order('updated_at', { ascending: false })

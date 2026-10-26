@@ -12,6 +12,8 @@ struct AppLandingView: View {
     /// Start Slideshow) rather than paused.
     @State private var startsSlideshowOnOpen = false
     @Environment(\.scenePhase) private var scenePhase
+    /// `nil` when `Supabase.plist` isn't set up (and in previews).
+    @Environment(AuthModel.self) private var auth: AuthModel?
 
     init(appModel: AppModel = AppModel()) {
         _appModel = State(initialValue: appModel)
@@ -26,7 +28,8 @@ struct AppLandingView: View {
                 onShowNews: { path = [.news] },
                 onShowGreatest: { path = [.greatest] },
                 onShowCredits: { path = [.credits] },
-                onShowSpeechSetup: { path = [.speechSetup] }
+                onShowSpeechSetup: { path = [.speechSetup] },
+                onShowAccount: { path = [.account] }
             )
                 .navigationDestination(for: AppScreen.self) { screen in
                     switch screen {
@@ -53,6 +56,14 @@ struct AppLandingView: View {
                         CreditsView()
                     case .speechSetup:
                         SpeechSetupView()
+                    case .account:
+                        // Restored on launch even if Account has since been turned off.
+                        if let auth {
+                            AccountView()
+                                .environment(auth)
+                        } else {
+                            ContentUnavailableView("Account Unavailable", systemImage: "person.crop.circle.badge.xmark")
+                        }
                     }
                 }
         }

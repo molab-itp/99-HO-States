@@ -1,13 +1,12 @@
 import SwiftUI
 
 /// The app's root screen: settings, app info, and the ways into `HOSDetailView` (Resume, Random
-/// Head, Start Slideshow), `HOSListView`, `NewsView`, `GreatestView`, `CreditsView` and `SpeechSetupView`. Navigation itself is handed back to
+/// Head, Start Slideshow), `HOSListView`, `NewsView`, `GreatestView`, `CreditsView`, `SpeechSetupView` and `AccountView`. Navigation itself is handed back to
 /// `AppLandingView` through the callbacks.
 struct LandingView: View {
   @Environment(AppModel.self) private var appModel
   /// `nil` when `Supabase.plist` isn't set up (and in previews), which hides the Account button.
   @Environment(AuthModel.self) private var auth: AuthModel?
-  @State private var isShowingAccount = false
   
   /// Shows the list of heads of state.
   let onShowList: () -> Void
@@ -21,6 +20,8 @@ struct LandingView: View {
   let onShowCredits: () -> Void
   /// Shows the text-to-speech setup screen.
   let onShowSpeechSetup: () -> Void
+  /// Shows the account screen.
+  let onShowAccount: () -> Void
   
   @AppStorage(SlideshowSettings.randomModeKey)
   private var isRandomMode = SlideshowSettings.defaultRandomMode
@@ -188,7 +189,7 @@ struct LandingView: View {
 
         if let auth {
           Button {
-            isShowingAccount = true
+            onShowAccount()
           } label: {
             Label(accountTitle(auth), systemImage: "person.crop.circle")
               .frame(maxWidth: .infinity)
@@ -203,13 +204,6 @@ struct LandingView: View {
       .padding()
     }
     .navigationBarTitleDisplayMode(.inline)
-    .sheet(isPresented: $isShowingAccount) {
-      if let auth {
-        AccountView()
-          .environment(auth)
-          .environment(appModel)
-      }
-    }
   }
 
   private func accountTitle(_ auth: AuthModel) -> String {
@@ -222,7 +216,7 @@ struct LandingView: View {
 
 #Preview {
   NavigationStack {
-    LandingView(onShowList: {}, onShowDetail: { _ in }, onShowNews: {}, onShowGreatest: {}, onShowCredits: {}, onShowSpeechSetup: {})
+    LandingView(onShowList: {}, onShowDetail: { _ in }, onShowNews: {}, onShowGreatest: {}, onShowCredits: {}, onShowSpeechSetup: {}, onShowAccount: {})
   }
   .environment(AppModel())
 }

@@ -83,3 +83,11 @@ Add a one-line comment at the top of each copy pointing back to the v06 original
 - Only portable fields are exported (`AppModel.Snapshot`): reactions, zoom states, drawing display modes, `greatestShownAt`, and the build. Drawings, shuffle and slide position, and `screen` stay on the device.
 - Guests see their lobby code (`Guest XXXX`, the first 4 of the user id, as in v06's `Profile.name`) in the Account view and on Landing's Account button.
 - Not done yet: a UI to pick an older export (roll back), and pruning old history rows.
+
+## Account page, profile photo, import from other users (2026-10-26)
+
+- Account is now its own pushed screen (`AppScreen.account`), like News, instead of a sheet. It is restored on launch like the other screens.
+- The top shows the signed-in user's profile photo (`profiles.photo_thumb_path` in the public `avatars` bucket, else `avatar_url`, else a placeholder). The photo is set in v06/v07; v2 only shows it.
+- **Other Users** section lists every other `profiles` row (photo, name, caption) with an Import button that merges that user's most recent export via `AppModel.merge`, same as Import App State.
+- Schema: new policy "Signed-in users can read all app state exports" on `app_state` for `key like 'history/%'` (`v06/supabase/schemas/20_app_state.sql`, migration `20261026000000_app_state_exports_shared.sql`). `key = 'default'` stays private. **Needs `supabase db push` from v06.**
+- Because RLS no longer limits history reads to your own rows, v2's `AppStateHistory.latest(of:)` and v05's `latestAppState(client, userId)` now filter by `user_id`.

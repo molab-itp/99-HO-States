@@ -1292,6 +1292,12 @@ Sign in with Apple on the web comes back to that address,
 so it won't work until it's listed. 
 The email code and guest sign-in don't need it.
 
+v02.171
+
+in v2, convert Account view to own page, like News
+add on Account view profile image 
+add list of other users and import from action
+that will import the most recent export of that user
 
 
 

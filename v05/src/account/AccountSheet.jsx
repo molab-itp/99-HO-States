@@ -90,11 +90,11 @@ function SignedIn({ user }) {
 
   const loadLastExport = useCallback(async () => {
     try {
-      setLastExportAt((await latestAppState(auth.client))?.savedAt ?? null);
+      setLastExportAt((await latestAppState(auth.client, user.id))?.savedAt ?? null);
     } catch {
       setLastExportAt(null);
     }
-  }, [auth.client]);
+  }, [auth.client, user.id]);
 
   useEffect(() => {
     loadLastExport();
@@ -121,7 +121,7 @@ function SignedIn({ user }) {
   const importState = () =>
     transfer(async () => {
       try {
-        const entry = await latestAppState(auth.client);
+        const entry = await latestAppState(auth.client, user.id);
         if (entry) {
           merge(entry.snapshot);
           setLastExportAt(entry.savedAt);

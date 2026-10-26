@@ -28,6 +28,15 @@ create policy "Users can read their own app state"
   to authenticated
   using ((select auth.uid()) = user_id);
 
+-- Exports (`key = 'history/<time>'`, written by v2's and v05's Export) are readable by every
+-- signed-in user, so the Account view can import another user's latest export. Everything else,
+-- e.g. live sync's `key = 'default'`, stays private to its owner. Clients must therefore filter
+-- history reads by `user_id` themselves.
+create policy "Signed-in users can read all app state exports"
+  on public.app_state for select
+  to authenticated
+  using (key like 'history/%');
+
 create policy "Users can insert their own app state"
   on public.app_state for insert
   to authenticated

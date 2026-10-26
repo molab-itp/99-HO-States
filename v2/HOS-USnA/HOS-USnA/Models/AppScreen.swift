@@ -10,4 +10,5 @@ enum AppScreen: String, Hashable {
     case greatest
     case credits
     case speechSetup
+    case account
 }

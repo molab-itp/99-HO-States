@@ -49,11 +49,14 @@ struct AppStateHistory {
             .execute()
     }
 
-    /// The most recent export by this user from any device, or `nil` if there's none.
-    func latest() async throws -> Entry? {
+    /// The most recent export by `userID` from any device, or `nil` if there's none. Filtered by
+    /// user here because RLS lets every signed-in user read every user's exports (so the Account
+    /// view can import someone else's).
+    func latest(of userID: UUID) async throws -> Entry? {
         let rows: [Row] = try await client
             .from("app_state")
             .select("app,key,data,schema_version,updated_at")
+            .eq("user_id", value: userID)
             .eq("app", value: Self.app)
             .like("key", pattern: Self.keyPrefix + "%")
             .order("updated_at", ascending: false)
