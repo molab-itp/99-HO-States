@@ -1281,3 +1281,18 @@ to maintain history of app state updates per user
 and to support possible roll back in future
 display guest signon code as show in HOS-Lobby
 
+v05.170
+
+sync web app in v05 with changes to v2
+
+What you need to do: add 
+https://molab-itp.github.io/99-HO-States/v05/ 
+to the Supabase dashboard's Auth > Redirect URLs. 
+Sign in with Apple on the web comes back to that address, 
+so it won't work until it's listed. 
+The email code and guest sign-in don't need it.
+
+
+
+
+

@@ -1,4 +1,7 @@
 import { useLayoutEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import { AuthProvider } from './account/AuthContext.jsx';
+import { loadSupabaseConfig } from './account/supabaseConfig.js';
 import { AppModelProvider, useAppModel } from './state/AppModelContext.jsx';
 import { AppScreen } from './data/appScreen.js';
 import LandingScreen from './screens/LandingScreen.jsx';
@@ -10,6 +13,19 @@ import GreatestDetailScreen from './screens/GreatestDetailScreen.jsx';
 import greatestList from './data/greatest.js';
 import CreditsScreen from './screens/CreditsScreen.jsx';
 import SpeechSetupScreen from './screens/SpeechSetupScreen.jsx';
+
+// Port of v2's `AccountSession.makeAuthModel()`: `null` until `.env.local` (or the Pages
+// workflow's repository variables) holds the Supabase project, which hides the Account feature
+// rather than showing v07's `SetupRequiredView`, since sign-in is optional here.
+const { config: supabaseConfig, error: supabaseError } = loadSupabaseConfig();
+if (supabaseError) console.info(`Account disabled: ${supabaseError}`);
+const supabaseClient = supabaseConfig
+  ? createClient(supabaseConfig.url, supabaseConfig.publishableKey, {
+      // PKCE, as in v07: a sign-in link or Apple's redirect comes back with a one-time `?code=`,
+      // which only the browser that asked for it can exchange.
+      auth: { flowType: 'pkce' },
+    })
+  : null;
 
 /**
  * Port of AppLandingView.swift: the navigation that `LandingScreen` sits at the bottom of. There
@@ -92,11 +108,12 @@ function Root() {
 }
 
 export default function App() {
-  return (
+  const app = (
     <AppModelProvider>
       <div className="app-shell">
         <Root />
       </div>
     </AppModelProvider>
   );
+  return supabaseClient ? <AuthProvider client={supabaseClient}>{app}</AuthProvider> : app;
 }

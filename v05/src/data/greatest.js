@@ -12,6 +12,10 @@ const greatestList = raw.people.map((person) => ({
 
 export default greatestList;
 
+// The Wikipedia article the list comes from, linked as "Source" next to each figure and above
+// an HOS's Greatest (v2's `GreatestFigureView`/`HOSSummaryView`).
+export const greatestSourceURL = raw.sourceUrl;
+
 const currentYear = () => new Date().getFullYear();
 
 // Port of HOS.swift's `termYears`: the years `hos.term` spans as [start, end], e.g. [1789, 1797]

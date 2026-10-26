@@ -3186,3 +3186,52 @@ bundle. The sign-in itself hasn't been tested. Before Sign in with Apple can wor
 `v06/supabase/config.toml`. Nothing was committed.
 
 **Cost**: ~15 minutes.
+
+# --
+
+2026-10-26 15:20 (v05.170: sync sign-in, Export/Import and links from v2)
+
+## Request
+
+Sync the web app in v05 with the changes to v2.
+
+## What was built
+
+This brings over v02.160 to v02.169 (v05 was last synced at v02.157):
+
+- Links (v02.160, v02.166, "Link Article"):
+  - The links.json links moved from Landing to the top of `CreditsScreen`.
+  - The HOS summary's "Read on Wikipedia" is now "Source". "100 Greatest of this period" has a
+    "Source" link to the list's Wikipedia article at its far end.
+  - Each Greatest figure has "Article" and "Source" links in place of "Read on Wikipedia". The
+    source URL comes from `people.json`'s `sourceUrl` (`greatestSourceURL` in `greatest.js`).
+- Landing (v02.166, v02.168): "left to see" and Reset Visit Count moved up under Start Slideshow.
+  Credits is followed by an Account button, labelled "Sign In" or with the signed-in name.
+- Sign-in (v02.168), in a new `src/account/` folder, mostly copied from v07:
+  - `supabaseConfig.js` and `AuthContext.jsx`. `AuthContext` also calls `touchLastSeen` on
+    sign-in and whenever the page becomes visible, like v2's `AccountSession`.
+  - `profilesService.js` keeps only `markSignedOut` and `touchLastSeen`.
+  - `SignInView.jsx` has v2's title and prompt.
+  - `App.jsx` creates the client only when `.env.local` is filled in. Otherwise there is no
+    `AuthProvider`, `useAuth()` returns `null`, and the Account button is hidden.
+- Export/Import (v02.169):
+  - `AccountSheet.jsx` is a bottom sheet like `EmojiPickerSheet`. It shows the sign-in method, the
+    guest code, Export/Import App State with the last export time, and Sign Out.
+  - `appStateHistory.js` inserts a `history/<ISO time>` row per export and reads the latest one,
+    with the same `app` (`ho-states`) and schema version as v2.
+  - `AppModelContext.jsx` has `snapshot()` and `merge()`, with the same rules as v2. The snapshot
+    is written in v2's JSON shape (zoom offset as `[x, y]`, like a Swift `CGSize`), so either app
+    can import the other's exports. `merge` saves to localStorage right away.
+- Setup: `@supabase/supabase-js`, plus `.env.example` and a gitignored `.env.local` (copied from
+  v07's). The Pages workflow's v05 build now gets the same `SUPABASE_URL` and
+  `SUPABASE_PUBLISHABLE_KEY` variables as v07.
+
+The build passes and `npm run smoke` passes. The smoke test now checks the Credits links, the
+Source and Article links, and that the Account sheet opens on sign-in and closes. I also relaxed
+the stale "#01 should start with Crispus Attucks" check, which failed before these changes too,
+to check only that he is listed. Signing in, Export and Import were not tested against the
+database, so the test never creates users or rows. Sign in with Apple and any magic link return
+to `https://molab-itp.github.io/99-HO-States/v05/`, which has to be added to the Supabase
+dashboard's Redirect URLs. Version bumped to 0.1.30. Nothing was committed.
+
+**Cost**: ~25 minutes.

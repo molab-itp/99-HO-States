@@ -121,12 +121,24 @@ async function main() {
     await page.waitForSelector('button:has-text("Resume")');
     await page.waitForSelector('text=USnA Heads');
     assert(!(await page.isVisible('button[aria-label="Back"]')), 'Landing is the root screen: no back button');
-    const linkTitles = await page.locator('a.source-link').allTextContents();
-    assert(linkTitles.length === 3, `Landing should list the links.json links: got ${linkTitles.length}`);
-    assertIncludes(linkTitles[0], 'Greatest Source', 'links should keep links.json order');
-    assertIncludes(linkTitles[1], 'HOS Source', 'links should keep links.json order');
-    assert(!linkTitles.some((t) => t.includes('Web App')), 'the web app should not link to itself');
+    assert((await page.locator('a.source-link').count()) === 0, 'the links.json links moved from Landing to Credits');
     await shot('landing');
+
+    // The Account button only shows when .env.local holds the Supabase project; it opens the
+    // sheet without signing in, so the test never touches the database.
+    const accountButton = page.locator('button:has-text("Sign In")');
+    if (await accountButton.isVisible()) {
+      console.log('Account sheet: Sign In while signed out...');
+      await accountButton.click();
+      await page.waitForSelector('.account-sheet .sign-in');
+      assert(await page.isVisible('button:has-text("Email Me a Sign-In Code")'), 'sign-in should offer the email code');
+      assert(await page.isVisible('button:has-text("Continue as Guest")'), 'sign-in should offer guest');
+      await shot('account-sign-in');
+      await page.click('.sheet-done');
+      assert((await page.locator('.account-sheet').count()) === 0, 'Done should close the Account sheet');
+    } else {
+      console.log('Account sheet: skipped, Supabase not configured');
+    }
 
     console.log('Resume -> detail screen, paused...');
     await resume();
@@ -321,12 +333,20 @@ async function main() {
     await pickFromList('#01');
     await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
     const periodNames = await page.locator('.period-greatest .greatest-figure h2').allTextContents();
-    assert(periodNames[0] === 'Crispus Attucks', `#01 should start with Crispus Attucks: got ${periodNames}`);
+    // Which figure leads rotates with the shared Greatest record (v05.151), so only membership is checked.
+    assert(periodNames.includes('Crispus Attucks'), `#01 should include Crispus Attucks: got ${periodNames}`);
     assert(periodNames.includes('Benjamin Banneker'), `#01 should include Benjamin Banneker: got ${periodNames}`);
     await backToLanding();
     await pickFromList('#47');
     await page.waitForSelector('.detail-text.visible', { timeout: 4000 });
     assert((await page.locator('.period-greatest .greatest-figure').count()) > 0, 'the current term should list living figures');
+    const greatestSource = 'https://en.wikipedia.org/wiki/100_Greatest_African_Americans';
+    assert(
+      (await page.locator('.period-greatest-title a').getAttribute('href')) === greatestSource,
+      'the period heading should link to the list source',
+    );
+    const figureLinks = await page.locator('.period-greatest .greatest-figure').first().locator('.link-pair a').allTextContents();
+    assert(figureLinks.map((t) => t.trim()).join(',') === 'Article,Source', `figure links: got ${figureLinks}`);
 
     console.log('Credits from Landing: three sections, hidden until their header is tapped...');
     await backToLanding();
@@ -335,6 +355,11 @@ async function main() {
     assert((await page.locator('.nav-title').textContent()) === 'Credits', 'credits screen should be titled Credits');
     const sectionTitles = await page.locator('.credits-header').allTextContents();
     assert(sectionTitles.join(',') === 'Articles,Photos,News', `credits sections: got ${sectionTitles}`);
+    const linkTitles = await page.locator('.credits a.link-row').allTextContents();
+    assert(linkTitles.length === 3, `Credits should list the links.json links first: got ${linkTitles.length}`);
+    assertIncludes(linkTitles[0], 'Greatest Source', 'links should keep links.json order');
+    assertIncludes(linkTitles[1], 'HOS Source', 'links should keep links.json order');
+    assert(!linkTitles.some((t) => t.includes('Web App')), 'the web app should not link to itself');
     assert((await page.locator('.credit-row').count()) === 0, 'credits sections should start hidden');
     // Each section in turn: show it, check its rows and first caption link, then hide it again.
     async function checkSection(name, rowCount, firstTitle, firstHref) {

@@ -5,11 +5,12 @@ import NavBar from '../components/NavBar.jsx';
 import news from '../data/news.js';
 import photoCredits from '../data/photoCredits.js';
 import { wikipediaArticleURL } from '../data/wikipedia.js';
+import links from '../data/links.js';
 
 const TEXT_LICENSE_URL = 'https://creativecommons.org/licenses/by-sa/4.0/';
 
 /**
- * Port of CreditsView.swift — sources and licences of everything the app shows that it didn't
+ * Port of CreditsView.swift — the external links from links.json, then the sources and licences of everything the app shows that it didn't
  * make itself: the Wikipedia article each summary is extracted from, the portrait photos, and the
  * pages linked from `NewsScreen`. Pushed from Landing; the caption under each title links to its
  * source, and each category can be hidden or shown from its header.
@@ -21,6 +22,17 @@ export default function CreditsScreen({ onBack }) {
     <div className="screen-scroll list-screen">
       <NavBar title="Credits" onBack={onBack} />
       <div className="list-group credits">
+        <ul className="hos-list">
+          {links.map((link) => (
+            <li key={link.url}>
+              <a className="link-row" href={link.url} target="_blank" rel="noopener noreferrer">
+                <Icon name="link-45deg" />
+                {link.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+
         <CreditsSection
           title="Articles"
           footer={

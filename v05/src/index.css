@@ -411,39 +411,17 @@ input {
   transform: scale(0.97);
 }
 
-.source-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--secondary-label);
-  font-size: 13px;
-  text-decoration: none;
-}
-
-.source-link {
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.source-link:active {
-  opacity: 0.5;
-}
-
-.source-links {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+.btn:disabled {
+  opacity: 0.4;
+  transform: none;
+  cursor: default;
 }
 
 .visited {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
   width: 100%;
   max-width: 320px;
 }
@@ -1436,10 +1414,26 @@ input {
   border-top: 0.5px solid var(--separator);
 }
 
+/* The heading, with the list's Source link at the far end (v2's HStack + Spacer). */
 .period-greatest-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 0 0 -20px;
+}
+
+.period-greatest-title h2 {
+  margin: 0;
   font-size: 17px;
   font-weight: 590;
+}
+
+/* GreatestFigureView's Article and Source links, at either end of a row. */
+.link-pair {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .detail-text .greatest-figure p {
@@ -1594,4 +1588,228 @@ input {
   .wiki-link {
     font-size: 22px;
   }
+}
+
+/* Credits' first section: the external links from links.json (moved here from Landing). */
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: var(--tint);
+  font-size: 17px;
+  text-decoration: none;
+}
+
+.link-row:active {
+  background: var(--fill-pressed);
+}
+
+/* Port of AccountView.swift: a sheet with Done on the right, holding an inset-grouped List (or
+   SignInView while signed out). Portaled out of `.home`, so it sets the same system-blue tint. */
+.account-sheet {
+  --tint: #007aff;
+  --tint-fill: rgba(0, 122, 255, 0.13);
+  --tint-fill-pressed: rgba(0, 122, 255, 0.22);
+}
+
+@media (prefers-color-scheme: dark) {
+  .account-sheet {
+    --tint: #0a84ff;
+    --tint-fill: rgba(10, 132, 255, 0.18);
+    --tint-fill-pressed: rgba(10, 132, 255, 0.28);
+  }
+}
+
+.sheet-done {
+  position: absolute;
+  right: 16px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--tint);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 16px 32px;
+}
+
+.account-loading {
+  text-align: center;
+  color: var(--secondary-label);
+}
+
+.account {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section-header {
+  margin: 0 16px 7px;
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--secondary-label);
+}
+
+.plain-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+/* SwiftUI's `LabeledContent`: the label, with the value in secondary text at the far end. */
+.labeled-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 16px;
+  font-size: 17px;
+}
+
+.labeled-row .value {
+  color: var(--secondary-label);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.labeled-row .value.mono {
+  font-family: var(--font-mono);
+}
+
+.labeled-row.secondary {
+  color: var(--secondary-label);
+}
+
+/* A `Button` row in a List: tinted text, or red for `role: .destructive`. */
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  background: none;
+  border: none;
+  color: var(--tint);
+  font: inherit;
+  font-size: 17px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.action-row.destructive {
+  justify-content: center;
+  color: var(--destructive);
+}
+
+.action-row:active {
+  background: var(--fill-pressed);
+}
+
+.action-row:disabled,
+fieldset:disabled .action-row {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.error-text {
+  color: var(--destructive);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Port of SignInView.swift. */
+.sign-in {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 16px;
+  border: none;
+}
+
+.sign-in-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.sign-in-icon {
+  color: var(--tint);
+}
+
+.sign-in-hero h1 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.sign-in-hero p {
+  margin: 0;
+  color: var(--secondary-label);
+}
+
+.sign-in-step {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* .textFieldStyle(.roundedBorder) */
+.text-field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 10px;
+  border: 0.5px solid var(--separator);
+  border-radius: 7px;
+  background: var(--card-bg);
+  color: var(--label);
+  font: inherit;
+  font-size: 17px;
+}
+
+.code-field {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* SignInWithAppleButton: black, or white in dark mode. */
+.btn-apple {
+  background: #000000;
+  color: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .btn-apple {
+    background: #ffffff;
+    color: #000000;
+  }
+}
+
+.sign-in-links {
+  display: flex;
+  justify-content: space-between;
+}
+
+.link-button {
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: var(--tint);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
 }

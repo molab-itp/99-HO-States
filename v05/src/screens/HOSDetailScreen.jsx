@@ -10,7 +10,7 @@ import HOSDrawingEditor from '../components/HOSDrawingEditor.jsx';
 import DrawingDisplayMenu from '../components/DrawingDisplayMenu.jsx';
 import SpeechPlayButton from '../components/SpeechPlayButton.jsx';
 import GreatestFigure from '../components/GreatestFigure.jsx';
-import { greatestFor } from '../data/greatest.js';
+import { greatestFor, greatestSourceURL } from '../data/greatest.js';
 import { showsDrawing, showsPhoto } from '../data/drawingDisplayMode.js';
 import { useStoredBoolean } from '../state/useStoredBoolean.js';
 import { useStoredNumber } from '../state/useStoredNumber.js';
@@ -495,13 +495,19 @@ export default function HOSDetailScreen({ selected, startsPlaying = false, onBac
           {articleURL && (
             <a className="wiki-link" href={articleURL} target="_blank" rel="noopener noreferrer">
               <Icon name="book" size={14} />
-              Read on Wikipedia
+              Source
             </a>
           )}
           {/* HOSSummaryView's Greatest figures alive during the term. */}
           {greatest.length > 0 && (
             <div className="period-greatest">
-              <h2 className="period-greatest-title">100 Greatest of this period</h2>
+              <div className="period-greatest-title">
+                <h2>100 Greatest of this period</h2>
+                <a className="wiki-link" href={greatestSourceURL} target="_blank" rel="noopener noreferrer">
+                  <Icon name="book" size={14} />
+                  Source
+                </a>
+              </div>
               {greatest.map((person, i) => (
                 <div key={person.id} ref={(el) => (greatestRefs.current[i] = el)}>
                   <GreatestFigure

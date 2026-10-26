@@ -41,8 +41,13 @@ jobs:
           npm ci
           npm run build
 
+      # v05's optional Account (sign-in, export/import of app state) uses the same Supabase
+      # project as v07; without these it builds as before, with no Account button.
       - name: Build v05
         working-directory: v05
+        env:
+          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
         run: |
           npm ci
           npm run build

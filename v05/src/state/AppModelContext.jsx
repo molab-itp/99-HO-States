@@ -20,6 +20,20 @@ function shuffledIndexes(count) {
   return arr;
 }
 
+// Each emoji ends up as many times as on whichever side has more of it, so importing the same
+// snapshot twice doesn't double anything. Local order first, then the imported extras.
+function mergedReactions(local, imported) {
+  const merged = [...local];
+  const unmatched = new Map();
+  for (const reaction of local) unmatched.set(reaction, (unmatched.get(reaction) ?? 0) + 1);
+  for (const reaction of imported) {
+    const count = unmatched.get(reaction) ?? 0;
+    if (count > 0) unmatched.set(reaction, count - 1);
+    else merged.push(reaction);
+  }
+  return merged;
+}
+
 /**
  * Port of AppModel.swift. Owns the loaded HOS list and a shuffled draw order used by
  * every "Random" control, so random selection cycles through the full set before repeating
@@ -348,6 +362,75 @@ export function AppModelProvider({ children }) {
     });
   }, [slideIndex, greatestIndex, screen, reactions, imageZoomStates, drawingDisplayModes]);
 
+  // Account export / import (port of `AppModel.swift`'s `snapshot()`/`merge(_:)`): what
+  // `AccountSheet`'s Export writes to the database (via `appStateHistory.js`) and Import merges
+  // back. Only the portable part of the saved state: drawings, the shuffle, slide position and
+  // `screen` only make sense for this browser. Written in v2's JSON shape (zoom offsets as a
+  // `CGSize`, `[width, height]`), so either app can import the other's exports.
+  const snapshot = useCallback(
+    () => ({
+      reactions,
+      imageZoomStates: Object.fromEntries(
+        Object.entries(imageZoomStates).map(([order, zoom]) => [
+          order,
+          { scale: zoom.scale, offset: [zoom.offsetX ?? 0, zoom.offsetY ?? 0] },
+        ]),
+      ),
+      drawingDisplayModes,
+      greatestShownAt: { ...greatestShownAtRef.current },
+      build: `v05 ${appVersion}`,
+    }),
+    [reactions, imageZoomStates, drawingDisplayModes],
+  );
+
+  // Set by `merge` so the merged state is saved as soon as it has rendered, rather than when the
+  // page is next hidden — like Swift's `merge` calling `persistState()` right away.
+  const persistsAfterMergeRef = useRef(false);
+
+  // Merges an imported snapshot into the current state. Anything only on one side is kept.
+  // Reactions are unioned per HOS (see `mergedReactions`); for zoom/pan and drawing display mode
+  // the imported value wins; a Greatest figure counts as shown if it was shown on either side.
+  const merge = useCallback((imported) => {
+    setReactions((prev) => {
+      const next = { ...prev };
+      for (const [order, list] of Object.entries(normalizeReactions(imported.reactions))) {
+        const merged = mergedReactions(prev[order] ?? [], list);
+        if (merged.length > 0) next[order] = merged;
+        else delete next[order];
+      }
+      return next;
+    });
+    setImageZoomStates((prev) => {
+      const next = { ...prev };
+      for (const [order, zoom] of Object.entries(imported.imageZoomStates ?? {})) {
+        if (typeof zoom?.scale !== 'number') continue;
+        const [offsetX = 0, offsetY = 0] = Array.isArray(zoom.offset) ? zoom.offset : [];
+        next[order] = { scale: zoom.scale, offsetX, offsetY };
+      }
+      return next;
+    });
+    setDrawingDisplayModes((prev) => {
+      const next = { ...prev };
+      for (const [order, mode] of Object.entries(normalizeDrawingDisplayModes(imported.drawingDisplayModes))) {
+        if (mode === DEFAULT_DRAWING_DISPLAY_MODE) delete next[order];
+        else next[order] = mode;
+      }
+      return next;
+    });
+    const shownAt = greatestShownAtRef.current;
+    for (const [id, at] of Object.entries(imported.greatestShownAt ?? {})) {
+      if (typeof at === 'number') shownAt[id] = Math.max(shownAt[id] ?? at, at);
+    }
+    greatestLeadCountRef.current = Math.max(0, ...Object.values(shownAt));
+    persistsAfterMergeRef.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!persistsAfterMergeRef.current) return;
+    persistsAfterMergeRef.current = false;
+    persistNow();
+  }, [persistNow]);
+
   useEffect(() => {
     function handleVisibilityChange() {
       if (document.visibilityState === 'hidden') persistNow();
@@ -389,6 +472,8 @@ export function AppModelProvider({ children }) {
       greatestPeopleFor,
       advanceGreatest,
       markGreatestShown,
+      snapshot,
+      merge,
     }),
     [
       viewedIDs,
@@ -414,6 +499,8 @@ export function AppModelProvider({ children }) {
       greatestPeopleFor,
       advanceGreatest,
       markGreatestShown,
+      snapshot,
+      merge,
     ],
   );
 
