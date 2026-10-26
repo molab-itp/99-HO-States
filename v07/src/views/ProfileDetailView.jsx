@@ -2,21 +2,25 @@ import { useState } from 'react';
 import Icon from '../components/Icon.jsx';
 import NavBar from '../components/NavBar.jsx';
 import Spinner from '../components/Spinner.jsx';
-import { profileName, relativeTime } from '../models/profile.js';
+import { CAPTION_LIMIT, profileName, relativeTime } from '../models/profile.js';
 import { makeProfilePhoto } from '../models/profilePhoto.js';
 import { useAuth } from '../services/AuthContext.jsx';
 import * as photos from '../services/profilePhotoService.js';
+import { updateCaption } from '../services/profilesService.js';
 import PhotoCropView from './PhotoCropView.jsx';
 
 /**
  * One user, with their full-size photo. On your own profile you can choose, crop or remove it; a
- * cropped photo keeps its original, which you can crop again or restore.
+ * cropped photo keeps its original, which you can crop again or restore. You can also edit your
+ * caption.
  *
- * `profile` is the list's copy, so `onPhotoChanged` (which reloads the list) is also what brings
- * the new photo here.
+ * `profile` is the list's copy, so `onProfileChanged` (which reloads the list) is also what brings
+ * the new photo or caption here.
  */
-export default function ProfileDetailView({ profile, isCurrentUser, onBack, onPhotoChanged }) {
+export default function ProfileDetailView({ profile, isCurrentUser, onBack, onProfileChanged }) {
   const { client } = useAuth();
+  /** The caption being typed; saved on Return or Save. */
+  const [captionDraft, setCaptionDraft] = useState(profile.caption ?? '');
   /** An uncropped photo waiting in the cropper: `{ blob, url, isNew }`. */
   const [cropSource, setCropSource] = useState(null);
   const [isWorking, setIsWorking] = useState(false);
@@ -38,7 +42,20 @@ export default function ProfileDetailView({ profile, isCurrentUser, onBack, onPh
   function change(operation) {
     return run(async () => {
       await operation();
-      await onPhotoChanged();
+      await onProfileChanged();
+    });
+  }
+
+  /** The draft as it would be stored: trimmed, with blank meaning no caption. */
+  const normalizedCaption = captionDraft.trim() || null;
+  const isCaptionChanged = normalizedCaption !== (profile.caption ?? null);
+
+  function saveCaption() {
+    if (!isCaptionChanged) return;
+    run(async () => {
+      const updated = await updateCaption(client, normalizedCaption, profile.id);
+      setCaptionDraft(updated.caption ?? '');
+      await onProfileChanged();
     });
   }
 
@@ -163,6 +180,35 @@ export default function ProfileDetailView({ profile, isCurrentUser, onBack, onPh
               </div>
             )}
           </>
+        )}
+
+        {isCurrentUser ? (
+          <form
+            className="caption-editor"
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.currentTarget.querySelector('input').blur();
+              saveCaption();
+            }}
+          >
+            <input
+              className="text-field"
+              placeholder="Add a caption"
+              aria-label="Caption"
+              enterKeyHint="done"
+              maxLength={CAPTION_LIMIT}
+              value={captionDraft}
+              disabled={isWorking}
+              onChange={(event) => setCaptionDraft(event.target.value)}
+            />
+            {isCaptionChanged && (
+              <button className="button button-prominent" type="submit" disabled={isWorking}>
+                Save
+              </button>
+            )}
+          </form>
+        ) : (
+          profile.caption && <p className="detail-caption">{profile.caption}</p>
         )}
 
         {errorMessage && <p className="error-text">{errorMessage}</p>}

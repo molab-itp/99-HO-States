@@ -41,6 +41,7 @@ function profile(id, fields) {
     photo_path: null,
     photo_thumb_path: null,
     photo_original_path: null,
+    caption: null,
     is_anonymous: false,
     created_at: ago(5000),
     last_sign_in_at: ago(600),
@@ -54,7 +55,7 @@ function profile(id, fields) {
 function fakeSupabase() {
   const db = {
     profiles: [
-      profile(ADA, { email: 'ada@example.com', display_name: 'Ada Lovelace', last_seen_at: ago(5) }),
+      profile(ADA, { email: 'ada@example.com', display_name: 'Ada Lovelace', caption: 'First programmer', last_seen_at: ago(5) }),
       profile(GUEST, { is_anonymous: true, last_seen_at: ago(60 * 26) }),
     ],
     /** Storage objects in the `avatars` bucket, by path. */
@@ -168,8 +169,10 @@ function fakeSupabase() {
     }
     if (at === 'PATCH /rest/v1/profiles') {
       const id = url.searchParams.get('id').replace('eq.', '');
-      Object.assign(db.profiles.find((p) => p.id === id), request.postDataJSON());
-      return empty(route);
+      const row = Object.assign(db.profiles.find((p) => p.id === id), request.postDataJSON());
+      // `.select().single()` asks for the updated row back, as one object.
+      if (!(request.headers().prefer ?? '').includes('return=representation')) return empty(route);
+      return json(route, (request.headers().accept ?? '').includes('pgrst.object') ? row : [row]);
     }
 
     // --- Storage ---
@@ -298,7 +301,7 @@ async function main() {
     assert(consoleErrors.length === 1 && consoleErrors[0].includes('403'), `console errors: ${consoleErrors}`);
     consoleErrors.length = 0;
     await page.getByLabel('Sign-in code').fill('123 456');
-    await page.getByText('Signed-on Users').waitFor();
+    await page.locator('.nav-title', { hasText: 'HOS-Lobby' }).waitFor();
     console.log('ok  email code sign-in');
 
     // The list: most recently active first, guests named by their id.
@@ -308,6 +311,7 @@ async function main() {
     assert((await page.locator('.list-item').first().locator('.you-badge').count()) === 1, 'my row should say You');
     await page.getByText('Active yesterday').waitFor();
     await page.getByText('ada@example.com').waitFor();
+    await page.locator('.profile-caption', { hasText: 'First programmer' }).waitFor();
     await page.waitForFunction(() => !document.querySelector('.error-text'));
     // v06.155's totals: the guest was last seen 26 hours ago.
     const counts = async () => (await page.locator('.user-count').allTextContents()).join('|');
@@ -348,13 +352,36 @@ async function main() {
     await page.getByRole('button', { name: /Ada Lovelace/ }).first().click();
     await page.locator('.nav-title', { hasText: 'Ada Lovelace' }).waitFor();
     assert((await page.getByText('Choose Photo').count()) === 0, "another user's photo can't be changed");
+    await page.locator('.detail-caption', { hasText: 'First programmer' }).waitFor();
+    assert((await page.getByLabel('Caption').count()) === 0, "another user's caption can't be edited");
     await page.goBack();
-    await page.getByText('Signed-on Users').waitFor();
+    await page.locator('.nav-title', { hasText: 'HOS-Lobby' }).waitFor();
 
     // My profile: pick a photo, crop it, upload.
     await page.getByRole('button', { name: /me@example\.com/ }).first().click();
     await page.getByText('Choose Photo').waitFor();
     assert(page.url().endsWith(`#/user/${ME}`), `the profile's address is ${page.url()}`);
+    const me = () => db.profiles.find((p) => p.id === ME);
+
+    // Caption: Save shows once it differs, Return saves it trimmed, and blank clears it.
+    const caption = page.getByLabel('Caption');
+    assert((await page.getByRole('button', { name: 'Save' }).count()) === 0, 'no Save before an edit');
+    await caption.fill('  Hello from the web  ');
+    await page.getByRole('button', { name: 'Save' }).waitFor();
+    await shot(page, 'caption-editing');
+    await caption.press('Enter');
+    await page.getByRole('button', { name: 'Save' }).waitFor({ state: 'detached' });
+    assert(me().caption === 'Hello from the web', `caption saved as ${JSON.stringify(me().caption)}`);
+    assert((await caption.inputValue()) === 'Hello from the web', 'the field shows the stored caption');
+    assert((await caption.getAttribute('maxlength')) === '100', 'captions are capped at 100 characters');
+    await caption.fill('   ');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'Save' }).waitFor({ state: 'detached' });
+    assert(me().caption === null, `a blank caption should clear it, found ${JSON.stringify(me().caption)}`);
+    await caption.fill('Hello from the web');
+    await caption.press('Enter');
+    await page.getByRole('button', { name: 'Save' }).waitFor({ state: 'detached' });
+    console.log('ok  edit caption');
     // Any picture will do; this one is 390 × 844.
     const picture = await page.screenshot();
     await page.locator('input[type=file]').setInputFiles({ name: 'photo.png', mimeType: 'image/png', buffer: picture });
@@ -381,7 +408,6 @@ async function main() {
     await page.getByRole('button', { name: 'Done' }).click();
 
     await page.getByRole('button', { name: 'Restore Original' }).waitFor();
-    const me = () => db.profiles.find((p) => p.id === ME);
     assert(db.files.size === 3, `expected full, thumb and original in the bucket, found ${[...db.files.keys()]}`);
     assert(me().photo_path.startsWith(`${ME}/`) && me().photo_path.endsWith('-full.jpg'), `photo_path is ${me().photo_path}`);
     assert(me().photo_original_path.endsWith('-original.jpg'), `photo_original_path is ${me().photo_original_path}`);
@@ -427,7 +453,8 @@ async function main() {
     await page.reload();
     await page.locator('.nav-title', { hasText: 'me@example.com' }).waitFor();
     await page.getByRole('button', { name: 'Back' }).click();
-    await page.getByText('Signed-on Users').waitFor();
+    await page.locator('.nav-title', { hasText: 'HOS-Lobby' }).waitFor();
+    await page.locator('.profile-caption', { hasText: 'Hello from the web' }).waitFor();
     assert(!page.url().includes('#'), `the list's address is ${page.url()}`);
     console.log('ok  profile address');
 
@@ -435,7 +462,7 @@ async function main() {
     await page.getByRole('button', { name: 'Sign Out' }).click();
     await page.getByRole('heading', { name: 'HO Users' }).waitFor();
     await page.getByRole('button', { name: 'Continue as Guest' }).click();
-    await page.getByText('Signed-on Users').waitFor();
+    await page.locator('.nav-title', { hasText: 'HOS-Lobby' }).waitFor();
     await page.locator('.list-item').first().waitFor();
     assert((await page.locator('.profile-name').first().textContent()) === 'Guest EEEE', 'the guest should top the list');
     assert((await page.locator('.list-delete').count()) === 0, 'a guest is not an admin');

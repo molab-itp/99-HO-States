@@ -128,27 +128,34 @@ p {
   text-align: center;
 }
 
-/* v06's UserCountsView: two stats side by side, split by a Divider. */
+/* .caption2 */
+.version-label-small {
+  font-size: 11px;
+}
+
+/* v06's UserCountsView: two stats side by side, split by a 12-point Divider. */
 .user-counts {
   display: flex;
-  align-items: stretch;
+  align-items: center;
 }
 
 .user-count {
   flex: 1;
   margin: 0;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--secondary-label);
   text-align: center;
 }
 
 .user-count-value {
   color: var(--label);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
 .user-counts-divider {
   width: 1px;
+  height: 12px;
   background: var(--separator);
 }
 
@@ -450,6 +457,14 @@ fieldset:disabled .button {
   padding: 0 4px;
 }
 
+/* The section header above the list: version, then the user counts. */
+.list-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 4px;
+}
+
 .list {
   margin: 0;
   padding: 0;
@@ -537,6 +552,16 @@ fieldset:disabled .button {
   background: var(--tint-fill);
   font-size: 12px;
   font-weight: 700;
+}
+
+/* .subheadline, up to two lines. */
+.profile-row-text > .profile-caption {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 15px;
 }
 
 .profile-email {
@@ -652,6 +677,18 @@ fieldset:disabled .button {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.caption-editor {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  gap: 8px;
+}
+
+.detail-caption {
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .detail-email {

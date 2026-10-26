@@ -3101,3 +3101,42 @@ The build for the iOS Simulator succeeds. The app and previews weren't run to ch
 The earlier change to the navigation title ("HOS-Lobby") was kept. Nothing was committed.
 
 **Cost**: ~4 minutes.
+
+# --
+
+2026-10-25 21:13 (v07: sync captions and list header from v06)
+
+## Request
+
+Sync the web app v07 with the SwiftUI app v06.
+
+## What was built
+
+v07 was last synced at v07.159. Since then v06 has added captions, moved the version and user
+counts to the top of the list, and renamed the list's title. The other v06 changes were Xcode
+previews and the preview sample data, which have no web equivalent.
+
+- `src/models/profile.js`, `src/services/profilesService.js`: added `CAPTION_LIMIT` (100, the
+  same as the database check) and `updateCaption`, which returns the updated row.
+- `src/views/ProfileDetailView.jsx`: on your own profile, an "Add a caption" field. Save
+  appears once the text differs from the stored caption, and Return also saves. The caption is
+  trimmed before it's stored, and a blank caption clears it. The field stops at 100 characters.
+  Other users' captions are shown centered and can't be edited. `onPhotoChanged` was renamed
+  `onProfileChanged`, as in v06.
+- `src/views/ProfileRow.jsx`: the caption appears under the name, cut off after two lines.
+- `src/views/UsersListView.jsx`, `AppVersionLabel.jsx`, `src/index.css`: the version label and
+  user counts moved from below the list to above it and use a smaller font (`.caption2`, with
+  the numbers in semibold). The divider between the counts is 12px tall. The title is now
+  "HOS-Lobby" (it was "Signed-on Users").
+- `scripts/smoke.mjs`: the fake Supabase now has a `caption` column and returns the updated row
+  when the app asks for it. A new step saves, clears and saves your own caption again. It checks
+  that Ada's caption shows in the list and on her profile, that it can't be edited there, and
+  that your new caption shows in the list.
+
+The build passes and `npm run smoke` passes with no console errors. The light and dark
+screenshots show the header above the list and the captions in the rows. The smoke test
+doesn't use the real Supabase project. Captions only save there once the
+`20261025000000_profile_caption.sql` migration has been pushed from `v06/`. Version bumped to
+0.7.2. Nothing was committed.
+
+**Cost**: ~10 minutes.

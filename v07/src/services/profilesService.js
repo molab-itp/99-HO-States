@@ -15,6 +15,14 @@ export async function fetchAll(client) {
 }
 
 /**
+ * Sets the current user's caption (`null` clears it) and returns the updated row. RLS only lets
+ * users update their own profile.
+ */
+export async function updateCaption(client, caption, id) {
+  return unwrap(await client.from('profiles').update({ caption }).eq('id', id).select().single());
+}
+
+/**
  * Records that the current user is about to sign out, which other clients show as a
  * "signed out" banner. Call it while the session is still valid.
  */

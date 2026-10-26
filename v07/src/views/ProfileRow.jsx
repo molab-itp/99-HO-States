@@ -11,6 +11,7 @@ export default function ProfileRow({ profile, isCurrentUser, thumbURL }) {
           <span className="profile-name">{profileName(profile)}</span>
           {isCurrentUser && <span className="you-badge">You</span>}
         </span>
+        {profile.caption && <span className="profile-caption">{profile.caption}</span>}
         {/* The name already falls back to the email, so only repeat it under a real name. */}
         {profile.display_name != null && profile.email && <span className="profile-email">{profile.email}</span>}
         {profile.last_seen_at && <span className="profile-active">Active {relativeTime(profile.last_seen_at)}</span>}

@@ -2,6 +2,9 @@
 // so fields keep their column names (`display_name`, `photo_thumb_path`, `last_seen_at`, …) and
 // timestamps are ISO strings.
 
+/** Matches the `char_length` check on `profiles.caption`. */
+export const CAPTION_LIMIT = 100;
+
 /** Guests have no email, so a slice of their id tells them apart in the list. */
 export function profileName(profile) {
   return (

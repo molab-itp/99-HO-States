@@ -143,12 +143,12 @@ export default function UsersListView({ currentUserID }) {
           profile={selected}
           isCurrentUser={selected.id === currentUserID}
           onBack={closeProfile}
-          onPhotoChanged={reload}
+          onProfileChanged={reload}
         />
       ) : (
         <>
           <NavBar
-            title="Signed-on Users"
+            title="HOS-Lobby"
             leading={
               // Pull-to-refresh, for a browser.
               <button className="nav-button" onClick={reload} disabled={isReloading} aria-label="Refresh">
@@ -163,6 +163,11 @@ export default function UsersListView({ currentUserID }) {
           />
           <div className="list-screen">
             {shownError && <p className="error-text list-error">{shownError}</p>}
+            {/* v06's section header. */}
+            <div className="list-header">
+              <AppVersionLabel small />
+              {hasLoaded && profiles.length > 0 && <UserCounts profiles={profiles} />}
+            </div>
             {!hasLoaded || (selectedID && !selected) ? (
               <div className="unavailable">
                 <Spinner large />
@@ -198,8 +203,6 @@ export default function UsersListView({ currentUserID }) {
                 ))}
               </ul>
             )}
-            <AppVersionLabel />
-            {hasLoaded && profiles.length > 0 && <UserCounts profiles={profiles} />}
           </div>
         </>
       )}
@@ -230,7 +233,7 @@ export default function UsersListView({ currentUserID }) {
 }
 
 /**
- * Totals shown under the list: every user, and those seen in the last 24 hours. Ticks each
+ * Totals shown above the list: every user, and those seen in the last 24 hours. Ticks each
  * minute so users drop out of the 24-hour count without a reload.
  */
 function UserCounts({ profiles }) {
