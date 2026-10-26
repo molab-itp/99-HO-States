@@ -207,6 +207,7 @@ struct LandingView: View {
       if let auth {
         AccountView()
           .environment(auth)
+          .environment(appModel)
       }
     }
   }

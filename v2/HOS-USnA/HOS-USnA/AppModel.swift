@@ -331,4 +331,68 @@ final class AppModel {
         guard let data = try? JSONEncoder().encode(state) else { return }
         try? data.write(to: Self.stateFileURL(), options: .atomic)
     }
+
+    // MARK: - Account export / import
+    //
+    // What `AccountView`'s Export writes to the database (via `AppStateHistory`) and Import merges
+    // back. Only the portable part of `PersistedState`: `drawingFileNames` points at PNGs on this
+    // device, and the shuffle, slide position and `screen` only make sense for this install.
+
+    struct Snapshot: Codable {
+        /// String-keyed like `PersistedState`, so the JSON in the database reads the same.
+        var reactions: [String: [HOSReaction]]
+        var imageZoomStates: [String: ImageZoomState]
+        var drawingDisplayModes: [String: DrawingDisplayMode]
+        var greatestShownAt: [GreatestPerson.ID: Int]
+        /// `CFBundleVersion` of the build that exported it, for reading the history later.
+        var build: String?
+    }
+
+    func snapshot() -> Snapshot {
+        Snapshot(
+            reactions: Dictionary(uniqueKeysWithValues: reactions.map { (String($0.key), $0.value) }),
+            imageZoomStates: Dictionary(uniqueKeysWithValues: imageZoomStates.map { (String($0.key), $0.value) }),
+            drawingDisplayModes: Dictionary(uniqueKeysWithValues: drawingDisplayModes.map { (String($0.key), $0.value) }),
+            greatestShownAt: greatestShownAt,
+            build: Self.bundleVersion()
+        )
+    }
+
+    /// Merges an imported snapshot into the current state and persists right away. Anything only
+    /// on one side is kept. Reactions are unioned per HOS (see `mergedReactions`); for zoom/pan
+    /// and drawing display mode the imported value wins; a Greatest figure counts as shown if it
+    /// was shown on either side.
+    func merge(_ snapshot: Snapshot) {
+        for (key, imported) in snapshot.reactions {
+            guard let id = Int(key) else { continue }
+            let merged = Self.mergedReactions(reactions[id] ?? [], imported)
+            reactions[id] = merged.isEmpty ? nil : merged
+        }
+        for (key, state) in snapshot.imageZoomStates {
+            guard let id = Int(key) else { continue }
+            imageZoomStates[id] = state
+        }
+        for (key, mode) in snapshot.drawingDisplayModes {
+            guard let id = Int(key) else { continue }
+            drawingDisplayModes[id] = mode == .photoAndDrawing ? nil : mode
+        }
+        greatestShownAt.merge(snapshot.greatestShownAt) { max($0, $1) }
+        greatestLeadCount = greatestShownAt.values.max() ?? 0
+        persistState()
+    }
+
+    /// Each emoji ends up as many times as on whichever side has more of it, so importing the
+    /// same snapshot twice doesn't double anything. Local order first, then the imported extras.
+    private static func mergedReactions(_ local: [HOSReaction], _ imported: [HOSReaction]) -> [HOSReaction] {
+        var merged = local
+        var unmatched = Dictionary(local.map { ($0, 1) }, uniquingKeysWith: +)
+        for reaction in imported {
+            if let count = unmatched[reaction], count > 0 {
+                unmatched[reaction] = count - 1
+            } else {
+                merged.append(reaction)
+            }
+        }
+        return merged
+    }
 }

@@ -74,3 +74,12 @@ Add a one-line comment at the top of each copy pointing back to the v06 original
 - No `AppStateStore`, and nothing reads or writes `app_state`. `AppState.json` works as before.
 - Project: `supabase-swift` 2.55 (pinned to v06's `Package.resolved`), `HOS-USnA.entitlements` (Sign in with Apple), gitignored `Supabase.plist` + `Supabase.example.plist` excluded from the target and copied by the "Copy Supabase.plist if present" script, `ENABLE_USER_SCRIPT_SANDBOXING = NO` on the target. No URL scheme is registered.
 - Still to do by hand before Sign in with Apple works: add `com.jht1900.HO-States-US` to the Supabase Apple provider's Client IDs (and `v06/supabase/config.toml`). Email code and Guest work now.
+
+## Export / import with history (v02.169, 2026-10-26)
+
+- Account view (signed in) has **Export App State** and **Import App State**, plus the date of the last export.
+- Export inserts a new `app_state` row, `app = 'ho-states'`, `key = 'history/<UTC ISO time>'`, so rows are keyed by user and date and never overwritten. That is the history to roll back from later. No migration: the primary key is already `(user_id, app, key)`. `key = 'default'` stays free for stage 2 live sync (v07's `appStateStore` reads only that key).
+- Import reads the newest `history/%` row (by the server's `updated_at`) and merges it into `AppModel` (`AppModel.merge`): reactions are a per-HOS multiset union (re-importing doesn't duplicate), the imported zoom and display mode win, `greatestShownAt` takes the max. Then `AppState.json` is written.
+- Only portable fields are exported (`AppModel.Snapshot`): reactions, zoom states, drawing display modes, `greatestShownAt`, and the build. Drawings, shuffle and slide position, and `screen` stay on the device.
+- Guests see their lobby code (`Guest XXXX`, the first 4 of the user id, as in v06's `Profile.name`) in the Account view and on Landing's Account button.
+- Not done yet: a UI to pick an older export (roll back), and pruning old history rows.

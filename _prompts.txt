@@ -1271,3 +1271,13 @@ do step 1. Sign-in only, with nothing synced
 
 the Apple Client ID you still need to add in Supabase before Sign in with Apple works
 
+v02.169
+
+in v2 Account view
+add export button that will write app state to db
+add import button that will merge app state with last db app state
+keep all app state updates keyed by user and date
+to maintain history of app state updates per user
+and to support possible roll back in future
+display guest signon code as show in HOS-Lobby
+
