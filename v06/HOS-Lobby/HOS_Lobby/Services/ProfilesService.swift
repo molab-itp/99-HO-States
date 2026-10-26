@@ -26,6 +26,19 @@ struct ProfilesService {
             .value
     }
 
+    /// Sets the current user's caption (`nil` clears it) and returns the updated row. RLS only
+    /// lets users update their own profile.
+    func updateCaption(_ caption: String?, id: UUID) async throws -> Profile {
+        try await client
+            .from("profiles")
+            .update(["caption": caption])
+            .eq("id", value: id)
+            .select()
+            .single()
+            .execute()
+            .value
+    }
+
     /// Records that the current user is about to sign out, which other clients show as a
     /// "signed out" banner. Call it while the session is still valid.
     func markSignedOut() async throws {

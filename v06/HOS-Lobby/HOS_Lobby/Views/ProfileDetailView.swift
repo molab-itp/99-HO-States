@@ -2,11 +2,12 @@ import PhotosUI
 import SwiftUI
 
 /// One user, with their full-resolution photo. On your own profile you can choose, crop or remove
-/// it; a cropped photo keeps its original, which you can crop again or restore.
+/// it; a cropped photo keeps its original, which you can crop again or restore. You can also edit
+/// your caption.
 struct ProfileDetailView: View {
     let isCurrentUser: Bool
-    /// Called after the photo changes, so the list can pick up the new thumbnail.
-    let onPhotoChanged: () async -> Void
+    /// Called after the photo or caption changes, so the list can pick them up.
+    let onProfileChanged: () async -> Void
 
     @Environment(AuthModel.self) private var auth
     @State private var profile: Profile
@@ -14,11 +15,21 @@ struct ProfileDetailView: View {
     @State private var cropSource: CropSource?
     @State private var isWorking = false
     @State private var errorMessage: String?
+    /// The caption being typed; saved on Return or Save.
+    @State private var captionDraft: String
+    @FocusState private var isEditingCaption: Bool
 
-    init(profile: Profile, isCurrentUser: Bool, onPhotoChanged: @escaping () async -> Void) {
+    init(profile: Profile, isCurrentUser: Bool, onProfileChanged: @escaping () async -> Void) {
         _profile = State(initialValue: profile)
+        _captionDraft = State(initialValue: profile.caption ?? "")
         self.isCurrentUser = isCurrentUser
-        self.onPhotoChanged = onPhotoChanged
+        self.onProfileChanged = onProfileChanged
+    }
+
+    /// The draft as it would be stored: trimmed, with blank meaning no caption.
+    private var normalizedCaption: String? {
+        let trimmed = captionDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 
     private var photos: ProfilePhotoService { ProfilePhotoService(client: auth.client) }
@@ -68,6 +79,13 @@ struct ProfileDetailView: View {
                     }
                 }
 
+                if isCurrentUser {
+                    captionEditor
+                } else if let caption = profile.caption {
+                    Text(caption)
+                        .multilineTextAlignment(.center)
+                }
+
                 if let errorMessage {
                     Text(errorMessage)
                         .font(.footnote)
@@ -100,6 +118,37 @@ struct ProfileDetailView: View {
                 cropSource = nil
                 finishCrop(of: source, to: rect)
             }
+        }
+    }
+
+    private var captionEditor: some View {
+        HStack {
+            TextField("Add a caption", text: $captionDraft)
+                .textFieldStyle(.roundedBorder)
+                .focused($isEditingCaption)
+                .submitLabel(.done)
+                .onSubmit(saveCaption)
+                .onChange(of: captionDraft) {
+                    if captionDraft.count > Profile.captionLimit {
+                        captionDraft = String(captionDraft.prefix(Profile.captionLimit))
+                    }
+                }
+            if normalizedCaption != profile.caption {
+                Button("Save", action: saveCaption)
+                    .buttonStyle(.borderedProminent)
+            }
+        }
+        .disabled(isWorking)
+    }
+
+    private func saveCaption() {
+        isEditingCaption = false
+        let caption = normalizedCaption
+        guard caption != profile.caption else { return }
+        run {
+            profile = try await ProfilesService(client: auth.client).updateCaption(caption, id: profile.id)
+            captionDraft = profile.caption ?? ""
+            await onProfileChanged()
         }
     }
 
@@ -195,7 +244,7 @@ struct ProfileDetailView: View {
         run {
             try await operation()
             profile = try await ProfilesService(client: auth.client).fetch(id: profile.id)
-            await onPhotoChanged()
+            await onProfileChanged()
         }
     }
 

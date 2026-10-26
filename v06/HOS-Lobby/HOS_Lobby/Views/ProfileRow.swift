@@ -30,6 +30,11 @@ struct ProfileRow: View {
                             .background(.tint.opacity(0.15), in: Capsule())
                     }
                 }
+                if let caption = profile.caption {
+                    Text(caption)
+                        .font(.subheadline)
+                        .lineLimit(2)
+                }
                 // `name` already falls back to the email, so only repeat it under a real name.
                 if profile.displayName != nil, let email = profile.email {
                     Text(email)

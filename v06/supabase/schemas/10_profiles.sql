@@ -14,6 +14,8 @@ create table public.profiles (
   -- The uncropped photo, set only while `photo_path` is a crop of it, so the user can re-crop or
   -- restore it. Null when `photo_path` is itself the original.
   photo_original_path text,
+  -- A short line the user writes about themselves in the app, shown under their name in the list.
+  caption text check (char_length(caption) <= 100),
   -- Guests from "Continue as Guest" (`signInAnonymously()`). They're real users with their own
   -- id and `app_state`; adding an email later keeps both.
   is_anonymous boolean not null default false,

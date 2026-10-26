@@ -1210,3 +1210,30 @@ in v06/HOS-Lobby/HOS-Lobby.xcodeproj
 update UsersListView to show
 version and user counts in small font 
 at top of list
+
+v02.163
+
+in v06/HOS-Lobby/HOS-Lobby.xcodeproj
+add user editable caption to profile
+caption will be editable in profile detail
+and displayed in user list
+
+To apply it, run npx supabase db push from v06/.
+
+Cannot find project ref. Have you run supabase link?
+Try rerunning the command with --debug to troubleshoot the error.
+
+npx supabase login
+npx supabase db push
+
+Cannot find project ref. Have you run supabase link?
+Try rerunning the command with --debug to troubleshoot the error.
+
+npx --debug supabase db push
+
+>> to do db update:
+npx supabase login
+npx supabase link --project-ref jcoolgnracpgjncksopx
+npx supabase db push
+
+I haven't added captions to the v07 web app, which uses the same database.
