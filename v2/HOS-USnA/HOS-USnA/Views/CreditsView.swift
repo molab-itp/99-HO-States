@@ -1,12 +1,14 @@
 import SwiftUI
 
-/// Sources and licences of everything the app shows that it didn't make itself: the Wikipedia
+/// The external links from Links.json, then the sources and licences of everything the app shows that it didn't make itself: the Wikipedia
 /// article each summary is extracted from, the portrait photos, and the pages linked from
 /// `NewsView`. Pushed from `LandingView`; the caption under each title links to its source,
 /// and each category can be hidden or shown from its header.
 struct CreditsView: View {
     @Environment(AppModel.self) private var appModel
 
+    /// External links listed at the top of the screen, from Links.json.
+    private let links = LinksRepository.loadAll()
     private let photoCredits = PhotoCreditsRepository.loadAll()
     private let newsItems = NewsRepository.loadAll()
 
@@ -14,6 +16,14 @@ struct CreditsView: View {
 
     var body: some View {
         List {
+            Section {
+                ForEach(links) { link in
+                    Link(destination: link.url) {
+                        Label(link.title, systemImage: "link")
+                    }
+                }
+            }
+
             CreditsSection("Articles", footer: Text("Summaries are extracted from Wikipedia and are available under the [Creative Commons Attribution-ShareAlike 4.0 License](\(Self.textLicenseURL.absoluteString)).")) {
                 ForEach(appModel.hosList) { hos in
                     if let url = hos.wikipediaArticleURL {

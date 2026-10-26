@@ -19,9 +19,6 @@ struct LandingView: View {
   /// Shows the text-to-speech setup screen.
   let onShowSpeechSetup: () -> Void
   
-  /// External links listed at the bottom of the screen, from Links.json.
-  private let links = LinksRepository.loadAll()
-  
   @AppStorage(SlideshowSettings.randomModeKey)
   private var isRandomMode = SlideshowSettings.defaultRandomMode
   @AppStorage(SlideshowSettings.animatedKey)
@@ -116,6 +113,15 @@ struct LandingView: View {
           }
           .buttonStyle(.bordered)
           
+          VStack(spacing: 4) {
+            Text("\(remainingCount) left to see")
+              .font(.callout.weight(.medium))
+            Button("Reset Visit Count", role: .destructive) {
+              appModel.resetVisitCount()
+            }
+            .buttonStyle(.bordered)
+          }
+
           Toggle(isOn: $isRandomMode) {
             Label("Random Mode", systemImage: "shuffle")
           }
@@ -168,30 +174,15 @@ struct LandingView: View {
         .controlSize(.large)
         .padding(.horizontal, 32)
         
-        VStack(spacing: 4) {
-          Text("\(remainingCount) left to see")
-            .font(.callout.weight(.medium))
-          Button("Reset Visit Count", role: .destructive) {
-            appModel.resetVisitCount()
-          }
-          .buttonStyle(.bordered)
-          Button {
-            onShowCredits()
-          } label: {
-            Label("Credits", systemImage: "info.circle")
-              .frame(maxWidth: .infinity)
-          }
-          .buttonStyle(.bordered)
-        }
         
-        VStack(spacing: 4) {
-          ForEach(links) { link in
-            Link(destination: link.url) {
-              Label(link.title, systemImage: "link")
-                .font(.footnote)
-            }
-          }
+        Button {
+          onShowCredits()
+        } label: {
+          Label("Credits", systemImage: "info.circle")
+            .frame(maxWidth: .infinity)
         }
+        .buttonStyle(.bordered)
+
         Text(appModel.buildInfo)
           .font(.footnote.monospaced())
           .foregroundStyle(.secondary)

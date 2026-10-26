@@ -1244,7 +1244,12 @@ Getting build error when creating archive for app store
 v06/HOS-Lobby/HOS_Lobby/Views/PhotoCropView.swift:126:27 
 Type 'UIImage' has no member 'sample'
 
-v02.165
+v07.165
 
 sync web app v07 with SwiftUI app v06
 add an entry to Log.md
+
+v02.166
+
+in v02 LandingView
+move links to top of  credits view
