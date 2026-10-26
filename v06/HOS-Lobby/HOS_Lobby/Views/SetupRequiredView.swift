@@ -12,3 +12,7 @@ struct SetupRequiredView: View {
         }
     }
 }
+
+#Preview {
+    SetupRequiredView(message: "Copy Supabase.example.plist to Supabase.plist and fill in your project's URL and publishable key.")
+}

@@ -46,3 +46,12 @@ struct ProfileRow: View {
         .accessibilityElement(children: .combine)
     }
 }
+
+#Preview {
+    List {
+        ProfileRow(profile: .sampleMe, isCurrentUser: true, thumbURL: nil)
+        ForEach(Profile.samples.dropFirst()) { profile in
+            ProfileRow(profile: profile, isCurrentUser: false, thumbURL: nil)
+        }
+    }
+}

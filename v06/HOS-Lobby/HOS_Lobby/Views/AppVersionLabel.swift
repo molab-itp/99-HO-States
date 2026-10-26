@@ -16,3 +16,7 @@ struct AppVersionLabel: View {
             .foregroundStyle(.secondary)
     }
 }
+
+#Preview {
+    AppVersionLabel()
+}

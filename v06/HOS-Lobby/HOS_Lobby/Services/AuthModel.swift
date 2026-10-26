@@ -20,10 +20,23 @@ final class AuthModel {
         self.client = client
     }
 
+    /// Set by previews (see `AuthModel.preview`).
+    @ObservationIgnored private var isPreview = false
+
+    #if DEBUG
+    /// For previews: starts in `state`, which `observeAuthChanges` then leaves alone.
+    init(client: SupabaseClient, state: State) {
+        self.client = client
+        self.state = state
+        isPreview = true
+    }
+    #endif
+
     /// Runs for the app's lifetime (started from `RootView`'s `.task`). The first event is the
     /// locally stored session, if any, so a returning user goes straight to the list; the client
     /// refreshes an expired token on its own and emits `.signedOut` if that fails.
     func observeAuthChanges() async {
+        if isPreview { return }
         for await (_, session) in client.auth.authStateChanges {
             state = session.map { .signedIn($0.user) } ?? .signedOut
         }

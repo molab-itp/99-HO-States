@@ -191,3 +191,13 @@ struct SignInView: View {
         }
     }
 }
+
+#Preview {
+    SignInView()
+        .environment(AuthModel.preview())
+}
+
+#Preview("Error") {
+    SignInView()
+        .environment(AuthModel.preview(errorMessage: "Email rate limit exceeded"))
+}

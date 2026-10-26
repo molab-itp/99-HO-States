@@ -15,6 +15,24 @@ struct UsersListView: View {
     /// The user an admin swiped, while the "are you sure" dialog is up.
     @State private var pendingDelete: Profile?
 
+    /// Set by previews, which show these instead of loading from Supabase.
+    private var isPreview = false
+
+    init(currentUserID: UUID) {
+        self.currentUserID = currentUserID
+    }
+
+    #if DEBUG
+    init(currentUserID: UUID, sampleProfiles: [Profile], isAdmin: Bool = false, banner: UserEvent? = nil) {
+        self.currentUserID = currentUserID
+        _profiles = State(initialValue: sampleProfiles)
+        _hasLoaded = State(initialValue: true)
+        _isAdmin = State(initialValue: isAdmin)
+        _banner = State(initialValue: banner)
+        isPreview = true
+    }
+    #endif
+
     private var service: ProfilesService { ProfilesService(client: auth.client) }
     private var photos: ProfilePhotoService { ProfilePhotoService(client: auth.client) }
 
@@ -117,6 +135,7 @@ struct UsersListView: View {
     }
 
     private func reload() async {
+        guard !isPreview else { return }
         do {
             try await service.touchLastSeen()
             profiles = try await service.fetchAll()
@@ -144,6 +163,7 @@ struct UsersListView: View {
 
     /// Keeps the list live for as long as it's on screen, and announces what other users do.
     private func watchChanges() async {
+        guard !isPreview else { return }
         do {
             try await service.observeChanges { apply($0) }
         } catch is CancellationError {
@@ -228,4 +248,15 @@ private struct UserCountsView: View {
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
     }
+}
+
+#Preview {
+    UsersListView(currentUserID: Profile.sampleMe.id, sampleProfiles: Profile.samples, isAdmin: true,
+                  banner: UserEvent(kind: .signedIn, name: "Grace Hopper"))
+        .environment(AuthModel.preview())
+}
+
+#Preview("Empty") {
+    UsersListView(currentUserID: UUID(), sampleProfiles: [])
+        .environment(AuthModel.preview())
 }

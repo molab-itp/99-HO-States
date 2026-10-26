@@ -213,3 +213,17 @@ struct ProfileDetailView: View {
         }
     }
 }
+
+#Preview("Your profile") {
+    NavigationStack {
+        ProfileDetailView(profile: .sampleMe, isCurrentUser: true) {}
+    }
+    .environment(AuthModel.preview())
+}
+
+#Preview("Someone else") {
+    NavigationStack {
+        ProfileDetailView(profile: Profile.samples[1], isCurrentUser: false) {}
+    }
+    .environment(AuthModel.preview())
+}

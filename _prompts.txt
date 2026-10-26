@@ -1199,4 +1199,8 @@ in v2, on view HOS detail
 flush right to "100 Greatest of this period"
 add link to 100 Greatest wikipedia article.
 
+v02.161
+
+in v06/HOS-Lobby/HOS-Lobby.xcodeproj
+update views to support Preview using sample data
 

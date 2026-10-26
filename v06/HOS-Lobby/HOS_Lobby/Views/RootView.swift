@@ -17,3 +17,13 @@ struct RootView: View {
         .task { await auth.observeAuthChanges() }
     }
 }
+
+#Preview("Loading") {
+    RootView()
+        .environment(AuthModel.preview(state: .loading))
+}
+
+#Preview("Signed out") {
+    RootView()
+        .environment(AuthModel.preview())
+}

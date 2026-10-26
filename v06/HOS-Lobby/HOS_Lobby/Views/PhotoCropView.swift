@@ -121,3 +121,7 @@ struct PhotoCropView: View {
         crop = CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
     }
 }
+
+#Preview {
+    PhotoCropView(image: .sample, onCancel: {}, onDone: { _ in })
+}
