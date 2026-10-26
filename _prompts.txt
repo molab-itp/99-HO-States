@@ -1256,4 +1256,9 @@ move links to top of  credits view
 
 v02.167
 
-in v02 
+for v2 give recommendations 
+for adding signin feature from v06
+how best to add signin code from v06
+to v2 and remifications for accessing same db.
+
+write these recommendations to top level new file Log-v2-signon.md
