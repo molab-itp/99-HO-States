@@ -11,6 +11,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AB952927308EE29700E1B1B4 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
 		EB89F154C1D19FF43DC0C415 /* HOS-Lobby.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HOS-Lobby.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -60,6 +61,7 @@
 		FE226FA7D131373B18698F09 = {
 			isa = PBXGroup;
 			children = (
+				AB952927308EE29700E1B1B4 /* README.md */,
 				AB532D443065324100E718FD /* HOS_Lobby */,
 				BBBCA7D0AA98DFD1812032D5 /* Products */,
 			);
