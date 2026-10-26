@@ -28,6 +28,9 @@ enum SlideshowSettings {
     static let fadePeriodKey = "slideshowFadePeriod"
     static let fadePeriodOptions: [Double] = [0.1, 1, 2]
     static let defaultFadePeriod: Double = 1
+    /// Every key above, for Landing's Reset App.
+    static let allKeys = [randomModeKey, animatedKey, autoScrollKey, autoScrollGreatestKey,
+                          intervalSecsKey, delayFractionKey, fadePeriodKey]
 }
 
 struct HOSDetailView: View {

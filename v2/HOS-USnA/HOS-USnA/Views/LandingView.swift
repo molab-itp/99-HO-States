@@ -37,6 +37,7 @@ struct LandingView: View {
   private var delayFraction = SlideshowSettings.defaultDelayFraction
   @AppStorage(SlideshowSettings.fadePeriodKey)
   private var fadePeriod = SlideshowSettings.defaultFadePeriod
+  @State private var isConfirmingReset = false
   private var remainingCount: Int {
     appModel.hosList.count - appModel.viewedHOSIDs.count
   }
@@ -195,6 +196,21 @@ struct LandingView: View {
               .frame(maxWidth: .infinity)
           }
           .buttonStyle(.bordered)
+        }
+
+        Button(role: .destructive) {
+          isConfirmingReset = true
+        } label: {
+          Label("Reset App", systemImage: "arrow.counterclockwise")
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .confirmationDialog("Reset App?", isPresented: $isConfirmingReset, titleVisibility: .visible) {
+          Button("Reset App", role: .destructive) {
+            appModel.resetApp()
+          }
+        } message: {
+          Text("Clears all reactions, drawings, zoom, visit progress and settings. This can't be undone.")
         }
 
         Text(appModel.buildInfo)

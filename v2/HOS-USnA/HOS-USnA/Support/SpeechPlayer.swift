@@ -59,6 +59,10 @@ enum SpeechSettings {
     static let shownGroupsKey = "speechShownLanguageGroups"
     static let defaultShownGroups = "Chinese"
 
+    /// Every key above, for Landing's Reset App.
+    static let allKeys = [languageKey, autoSpeakKey, autoSpeakModeKey, sampleTextKey,
+                          sampleTextLanguageKey, shownGroupsKey]
+
     static func shownGroups(_ stored: String) -> Set<String> {
         Set(stored.split(separator: "\n").map(String.init))
     }

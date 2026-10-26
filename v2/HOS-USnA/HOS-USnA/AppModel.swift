@@ -243,6 +243,27 @@ final class AppModel {
         greatestLeadCount = 0
     }
 
+    /// Landing's Reset App: back to a fresh install. Clears everything `resetVisitCount()` does
+    /// plus reactions, zoom/pan, drawings (and their files), the saved screen, the state file,
+    /// and the slideshow and speech settings. Leaves the account sign-in alone.
+    func resetApp() {
+        resetVisitCount()
+        cycleCount = 1
+        screen = .landing
+        reactions.removeAll()
+        imageZoomStates.removeAll()
+        drawingDisplayModes.removeAll()
+        drawingFileNames.removeAll()
+        drawingImageCache.removeAll()
+        drawingRevision += 1
+        greatestVisit = nil
+        try? FileManager.default.removeItem(at: HOSDrawingStore.directoryURL())
+        try? FileManager.default.removeItem(at: Self.stateFileURL())
+        for key in SlideshowSettings.allKeys + SpeechSettings.allKeys {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+    }
+
     // MARK: - Persistence
     //
     // Only `slideIndex`, `screen`, the shuffle state (`shuffledIndexes`/`nextShuffleIndex`), `reactions`,

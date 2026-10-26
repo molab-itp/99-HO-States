@@ -1309,5 +1309,8 @@ npx supabase db push
 >> check v05
 -- no visible change, need to sync to v2
 
+v02.171
 
+in v2, on LandingView
+add button label "Reset App" that clears out all app state.
 
