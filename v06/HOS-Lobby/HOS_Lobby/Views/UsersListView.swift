@@ -60,14 +60,15 @@ struct UsersListView: View {
                             }
                         }
                     }
-                } footer: {
-                  VStack {
-                    AppVersionLabel()
-                      .frame(maxWidth: .infinity)
-                    if hasLoaded && !profiles.isEmpty {
-                      UserCountsView(profiles: profiles)
+                } header: {
+                    VStack(spacing: 4) {
+                        AppVersionLabel(font: .caption2)
+                            .frame(maxWidth: .infinity)
+                        if hasLoaded && !profiles.isEmpty {
+                            UserCountsView(profiles: profiles)
+                        }
                     }
-                  }
+                    .textCase(nil)
                 }
             }
             .overlay {
@@ -77,7 +78,7 @@ struct UsersListView: View {
                     ContentUnavailableView("No users yet", systemImage: "person.slash")
                 }
             }
-            .navigationTitle("Signed-on Users")
+            .navigationTitle("HOS-Lobby")
             .navigationDestination(for: Profile.self) { profile in
                 ProfileDetailView(profile: profile, isCurrentUser: profile.id == currentUserID) {
                     await reload()
@@ -229,6 +230,7 @@ private struct UserCountsView: View {
             HStack {
                 stat("Total Users", profiles.count)
                 Divider()
+                    .frame(height: 12)
                 stat("Active in 24h", activeCount)
             }
         }
@@ -237,12 +239,11 @@ private struct UserCountsView: View {
     private func stat(_ title: String, _ value: Int) -> some View {
         HStack(spacing: 2) {
             Text(value, format: .number)
-//            .font(.title2.weight(.semibold))
-            .font(.caption)
+                .font(.caption2.weight(.semibold))
                 .monospacedDigit()
                 .contentTransition(.numericText())
             Text(title)
-                .font(.caption)
+                .font(.caption2)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)

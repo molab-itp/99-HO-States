@@ -1204,3 +1204,9 @@ v02.161
 in v06/HOS-Lobby/HOS-Lobby.xcodeproj
 update views to support Preview using sample data
 
+v02.162
+
+in v06/HOS-Lobby/HOS-Lobby.xcodeproj
+update UsersListView to show
+version and user counts in small font 
+at top of list

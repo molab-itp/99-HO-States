@@ -3076,3 +3076,28 @@ Supabase, so this hasn't been tried against the real project. Version bumped to 
 Nothing was committed.
 
 **Cost**: ~6 minutes.
+
+# --
+
+2026-10-25 20:44 (v06: version and user counts at top of list)
+
+## Request
+
+In v06/HOS-Lobby, update UsersListView to show the version and user counts in small font at the
+top of the list.
+
+## What was built
+
+- `HOS_Lobby/Views/UsersListView.swift`: the version label and user counts moved from the list
+  section's footer to its header, with `.textCase(nil)` so the header doesn't turn them into
+  capitals. The counts use `.caption2` (semibold numbers), and the divider between them is
+  12 points tall so it doesn't stretch the header. The old commented-out `.title2` line was
+  removed.
+- `HOS_Lobby/Views/AppVersionLabel.swift`: added a `font` parameter that defaults to
+  `.footnote`. The label set its own font, so a smaller font applied from outside had no
+  effect. The users list passes `.caption2`, and the sign-in screen looks the same as before.
+
+The build for the iOS Simulator succeeds. The app and previews weren't run to check the layout.
+The earlier change to the navigation title ("HOS-Lobby") was kept. Nothing was committed.
+
+**Cost**: ~4 minutes.

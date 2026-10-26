@@ -10,9 +10,11 @@ struct AppVersionLabel: View {
         return "Version \(version) (\(build))"
     }()
 
+    var font: Font = .footnote
+
     var body: some View {
         Text(Self.text)
-            .font(.footnote)
+            .font(font)
             .foregroundStyle(.secondary)
     }
 }
