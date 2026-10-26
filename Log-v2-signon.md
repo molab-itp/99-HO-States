@@ -66,3 +66,11 @@ Add a one-line comment at the top of each copy pointing back to the v06 original
 1. Step 1 with sign-in only.
 2. The Apple Client ID and self-delete.
 3. `app_state` sync with an explicit conflict rule, with drawings left out.
+
+## Stage 1 done: sign-in only (v02.168, 2026-10-26)
+
+- `v2/HOS-USnA/HOS-USnA/Account/`: `SupabaseConfig`, `AuthModel`, `SignInView` copied from v06 (each says where it came from); `ProfilesService` cut down to `markSignedOut` and `touchLastSeen`; new `AccountView` (sheet) and `AccountSession` (builds the client, observes the session, calls `touchLastSeen` on sign-in and on each return to the foreground).
+- Landing has an Account button under Credits, labelled "Sign In" or the signed-in email/name. It is hidden when `Supabase.plist` is missing.
+- No `AppStateStore`, and nothing reads or writes `app_state`. `AppState.json` works as before.
+- Project: `supabase-swift` 2.55 (pinned to v06's `Package.resolved`), `HOS-USnA.entitlements` (Sign in with Apple), gitignored `Supabase.plist` + `Supabase.example.plist` excluded from the target and copied by the "Copy Supabase.plist if present" script, `ENABLE_USER_SCRIPT_SANDBOXING = NO` on the target. No URL scheme is registered.
+- Still to do by hand before Sign in with Apple works: add `com.jht1900.HO-States-US` to the Supabase Apple provider's Client IDs (and `v06/supabase/config.toml`). Email code and Guest work now.

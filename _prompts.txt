@@ -1262,3 +1262,12 @@ how best to add signin code from v06
 to v2 and remifications for accessing same db.
 
 write these recommendations to top level new file Log-v2-signon.md
+
+v02.168
+
+Proceed with "bring sign-in into v2" 
+for step 4. Turn on sync in stages
+do step 1. Sign-in only, with nothing synced
+
+the Apple Client ID you still need to add in Supabase before Sign in with Apple works
+

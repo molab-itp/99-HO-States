@@ -3140,3 +3140,49 @@ doesn't use the real Supabase project. Captions only save there once the
 0.7.2. Nothing was committed.
 
 **Cost**: ~10 minutes.
+
+# --
+
+2026-10-26 14:25 (v02.168: v2 sign-in, stage 1, nothing synced)
+
+## Request
+
+Go ahead with "bring sign-in into v2" from Log-v2-signon.md, doing step 1 of "Turn on sync in
+stages": sign-in only, with nothing synced.
+
+## What was built
+
+- `v2/HOS-USnA/HOS-USnA/Account/`:
+  - Copied from v06: `SupabaseConfig.swift`, `AuthModel.swift` and `SignInView.swift`. Each
+    file has a comment pointing back to its v06 original.
+  - `SupabaseConfig.authRedirectURL` is now `hostates-usna://auth-callback`. That scheme isn't
+    registered, because sign-in uses the 6-digit code.
+  - `SignInView` has a v2 title and prompt, and leaves out `AppVersionLabel`.
+  - `ProfilesService.swift` keeps only `markSignedOut` and `touchLastSeen`.
+  - `AuthModel+Preview.swift` is `AuthModel.preview` from v06's PreviewData.
+- New in that folder:
+  - `AccountSession.swift` builds the client. It returns `nil` when `Supabase.plist` is missing,
+    which hides the feature instead of showing `SetupRequiredView`.
+  - Its `.accountSession(_:)` modifier observes the session and calls `touchLastSeen` on
+    sign-in and on each return to the foreground.
+  - `AccountView.swift` is a sheet that shows `SignInView` when signed out. When signed in, it
+    shows the email, name or "Guest", the sign-in method, and Sign Out.
+- `HOS_USnA_App.swift` applies `.accountSession(auth)`. `LandingView.swift` has an Account
+  button under Credits, labelled "Sign In" or with the signed-in name.
+- Project changes:
+  - The `supabase-swift` package (2.55+). Its `Package.resolved` was copied from v06, because
+    resolving fresh failed on a stale swift-asn1 1.7.3 checkout in the package cache.
+  - `HOS-USnA.entitlements` (Sign in with Apple), set in `CODE_SIGN_ENTITLEMENTS`.
+  - `Supabase.plist` (gitignored by a new `v2/HOS-USnA/.gitignore`) and `Supabase.example.plist`
+    are kept out of the target. The "Copy Supabase.plist if present" script copies the real one.
+  - `ENABLE_USER_SCRIPT_SANDBOXING = NO` on the target.
+- Nothing reads or writes `app_state`, and `AppStateStore` wasn't copied. `AppState.json`
+  works as before.
+- A "Stage 1 done" section was added to Log-v2-signon.md.
+
+The build succeeds for the iOS Simulator. The app launches, and `Supabase.plist` is in the
+bundle. The sign-in itself hasn't been tested. Before Sign in with Apple can work,
+`com.jht1900.HO-States-US` has to be added to the Supabase Apple provider's Client IDs and to
+`v06/supabase/config.toml`. Nothing was committed.
+
+**Cost**: ~15 minutes.

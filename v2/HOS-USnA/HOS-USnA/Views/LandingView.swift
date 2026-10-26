@@ -5,6 +5,9 @@ import SwiftUI
 /// `AppLandingView` through the callbacks.
 struct LandingView: View {
   @Environment(AppModel.self) private var appModel
+  /// `nil` when `Supabase.plist` isn't set up (and in previews), which hides the Account button.
+  @Environment(AuthModel.self) private var auth: AuthModel?
+  @State private var isShowingAccount = false
   
   /// Shows the list of heads of state.
   let onShowList: () -> Void
@@ -183,6 +186,16 @@ struct LandingView: View {
         }
         .buttonStyle(.bordered)
 
+        if let auth {
+          Button {
+            isShowingAccount = true
+          } label: {
+            Label(accountTitle(auth), systemImage: "person.crop.circle")
+              .frame(maxWidth: .infinity)
+          }
+          .buttonStyle(.bordered)
+        }
+
         Text(appModel.buildInfo)
           .font(.footnote.monospaced())
           .foregroundStyle(.secondary)
@@ -190,6 +203,19 @@ struct LandingView: View {
       .padding()
     }
     .navigationBarTitleDisplayMode(.inline)
+    .sheet(isPresented: $isShowingAccount) {
+      if let auth {
+        AccountView()
+          .environment(auth)
+      }
+    }
+  }
+
+  private func accountTitle(_ auth: AuthModel) -> String {
+    if case .signedIn(let user) = auth.state {
+      return AccountView.displayName(of: user)
+    }
+    return "Sign In"
   }
 }
 

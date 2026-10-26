@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct HOS_USnA_App: App {
+    /// `nil` until `Supabase.plist` is filled in, which hides the Account feature.
+    @State private var auth = AccountSession.makeAuthModel()
+
     var body: some Scene {
         WindowGroup {
             AppLandingView()
+                .accountSession(auth)
         }
     }
 }
