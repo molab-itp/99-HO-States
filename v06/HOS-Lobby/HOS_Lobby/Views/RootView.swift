@@ -18,6 +18,7 @@ struct RootView: View {
     }
 }
 
+#if DEBUG
 #Preview("Loading") {
     RootView()
         .environment(AuthModel.preview(state: .loading))
@@ -27,3 +28,4 @@ struct RootView: View {
     RootView()
         .environment(AuthModel.preview())
 }
+#endif

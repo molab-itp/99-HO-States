@@ -192,6 +192,7 @@ struct SignInView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     SignInView()
         .environment(AuthModel.preview())
@@ -201,3 +202,4 @@ struct SignInView: View {
     SignInView()
         .environment(AuthModel.preview(errorMessage: "Email rate limit exceeded"))
 }
+#endif

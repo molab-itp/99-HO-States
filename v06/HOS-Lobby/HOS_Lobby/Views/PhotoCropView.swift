@@ -122,6 +122,8 @@ struct PhotoCropView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     PhotoCropView(image: .sample, onCancel: {}, onDone: { _ in })
 }
+#endif

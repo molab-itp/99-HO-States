@@ -251,6 +251,7 @@ private struct UserCountsView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     UsersListView(currentUserID: Profile.sampleMe.id, sampleProfiles: Profile.samples, isAdmin: true,
                   banner: UserEvent(kind: .signedIn, name: "Grace Hopper"))
@@ -261,3 +262,4 @@ private struct UserCountsView: View {
     UsersListView(currentUserID: UUID(), sampleProfiles: [])
         .environment(AuthModel.preview())
 }
+#endif

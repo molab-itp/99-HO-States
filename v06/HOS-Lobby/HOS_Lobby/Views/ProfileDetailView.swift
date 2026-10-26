@@ -263,6 +263,7 @@ struct ProfileDetailView: View {
     }
 }
 
+#if DEBUG
 #Preview("Your profile") {
     NavigationStack {
         ProfileDetailView(profile: .sampleMe, isCurrentUser: true) {}
@@ -276,3 +277,4 @@ struct ProfileDetailView: View {
     }
     .environment(AuthModel.preview())
 }
+#endif

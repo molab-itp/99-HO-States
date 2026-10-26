@@ -52,6 +52,7 @@ struct ProfileRow: View {
     }
 }
 
+#if DEBUG
 #Preview {
     List {
         ProfileRow(profile: .sampleMe, isCurrentUser: true, thumbURL: nil)
@@ -60,3 +61,4 @@ struct ProfileRow: View {
         }
     }
 }
+#endif
