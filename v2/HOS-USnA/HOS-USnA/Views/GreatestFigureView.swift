@@ -42,9 +42,15 @@ struct GreatestFigureView: View {
                 .foregroundStyle(.secondary)
             Text(person.summary)
                 .font(.body)
+          HStack {
             Link(destination: person.articleUrl) {
-                Label("Read on Wikipedia", systemImage: "book")
+              Label("Article", systemImage: "book")
             }
+            Spacer()
+            Link(destination: URL(string: "https://en.wikipedia.org/wiki/100_Greatest_African_Americans")!) {
+              Label("Source", systemImage: "book")
+            }
+          }
             .font(.callout)
         }
     }

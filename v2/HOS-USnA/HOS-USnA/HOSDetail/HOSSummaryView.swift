@@ -49,7 +49,7 @@ struct HOSSummaryView: View {
                 }
             if let articleURL = hos.wikipediaArticleURL {
                 Link(destination: articleURL) {
-                    Label("Read on Wikipedia", systemImage: "book")
+                    Label("Source", systemImage: "book")
                 }
                 .font(.callout)
             }
@@ -61,7 +61,7 @@ struct HOSSummaryView: View {
                         .font(.headline)
                     Spacer()
                     Link(destination: URL(string: "https://en.wikipedia.org/wiki/100_Greatest_African_Americans")!) {
-                        Label("Wikipedia", systemImage: "book")
+                        Label("Source", systemImage: "book")
                     }
                     .font(.callout)
                 }
