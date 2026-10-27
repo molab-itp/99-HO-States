@@ -1334,3 +1334,7 @@ in v06 UsersListView change delete flow
 add checkbox to each entry 
 and action menu to support delete
 and in future other operations
+
+v07.175
+
+sync web app v07 with SwiftUI app v06

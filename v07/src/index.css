@@ -312,7 +312,8 @@ fieldset:disabled .button {
 .nav-button:focus-visible,
 .link-button:focus-visible,
 .list-row:focus-visible,
-.list-delete:focus-visible {
+.list-check:focus-visible,
+.menu-item:focus-visible {
   outline: 2px solid var(--tint);
   outline-offset: 2px;
 }
@@ -455,6 +456,8 @@ fieldset:disabled .button {
 .list-error {
   text-align: left;
   padding: 0 4px;
+  /* One line per failed delete. */
+  white-space: pre-line;
 }
 
 /* The section header above the list: version, then the user counts. */
@@ -504,12 +507,86 @@ fieldset:disabled .button {
   color: var(--tertiary-label);
 }
 
-.list-delete {
+/* The row's checkbox, for admins. */
+.list-check {
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 0 0 16px;
   border: none;
   background: none;
+  color: var(--secondary-label);
+}
+
+.list-check-on {
+  color: var(--tint);
+}
+
+.list-check + .list-row {
+  padding-left: 12px;
+}
+
+.list-selectable .list-item + .list-item {
+  background-position: 106px 0;
+}
+
+/* Actions menu: a SwiftUI Menu, as a popover under its button. */
+.menu {
+  position: relative;
+}
+
+.menu-button {
+  gap: 4px;
+}
+
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+
+.menu-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 21;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+.menu-divider {
+  height: 6px;
+  margin: 4px 0;
+  background: var(--fill);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  color: var(--label);
+  font-size: 17px;
+  text-align: left;
+}
+
+.menu-item:not(:disabled):active {
+  background: var(--fill-pressed);
+}
+
+.menu-item:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.menu-item-destructive {
   color: var(--destructive);
 }
 

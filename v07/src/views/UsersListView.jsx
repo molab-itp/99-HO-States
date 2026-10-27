@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Icon from '../components/Icon.jsx';
 import NavBar from '../components/NavBar.jsx';
 import Spinner from '../components/Spinner.jsx';
@@ -22,10 +22,12 @@ export default function UsersListView({ currentUserID }) {
   const [isReloading, setIsReloading] = useState(false);
   /** The latest live event about another user; clears itself after a few seconds. */
   const [banner, setBanner] = useState(null);
-  /** Admins (`public.admins`) get a Delete button on other users' rows. */
+  /** Admins (`public.admins`) can check rows and delete those users from the Actions menu. */
   const [isAdmin, setIsAdmin] = useState(false);
-  /** The user an admin is deleting, while the "are you sure" dialog is up. */
-  const [pendingDelete, setPendingDelete] = useState(null);
+  /** The checked rows' ids, which the Actions menu works on. */
+  const [selection, setSelection] = useState(() => new Set());
+  /** Up while the "are you sure" dialog for deleting the checked users is showing. */
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [selectedID, openProfile, closeProfile] = useSelectedUser();
 
   // Live changes are compared with the list as it is now, so it's also kept in a ref.
@@ -115,17 +117,54 @@ export default function UsersListView({ currentUserID }) {
     return () => clearTimeout(timer);
   }, [banner]);
 
+  // Whether rows show checkboxes. Delete is the only action so far, and it's admin-only;
+  // widen this when actions any user can take are added to the menu.
+  const canSelect = isAdmin;
+
+  // Drop checks for users who are gone (e.g. deleted by another admin), and all of them when
+  // checkboxes go away.
+  useEffect(() => {
+    setSelection((current) => {
+      const kept = canSelect ? [...current].filter((id) => profiles.some((p) => p.id === id)) : [];
+      return kept.length === current.size ? current : new Set(kept);
+    });
+  }, [profiles, canSelect]);
+
+  /** The checked users Delete applies to: never the signed-in user. */
+  const deletableSelection = useMemo(
+    () => profiles.filter((p) => selection.has(p.id) && p.id !== currentUserID),
+    [profiles, selection, currentUserID],
+  );
+
+  function toggleSelected(id) {
+    setSelection((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  /** Deletes one at a time and keeps going past failures, so one bad row doesn't block the rest. */
   async function confirmDelete() {
-    const profile = pendingDelete;
-    setPendingDelete(null);
-    try {
-      await deleteUser(client, profile.id);
-      // Realtime removes the row too; this covers live updates being off.
-      setProfiles(profilesRef.current.filter((p) => p.id !== profile.id));
-      setErrorMessage(null);
-    } catch (error) {
-      setErrorMessage(error.message);
+    const users = deletableSelection;
+    setIsConfirmingDelete(false);
+    const failures = [];
+    for (const profile of users) {
+      try {
+        await deleteUser(client, profile.id);
+        // Realtime removes the row too; this covers live updates being off.
+        setProfiles(profilesRef.current.filter((p) => p.id !== profile.id));
+        setSelection((current) => {
+          const next = new Set(current);
+          next.delete(profile.id);
+          return next;
+        });
+      } catch (error) {
+        failures.push(`${profileName(profile)}: ${error.message}`);
+      }
     }
+    setErrorMessage(failures.length === 0 ? null : failures.join('\n'));
   }
 
   const selected = selectedID ? profiles.find((p) => p.id === selectedID) : null;
@@ -150,10 +189,22 @@ export default function UsersListView({ currentUserID }) {
           <NavBar
             title="HOS-Lobby"
             leading={
-              // Pull-to-refresh, for a browser.
-              <button className="nav-button" onClick={reload} disabled={isReloading} aria-label="Refresh">
-                <Icon name="arrow-clockwise" size={18} />
-              </button>
+              <>
+                {/* Pull-to-refresh, for a browser. */}
+                <button className="nav-button" onClick={reload} disabled={isReloading} aria-label="Refresh">
+                  <Icon name="arrow-clockwise" size={18} />
+                </button>
+                {canSelect && (
+                  <ActionsMenu
+                    selectedCount={selection.size}
+                    totalCount={profiles.length}
+                    deletableCount={deletableSelection.length}
+                    onSelectAll={() => setSelection(new Set(profiles.map((p) => p.id)))}
+                    onDeselectAll={() => setSelection(new Set())}
+                    onDelete={() => setIsConfirmingDelete(true)}
+                  />
+                )}
+              </>
             }
             trailing={
               <button className="nav-button" onClick={signOut}>
@@ -178,9 +229,16 @@ export default function UsersListView({ currentUserID }) {
                 <h1>No users yet</h1>
               </div>
             ) : (
-              <ul className="list">
+              <ul className={canSelect ? 'list list-selectable' : 'list'}>
                 {profiles.map((profile) => (
                   <li key={profile.id} className="list-item">
+                    {canSelect && (
+                      <Checkbox
+                        isSelected={selection.has(profile.id)}
+                        name={profileName(profile)}
+                        onToggle={() => toggleSelected(profile.id)}
+                      />
+                    )}
                     <button className="list-row" onClick={() => openProfile(profile.id)}>
                       <ProfileRow
                         profile={profile}
@@ -189,16 +247,6 @@ export default function UsersListView({ currentUserID }) {
                       />
                       <Icon className="list-chevron" name="chevron-right" size={14} />
                     </button>
-                    {/* v06's swipe action. */}
-                    {isAdmin && profile.id !== currentUserID && (
-                      <button
-                        className="list-delete"
-                        onClick={() => setPendingDelete(profile)}
-                        aria-label={`Delete ${profileName(profile)}`}
-                      >
-                        <Icon name="trash" size={18} />
-                      </button>
-                    )}
                   </li>
                 ))}
               </ul>
@@ -207,15 +255,19 @@ export default function UsersListView({ currentUserID }) {
         </>
       )}
 
-      {pendingDelete && (
-        <div className="dialog-backdrop" onClick={() => setPendingDelete(null)}>
+      {isConfirmingDelete && deletableSelection.length > 0 && (
+        <div className="dialog-backdrop" onClick={() => setIsConfirmingDelete(false)}>
           <div className="dialog" role="alertdialog" aria-labelledby="delete-title" onClick={(event) => event.stopPropagation()}>
-            <h2 id="delete-title">Delete {profileName(pendingDelete)}?</h2>
-            <p>Their account, photo and saved data are removed for good.</p>
+            <h2 id="delete-title">
+              {deletableSelection.length === 1
+                ? `Delete ${profileName(deletableSelection[0])}?`
+                : `Delete ${deletableSelection.length} users?`}
+            </h2>
+            <p>Their accounts, photos and saved data are removed for good.</p>
             <button className="button button-destructive button-large" onClick={confirmDelete}>
-              Delete User
+              {deletableSelection.length === 1 ? 'Delete User' : `Delete ${deletableSelection.length} Users`}
             </button>
-            <button className="button button-bordered button-large" onClick={() => setPendingDelete(null)}>
+            <button className="button button-bordered button-large" onClick={() => setIsConfirmingDelete(false)}>
               Cancel
             </button>
           </div>
@@ -227,6 +279,79 @@ export default function UsersListView({ currentUserID }) {
           <Icon name={banner.icon} size={18} />
           {banner.message}
         </div>
+      )}
+    </div>
+  );
+}
+
+/** A row's checkbox. Separate from the row's button, so a tap on it doesn't also open the profile. */
+function Checkbox({ isSelected, name, onToggle }) {
+  return (
+    <button
+      className={isSelected ? 'list-check list-check-on' : 'list-check'}
+      onClick={onToggle}
+      aria-label={isSelected ? `Deselect ${name}` : `Select ${name}`}
+      aria-pressed={isSelected}
+    >
+      <Icon name={isSelected ? 'check-circle-fill' : 'circle'} size={22} />
+    </button>
+  );
+}
+
+/** Operations on the checked users, as v06's toolbar Menu. New ones go below the selection controls. */
+function ActionsMenu({ selectedCount, totalCount, deletableCount, onSelectAll, onDeselectAll, onDelete }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen]);
+
+  // Each item closes the menu, as a SwiftUI Menu does.
+  const choose = (action) => () => {
+    setIsOpen(false);
+    action();
+  };
+
+  return (
+    <div className="menu">
+      <button
+        className="nav-button menu-button"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+      >
+        <Icon name="three-dots-circle" size={18} />
+        {selectedCount === 0 ? 'Actions' : `Actions (${selectedCount})`}
+      </button>
+      {isOpen && (
+        <>
+          <div className="menu-backdrop" onClick={() => setIsOpen(false)} />
+          <div className="menu-popover" role="menu">
+            <button className="menu-item" role="menuitem" onClick={choose(onSelectAll)} disabled={selectedCount === totalCount}>
+              Select All
+              <Icon name="check-circle" size={18} />
+            </button>
+            <button className="menu-item" role="menuitem" onClick={choose(onDeselectAll)} disabled={selectedCount === 0}>
+              Deselect All
+              <Icon name="circle" size={18} />
+            </button>
+            <div className="menu-divider" />
+            <button
+              className="menu-item menu-item-destructive"
+              role="menuitem"
+              onClick={choose(onDelete)}
+              disabled={deletableCount === 0}
+            >
+              {deletableCount === 0 ? 'Delete' : `Delete (${deletableCount})`}
+              <Icon name="trash" size={18} />
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

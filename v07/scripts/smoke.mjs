@@ -336,20 +336,36 @@ async function main() {
     await page.getByRole('status').getByText('Ada Lovelace signed in').waitFor();
     console.log('ok  live updates');
 
-    // Admin delete.
-    await page.getByRole('button', { name: 'Delete Guest CDEF' }).click();
+    // Admin delete: check rows, then Delete from the Actions menu.
+    const actions = page.getByRole('button', { name: /^Actions/ });
+    await actions.click();
+    assert(await page.getByRole('menuitem', { name: 'Delete', exact: true }).isDisabled(), 'Delete needs a checked row');
+    await page.getByRole('menuitem', { name: 'Select All', exact: true }).click();
+    assert((await actions.textContent()) === `Actions (${await page.locator('.list-item').count()})`, 'Select All should check every row');
+    await actions.click();
+    // The signed-in admin is checked but never deleted.
+    assert((await page.getByRole('menuitem', { name: `Delete (${(await page.locator('.list-item').count()) - 1})`, exact: true }).count()) === 1, "Delete shouldn't count the admin");
+    await page.getByRole('menuitem', { name: 'Deselect All', exact: true }).click();
+    assert((await actions.textContent()) === 'Actions', 'Deselect All should clear the checks');
+
+    await page.getByRole('button', { name: 'Select Guest CDEF' }).click();
+    assert((await page.locator('.nav-title').textContent()) === 'HOS-Lobby', "a checkbox shouldn't open the profile");
+    await actions.click();
+    await shot(page, 'actions-menu');
+    await page.getByRole('menuitem', { name: 'Delete (1)', exact: true }).click();
     await page.getByRole('heading', { name: 'Delete Guest CDEF?' }).waitFor();
     await shot(page, 'delete-dialog');
     await page.getByRole('button', { name: 'Cancel' }).click();
     assert((await page.getByText('Guest CDEF').count()) === 1, 'Cancel should keep the user');
-    await page.getByRole('button', { name: 'Delete Guest CDEF' }).click();
+    await actions.click();
+    await page.getByRole('menuitem', { name: 'Delete (1)', exact: true }).click();
     await page.getByRole('button', { name: 'Delete User' }).click();
     await page.getByText('Guest CDEF', { exact: true }).waitFor({ state: 'detached' });
-    assert((await page.getByRole('button', { name: 'Delete me@example.com' }).count()) === 0, "admins can't delete themselves");
+    assert((await actions.textContent()) === 'Actions', "a deleted user's check should go");
     console.log('ok  admin delete');
 
     // Someone else's profile has no photo buttons.
-    await page.getByRole('button', { name: /Ada Lovelace/ }).first().click();
+    await page.locator('.list-row', { hasText: 'Ada Lovelace' }).click();
     await page.locator('.nav-title', { hasText: 'Ada Lovelace' }).waitFor();
     assert((await page.getByText('Choose Photo').count()) === 0, "another user's photo can't be changed");
     await page.locator('.detail-caption', { hasText: 'First programmer' }).waitFor();
@@ -358,7 +374,7 @@ async function main() {
     await page.locator('.nav-title', { hasText: 'HOS-Lobby' }).waitFor();
 
     // My profile: pick a photo, crop it, upload.
-    await page.getByRole('button', { name: /me@example\.com/ }).first().click();
+    await page.locator('.list-row', { hasText: 'me@example.com' }).click();
     await page.getByText('Choose Photo').waitFor();
     assert(page.url().endsWith(`#/user/${ME}`), `the profile's address is ${page.url()}`);
     const me = () => db.profiles.find((p) => p.id === ME);
@@ -465,7 +481,7 @@ async function main() {
     await page.locator('.nav-title', { hasText: 'HOS-Lobby' }).waitFor();
     await page.locator('.list-item').first().waitFor();
     assert((await page.locator('.profile-name').first().textContent()) === 'Guest EEEE', 'the guest should top the list');
-    assert((await page.locator('.list-delete').count()) === 0, 'a guest is not an admin');
+    assert((await page.locator('.list-check').count()) === 0, 'a guest is not an admin');
     await shot(page, 'guest');
     console.log('ok  sign out and guest sign-in');
 

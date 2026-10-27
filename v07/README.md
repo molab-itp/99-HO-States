@@ -5,7 +5,8 @@ hosted on GitHub Pages at https://molab-itp.github.io/99-HO-States/v07/.
 
 It does what v06 does: sign in with a 6-digit code that Supabase Auth emails you, with Sign in
 with Apple, or as a guest; see every user who has signed on and when they were last active, live;
-set, crop and restore your profile photo; and, for admins, delete users.
+set, crop and restore your profile photo; and, for admins, check users and delete them from an
+Actions menu.
 
 It uses v06's Supabase project as it is. Nothing under [`v06/supabase/`](../v06/supabase) changes,
 and a user sees the same list, photos and live banners in both apps.
@@ -106,7 +107,7 @@ v07/
   sign in separately, and a guest is a different guest in each.
 - **Refresh** is a button in the navigation bar, in place of pull-to-refresh. The list also
   reloads when the tab comes back to the front.
-- **Admin delete** is a trash button on the row, in place of the swipe action.
+- **Actions menu** (admins): a popover under the button stands in for SwiftUI's `Menu`.
 - **Page links:** a profile's address is `…/v07/#/user/<id>`, so the browser's Back button
   returns to the list and a profile can be bookmarked.
 - **Choosing a photo** uses the browser's file picker; on a phone that offers the photo library
