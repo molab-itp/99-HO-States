@@ -1314,3 +1314,10 @@ v02.171
 in v2, on LandingView
 add button label "Reset App" that clears out all app state.
 
+v02.172
+
+in v2, on Account view replace Guest code
+with Sign Out button
+
+in Acount view:
+- Manually used HStack for remainingCount Reset Visit Count button

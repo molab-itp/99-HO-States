@@ -118,9 +118,10 @@ struct LandingView: View {
           }
           .buttonStyle(.bordered)
           
-          VStack(spacing: 4) {
+          HStack(spacing: 4) {
             Text("\(remainingCount) left to see")
               .font(.callout.weight(.medium))
+            Spacer()
             Button("Reset Visit Count", role: .destructive) {
               appModel.resetVisitCount()
             }

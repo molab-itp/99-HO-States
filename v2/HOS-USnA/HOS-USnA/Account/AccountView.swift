@@ -3,8 +3,8 @@ import SwiftUI
 
 /// The Account screen pushed from `LandingView`, like News: `SignInView` while signed out,
 /// otherwise who is signed in (with their profile photo), Export/Import of the app state (see
-/// `AppStateHistory`), the other users with an Import action for each one's latest export, and a
-/// Sign Out button.
+/// `AppStateHistory`), and the other users with an Import action for each one's latest export.
+/// The Sign Out button sits under who is signed in.
 struct AccountView: View {
     @Environment(AuthModel.self) private var auth
     @Environment(AppModel.self) private var appModel
@@ -50,12 +50,14 @@ struct AccountView: View {
             Section {
                 LabeledContent("Signed in as", value: Self.displayName(of: user))
                 LabeledContent("Method", value: Self.method(of: user))
-                if user.isAnonymous {
-                    LabeledContent("Guest code") {
-                        Text(Self.guestCode(of: user))
-                            .font(.body.monospaced())
+                Button("Sign Out", role: .destructive) {
+                    isSigningOut = true
+                    Task {
+                        await auth.signOut()
+                        isSigningOut = false
                     }
                 }
+                .disabled(isSigningOut)
             } footer: {
                 Text(user.isAnonymous
                      ? "You'll appear in the HO Users lobby as \(Self.displayName(of: user))."
@@ -125,17 +127,6 @@ struct AccountView: View {
                     Text(message)
                         .foregroundStyle(.red)
                 }
-            }
-
-            Section {
-                Button("Sign Out", role: .destructive) {
-                    isSigningOut = true
-                    Task {
-                        await auth.signOut()
-                        isSigningOut = false
-                    }
-                }
-                .disabled(isSigningOut)
             }
         }
     }
