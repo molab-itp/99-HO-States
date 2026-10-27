@@ -1327,3 +1327,10 @@ v05.173
 sync web app in v05 with changes to v2
 append this chat to Log.md with date and time stamp
 with approximate time cost
+
+v06.174
+
+in v06 UsersListView change delete flow
+add checkbox to each entry 
+and action menu to support delete
+and in future other operations

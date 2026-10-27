@@ -10,10 +10,12 @@ struct UsersListView: View {
     @State private var hasLoaded = false
     /// The latest live event about another user; clears itself after a few seconds.
     @State private var banner: UserEvent?
-    /// Admins (`public.admins`) can swipe a row to delete that user.
+    /// Admins (`public.admins`) can check rows and delete those users from the Actions menu.
     @State private var isAdmin = false
-    /// The user an admin swiped, while the "are you sure" dialog is up.
-    @State private var pendingDelete: Profile?
+    /// The checked rows, which the Actions menu works on.
+    @State private var selection: Set<UUID> = []
+    /// Up while the "are you sure" dialog for deleting the checked users is showing.
+    @State private var isConfirmingDelete = false
 
     /// Set by previews, which show these instead of loading from Supabase.
     private var isPreview = false
@@ -36,6 +38,15 @@ struct UsersListView: View {
     private var service: ProfilesService { ProfilesService(client: auth.client) }
     private var photos: ProfilePhotoService { ProfilePhotoService(client: auth.client) }
 
+    /// Whether rows show checkboxes. Delete is the only action so far, and it's admin-only;
+    /// widen this when actions any user can take are added to the menu.
+    private var canSelect: Bool { isAdmin }
+
+    private var selectedProfiles: [Profile] { profiles.filter { selection.contains($0.id) } }
+
+    /// The checked users Delete applies to: never the signed-in user.
+    private var deletableSelection: [Profile] { selectedProfiles.filter { $0.id != currentUserID } }
+
     var body: some View {
         NavigationStack {
             List {
@@ -46,17 +57,16 @@ struct UsersListView: View {
                 }
                 Section {
                     ForEach(profiles) { profile in
-                        NavigationLink(value: profile) {
-                            ProfileRow(
-                                profile: profile,
-                                isCurrentUser: profile.id == currentUserID,
-                                thumbURL: photos.publicURL(for: profile.photoThumbPath)
-                            )
-                        }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            if isAdmin && profile.id != currentUserID {
-                                Button("Delete", systemImage: "trash") { pendingDelete = profile }
-                                    .tint(.red)
+                        HStack(spacing: 12) {
+                            if canSelect {
+                                checkbox(for: profile)
+                            }
+                            NavigationLink(value: profile) {
+                                ProfileRow(
+                                    profile: profile,
+                                    isCurrentUser: profile.id == currentUserID,
+                                    thumbURL: photos.publicURL(for: profile.photoThumbPath)
+                                )
                             }
                         }
                     }
@@ -85,6 +95,11 @@ struct UsersListView: View {
                 }
             }
             .toolbar {
+                if canSelect {
+                    ToolbarItem(placement: .topBarLeading) {
+                        actionsMenu
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Sign Out") {
                         Task { await auth.signOut() }
@@ -93,18 +108,23 @@ struct UsersListView: View {
             }
             .refreshable { await reload() }
             .confirmationDialog(
-                "Delete \(pendingDelete?.name ?? "this user")?",
-                isPresented: Binding(
-                    get: { pendingDelete != nil },
-                    set: { if !$0 { pendingDelete = nil } }),
-                titleVisibility: .visible,
-                presenting: pendingDelete
-            ) { profile in
-                Button("Delete User", role: .destructive) {
-                    Task { await delete(profile) }
+                deleteTitle,
+                isPresented: $isConfirmingDelete,
+                titleVisibility: .visible
+            ) {
+                Button(deletableSelection.count == 1 ? "Delete User" : "Delete \(deletableSelection.count) Users",
+                       role: .destructive) {
+                    Task { await delete(deletableSelection) }
                 }
-            } message: { _ in
-                Text("Their account, photo and saved data are removed for good.")
+            } message: {
+                Text("Their accounts, photos and saved data are removed for good.")
+            }
+            // Drop checks for users who are gone, e.g. deleted by another admin.
+            .onChange(of: profiles) { _, newProfiles in
+                selection.formIntersection(newProfiles.map(\.id))
+            }
+            .onChange(of: canSelect) { _, newValue in
+                if !newValue { selection.removeAll() }
             }
             .safeAreaInset(edge: .bottom) {
                 if let banner {
@@ -135,6 +155,59 @@ struct UsersListView: View {
         }
     }
 
+    private func checkbox(for profile: Profile) -> some View {
+        let isSelected = selection.contains(profile.id)
+        return Button {
+            if isSelected {
+                selection.remove(profile.id)
+            } else {
+                selection.insert(profile.id)
+            }
+        } label: {
+            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                .font(.title3)
+                .foregroundStyle(isSelected ? Color.accentColor : .secondary)
+                .contentTransition(.symbolEffect(.replace))
+        }
+        // Borderless so a tap on the checkbox doesn't also open the row's NavigationLink.
+        .buttonStyle(.borderless)
+        .accessibilityLabel(isSelected ? "Deselect \(profile.name)" : "Select \(profile.name)")
+    }
+
+    /// Operations on the checked users. New ones go here, below the selection controls.
+    private var actionsMenu: some View {
+        Menu {
+            Section {
+                Button("Select All", systemImage: "checkmark.circle") {
+                    selection = Set(profiles.map(\.id))
+                }
+                .disabled(selection.count == profiles.count)
+                Button("Deselect All", systemImage: "circle") {
+                    selection.removeAll()
+                }
+                .disabled(selection.isEmpty)
+            }
+            Section {
+                Button(role: .destructive) {
+                    isConfirmingDelete = true
+                } label: {
+                    Label(deletableSelection.isEmpty ? "Delete" : "Delete (\(deletableSelection.count))",
+                          systemImage: "trash")
+                }
+                .disabled(deletableSelection.isEmpty)
+            }
+        } label: {
+            Label(selection.isEmpty ? "Actions" : "Actions (\(selection.count))",
+                  systemImage: "ellipsis.circle")
+                .labelStyle(.titleAndIcon)
+        }
+    }
+
+    private var deleteTitle: String {
+        let users = deletableSelection
+        return users.count == 1 ? "Delete \(users[0].name)?" : "Delete \(users.count) users?"
+    }
+
     private func reload() async {
         guard !isPreview else { return }
         do {
@@ -151,15 +224,20 @@ struct UsersListView: View {
         hasLoaded = true
     }
 
-    private func delete(_ profile: Profile) async {
-        do {
-            try await service.deleteUser(id: profile.id)
-            // Realtime removes the row too; this covers live updates being off.
-            profiles.removeAll { $0.id == profile.id }
-            errorMessage = nil
-        } catch {
-            errorMessage = error.localizedDescription
+    /// Deletes one at a time and keeps going past failures, so one bad row doesn't block the rest.
+    private func delete(_ users: [Profile]) async {
+        var failures: [String] = []
+        for profile in users {
+            do {
+                try await service.deleteUser(id: profile.id)
+                // Realtime removes the row too; this covers live updates being off.
+                profiles.removeAll { $0.id == profile.id }
+                selection.remove(profile.id)
+            } catch {
+                failures.append("\(profile.name): \(error.localizedDescription)")
+            }
         }
+        errorMessage = failures.isEmpty ? nil : failures.joined(separator: "\n")
     }
 
     /// Keeps the list live for as long as it's on screen, and announces what other users do.
