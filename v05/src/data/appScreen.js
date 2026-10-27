@@ -10,6 +10,7 @@ export const AppScreen = {
   greatestDetail: 'greatestDetail',
   credits: 'credits',
   speechSetup: 'speechSetup',
+  account: 'account',
 };
 
 // A saved value this build doesn't know (or none at all, from an older save) falls back to Landing.

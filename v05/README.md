@@ -53,9 +53,10 @@ navigator) is the only expected change to port further.
 - `src/data/photoCredits.json` — copy of v2's generated `Resources/PhotoCredits.json`.
 - `src/account/` — port of v2's `Account/` folder (most of it copied from `v07`, which stays the
   source of truth): optional sign-in (email code, Sign in with Apple, guest) to the same Supabase
-  project as v06/v07, and an Account sheet from Landing that exports the app state to
+  project as v06/v07, and an Account screen from Landing that exports the app state to
   `public.app_state` as a dated history row (`key = history/<UTC time>`, app `ho-states`) and
-  merges the latest one back in. Rows use v2's JSON shape, so exports move between v2 and v05.
+  merges the latest one back in, and lists the other users with an Import of each one's latest
+  export. Rows use v2's JSON shape, so exports move between v2 and v05.
   The Account button only appears when `.env.local` (copy `.env.example`) or the Pages
   workflow's `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY` repository variables are set.
 

@@ -3235,3 +3235,44 @@ to `https://molab-itp.github.io/99-HO-States/v05/`, which has to be added to the
 dashboard's Redirect URLs. Version bumped to 0.1.30. Nothing was committed.
 
 **Cost**: ~25 minutes.
+
+# --
+
+2026-10-26 20:48 (v05.173: sync Account page, other users, Reset App from v2)
+
+## Request
+
+Sync the web app in v05 with the changes to v2.
+
+## What was built
+
+This brings over v02.171 and v02.172 (v05 was last synced at v02.169):
+
+- Account page (v02.171): `AccountSheet.jsx` is now `AccountScreen.jsx`, a pushed screen with a
+  Back button like News. It is `AppScreen.account`, has the page link `Account`, and is restored
+  on reload. If Supabase isn't set up when it's restored, it says "Account Unavailable".
+- Profile photo (v02.171): the signed-in user's photo is at the top. It comes from
+  `photo_thumb_path` in the `avatars` bucket, else `avatar_url`, else a person symbol.
+- Other Users (v02.171): every other `profiles` row is listed, most recently active first, with
+  its photo, name and caption. Each one's Import button merges that user's latest export, the same
+  way as Import App State, and the result shows under App State. `profilesService.js` gained
+  `fetchAllProfiles`, `publicURL` and `profileName`, taken from v07.
+- Sign Out (v02.172): the Guest code row is gone. Sign Out now sits under "Signed in as" and
+  "Method".
+- Reset App (v02.171): a red button under Credits/Account. It asks for confirmation with
+  `window.confirm`, then calls the new `resetApp()` in `AppModelContext`. This clears the visit
+  count, reactions, zoom, drawings, the saved state and screen, and the slideshow and speech
+  settings, but leaves sign-in alone. A new `removeStoredValues` in `useStoredValue.js` removes
+  the settings and puts any mounted hooks back to their defaults. `SlideshowSettings.allKeys` and
+  `SpeechSettings.allKeys` were added, as in v2.
+- Landing (v02.172): "left to see" and Reset Visit Count are on one row, with the count on the
+  left and the button on the right.
+
+The build passes and `npm run smoke` passes. The smoke test now opens the Account screen,
+checks the `/Account` address and goes Back. It also checks that Reset App turns Random Mode back
+off and removes its stored value. The signed-in view (photo, Other Users, Import from a user)
+was not tested, because that would mean creating users in the database. Importing another user's
+export needs the v06 migration from v02.171 (`supabase db push` from v06), which _prompts.txt notes as done.
+Version bumped to 0.1.31. Nothing was committed.
+
+**Cost**: ~20 minutes.

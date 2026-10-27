@@ -90,6 +90,11 @@ export const SpeechSettings = {
   shownGroups: (stored) => new Set(stored.split('\n').filter(Boolean)),
   storedShownGroups: (titles) => [...titles].sort().join('\n'),
 
+  /** Every key above, for Landing's Reset App. */
+  get allKeys() {
+    return [this.languageKey, this.autoSpeakKey, this.autoSpeakModeKey, this.sampleTextKey, this.sampleTextLanguageKey, this.shownGroupsKey];
+  },
+
   /**
    * `languageGroups` narrowed to the languages `voices` (the browser's speech voices) cover, with
    * groups left empty by that dropped.

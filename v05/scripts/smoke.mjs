@@ -125,20 +125,34 @@ async function main() {
     await shot('landing');
 
     // The Account button only shows when .env.local holds the Supabase project; it opens the
-    // sheet without signing in, so the test never touches the database.
+    // screen without signing in, so the test never touches the database.
     const accountButton = page.locator('button:has-text("Sign In")');
     if (await accountButton.isVisible()) {
-      console.log('Account sheet: Sign In while signed out...');
+      console.log('Account screen: Sign In while signed out...');
       await accountButton.click();
-      await page.waitForSelector('.account-sheet .sign-in');
+      await page.waitForSelector('.account-screen .sign-in');
+      assert(new URL(page.url()).pathname.endsWith('/Account'), 'Account should have its own page link');
       assert(await page.isVisible('button:has-text("Email Me a Sign-In Code")'), 'sign-in should offer the email code');
       assert(await page.isVisible('button:has-text("Continue as Guest")'), 'sign-in should offer guest');
       await shot('account-sign-in');
-      await page.click('.sheet-done');
-      assert((await page.locator('.account-sheet').count()) === 0, 'Done should close the Account sheet');
+      await page.click('button[aria-label="Back"]');
+      await page.waitForSelector('button:has-text("Resume")');
+      assert((await page.locator('.account-screen').count()) === 0, 'Back should return to Landing');
     } else {
-      console.log('Account sheet: skipped, Supabase not configured');
+      console.log('Account screen: skipped, Supabase not configured');
     }
+
+    console.log('Reset App puts settings back to their defaults...');
+    const randomMode = page.locator('label.toggle-row', { hasText: 'Random Mode' }).locator('input');
+    await randomMode.check({ force: true });
+    assert(await randomMode.isChecked(), 'Random Mode should turn on');
+    page.once('dialog', (dialog) => dialog.accept());
+    await page.click('button:has-text("Reset App")');
+    await page.waitForFunction(() => !document.querySelector('label.toggle-row input').checked);
+    assert(
+      (await page.evaluate(() => localStorage.getItem('ho-states-us.slideshowRandomMode'))) === null,
+      'Reset App should remove the stored setting',
+    );
 
     console.log('Resume -> detail screen, paused...');
     await resume();

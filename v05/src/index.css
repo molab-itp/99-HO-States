@@ -417,13 +417,18 @@ input {
   cursor: default;
 }
 
+/* v2's HStack: the count, then Reset Visit Count at the far end. */
 .visited {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   gap: 4px;
   width: 100%;
   max-width: 320px;
+}
+
+.visited .btn {
+  width: auto;
 }
 
 .visited-count {
@@ -440,7 +445,7 @@ input {
   color: var(--secondary-label);
 }
 
-/* SwiftUI's `.bordered` button with `role: .destructive` (Landing's Reset Visit Count). */
+/* SwiftUI's `.bordered` button with `role: .destructive` (Landing's Reset Visit Count and Reset App). */
 .btn-bordered.btn-destructive {
   background: color-mix(in srgb, var(--destructive) 13%, transparent);
   color: var(--destructive);
@@ -1605,39 +1610,20 @@ input {
   background: var(--fill-pressed);
 }
 
-/* Port of AccountView.swift: a sheet with Done on the right, holding an inset-grouped List (or
-   SignInView while signed out). Portaled out of `.home`, so it sets the same system-blue tint. */
-.account-sheet {
+/* Port of AccountView.swift: a pushed screen holding an inset-grouped List (or SignInView while
+   signed out). Uses the same system-blue tint as `.home`. */
+.account-screen {
   --tint: #007aff;
   --tint-fill: rgba(0, 122, 255, 0.13);
   --tint-fill-pressed: rgba(0, 122, 255, 0.22);
 }
 
 @media (prefers-color-scheme: dark) {
-  .account-sheet {
+  .account-screen {
     --tint: #0a84ff;
     --tint-fill: rgba(10, 132, 255, 0.18);
     --tint-fill-pressed: rgba(10, 132, 255, 0.28);
   }
-}
-
-.sheet-done {
-  position: absolute;
-  right: 16px;
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--tint);
-  font: inherit;
-  font-size: 17px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.sheet-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 16px 32px;
 }
 
 .account-loading {
@@ -1649,6 +1635,69 @@ input {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+/* The signed-in user's photo, centered above the list. */
+.account-photo {
+  display: flex;
+  justify-content: center;
+}
+
+/* AccountView's `ProfileImage`: a round photo, or the person symbol in secondary color. */
+.profile-image {
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  color: var(--secondary-label);
+}
+
+.profile-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* An Other Users row: photo, name over caption (one line each), and the Import button. */
+.other-user-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+}
+
+.other-user-row .names {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.other-user-row .names > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.other-user-row .caption {
+  font-size: 13px;
+  color: var(--secondary-label);
+}
+
+/* A `.borderless`, `.iconOnly` button: just the tinted symbol. */
+.icon-button {
+  display: flex;
+  padding: 6px;
+  background: none;
+  border: none;
+  color: var(--tint);
+  cursor: pointer;
+}
+
+fieldset:disabled .icon-button {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .section-header {

@@ -13,6 +13,7 @@ import GreatestDetailScreen from './screens/GreatestDetailScreen.jsx';
 import greatestList from './data/greatest.js';
 import CreditsScreen from './screens/CreditsScreen.jsx';
 import SpeechSetupScreen from './screens/SpeechSetupScreen.jsx';
+import AccountScreen from './account/AccountScreen.jsx';
 
 // Port of v2's `AccountSession.makeAuthModel()`: `null` until `.env.local` (or the Pages
 // workflow's repository variables) holds the Supabase project, which hides the Account feature
@@ -93,6 +94,9 @@ function Root() {
       return <CreditsScreen onBack={showLanding} />;
     case AppScreen.speechSetup:
       return <SpeechSetupScreen onBack={showLanding} />;
+    case AppScreen.account:
+      // Restored on reload even if Account has since been turned off; `AccountScreen` then says so.
+      return <AccountScreen onBack={showLanding} />;
     default:
       return (
         <LandingScreen
@@ -102,6 +106,7 @@ function Root() {
           onShowGreatest={() => setScreen(AppScreen.greatest)}
           onShowCredits={() => setScreen(AppScreen.credits)}
           onShowSpeechSetup={() => setScreen(AppScreen.speechSetup)}
+          onShowAccount={() => setScreen(AppScreen.account)}
         />
       );
   }

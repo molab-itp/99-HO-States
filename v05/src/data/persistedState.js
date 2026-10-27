@@ -16,6 +16,15 @@ export function loadPersistedState() {
   }
 }
 
+/** For Landing's Reset App. */
+export function removePersistedState() {
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Storage unavailable — nothing was saved there to remove.
+  }
+}
+
 export function savePersistedState(state) {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));

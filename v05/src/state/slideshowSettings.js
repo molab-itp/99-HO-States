@@ -30,3 +30,8 @@ export const SlideshowSettings = {
   fadePeriodOptions: [0.1, 1, 2],
   defaultFadePeriod: 1,
 };
+
+/** Every key above, for Landing's Reset App. */
+SlideshowSettings.allKeys = Object.entries(SlideshowSettings)
+  .filter(([name]) => name.endsWith('Key'))
+  .map(([, key]) => key);

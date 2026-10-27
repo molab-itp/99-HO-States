@@ -2,7 +2,7 @@ import { AppScreen } from './appScreen.js';
 import greatestList from './greatest.js';
 
 // Page links: each screen has its own path under the app's base (`News`, `List`, `Greatest`,
-// `Credits`, `Speech`, `HOS/NN` for one head of state and `Greatest/NNN` for one Greatest figure), so a location in the app can be bookmarked or
+// `Credits`, `Speech`, `Account`, `HOS/NN` for one head of state and `Greatest/NNN` for one Greatest figure), so a location in the app can be bookmarked or
 // shared. This is not a router — `appModel.screen`, `slideIndex` and `greatestIndex` still decide what shows; the
 // address bar is just kept in step with them, and read once on load (and on browser Back/Forward).
 const SCREEN_PATHS = {
@@ -11,6 +11,7 @@ const SCREEN_PATHS = {
   [AppScreen.greatest]: 'Greatest',
   [AppScreen.credits]: 'Credits',
   [AppScreen.speechSetup]: 'Speech',
+  [AppScreen.account]: 'Account',
 };
 const HOS_PREFIX = 'HOS/';
 const GREATEST_PREFIX = 'Greatest/';

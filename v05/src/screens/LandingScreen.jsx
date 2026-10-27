@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { useAppModel } from '../state/AppModelContext.jsx';
 import { useAuth } from '../account/AuthContext.jsx';
-import AccountSheet, { displayName } from '../account/AccountSheet.jsx';
+import { displayName } from '../account/AccountScreen.jsx';
 import Icon from '../components/Icon.jsx';
 import SegmentedPicker from '../components/SegmentedPicker.jsx';
 import { SlideshowSettings } from '../state/slideshowSettings.js';
@@ -11,11 +10,11 @@ import { useStoredNumber } from '../state/useStoredNumber.js';
 /**
  * Port of LandingView.swift — the app's root screen: settings, app info, and the ways into
  * `HOSDetailScreen` (Resume, Random Head, Start Slideshow), `HOSListScreen`, `NewsScreen`,
- * `GreatestScreen`, `CreditsScreen` and `SpeechSetupScreen`, and the Account sheet (when the
+ * `GreatestScreen`, `CreditsScreen`, `SpeechSetupScreen` and `AccountScreen` (when the
  * Supabase project is set up). Navigation itself is handed back to `App` through the
  * callbacks: `onShowList()` shows the list, `onShowDetail(startSlideshow)` shows the detail screen
  * at `slideIndex`, with its slideshow playing if asked, `onShowNews()` shows the news screen,
- * `onShowGreatest()` the 100 Greatest African Americans listing, `onShowCredits()` the credits screen and `onShowSpeechSetup()` the text-to-speech setup screen.
+ * `onShowGreatest()` the 100 Greatest African Americans listing, `onShowCredits()` the credits screen, `onShowSpeechSetup()` the text-to-speech setup screen and `onShowAccount()` the account screen.
  */
 export default function LandingScreen({
   onShowList,
@@ -24,8 +23,9 @@ export default function LandingScreen({
   onShowGreatest,
   onShowCredits,
   onShowSpeechSetup,
+  onShowAccount,
 }) {
-  const { hosList, viewedIDs, nextRandomHOS, select, resetVisitCount, buildInfo } = useAppModel();
+  const { hosList, viewedIDs, nextRandomHOS, select, resetVisitCount, resetApp, buildInfo } = useAppModel();
   const [isRandomMode, setIsRandomMode] = useStoredBoolean(
     SlideshowSettings.randomModeKey,
     SlideshowSettings.defaultRandomMode,
@@ -57,7 +57,6 @@ export default function LandingScreen({
 
   // `null` when `.env.local` isn't set up, which hides the Account button.
   const auth = useAuth();
-  const [isShowingAccount, setIsShowingAccount] = useState(false);
 
   const remainingCount = hosList.length - viewedIDs.size;
 
@@ -181,16 +180,30 @@ export default function LandingScreen({
           Credits
         </button>
         {auth && (
-          <button className="btn btn-bordered" onClick={() => setIsShowingAccount(true)}>
+          <button className="btn btn-bordered" onClick={onShowAccount}>
             <Icon name="person-circle" />
             {auth.state.status === 'signedIn' ? displayName(auth.state.user) : 'Sign In'}
           </button>
         )}
+        <button
+          className="btn btn-bordered btn-destructive"
+          onClick={() => {
+            // Stands in for v2's `confirmationDialog`.
+            if (
+              window.confirm(
+                "Reset App?\n\nClears all reactions, drawings, zoom, visit progress and settings. This can't be undone.",
+              )
+            ) {
+              resetApp();
+            }
+          }}
+        >
+          <Icon name="arrow-counterclockwise" />
+          Reset App
+        </button>
       </div>
 
       <p className="build-info">{buildInfo}</p>
-
-      {auth && isShowingAccount && <AccountSheet onClose={() => setIsShowingAccount(false)} />}
     </div>
   );
 }

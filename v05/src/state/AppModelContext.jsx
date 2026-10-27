@@ -2,12 +2,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import hosList from '../data/hosList.js';
 import greatestList, { greatestFor } from '../data/greatest.js';
 import { version as appVersion } from '../../package.json';
-import { loadPersistedState, savePersistedState } from '../data/persistedState.js';
+import { loadPersistedState, removePersistedState, savePersistedState } from '../data/persistedState.js';
 import { normalizeReactions } from '../data/hosReaction.js';
 import { deleteDrawing, loadAllDrawings, saveDrawing } from '../data/hosDrawingStore.js';
 import { DEFAULT_DRAWING_DISPLAY_MODE, normalizeDrawingDisplayModes } from '../data/drawingDisplayMode.js';
 import { AppScreen, normalizeAppScreen } from '../data/appScreen.js';
 import { routeFromLocation, showRoute } from '../data/route.js';
+import { SlideshowSettings } from './slideshowSettings.js';
+import { SpeechSettings } from './speechSettings.js';
+import { removeStoredValues } from './useStoredValue.js';
 
 const AppModelContext = createContext(null);
 
@@ -248,6 +251,25 @@ export function AppModelProvider({ children }) {
     greatestLeadCountRef.current = 0;
   }, [resetViewed]);
 
+  // Landing's Reset App: back to a fresh install. Clears everything `resetVisitCount()` does
+  // plus reactions, zoom/pan, drawings, the saved screen and state, and the slideshow and speech
+  // settings. Leaves the account sign-in alone. Ported from `AppModel.swift`'s `resetApp()`.
+  const resetApp = useCallback(() => {
+    resetVisitCount();
+    setCycleCount(1);
+    setScreen(AppScreen.landing);
+    setGreatestIndex(0);
+    setReactions({});
+    setImageZoomStates({});
+    setDrawingDisplayModes({});
+    for (const hos of hosList) deleteDrawing(hos.order);
+    setDrawings({});
+    greatestVisitRef.current = null;
+    setGreatestVisit(null);
+    removePersistedState();
+    removeStoredValues([...SlideshowSettings.allKeys, ...SpeechSettings.allKeys]);
+  }, [resetVisitCount]);
+
   const markViewed = useCallback((hos, resetIfComplete = false) => {
     const next = new Set(viewedIDsRef.current);
     next.add(hos.order);
@@ -460,6 +482,7 @@ export function AppModelProvider({ children }) {
       markViewed,
       resetViewed,
       resetVisitCount,
+      resetApp,
       reactionsFor,
       addReaction,
       removeLastReaction,
@@ -487,6 +510,7 @@ export function AppModelProvider({ children }) {
       markViewed,
       resetViewed,
       resetVisitCount,
+      resetApp,
       reactionsFor,
       addReaction,
       removeLastReaction,
