@@ -1368,3 +1368,5 @@ is still /99-HO-States/v05/
 v.179
 
 fix v05 links that you left alone
+
+bin/publish.sh

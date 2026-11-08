@@ -34,7 +34,7 @@ navigator) is the only expected change to port further.
 - `src/data/appScreen.js` — port of `AppScreen.swift`, the top-level screen names.
 - `src/data/route.js` — page links, so a location can be bookmarked: `News`, `List`, `Greatest`,
   `Credits`, `Speech`, `HOS/NN` (one per head of state) and `Greatest/NNN` (one per figure) under the app's base, e.g.
-  `https://molab-itp.github.io/99-HO-States/v05/News` or `.../v05/HOS/16`. Still no router: the
+  `https://molab-itp.github.io/99-HO-States/HOS-USnA/web/News` or `.../HOS-USnA/web/HOS/16`. Still no router: the
   address bar is kept in step with `screen`/`slideIndex` and read on load and on browser
   Back/Forward. The base address itself reopens the last screen shown. The build
   (`vite.config.js`) writes a copy of `index.html` for every link (`News.html`, `HOS/16.html`),

@@ -59,7 +59,7 @@ export function parseRoutePath(path, hosList) {
 export function routeFromLocation(hosList) {
   const base = import.meta.env.BASE_URL;
   const { pathname } = window.location;
-  // Also matches the base without its trailing slash (`/99-HO-States/v05`).
+  // Also matches the base without its trailing slash (`/99-HO-States/HOS-USnA/web`).
   if (!`${pathname}/`.startsWith(base)) return null;
   return parseRoutePath(pathname.slice(base.length), hosList);
 }

@@ -41,8 +41,8 @@ jobs:
           npm ci
           npm run build
 
-      # v05 lives in HOS-USnA/web (the web port of the HOS-USnA Swift app) but still deploys to
-      # /v05/, the URL the app and pages/index.html link to.
+      # v05 lives in HOS-USnA/web (the web port of the HOS-USnA Swift app) and deploys to
+      # /HOS-USnA/web/ (its Vite base in vite.config.js); old /v05/ addresses redirect there.
       # v05's optional Account (sign-in, export/import of app state) uses the same Supabase
       # project as v07; without these it builds as before, with no Account button.
       - name: Build v05 (HOS-USnA/web)
@@ -68,7 +68,7 @@ jobs:
           npm run build
 
       # Each deployed version gets its own subfolder under the site root, so multiple versions
-      # can be live at once (https://molab-itp.github.io/99-HO-States/v4/, .../v05/, ...). To add
+      # can be live at once (https://molab-itp.github.io/99-HO-States/v4/, .../HOS-USnA/web/, ...). To add
       # another one: give it a build step (or none, if it's already static like v3) and a
       # `cp -r <version>/<output> _site/<version>/` line below, then add a link in pages/index.html.
       - name: Assemble site
@@ -77,8 +77,16 @@ jobs:
           cp pages/index.html _site/index.html
           mkdir -p _site/v4
           cp -r v4/dist/. _site/v4/
-          mkdir -p _site/v05
-          cp -r HOS-USnA/web/dist/. _site/v05/
+          mkdir -p _site/HOS-USnA/web
+          cp -r HOS-USnA/web/dist/. _site/HOS-USnA/web/
+          # Old v05 addresses (bookmarks, earlier iOS builds' Web App link): one redirect page
+          # per page of the app, so deep links like /v05/HOS/16 land on /HOS-USnA/web/HOS/16.
+          (cd HOS-USnA/web/dist && find . -name '*.html') | while read -r f; do
+            f=${f#./}; to=${f%.html}; [ "$to" = index ] && to=; [ "${to##*/}" = index ] && to=${to%index}
+            mkdir -p "_site/v05/$(dirname "$f")"
+            url="/99-HO-States/HOS-USnA/web/$to"
+            printf '<!doctype html><meta charset="utf-8"><title>Moved</title><meta http-equiv="refresh" content="0; url=%s"><link rel="canonical" href="%s"><script>location.replace("%s"+location.search+location.hash)</script><a href="%s">Moved here</a>\n' "$url" "$url" "$url" "$url" > "_site/v05/$f"
+          done
           mkdir -p _site/v07
           cp -r v07/dist/. _site/v07/
 

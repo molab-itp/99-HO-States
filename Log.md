@@ -3342,3 +3342,36 @@ I moved `v05` to [HOS-USnA/web/](HOS-USnA/web/) and updated the deploy workflow 
 When you're ready, `bin/publish.sh` will commit this under your v.178 entry.
 
 *Time: 44s · Cost: $0.3402 (input 22, output 3.6k, cache write 22.3k, cache read 451.3k) · session $0.3402*
+
+---
+
+## User (11/8/2026, 12:21:22 PM)
+
+```
+fix v05 links that you left alone
+```
+
+## Assistant
+
+Next, the workflow: deploy to the new path and add redirect pages under `/v05/`.
+
+I changed the web app's address to `https://molab-itp.github.io/99-HO-States/HOS-USnA/web/`, matching its new folder. Old `/v05/` links now redirect there. You didn't name a new address, so tell me if you'd rather have a different one, such as just `/HOS-USnA/`.
+
+**Links updated**
+- **Swift app:** the "Web App" link in [Links.json](HOS-USnA/HOS-USnA/HOS-USnA/Resources/Links.json).
+- **Web app's own copy:** the matching entry in [links.json](HOS-USnA/web/src/data/links.json), plus the address in [links.js](HOS-USnA/web/src/data/links.js) that keeps the app from listing a link to itself.
+- **Site landing page:** [pages/index.html](pages/index.html) now links to `HOS-USnA/web/`.
+- **Root [README.md](README.md).**
+- **Build base path:** [vite.config.js](HOS-USnA/web/vite.config.js) now uses `/99-HO-States/HOS-USnA/web/`.
+- **Comments and docs:** [route.js](HOS-USnA/web/src/data/route.js) and the example links in [HOS-USnA/web/README.md](HOS-USnA/web/README.md).
+
+**Deploy workflow:** [deploy-pages.yml](.github/workflows/deploy-pages.yml) now copies the build to `_site/HOS-USnA/web/`. It also writes one redirect page under `/v05/` for every page in the build, so copies of the iOS app that still have the old Web App link, plus old bookmarks, keep working. Deep links go to the matching page, so `/v05/HOS/16` lands on `/HOS-USnA/web/HOS/16`.
+
+**Tested:**
+- A local build puts the new base path on the app's asset links.
+- I ran a copy of the workflow's site-assembly step locally. It produced 154 redirect pages, and the three I checked (`/v05/`, `/v05/News` and `/v05/HOS/16`) point at the right new addresses.
+- The live site won't change until the workflow runs on `main`.
+
+I kept "v05" where it's the version's name rather than an address, such as the `v05 0.1.31` build label and code comments about history.
+
+*Time: 44s · Cost: $0.2287 (input 16, output 4.3k, cache write 8.8k, cache read 360.3k) · session $0.5689*
