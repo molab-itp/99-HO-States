@@ -1393,3 +1393,5 @@ v.181
 Update pages/index.html
 to use new names HOS-Lobby, HOS-USnA
 and include larger icon form app assets for button
+
+bin/publish.sh
