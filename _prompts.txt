@@ -1387,3 +1387,9 @@ The app builds its sign-in return address from the page's own location,
 so until you add it, Sign in with Apple 
 won't return to the new address. 
 The email code and guest sign-in don't need it.
+
+v.181
+
+Update pages/index.html
+to use new names HOS-Lobby, HOS-USnA
+and include larger icon form app assets for button

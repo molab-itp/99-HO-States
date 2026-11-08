@@ -47,7 +47,7 @@
         flex-direction: column;
         gap: 12px;
         width: 100%;
-        max-width: 320px;
+        max-width: 380px;
       }
       .versions a {
         display: block;
@@ -60,6 +60,20 @@
       }
       .versions a:hover {
         background: rgba(179, 33, 46, 0.08);
+      }
+      .versions a.app {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 16px;
+        text-align: left;
+      }
+      .versions a.app img {
+        width: 64px;
+        height: 64px;
+        flex: none;
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
       }
       .versions .name {
         display: block;
@@ -83,13 +97,19 @@
         <span class="name">v4 — React</span>
         <span class="desc">Web app, React-Native-friendly structure</span>
       </a>
-      <a href="HOS-USnA/web/">
-        <span class="name">v05 — React, SwiftUI-styled</span>
-        <span class="desc">Same app, native iOS chrome (inset-grouped list, blurred bars)</span>
+      <a class="app" href="HOS-USnA/web/">
+        <img src="HOS-USnA/web/apple-touch-icon.png" alt="" />
+        <span>
+          <span class="name">HOS-USnA</span>
+          <span class="desc">Web port of the HOS-USnA SwiftUI app — native iOS chrome (inset-grouped list, blurred bars)</span>
+        </span>
       </a>
-      <a href="HOS-Lobby/web/">
-        <span class="name">v07 — HOS-Lobby, React</span>
-        <span class="desc">Sign in and see who else is here (web port of the v06 SwiftUI app)</span>
+      <a class="app" href="HOS-Lobby/web/">
+        <img src="HOS-Lobby/web/apple-touch-icon.png" alt="" />
+        <span>
+          <span class="name">HOS-Lobby</span>
+          <span class="desc">Sign in and see who else is here (web port of the HOS-Lobby SwiftUI app)</span>
+        </span>
       </a>
     </div>
   </body>

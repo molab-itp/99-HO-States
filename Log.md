@@ -3453,3 +3453,27 @@ I moved `v07` to `HOS-Lobby/web` and updated the deploy workflow and links. A lo
 **One thing you need to do in the Supabase dashboard:** under Authentication → URL Configuration → Redirect URLs, add `https://molab-itp.github.io/99-HO-States/HOS-Lobby/web/`. The app builds its sign-in return address from the page's own location, so until you add it, Sign in with Apple won't return to the new address. The email code and guest sign-in don't need it.
 
 *Time: 47s · Cost: $0.4312 (input 20, output 4.5k, cache write 31.5k, cache read 449.1k) · session $0.4312*
+
+---
+
+## User (11/8/2026, 2:09:07 PM)
+
+```
+Update pages/index.html
+to use new names HOS-Lobby, HOS-USnA
+and include larger icon form app assets for button
+```
+
+## Assistant
+
+Both apps already ship a 180px `apple-touch-icon.png` (made from the 1024px app icons) that gets deployed with each site, so the buttons will use those. Editing now.
+
+I updated [pages/index.html](pages/index.html) to use the new names and show each app's icon on its button. I haven't opened the page in a browser yet.
+
+- **Names:** The two buttons are now titled **HOS-USnA** and **HOS-Lobby**. Their descriptions call each one the web port of the matching SwiftUI app; before, they were labelled "v05" and "v07".
+- **Icons:** Each button now shows a 64px rounded app icon on the left, with the text beside it. The image is the 180px `apple-touch-icon.png` that each app already has in `web/public/`, made from its 1024px app icon. Each one is copied into that app's deployed folder with the build, so the links `HOS-USnA/web/apple-touch-icon.png` and `HOS-Lobby/web/apple-touch-icon.png` work on the live site without any new files.
+- **Width:** The button column is now 380px wide instead of 320px, to make room for the icon next to the text.
+
+The v4 button and the 🏛️ page header haven't changed. I also haven't committed anything.
+
+*Time: 27s · Cost: $0.2712 (input 16, output 2.5k, cache write 19.8k, cache read 314.7k) · session $0.2712*
