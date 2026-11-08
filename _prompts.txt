@@ -1339,7 +1339,7 @@ v07.175
 
 sync web app v07 with SwiftUI app v06
 
-v.176
+v0.176
 
 is .claude/settings.local.json needed?
 what does it do
@@ -1349,11 +1349,11 @@ what is purpose of .claude/skills/run-v4/SKILL.md.
 new .claude from ../99-Black-Power/.claude 
 cp tools from ../99-Black-Po
 
-v.177
+v0.177
 
 rename folder v2 to HOS-USnA
 
-v.178
+v0.178
 
 move v05 folder to HOS-USnA/web
 and update required web deploy scripts
@@ -1365,17 +1365,17 @@ pages/index.html and the root README all link there,
 and the Vite base path in vite.config.js 
 is still /99-HO-States/v05/
 
-v.179
+v0.179
 
 fix v05 links that you left alone
 
 bin/publish.sh
 
-v.180
+v0.180
 
 move v06 folder to HOS-Lobby
 
-v.181
+v0.181
 
 move v07 folder to HOS-Lobby/web
 and update required web deploy scripts
@@ -1388,10 +1388,14 @@ so until you add it, Sign in with Apple
 won't return to the new address. 
 The email code and guest sign-in don't need it.
 
-v.181
+v0.182
 
 Update pages/index.html
 to use new names HOS-Lobby, HOS-USnA
 and include larger icon form app assets for button
+
+bin/publish.sh
+
+v0.183
 
 bin/publish.sh
