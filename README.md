@@ -4,7 +4,7 @@
 - workflow tracked in [\_prompts.txt](https://github.com/molab-itp/99-HO-States/blob/main/_prompts.txt)
 - [HO-State-USnA v05](https://molab-itp.github.io/99-HO-States/HOS-USnA/web/)
   - A web port of the HOS-USnA SwiftUI app built with React
-- [HOS-Lobby v07](https://molab-itp.github.io/99-HO-States/v07/)
+- [HOS-Lobby v07](https://molab-itp.github.io/99-HO-States/HOS-Lobby/web/)
   - A web port of the HOS-Lobby SwiftUI app built with React
 
 ```

@@ -3416,3 +3416,40 @@ Untracked local files in that folder moved along with it, including the gitignor
 I haven't committed anything. Your existing `_prompts.txt` change is also in the working tree. Since the folder moved, Xcode needs to reopen `HOS-Lobby/HOS-Lobby/HOS-Lobby.xcodeproj` from its new location.
 
 *Time: 40s · Cost: $0.4189 (input 18, output 4.0k, cache write 32.5k, cache read 397.3k) · session $0.4189*
+
+---
+
+## User (11/8/2026, 2:04:32 PM)
+
+```
+move v07 folder to HOS-Lobby/web
+and update required web deploy scripts
+```
+
+## Assistant
+
+Moved. Now updating the base path, deploy workflow, links, and README paths.
+
+Now the deploy workflow, mirroring how v05 was handled (new path + redirect from the old `/v07/` URL).
+
+I moved `v07` to `HOS-Lobby/web` and updated the deploy workflow and links. A local production build works and its asset paths now start with `/99-HO-States/HOS-Lobby/web/`. Nothing is committed and the GitHub Pages workflow hasn't run with these changes yet.
+
+**The move:** I used `git mv`, which kept the file history. Your local `node_modules`, `dist` and `.env.local` moved with the folder, so you don't need to reinstall.
+
+**Deploy changes:**
+- [deploy-pages.yml](.github/workflows/deploy-pages.yml):
+  - The workflow now watches `HOS-Lobby/web/**` instead of `v07/**`, and uses that folder's `package-lock.json` for its cache.
+  - The v07 build step now runs in `HOS-Lobby/web`.
+  - The app is published to `_site/HOS-Lobby/web/`.
+  - `/v07/` is now a single redirect page to `/HOS-Lobby/web/`, the same way old v05 addresses redirect. v07 keeps its routes after `#` in the address (like `#/user/<id>`), so the redirect carries old bookmarked profile links over too.
+- [vite.config.js](HOS-Lobby/web/vite.config.js): the production base path is now `/99-HO-States/HOS-Lobby/web/`.
+
+**Links and docs:**
+- [pages/index.html](pages/index.html) and the root [README.md](README.md) now link to `HOS-Lobby/web/`.
+- [HOS-Lobby/README.md](HOS-Lobby/README.md) points its v07 link at `web`.
+- In [HOS-Lobby/web/README.md](HOS-Lobby/web/README.md) I fixed the relative links (`..`, `../supabase`, `../../.github`), the `cd` command, the site URLs and the folder tree.
+- I updated the comment in [SetupRequiredView.jsx](HOS-Lobby/web/src/views/SetupRequiredView.jsx) that points to the README.
+
+**One thing you need to do in the Supabase dashboard:** under Authentication → URL Configuration → Redirect URLs, add `https://molab-itp.github.io/99-HO-States/HOS-Lobby/web/`. The app builds its sign-in return address from the page's own location, so until you add it, Sign in with Apple won't return to the new address. The email code and guest sign-in don't need it.
+
+*Time: 47s · Cost: $0.4312 (input 20, output 4.5k, cache write 31.5k, cache read 449.1k) · session $0.4312*

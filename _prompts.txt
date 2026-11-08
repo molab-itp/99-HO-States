@@ -1375,5 +1375,15 @@ v.180
 
 move v06 folder to HOS-Lobby
 
+v.181
+
 move v07 folder to HOS-Lobby/web
 and update required web deploy scripts
+
+**One thing you need to do in the Supabase dashboard:** 
+under Authentication → URL Configuration → Redirect URLs, 
+add `https://molab-itp.github.io/99-HO-States/HOS-Lobby/web/`. 
+The app builds its sign-in return address from the page's own location,
+so until you add it, Sign in with Apple 
+won't return to the new address. 
+The email code and guest sign-in don't need it.

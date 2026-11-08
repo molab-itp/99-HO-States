@@ -1,20 +1,20 @@
 # v07 — HOS-Lobby (React)
 
-A web port of the [v06](../HOS-Lobby) SwiftUI app (`HOS-Lobby.xcodeproj`), built with React + Vite and
-hosted on GitHub Pages at https://molab-itp.github.io/99-HO-States/v07/.
+A web port of the [v06](..) SwiftUI app (`HOS-Lobby.xcodeproj`), built with React + Vite and
+hosted on GitHub Pages at https://molab-itp.github.io/99-HO-States/HOS-Lobby/web/.
 
 It does what v06 does: sign in with a 6-digit code that Supabase Auth emails you, with Sign in
 with Apple, or as a guest; see every user who has signed on and when they were last active, live;
 set, crop and restore your profile photo; and, for admins, check users and delete them from an
 Actions menu.
 
-It uses v06's Supabase project as it is. Nothing under [`HOS-Lobby/supabase/`](../HOS-Lobby/supabase) changes,
+It uses v06's Supabase project as it is. Nothing under [`HOS-Lobby/supabase/`](../supabase) changes,
 and a user sees the same list, photos and live banners in both apps.
 
 ## Running
 
 ```sh
-cd v07
+cd HOS-Lobby/web
 npm install
 cp .env.example .env.local   # fill in the URL + publishable key, as in v06's Supabase.plist
 npm run dev                  # http://localhost:5173
@@ -35,7 +35,7 @@ The app needs three things that v06 didn't. None of them is done yet.
 ### 1. Repository variables, for the Pages build
 
 The Supabase URL and key are baked into the build. The
-[Pages workflow](../.github/workflows/deploy-pages.yml) reads them from repository variables
+[Pages workflow](../../.github/workflows/deploy-pages.yml) reads them from repository variables
 (**Settings → Secrets and variables → Actions → Variables**):
 
 ```sh
@@ -49,7 +49,7 @@ meant to be public (it's in the page's JavaScript either way); RLS is what prote
 ### 2. Redirect URL
 
 **Authentication → URL Configuration → Redirect URLs**: add
-`https://molab-itp.github.io/99-HO-States/v07/`, next to the `http://localhost:5173` that v06's
+`https://molab-itp.github.io/99-HO-States/HOS-Lobby/web/`, next to the `http://localhost:5173` that v06's
 setup lists for local development. Sign in with Apple returns to this address, and so would a sign-in link if a
 template ever adds one back. The email code and guest sign-in work without it.
 
@@ -76,7 +76,7 @@ in aren't affected.
 Each file is a port of the Swift file of the same name.
 
 ```
-v07/
+HOS-Lobby/web/
   .env.example             copy to .env.local (gitignored): URL + publishable key
   scripts/smoke.mjs        headless smoke test against a stand-in Supabase
   src/
@@ -108,7 +108,7 @@ v07/
 - **Refresh** is a button in the navigation bar, in place of pull-to-refresh. The list also
   reloads when the tab comes back to the front.
 - **Actions menu** (admins): a popover under the button stands in for SwiftUI's `Menu`.
-- **Page links:** a profile's address is `…/v07/#/user/<id>`, so the browser's Back button
+- **Page links:** a profile's address is `…/HOS-Lobby/web/#/user/<id>`, so the browser's Back button
   returns to the list and a profile can be bookmarked.
 - **Choosing a photo** uses the browser's file picker; on a phone that offers the photo library
   and the camera. HEIC photos only work in Safari, which is the only browser that decodes them.

@@ -6,7 +6,7 @@ on:
     paths:
       - 'v4/**'
       - 'HOS-USnA/web/**'
-      - 'v07/**'
+      - 'HOS-Lobby/web/**'
       - 'pages/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
@@ -33,7 +33,7 @@ jobs:
           cache-dependency-path: |
             v4/package-lock.json
             HOS-USnA/web/package-lock.json
-            v07/package-lock.json
+            HOS-Lobby/web/package-lock.json
 
       - name: Build v4
         working-directory: v4
@@ -54,12 +54,14 @@ jobs:
           npm ci
           npm run build
 
-      # v07 talks to the v06 Supabase project, whose URL and publishable key are baked into the
+      # v07 lives in HOS-Lobby/web (the web port of the HOS-Lobby Swift app) and deploys to
+      # /HOS-Lobby/web/ (its Vite base in vite.config.js); old /v07/ addresses redirect there.
+      # It talks to the HOS-Lobby Supabase project, whose URL and publishable key are baked into the
       # build. They come from repository variables (Settings > Secrets and variables > Actions >
       # Variables); the publishable key is public by design, so these aren't secrets. Without
       # them the build still succeeds and the page shows "Supabase not configured".
-      - name: Build v07
-        working-directory: v07
+      - name: Build v07 (HOS-Lobby/web)
+        working-directory: HOS-Lobby/web
         env:
           VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
@@ -87,8 +89,13 @@ jobs:
             url="/99-HO-States/HOS-USnA/web/$to"
             printf '<!doctype html><meta charset="utf-8"><title>Moved</title><meta http-equiv="refresh" content="0; url=%s"><link rel="canonical" href="%s"><script>location.replace("%s"+location.search+location.hash)</script><a href="%s">Moved here</a>\n' "$url" "$url" "$url" "$url" > "_site/v05/$f"
           done
+          mkdir -p _site/HOS-Lobby/web
+          cp -r HOS-Lobby/web/dist/. _site/HOS-Lobby/web/
+          # Old v07 address: v07 routes with the hash (#/user/<id>), so one redirect page at /v07/
+          # covers deep links; location.hash carries the route over.
           mkdir -p _site/v07
-          cp -r v07/dist/. _site/v07/
+          url="/99-HO-States/HOS-Lobby/web/"
+          printf '<!doctype html><meta charset="utf-8"><title>Moved</title><meta http-equiv="refresh" content="0; url=%s"><link rel="canonical" href="%s"><script>location.replace("%s"+location.search+location.hash)</script><a href="%s">Moved here</a>\n' "$url" "$url" "$url" "$url" > _site/v07/index.html
 
       - uses: actions/configure-pages@v5
 

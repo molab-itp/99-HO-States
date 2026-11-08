@@ -1,6 +1,6 @@
 import Icon from '../components/Icon.jsx';
 
-/** Shown when `.env.local` hasn't been filled in yet (see v07/README.md). */
+/** Shown when `.env.local` hasn't been filled in yet (see HOS-Lobby/web/README.md). */
 export default function SetupRequiredView({ message }) {
   return (
     <div className="unavailable">
