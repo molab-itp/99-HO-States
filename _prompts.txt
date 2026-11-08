@@ -1352,3 +1352,19 @@ cp tools from ../99-Black-Po
 v.177
 
 rename folder v2 to HOS-USnA
+
+v.178
+
+move v05 folder to HOS-USnA/web
+and update required web deploy scripts
+
+What I left alone: the site still publishes this app at 
+https://molab-itp.github.io/99-HO-States/v05/. 
+The Swift app's Links.json, 
+pages/index.html and the root README all link there, 
+and the Vite base path in vite.config.js 
+is still /99-HO-States/v05/
+
+v.179
+
+fix v05 links that you left alone

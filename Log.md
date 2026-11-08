@@ -3302,3 +3302,43 @@ I didn't change these:
 - **`v3/tools/migrate.js`** points to `v2/US-Headers`, a folder that no longer exists, so it was already out of date.
 
 *Time: 21s · Cost: $0.2133 (input 12, output 1.9k, cache write 16.4k, cache read 219.8k) · session $0.2133*
+
+---
+
+## User (11/8/2026, 12:17:01 PM)
+
+```
+move v05 folder to HOS-USnA/web
+and update required web deploy scripts
+```
+
+## Assistant
+
+The deploy is via .github — let's see it.
+
+Self-contained. Moving it and updating the workflow, README links, and comments.
+
+The local node_modules is missing `@supabase/supabase-js`. That was already true before the move. I'll run `npm ci` the same way CI does, then rebuild.
+
+I'll also add a note to the workflow explaining that the build is published at `/v05/` but the source now lives somewhere else.
+
+I moved `v05` to [HOS-USnA/web/](HOS-USnA/web/) and updated the deploy workflow to match. It builds there after one fix noted below. Nothing is committed yet.
+
+**What changed**
+- **The move:** I used `git mv`, so git records it as a rename and keeps the file history. `node_modules` and `dist` aren't tracked by git, but they moved with the folder.
+- **[.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml):** these all point to `HOS-USnA/web` now instead of `v05`:
+  - the folders that trigger a deploy
+  - the npm cache lockfile
+  - the build step's working folder
+  - the copy into the site
+  
+  I also added a comment saying where v05's source now lives.
+- **[HOS-USnA/web/README.md](HOS-USnA/web/README.md):** fixed the relative link to the Swift app, which the move had broken.
+
+**What I left alone:** the site still publishes this app at `https://molab-itp.github.io/99-HO-States/v05/`. The Swift app's `Links.json`, `pages/index.html` and the root README all link there, and the Vite base path in `vite.config.js` is still `/99-HO-States/v05/`. Moving the folder didn't change the URL, so none of these needed edits.
+
+**Build check:** at first `npm run build` failed in the new folder because `@supabase/supabase-js` was missing from the local `node_modules`. That was a local problem unrelated to the move, since the folder's contents moved unchanged. I ran `npm ci`, the same install the deploy workflow uses, and the build then succeeded.
+
+When you're ready, `bin/publish.sh` will commit this under your v.178 entry.
+
+*Time: 44s · Cost: $0.3402 (input 22, output 3.6k, cache write 22.3k, cache read 451.3k) · session $0.3402*

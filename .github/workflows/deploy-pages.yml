@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - 'v4/**'
-      - 'v05/**'
+      - 'HOS-USnA/web/**'
       - 'v07/**'
       - 'pages/**'
       - '.github/workflows/deploy-pages.yml'
@@ -32,7 +32,7 @@ jobs:
           cache: npm
           cache-dependency-path: |
             v4/package-lock.json
-            v05/package-lock.json
+            HOS-USnA/web/package-lock.json
             v07/package-lock.json
 
       - name: Build v4
@@ -41,10 +41,12 @@ jobs:
           npm ci
           npm run build
 
+      # v05 lives in HOS-USnA/web (the web port of the HOS-USnA Swift app) but still deploys to
+      # /v05/, the URL the app and pages/index.html link to.
       # v05's optional Account (sign-in, export/import of app state) uses the same Supabase
       # project as v07; without these it builds as before, with no Account button.
-      - name: Build v05
-        working-directory: v05
+      - name: Build v05 (HOS-USnA/web)
+        working-directory: HOS-USnA/web
         env:
           VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
@@ -76,7 +78,7 @@ jobs:
           mkdir -p _site/v4
           cp -r v4/dist/. _site/v4/
           mkdir -p _site/v05
-          cp -r v05/dist/. _site/v05/
+          cp -r HOS-USnA/web/dist/. _site/v05/
           mkdir -p _site/v07
           cp -r v07/dist/. _site/v07/
 
