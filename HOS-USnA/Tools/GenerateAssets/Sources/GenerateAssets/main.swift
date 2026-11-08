@@ -196,7 +196,7 @@ let defaultAssetsURL = URL(fileURLWithPath: #filePath)
     .deletingLastPathComponent() // Sources/
     .deletingLastPathComponent() // GenerateAssets (package root)/
     .deletingLastPathComponent() // Tools/
-    .deletingLastPathComponent() // v2/
+    .deletingLastPathComponent() // HOS-USnA/
     .appendingPathComponent("US-Headers/US-Headers/Assets.xcassets")
 
 let assetsURL: URL = {

@@ -1347,4 +1347,8 @@ what does it do
 what is purpose of .claude/skills/run-v4/SKILL.md.
 
 new .claude from ../99-Black-Power/.claude 
-cp tools from ../99-Black-Power
+cp tools from ../99-Black-Po
+
+v.177
+
+rename folder v2 to HOS-USnA

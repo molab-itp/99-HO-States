@@ -3276,3 +3276,29 @@ export needs the v06 migration from v02.171 (`supabase db push` from v06), which
 Version bumped to 0.1.31. Nothing was committed.
 
 **Cost**: ~20 minutes.
+
+---
+
+## User (11/8/2026, 11:58:59 AM)
+
+```
+rename folder v2 to HOS-USnA
+```
+
+## Assistant
+
+I renamed the folder with `git mv v2 HOS-USnA`, so git tracks it as a rename. Files that git ignores, such as `Supabase.plist`, moved with the folder. Nothing has been committed. I haven't opened or built the Xcode project from its new location yet.
+
+The folder holds a project folder with the same name, so the project is now at `HOS-USnA/HOS-USnA/HOS-USnA.xcodeproj`. If that nesting isn't what you meant, tell me and I'll change it.
+
+I updated the references to the old path:
+- In [v4/README.md](v4/README.md) and [v05/README.md](v05/README.md), the links now point to `../HOS-USnA/HOS-USnA`.
+- In [README.md](README.md), the wording "v2/HOS-USnA SwiftUI app" is now "HOS-USnA SwiftUI app".
+- In [main.swift](HOS-USnA/Tools/GenerateAssets/Sources/GenerateAssets/main.swift#L199), a path comment now says `HOS-USnA/`. The script works out its paths relative to its own location, so the rename doesn't change how it runs.
+
+I didn't change these:
+- **Old entries in `Log.md` and `Log-v2-signon.md`** still say `v2/...`, because they record what was done at the time.
+- **Comments and descriptions in v05, v4 and v3** still say "v2's …".
+- **`v3/tools/migrate.js`** points to `v2/US-Headers`, a folder that no longer exists, so it was already out of date.
+
+*Time: 21s · Cost: $0.2133 (input 12, output 1.9k, cache write 16.4k, cache read 219.8k) · session $0.2133*
