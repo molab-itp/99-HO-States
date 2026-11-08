@@ -1338,3 +1338,13 @@ and in future other operations
 v07.175
 
 sync web app v07 with SwiftUI app v06
+
+v.176
+
+is .claude/settings.local.json needed?
+what does it do
+
+what is purpose of .claude/skills/run-v4/SKILL.md.
+
+new .claude from ../99-Black-Power/.claude 
+cp tools from ../99-Black-Power

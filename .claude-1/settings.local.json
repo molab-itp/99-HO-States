@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(swift build *)",
+      "Bash(xcodebuild -project US-Headers.xcodeproj -scheme US-Headers -destination 'generic/platform=iOS Simulator' -quiet build)",
+      "Bash(ls /Applications/ | grep -i xcode)",
+      "Read(//Applications/**)",
+      "Bash(sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer)",
+      "Bash(xcodebuild -version)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode_26.6.app/Contents/Developer xcodebuild -version)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode_26.6.app/Contents/Developer xcodebuild -project US-Headers.xcodeproj -scheme US-Headers -destination 'generic/platform=iOS Simulator' -quiet build)",
+      "Bash(echo \"EXIT: $?\")"
+    ]
+  }
+}

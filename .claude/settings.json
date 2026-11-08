@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CHAT_LOG=\"$CLAUDE_PROJECT_DIR/Log.md\" node \"$CLAUDE_PROJECT_DIR/tools/log-turn.js\""
+          }
+        ]
+      }
+    ]
+  }
+}
