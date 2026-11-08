@@ -1,4 +1,4 @@
-// Cut down from v06/HOS-Lobby/HOS_Lobby/Models/Profile.swift; keep v06 as the source of truth.
+// Cut down from HOS-Lobby/HOS-Lobby/HOS_Lobby/Models/Profile.swift; keep v06 as the source of truth.
 import Foundation
 
 /// A row of `public.profiles`, with just the columns the Account view shows.

@@ -1,4 +1,4 @@
-// From v06/HOS-Lobby/HOS_Lobby/Preview/PreviewData.swift (`AuthModel.preview` only).
+// From HOS-Lobby/HOS-Lobby/HOS_Lobby/Preview/PreviewData.swift (`AuthModel.preview` only).
 #if DEBUG
 import Foundation
 import Supabase

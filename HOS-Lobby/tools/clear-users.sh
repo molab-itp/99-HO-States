@@ -8,16 +8,16 @@
 #   hosted:  Dashboard → Project Settings → API Keys → Secret keys (sb_secret_…)
 #
 # Usage (from anywhere):
-#   SUPABASE_SECRET_KEY=sb_secret_… v06/tools/clear-users.sh          # list guest/unknown users (dry run)
-#   SUPABASE_SECRET_KEY=sb_secret_… v06/tools/clear-users.sh --delete # actually delete them
-#   … v06/tools/clear-users.sh --email a@b.com [--delete]             # that user instead; repeat
+#   SUPABASE_SECRET_KEY=sb_secret_… HOS-Lobby/tools/clear-users.sh          # list guest/unknown users (dry run)
+#   SUPABASE_SECRET_KEY=sb_secret_… HOS-Lobby/tools/clear-users.sh --delete # actually delete them
+#   … HOS-Lobby/tools/clear-users.sh --email a@b.com [--delete]             # that user instead; repeat
 #                                                                     # --email for several
-#   v06/tools/clear-users.sh --local [--email …] [--delete]           # local stack; key read
+#   HOS-Lobby/tools/clear-users.sh --local [--email …] [--delete]           # local stack; key read
 #                                                                     # from `supabase status`
 # The hosted URL comes from SUPABASE_URL, else from the app's Supabase.plist.
 set -euo pipefail
 
-cd "$(dirname "$0")/.."   # v06/
+cd "$(dirname "$0")/.."   # HOS-Lobby/
 
 command -v jq >/dev/null || { echo "Needs jq: brew install jq" >&2; exit 1; }
 
@@ -55,7 +55,7 @@ else
 fi
 url=$(tr -d '[:space:]' <<<"$url")
 url=${url%/}
-[[ -n "$url" ]] || { echo "No project URL: set SUPABASE_URL (https://<project-ref>.supabase.co), or create v06/HOS-Lobby/HOS_Lobby/Supabase.plist" >&2; exit 1; }
+[[ -n "$url" ]] || { echo "No project URL: set SUPABASE_URL (https://<project-ref>.supabase.co), or create HOS-Lobby/HOS-Lobby/HOS_Lobby/Supabase.plist" >&2; exit 1; }
 [[ "$url" =~ ^https?://[^/]+$ && "$url" != *YOUR-PROJECT-REF* ]] || { echo "Not a valid project URL: $url" >&2; exit 1; }
 [[ -n "$key" ]] || { echo "No secret key: set SUPABASE_SECRET_KEY (sb_secret_…)" >&2; exit 1; }
 

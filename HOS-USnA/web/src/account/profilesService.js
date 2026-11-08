@@ -17,7 +17,7 @@ export async function fetchAllProfiles(client) {
   );
 }
 
-/** A public URL for a path in the `avatars` bucket (see `v06/supabase/schemas/30_profile_photos.sql`). */
+/** A public URL for a path in the `avatars` bucket (see `HOS-Lobby/supabase/schemas/30_profile_photos.sql`). */
 export function publicURL(client, path) {
   if (!path) return null;
   return client.storage.from('avatars').getPublicUrl(path).data.publicUrl;

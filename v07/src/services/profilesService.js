@@ -1,5 +1,5 @@
 // Port of ProfilesService.swift: reads and watches `public.profiles` (see
-// `v06/supabase/schemas/10_profiles.sql`), and lets admins delete users.
+// `HOS-Lobby/supabase/schemas/10_profiles.sql`), and lets admins delete users.
 
 /** supabase-js returns `{ data, error }` rather than throwing. */
 export function unwrap({ data, error }) {
@@ -68,7 +68,7 @@ export async function touchLastSeen(client) {
 }
 
 /**
- * Whether the current user is in `public.admins` (see `v06/supabase/schemas/40_admins.sql`).
+ * Whether the current user is in `public.admins` (see `HOS-Lobby/supabase/schemas/40_admins.sql`).
  * Only decides whether to show the Delete action; the Edge Function checks again.
  */
 export async function isAdmin(client) {
@@ -77,7 +77,7 @@ export async function isAdmin(client) {
 
 /**
  * Deletes another user's account, photos and data through the `delete-user` Edge Function
- * (`v06/supabase/functions/delete-user`). Admins only. Every client, this one included, then
+ * (`HOS-Lobby/supabase/functions/delete-user`). Admins only. Every client, this one included, then
  * gets the `profiles` delete over Realtime.
  */
 export async function deleteUser(client, id) {

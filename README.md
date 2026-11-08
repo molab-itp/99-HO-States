@@ -5,7 +5,7 @@
 - [HO-State-USnA v05](https://molab-itp.github.io/99-HO-States/HOS-USnA/web/)
   - A web port of the HOS-USnA SwiftUI app built with React
 - [HOS-Lobby v07](https://molab-itp.github.io/99-HO-States/v07/)
-  - A web port of the v06/HOS-Lobby SwiftUI app built with React
+  - A web port of the HOS-Lobby SwiftUI app built with React
 
 ```
 What will the USnA look like in 2028?

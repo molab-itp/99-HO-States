@@ -1,5 +1,5 @@
 // Port of v2's Account/AppStateHistory.swift: Export/Import for `AccountSheet`, kept as a history
-// in `public.app_state` (see `v06/supabase/schemas/20_app_state.sql`). Every export inserts a new
+// in `public.app_state` (see `HOS-Lobby/supabase/schemas/20_app_state.sql`). Every export inserts a new
 // row keyed by user and date, `key = "history/<UTC time>"`, rather than overwriting one row; rows
 // are never updated or deleted here, so any earlier export can be rolled back to later. Same
 // `app` and JSON shape as v2 (see `AppModelContext`'s `snapshot`), so an export from either app

@@ -1,4 +1,4 @@
-// Copied from v06/HOS-Lobby/HOS_Lobby/Views/SignInView.swift; keep v06 as the source of truth.
+// Copied from HOS-Lobby/HOS-Lobby/HOS_Lobby/Views/SignInView.swift; keep v06 as the source of truth.
 // v2 changes: the title and prompt text, and no `AppVersionLabel` (Landing shows the build).
 import AuthenticationServices
 import CryptoKit

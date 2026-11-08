@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Shown when `Supabase.plist` hasn't been filled in yet (see v06/README.md).
+/// Shown when `Supabase.plist` hasn't been filled in yet (see HOS-Lobby/README.md).
 struct SetupRequiredView: View {
     let message: String
 

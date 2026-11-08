@@ -1,5 +1,5 @@
 // Port of AppStateStore.swift: syncs one app's state as a JSON document in `public.app_state`
-// (see `v06/supabase/schemas/20_app_state.sql`). Changing the state's fields is a client-only
+// (see `HOS-Lobby/supabase/schemas/20_app_state.sql`). Changing the state's fields is a client-only
 // change; the database never needs a migration for it.
 //
 // Not used by this app. Like the Swift one, it's the ready-to-copy client for v05, e.g.

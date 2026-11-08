@@ -9,7 +9,7 @@ OAuth redirect).
 [v07](../v07) is the web port of this app, on the same database.
 
 ```
-v06/
+HOS-Lobby/
   supabase/
     config.toml            local-stack config (anonymous sign-ins, redirect URLs, email templates)
     templates/otp.html     sign-in email: 6-digit code only (copy into the dashboard too)
@@ -67,7 +67,7 @@ Rules that keep this painless:
 
 ### 1. Supabase project
 1. Create a project at https://supabase.com/dashboard.
-2. Link and push the schema from `v06/`:
+2. Link and push the schema from `HOS-Lobby/`:
    ```sh
    npx supabase login
    npx supabase link --project-ref <your-project-ref>
@@ -139,7 +139,7 @@ live list updates or banners.
 The simulator needs to be signed in to an Apple Account (Settings) to test this.
 
 ### 8. Admins (deleting users from the app)
-1. Push the `admins` table and deploy the Edge Function, from `v06/`:
+1. Push the `admins` table and deploy the Edge Function, from `HOS-Lobby/`:
    ```sh
    npx supabase db push                        # migrations/20261005020000_admins.sql
    npx supabase functions deploy delete-user   # no Docker needed
@@ -158,7 +158,7 @@ key instead: `npx supabase secrets set SB_SECRET_KEY=sb_secret_…`.
 
 ### 9. iOS app
 ```sh
-cd v06/HOS-Lobby
+cd HOS-Lobby/HOS-Lobby
 cp HOS_Lobby/Supabase.example.plist HOS_Lobby/Supabase.plist   # fill in URL + publishable key
 open HOS-Lobby.xcodeproj
 ```

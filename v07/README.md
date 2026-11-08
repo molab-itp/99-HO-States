@@ -1,6 +1,6 @@
 # v07 — HOS-Lobby (React)
 
-A web port of the [v06](../v06) SwiftUI app (`HOS-Lobby.xcodeproj`), built with React + Vite and
+A web port of the [v06](../HOS-Lobby) SwiftUI app (`HOS-Lobby.xcodeproj`), built with React + Vite and
 hosted on GitHub Pages at https://molab-itp.github.io/99-HO-States/v07/.
 
 It does what v06 does: sign in with a 6-digit code that Supabase Auth emails you, with Sign in
@@ -8,7 +8,7 @@ with Apple, or as a guest; see every user who has signed on and when they were l
 set, crop and restore your profile photo; and, for admins, check users and delete them from an
 Actions menu.
 
-It uses v06's Supabase project as it is. Nothing under [`v06/supabase/`](../v06/supabase) changes,
+It uses v06's Supabase project as it is. Nothing under [`HOS-Lobby/supabase/`](../HOS-Lobby/supabase) changes,
 and a user sees the same list, photos and live banners in both apps.
 
 ## Running

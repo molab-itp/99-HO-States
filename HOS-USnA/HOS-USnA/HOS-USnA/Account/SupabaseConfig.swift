@@ -1,4 +1,4 @@
-// Copied from v06/HOS-Lobby/HOS_Lobby/SupabaseConfig.swift; keep v06 as the source of truth.
+// Copied from HOS-Lobby/HOS-Lobby/HOS_Lobby/SupabaseConfig.swift; keep v06 as the source of truth.
 import Foundation
 
 /// The project URL + publishable key, read from the bundled (gitignored) `Supabase.plist`.

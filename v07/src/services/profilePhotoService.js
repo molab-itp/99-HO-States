@@ -1,6 +1,6 @@
 // Port of ProfilePhotoService.swift: uploads, crops and removes profile photos in the `avatars`
 // bucket and points `profiles.photo_path` / `photo_thumb_path` / `photo_original_path` at them
-// (see `v06/supabase/schemas/30_profile_photos.sql`).
+// (see `HOS-Lobby/supabase/schemas/30_profile_photos.sql`).
 import { unwrap } from './profilesService.js';
 
 const BUCKET = 'avatars';

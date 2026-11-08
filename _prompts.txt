@@ -1370,3 +1370,10 @@ v.179
 fix v05 links that you left alone
 
 bin/publish.sh
+
+v.180
+
+move v06 folder to HOS-Lobby
+
+move v07 folder to HOS-Lobby/web
+and update required web deploy scripts

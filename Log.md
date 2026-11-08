@@ -3375,3 +3375,44 @@ I changed the web app's address to `https://molab-itp.github.io/99-HO-States/HOS
 I kept "v05" where it's the version's name rather than an address, such as the `v05 0.1.31` build label and code comments about history.
 
 *Time: 44s · Cost: $0.2287 (input 16, output 4.3k, cache write 8.8k, cache read 360.3k) · session $0.5689*
+
+---
+
+## User (11/8/2026, 1:58:33 PM)
+
+```
+move v06 folder to HOS-Lobby
+```
+
+## Assistant
+
+Moved. Now updating path references across the repo (leaving historical logs and _prompts.txt alone).
+
+I moved `v06/` to [HOS-Lobby/](HOS-Lobby/) with `git mv`, so it now matches the HOS-USnA layout:
+
+```
+HOS-Lobby/
+  HOS-Lobby/   (Xcode project + HOS_Lobby sources)
+  supabase/
+  tools/
+  README.md
+```
+
+Untracked local files in that folder moved along with it, including the gitignored `Supabase.plist`.
+
+**Updated path references** (`v06/...` → `HOS-Lobby/...`) in:
+- [README.md](README.md): the v07 line now says "a web port of the HOS-Lobby SwiftUI app".
+- [HOS-Lobby/README.md](HOS-Lobby/README.md): the folder tree, "from `HOS-Lobby/`" and `cd HOS-Lobby/HOS-Lobby`.
+- [HOS-Lobby/tools/clear-users.sh](HOS-Lobby/tools/clear-users.sh): the usage comments and the error message. The script finds its own location, so it still runs the same way.
+- [SetupRequiredView.swift](HOS-Lobby/HOS-Lobby/HOS_Lobby/Views/SetupRequiredView.swift)
+- The source-of-truth comments in HOS-USnA's `Account/*.swift` and `web/src/account/*.js` files.
+- [v07/README.md](v07/README.md) links and the `v07/src/services/*.js` comments.
+
+**Left as is:**
+- Places that use "v06" as a version name rather than a path, like "the v06/v07 lobby" and the README title. That's what we did for v05.
+- `_prompts.txt` and the `Log*` files, since they're history.
+- The deploy workflow, because nothing in it builds v06.
+
+I haven't committed anything. Your existing `_prompts.txt` change is also in the working tree. Since the folder moved, Xcode needs to reopen `HOS-Lobby/HOS-Lobby/HOS-Lobby.xcodeproj` from its new location.
+
+*Time: 40s · Cost: $0.4189 (input 18, output 4.0k, cache write 32.5k, cache read 397.3k) · session $0.4189*

@@ -2,7 +2,7 @@ import Foundation
 import Supabase
 
 /// Export/import for `AccountView`, kept as a history in `public.app_state` (see
-/// `v06/supabase/schemas/20_app_state.sql`): every export inserts a new row keyed by user and
+/// `HOS-Lobby/supabase/schemas/20_app_state.sql`): every export inserts a new row keyed by user and
 /// date, `key = "history/<UTC time>"`, rather than overwriting one row. Rows are never updated or
 /// deleted here, so any earlier export can be rolled back to later. No migration needed: the
 /// table's key is already (user_id, app, key). `key = 'default'` is left for live sync (stage 2 in

@@ -1,4 +1,4 @@
-// Copied as is from v06/HOS-Lobby/HOS_Lobby/Services/AuthModel.swift; keep v06 as the source of truth.
+// Copied as is from HOS-Lobby/HOS-Lobby/HOS_Lobby/Services/AuthModel.swift; keep v06 as the source of truth.
 import Foundation
 import Observation
 import Supabase
