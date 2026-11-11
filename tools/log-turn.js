@@ -31,22 +31,34 @@ const PRICES = [
   ['claude-haiku-4', { in: 1, out: 5 }],
 ];
 
-const blocks = (e) => (typeof e.message.content === 'string' ? [{ type: 'text', text: e.message.content }] : e.message.content);
-const textOf = (e) => blocks(e).filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim();
+const blocks = (e) =>
+  typeof e.message.content === 'string' ? [{ type: 'text', text: e.message.content }] : e.message.content;
+const textOf = (e) =>
+  blocks(e)
+    .filter((b) => b.type === 'text')
+    .map((b) => b.text)
+    .join('\n')
+    .trim();
 const cleanPrompt = (e) =>
   textOf(e)
     .replace(/<(system-reminder|ide_selection)>[\s\S]*?<\/\1>/g, '')
     .replace(/<\/?pasted_content[^>]*>/g, '')
     .trim();
 // A real prompt has text of its own and no tool_result.
-const isPrompt = (e) => e.type === 'user' && !e.isMeta && !e.isSidechain && !blocks(e).some((b) => b.type === 'tool_result') && cleanPrompt(e);
+const isPrompt = (e) =>
+  e.type === 'user' &&
+  !e.isMeta &&
+  !e.isSidechain &&
+  !blocks(e).some((b) => b.type === 'tool_result') &&
+  cleanPrompt(e);
 const isReply = (e) => e.type === 'assistant' && !e.isSidechain;
 
 // Usage and cost of the assistant messages in entries. A message is split over several
 // transcript entries that repeat its usage, so each message id is counted once.
 function costOf(entries) {
   const messages = new Map();
-  for (const e of entries) if (e.type === 'assistant' && e.message?.usage) messages.set(e.message.id ?? e.uuid, e.message);
+  for (const e of entries)
+    if (e.type === 'assistant' && e.message?.usage) messages.set(e.message.id ?? e.uuid, e.message);
   const t = { cost: 0, in: 0, out: 0, write: 0, read: 0, unpriced: new Set() };
   for (const { model, usage: u } of messages.values()) {
     const price = PRICES.find(([id]) => model?.startsWith(id))?.[1];
@@ -61,7 +73,12 @@ function costOf(entries) {
       if (model && model !== '<synthetic>') t.unpriced.add(model);
       continue;
     }
-    const dollars = inp * price.in + out * price.out + write5m * price.in * 1.25 + write1h * price.in * 2 + read * (price.read ?? price.in * 0.1);
+    const dollars =
+      inp * price.in +
+      out * price.out +
+      write5m * price.in * 1.25 +
+      write1h * price.in * 2 +
+      read * (price.read ?? price.in * 0.1);
     t.cost += (dollars / 1e6) * (u.speed === 'fast' ? 2 : 1);
   }
   return t;
@@ -72,7 +89,9 @@ function lapseOf(prompt, turn) {
   const end = turn.findLast((e) => e.timestamp)?.timestamp;
   const ms = end ? Date.parse(end) - Date.parse(prompt.timestamp) : 0;
   const s = Math.max(0, Math.round(ms / 1000));
-  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  const h = Math.floor(s / 3600),
+    m = Math.floor((s % 3600) / 60),
+    sec = s % 60;
   const pad = (n) => String(n).padStart(2, '0');
   return h ? `${h}h ${pad(m)}m ${pad(sec)}s` : m ? `${m}m ${pad(sec)}s` : `${sec}s`;
 }
@@ -116,7 +135,10 @@ async function write(transcript, logFile) {
     const reply = turn.filter(isReply).map(textOf).filter(Boolean).join('\n\n');
     const when = new Date(entries[start].timestamp).toLocaleString();
     const cost = costLine(lapseOf(entries[start], turn), costOf(turn), costOf(entries.slice(0, prompts[n + 1])));
-    fs.appendFileSync(logFile, `\n---\n\n## User (${when})\n\n\`\`\`\n${cleanPrompt(entries[start])}\n\`\`\`\n\n## Assistant\n\n${reply}\n\n${cost}\n`);
+    fs.appendFileSync(
+      logFile,
+      `\n---\n\n## User (${when})\n\n\`\`\`\n${cleanPrompt(entries[start])}\n\`\`\`\n\n## Assistant\n\n${reply}\n\n${cost}\n`,
+    );
     fs.writeFileSync(stateFile, entries[start].uuid);
   }
 }
@@ -126,5 +148,8 @@ if (process.argv[2] === '--write') {
 } else {
   const input = JSON.parse(fs.readFileSync(0, 'utf8'));
   const logFile = process.env.CHAT_LOG || path.join(input.cwd, 'Log.md');
-  spawn(process.execPath, [__filename, '--write', input.transcript_path, logFile], { detached: true, stdio: 'ignore' }).unref();
+  spawn(process.execPath, [__filename, '--write', input.transcript_path, logFile], {
+    detached: true,
+    stdio: 'ignore',
+  }).unref();
 }
