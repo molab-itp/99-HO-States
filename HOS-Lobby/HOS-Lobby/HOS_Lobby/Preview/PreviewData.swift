@@ -58,3 +58,26 @@ extension UIImage {
     }
 }
 #endif
+
+#if DEBUG
+extension ShakeSession {
+    static func samples(for userID: UUID) -> [ShakeSession] {
+        [(14, 3200, 120), (6, 1400, 3600), (22, 5100, 86_400)].map { count, ms, ago in
+            ShakeSession(id: UUID(), userID: userID, shakeCount: count, durationMS: ms,
+                         startedAt: .now.addingTimeInterval(-Double(ago)))
+        }
+    }
+}
+
+extension ShakeRanking {
+    static let samples: [ShakeRanking] = {
+        let totals = Profile.samples.prefix(3).enumerated().map { index, profile in
+            ShakeTotals(userID: profile.id, sessionCount: 3 - index, totalShakes: [42, 57, 9][index],
+                        totalDurationMS: 9700, lastShakeCount: [14, 20, 9][index],
+                        lastDurationMS: [3200, 4100, 1800][index],
+                        lastShakeAt: .now.addingTimeInterval(-Double(index + 1) * 600))
+        }
+        return rank(profiles: Profile.samples, totals: totals)
+    }()
+}
+#endif

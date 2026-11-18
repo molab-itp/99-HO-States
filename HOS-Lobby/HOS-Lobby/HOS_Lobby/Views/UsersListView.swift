@@ -48,99 +48,92 @@ struct UsersListView: View {
     private var deletableSelection: [Profile] { selectedProfiles.filter { $0.id != currentUserID } }
 
     var body: some View {
-        NavigationStack {
-            List {
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                }
-                Section {
-                    ForEach(profiles) { profile in
-                        HStack(spacing: 12) {
-                            if canSelect {
-                                checkbox(for: profile)
-                            }
-                            NavigationLink(value: profile) {
-                                ProfileRow(
-                                    profile: profile,
-                                    isCurrentUser: profile.id == currentUserID,
-                                    thumbURL: photos.publicURL(for: profile.photoThumbPath)
-                                )
-                            }
+        List {
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+            }
+            Section {
+                ForEach(profiles) { profile in
+                    HStack(spacing: 12) {
+                        if canSelect {
+                            checkbox(for: profile)
+                        }
+                        NavigationLink(value: profile) {
+                            ProfileRow(
+                                profile: profile,
+                                isCurrentUser: profile.id == currentUserID,
+                                thumbURL: photos.publicURL(for: profile.photoThumbPath)
+                            )
                         }
                     }
-                } header: {
-                    VStack(spacing: 4) {
-                        AppVersionLabel(font: .caption2)
-                            .frame(maxWidth: .infinity)
-                        if hasLoaded && !profiles.isEmpty {
-                            UserCountsView(profiles: profiles)
-                        }
-                    }
-                    .textCase(nil)
                 }
-            }
-            .overlay {
-                if !hasLoaded {
-                    ProgressView()
-                } else if profiles.isEmpty && errorMessage == nil {
-                    ContentUnavailableView("No users yet", systemImage: "person.slash")
-                }
-            }
-            .navigationTitle("HOS-Lobby")
-            .navigationDestination(for: Profile.self) { profile in
-                ProfileDetailView(profile: profile, isCurrentUser: profile.id == currentUserID) {
-                    await reload()
-                }
-            }
-            .toolbar {
-                if canSelect {
-                    ToolbarItem(placement: .topBarLeading) {
-                        actionsMenu
+            } header: {
+                VStack(spacing: 4) {
+                    AppVersionLabel(font: .caption2)
+                        .frame(maxWidth: .infinity)
+                    if hasLoaded && !profiles.isEmpty {
+                        UserCountsView(profiles: profiles)
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Sign Out") {
-                        Task { await auth.signOut() }
-                    }
-                }
+                .textCase(nil)
             }
-            .refreshable { await reload() }
-            .confirmationDialog(
-                deleteTitle,
-                isPresented: $isConfirmingDelete,
-                titleVisibility: .visible
-            ) {
-                Button(deletableSelection.count == 1 ? "Delete User" : "Delete \(deletableSelection.count) Users",
-                       role: .destructive) {
-                    Task { await delete(deletableSelection) }
-                }
-            } message: {
-                Text("Their accounts, photos and saved data are removed for good.")
-            }
-            // Drop checks for users who are gone, e.g. deleted by another admin.
-            .onChange(of: profiles) { _, newProfiles in
-                selection.formIntersection(newProfiles.map(\.id))
-            }
-            .onChange(of: canSelect) { _, newValue in
-                if !newValue { selection.removeAll() }
-            }
-            .safeAreaInset(edge: .bottom) {
-                if let banner {
-                    Label(banner.message, systemImage: banner.systemImage)
-                        .font(.subheadline.weight(.medium))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(.regularMaterial, in: Capsule())
-                        .shadow(radius: 4, y: 2)
-                        .padding(.bottom, 8)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                        .id(banner.id)
-                }
-            }
-            .animation(.snappy, value: banner)
         }
+        .overlay {
+            if !hasLoaded {
+                ProgressView()
+            } else if profiles.isEmpty && errorMessage == nil {
+                ContentUnavailableView("No users yet", systemImage: "person.slash")
+            }
+        }
+        .navigationTitle("Users")
+        .navigationDestination(for: Profile.self) { profile in
+            ProfileDetailView(profile: profile, isCurrentUser: profile.id == currentUserID) {
+                await reload()
+            }
+        }
+        .toolbar {
+            if canSelect {
+                ToolbarItem(placement: .topBarTrailing) {
+                    actionsMenu
+                }
+            }
+        }
+        .refreshable { await reload() }
+        .confirmationDialog(
+            deleteTitle,
+            isPresented: $isConfirmingDelete,
+            titleVisibility: .visible
+        ) {
+            Button(deletableSelection.count == 1 ? "Delete User" : "Delete \(deletableSelection.count) Users",
+                   role: .destructive) {
+                Task { await delete(deletableSelection) }
+            }
+        } message: {
+            Text("Their accounts, photos and saved data are removed for good.")
+        }
+        // Drop checks for users who are gone, e.g. deleted by another admin.
+        .onChange(of: profiles) { _, newProfiles in
+            selection.formIntersection(newProfiles.map(\.id))
+        }
+        .onChange(of: canSelect) { _, newValue in
+            if !newValue { selection.removeAll() }
+        }
+        .safeAreaInset(edge: .bottom) {
+            if let banner {
+                Label(banner.message, systemImage: banner.systemImage)
+                    .font(.subheadline.weight(.medium))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(.regularMaterial, in: Capsule())
+                    .shadow(radius: 4, y: 2)
+                    .padding(.bottom, 8)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .id(banner.id)
+            }
+        }
+        .animation(.snappy, value: banner)
         .task { await reload() }
         .task { await watchChanges() }
         .task(id: banner?.id) {
@@ -331,13 +324,17 @@ private struct UserCountsView: View {
 
 #if DEBUG
 #Preview {
-    UsersListView(currentUserID: Profile.sampleMe.id, sampleProfiles: Profile.samples, isAdmin: true,
-                  banner: UserEvent(kind: .signedIn, name: "Grace Hopper"))
-        .environment(AuthModel.preview())
+    NavigationStack {
+        UsersListView(currentUserID: Profile.sampleMe.id, sampleProfiles: Profile.samples, isAdmin: true,
+                      banner: UserEvent(kind: .signedIn, name: "Grace Hopper"))
+    }
+    .environment(AuthModel.preview())
 }
 
 #Preview("Empty") {
-    UsersListView(currentUserID: UUID(), sampleProfiles: [])
-        .environment(AuthModel.preview())
+    NavigationStack {
+        UsersListView(currentUserID: UUID(), sampleProfiles: [])
+    }
+    .environment(AuthModel.preview())
 }
 #endif

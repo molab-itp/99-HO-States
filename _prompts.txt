@@ -1399,3 +1399,21 @@ bin/publish.sh
 v0.183
 
 bin/publish.sh
+
+v0.184
+
+in HOS-Lobby/HOS-Lobby
+update with landing page 
+that says "Welcome to HOS-Lobby"
+with options to see list of users
+(the prior starting screen)
+and a new screen that displays 
+users in order of recorded shake count,
+a new thing.
+the shake count is a count of the
+number of times user skaes device.
+count and duration of shakes is
+recorded. last shake count
+and duration is reporteed
+detailed shake history is save 
+and presented as detailed view option

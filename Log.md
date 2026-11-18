@@ -3477,3 +3477,61 @@ I updated [pages/index.html](pages/index.html) to use the new names and show eac
 The v4 button and the 🏛️ page header haven't changed. I also haven't committed anything.
 
 *Time: 27s · Cost: $0.2712 (input 16, output 2.5k, cache write 19.8k, cache read 314.7k) · session $0.2712*
+
+---
+
+## User (11/18/2026, 7:01:15 AM)
+
+```
+in HOS-Lobby/HOS-Lobby
+update with landing page 
+that says "Welcome to HOS-Lobby"
+with options to see list of users
+(the prior starting screen)
+and a new screen that displays 
+users in order of recorded shake count,
+a new thing.
+the shake count is a count of the
+number of times user skaes device.
+count and duration of shakes is
+recorded. last shake count
+and duration is reporteed
+detailed shake history is save 
+and presented as detailed view option
+```
+
+## Assistant
+
+Database and services are in. Now the views: the landing page, Shakes leaderboard, history, and the Simulator shake hook.
+
+Now point RootView at the landing page and take the NavigationStack out of UsersListView, since it's now pushed inside the landing page's stack.
+
+The project's deployment target is lower than iOS 18, so I'm replacing the wiggle effect with pulse, which iOS 17 supports.
+
+I've added the Welcome landing page and the Shakes screen. The app builds for the Simulator, but I haven't run it yet. The Shakes screen won't work until you push the database migration, which I didn't do because it changes your hosted project.
+
+**Next step:** from `HOS-Lobby/`, run `npx supabase db push`. Until then the Shakes screen will show an error that the table is missing. The Users list works either way.
+
+**What you'll see after signing in**
+- **Landing page** ([HomeView.swift](HOS-Lobby/HOS_Lobby/Views/HomeView.swift)): "Welcome to HOS-Lobby" with two choices:
+  - **Users** opens the old starting screen, which is otherwise unchanged. Its title is now "Users" and the admin Actions menu moved to the top right to make room for the Back button.
+  - **Shakes** opens the new screen.
+- Sign Out is now on the landing page. The app still updates "last seen" whenever it opens.
+
+**Shakes screen** ([ShakesView.swift](HOS-Lobby/HOS_Lobby/Views/ShakesView.swift))
+- **Live counter:** while this screen is open, shaking the phone counts up on screen with a light buzz each time. A burst ends after 1.2 seconds without a shake. Its count and duration (first shake to last) are then saved, and "Last: N shakes in X s" appears.
+- **Leaderboard:** every user, ranked by total shakes. Each row shows the user's last burst count, its duration and how long ago it was. Users who have never shaken are at the bottom. It updates live as anyone records a shake.
+- **History:** tapping a user opens [ShakeHistoryView.swift](HOS-Lobby/HOS_Lobby/Views/ShakeHistoryView.swift). It shows totals, number of bursts, total time shaking, the biggest burst and the last burst, then every burst with its date, count and duration. You can swipe to delete your own bursts.
+
+**How shakes are counted** ([ShakeDetector.swift](HOS-Lobby/HOS_Lobby/Services/ShakeDetector.swift)): a jolt above 1.6 g counts as one shake, and jolts less than 0.2 seconds apart count once. These numbers are guesses, so try them on a real phone and adjust if needed. The Simulator has no motion sensor, so there each Device ▸ Shake counts as one shake.
+
+**Database** ([50_shakes.sql](supabase/schemas/50_shakes.sql) and its migration `migrations/20261118000000_shake_sessions.sql`)
+- A new `shake_sessions` table holds one row per burst. Any signed-in user can read all rows, but users can only add or delete their own.
+- A `shake_totals` view adds up each user's totals and last burst for the leaderboard.
+- I wrote the migration by hand because Docker isn't installed for `db diff`, so give it a quick read before pushing.
+
+Two choices you can change:
+- **Ranking:** I took "shake count" to mean total shakes across all bursts. If you'd rather rank by last burst or biggest burst, it's a small change.
+- **Web version:** the web version (v07) doesn't have a landing page or Shakes screen yet.
+
+*Time: 3m 11s · Cost: $0.9766 (input 22, output 18.3k, cache write 58.9k, cache read 701.1k) · session $0.9766*

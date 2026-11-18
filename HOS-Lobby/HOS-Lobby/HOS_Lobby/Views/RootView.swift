@@ -11,7 +11,7 @@ struct RootView: View {
             case .signedOut:
                 SignInView()
             case .signedIn(let user):
-                UsersListView(currentUserID: user.id)
+                HomeView(currentUserID: user.id)
             }
         }
         .task { await auth.observeAuthChanges() }
