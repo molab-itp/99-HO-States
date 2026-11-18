@@ -3761,3 +3761,51 @@ Two things came up along the way:
 - **`--remote` doesn't work here.** The Supabase CLI version this checkout runs (v2.117.0) rejects it; the flag for the hosted project is `--linked`. I did a dry run first, and it showed only the new migration was waiting, so nothing else was applied.
 
 *Time: 43s · Cost: $0.1532 (input 16, output 1.5k, cache write 4.9k, cache read 424.6k) · session $0.6255*
+
+---
+
+## User (11/18/2026, 9:44:36 AM)
+
+```
+in HOS-Lobby/HOS-Lobby ios
+increment build version
+and in web append build version to its version report
+sync web to with ios
+```
+
+## Assistant
+
+Bumping the iOS build, wiring the build number into the web version label, and porting v0.187's "Clear Shake Stats" admin action to the web.
+
+Now the edits: iOS build bump, vite config reads the build from the Xcode project, label appends it.
+
+Now porting Clear Shake Stats.
+
+Now extending the smoke test's Supabase stand-in and adding a check for the new action.
+
+Only Ada has seeded shakes and later steps depend on them, so I'll seed a burst for the guest and clear theirs instead.
+
+No node_modules locally; installing from the lockfile to build and run the smoke test.
+
+Build and smoke test pass. Updating the README note and the Pages workflow so an iOS build bump also redeploys the web.
+
+The iOS build is now 1021, and the web version label shows the build number. On sign-in, Home and Users it reads **"Version 0.7.5 (1021)"**, matching iOS's "Version 0.8 (1021)". The web build passes and the smoke test passes every step, including a new one for clearing shake stats. I haven't committed anything.
+
+**iOS**
+- `CURRENT_PROJECT_VERSION` went from 1020 to 1021 in both build configurations in [project.pbxproj](HOS-Lobby/HOS-Lobby/HOS-Lobby.xcodeproj/project.pbxproj).
+
+**Web build number**
+- [vite.config.js](HOS-Lobby/web/vite.config.js) reads the build number from the Xcode project when the web app is built, so the two apps can't drift apart. If it can't read the project file it shows `?`, as the iOS label does.
+- [AppVersionLabel.jsx](HOS-Lobby/web/src/views/AppVersionLabel.jsx) adds the build number after the version.
+- I also changed [deploy-pages.yml](.github/workflows/deploy-pages.yml) so that a commit changing only the Xcode project redeploys the web. Before, a build-number bump on its own wouldn't have reached the web page.
+
+**Syncing web with iOS (porting v0.187 "Clear Shake Stats")**
+- [shakesService.js](HOS-Lobby/web/src/services/shakesService.js): new `clearStats(client, userIDs)`, the web version of the Swift `clearStats(userIDs:)`. It deletes all of the given users' shakes in one request.
+- [UsersListView.jsx](HOS-Lobby/web/src/views/UsersListView.jsx): the admin Actions menu now has "Clear Shake Stats (n)" between the selection controls and Delete. It asks for confirmation with the same title and wording as the iOS dialog. Unlike Delete, it can include the signed-in admin, as on iOS.
+- [smoke.mjs](HOS-Lobby/web/scripts/smoke.mjs): the fake Supabase now handles deleting all of a user's shakes at once. A new step checks that Cancel keeps the shakes, that confirming clears only the guest's shakes, and that Ada's stay. Another check confirms the version label includes a build number.
+- I raised the web version from 0.7.4 to 0.7.5. `package-lock.json` still said 0.7.3, so I set it to 0.7.5 as well.
+- I updated [README.md](HOS-Lobby/web/README.md) to describe the version label and the new admin action.
+
+The web action depends on the v0.187 migration `20261118120000_shake_sessions_admin_delete.sql`, which lets admins delete other users' shakes. If that hasn't been pushed to Supabase yet, clearing another user's stats will appear to work but delete nothing.
+
+*Time: 2m 29s · Cost: $0.8056 (input 38, output 11.5k, cache write 45.6k, cache read 1056.0k) · session $0.8056*

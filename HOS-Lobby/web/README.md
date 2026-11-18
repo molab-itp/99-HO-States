@@ -6,7 +6,7 @@ hosted on GitHub Pages at https://molab-itp.github.io/99-HO-States/HOS-Lobby/web
 It does what v06 does: sign in with a 6-digit code that Supabase Auth emails you, with Sign in
 with Apple, or as a guest; see every user who has signed on and when they were last active, live;
 set, crop and restore your profile photo; and, for admins, check users and delete them from an
-Actions menu.
+Actions menu, or clear their shake stats.
 
 It uses v06's Supabase project as it is. Nothing under [`HOS-Lobby/supabase/`](../supabase) changes,
 and a user sees the same list, photos and live banners in both apps.
@@ -126,6 +126,6 @@ HOS-Lobby/web/
   iOS Safari usually hands the page a JPEG anyway.
 - **Photo size:** a photo longer than 4096 pixels on a side is scaled down to that, because
   browsers limit how large a canvas can be. v06 keeps every pixel.
-- **Version label** shows `version` from `package.json`. There's no build number.
+- **Version label** shows `version` from `package.json` and, in parentheses, the iOS app's build number (`CURRENT_PROJECT_VERSION` in `HOS-Lobby.xcodeproj`, read by `vite.config.js`), so both apps report the same build.
 - **No magic-link scheme:** `hostates://auth-callback` is the iOS app's. Here a sign-in link
   would return to the page's own address.
