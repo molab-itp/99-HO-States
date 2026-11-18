@@ -2,9 +2,9 @@
 
 - SwiftUI and React web app built with Claude AI
 - workflow tracked in [\_prompts.txt](https://github.com/molab-itp/99-HO-States/blob/main/_prompts.txt)
-- [HO-State-USnA v05](https://molab-itp.github.io/99-HO-States/HOS-USnA/web/)
+- [HO-State-USnA ](https://molab-itp.github.io/99-HO-States/HOS-USnA/web/)
   - A web port of the HOS-USnA SwiftUI app built with React
-- [HOS-Lobby v07](https://molab-itp.github.io/99-HO-States/HOS-Lobby/web/)
+- [HOS-Lobby ](https://molab-itp.github.io/99-HO-States/HOS-Lobby/web/)
   - A web port of the HOS-Lobby SwiftUI app built with React
 
 ```
@@ -13,4 +13,3 @@ Reflection and past a future Head of State
 HOS 48 is comming!
 8748 will see a new world
 ```
-

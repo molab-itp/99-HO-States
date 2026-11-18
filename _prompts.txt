@@ -1436,3 +1436,8 @@ v0.186
 
 in HOS-Lobby/HOS-Lobby
 update web version to match ios app
+
+v0.186
+
+in HOS-Lobby/HOS-Lobby
+add link on main view to source repo

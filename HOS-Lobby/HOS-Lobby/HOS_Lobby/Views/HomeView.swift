@@ -7,6 +7,9 @@ struct HomeView: View {
     @Environment(AuthModel.self) private var auth
     @Environment(\.scenePhase) private var scenePhase
 
+    private static let sourceRepoURL =
+        URL(string: "https://github.com/molab-itp/99-HO-States/tree/main/HOS-Lobby")!
+
     enum Route: Hashable {
         case users, shakes
     }
@@ -50,6 +53,11 @@ struct HomeView: View {
                         } icon: {
                             Image(systemName: "iphone.radiowaves.left.and.right")
                         }
+                    }
+                }
+                Section {
+                    Link(destination: Self.sourceRepoURL) {
+                        Label("Source on GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
                     }
                 }
             }

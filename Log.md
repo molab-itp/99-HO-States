@@ -3645,3 +3645,22 @@ The web version in [HOS-Lobby/web](.) now matches the iOS app. The smoke test pa
 Nothing is committed, so you can review the changes and run `bin/publish.sh` when ready.
 
 *Time: 5m 13s · Cost: $2.0144 (input 54, output 31.1k, cache write 104.8k, cache read 2765.4k) · session $2.0144*
+
+---
+
+## User (11/18/2026, 7:33:01 AM)
+
+```
+in HOS-Lobby/HOS-Lobby
+add link on main view to source repo
+```
+
+## Assistant
+
+I'll add a Source section linking to the HOS-Lobby folder in the GitHub repo.
+
+I added a **Source on GitHub** link to the main screen. It sits in its own section under Users and Shakes, and tapping it opens https://github.com/molab-itp/99-HO-States/tree/main/HOS-Lobby in Safari. The change is in [HomeView.swift](HOS-Lobby/HOS_Lobby/Views/HomeView.swift). The app builds for the simulator, but I haven't run it or tapped the link.
+
+The link goes to the `main` branch, and you're on `prep`. If HOS-Lobby isn't on `main` yet, the link will show GitHub's 404 page until you merge. Let me know if it should point somewhere else, like the repo root.
+
+*Time: 47s · Cost: $0.2612 (input 18, output 2.1k, cache write 17.4k, cache read 400.9k) · session $0.2612*
