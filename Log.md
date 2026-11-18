@@ -3535,3 +3535,67 @@ Two choices you can change:
 - **Web version:** the web version (v07) doesn't have a landing page or Shakes screen yet.
 
 *Time: 3m 11s · Cost: $0.9766 (input 22, output 18.3k, cache write 58.9k, cache read 701.1k) · session $0.9766*
+
+---
+
+## User (11/18/2026, 7:10:43 AM)
+
+```
+how to install db update
+```
+
+## Assistant
+
+This folder is already linked to your Supabase project (`jcoolgnracpgjncksopx`), so you only need to push. Run this in a terminal:
+
+```sh
+cd /Users/jht2/Documents/projects/molab/99-HO-States/HOS-Lobby
+npx supabase db push
+```
+
+1. It lists the migrations it hasn't applied yet. That should be just `20261118000000_shake_sessions.sql`.
+2. Type `Y` to confirm.
+3. If it asks for the database password, use the one from Supabase Dashboard → Project Settings → Database.
+
+To check that it worked, run `npx supabase migration list`. The new migration should show in both the Local and Remote columns. Then open the Shakes screen in the app: it should load without the missing-table error.
+
+If you want to see what would run first, `npx supabase db push --dry-run` shows the pending migrations without applying anything. The push itself takes a few seconds and doesn't touch existing data. It only adds the new `shake_sessions` table and the `shake_totals` view.
+
+*Time: 8s · Cost: $0.0616 (input 6, output 582, cache write 1.8k, cache read 178.2k) · session $1.0381*
+
+---
+
+## User (11/18/2026, 7:13:32 AM)
+
+```
+getting error in terminal trying to migrate db
+
+WARN: auth.email.enable_signup is deprecated and will be removed in v4, use auth.email.enabled instead.
+WARN: auth.sms.enable_signup is deprecated and will be removed in v4, use auth.sms.enabled instead.
+Target: local stack (127.0.0.1:54322) · default; pass --remote for ho-states-us (jcoolgnracpgjncksopx)
+failed to connect to postgres: failed to connect to `host=127.0.0.1 user=postgres database=postgres`: dial error (connect ECONNREFUSED 127.0.0.1:54322)
+Make sure Docker is running, then run: supabase start
+To use the linked project instead, pass --remote.
+```
+
+## Assistant
+
+Newer versions of the Supabase CLI send commands to a local database by default, not to your hosted project. You don't have one running locally (it needs Docker), so the connection fails. Add `--remote` to send the command to your linked project, `ho-states-us`:
+
+```sh
+cd /Users/jht2/Documents/projects/molab/99-HO-States/HOS-Lobby
+npx supabase db push --remote
+```
+
+The same applies to the other commands from my last message:
+
+```sh
+npx supabase db push --remote --dry-run   # preview what will run
+npx supabase migration list --remote      # check it was applied
+```
+
+The two `WARN` lines are only deprecation notices about `config.toml` and don't cause the failure, so you can ignore them for now.
+
+The setup steps in the README still say plain `npx supabase db push`; I can add `--remote` there if you like.
+
+*Time: 4s · Cost: $0.0317 (input 4, output 314, cache write 919, cache read 90.3k) · session $1.0698*

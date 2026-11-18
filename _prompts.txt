@@ -1417,3 +1417,15 @@ recorded. last shake count
 and duration is reporteed
 detailed shake history is save 
 and presented as detailed view option
+
+v0.185
+
+getting error in terminal trying to migrate db
+
+WARN: auth.email.enable_signup is deprecated and will be removed in v4, use auth.email.enabled instead.
+WARN: auth.sms.enable_signup is deprecated and will be removed in v4, use auth.sms.enabled instead.
+Target: local stack (127.0.0.1:54322) · default; pass --remote for ho-states-us (jcoolgnracpgjncksopx)
+failed to connect to postgres: failed to connect to `host=127.0.0.1 user=postgres database=postgres`: dial error (connect ECONNREFUSED 127.0.0.1:54322)
+Make sure Docker is running, then run: supabase start
+To use the linked project instead, pass --remote.
+
