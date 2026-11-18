@@ -7,6 +7,7 @@ import { userEvent } from '../models/userEvent.js';
 import { useAuth } from '../services/AuthContext.jsx';
 import { publicURL } from '../services/profilePhotoService.js';
 import { deleteUser, fetchAll, isAdmin as fetchIsAdmin, observeChanges, touchLastSeen } from '../services/profilesService.js';
+import { clearStats as clearShakeStats } from '../services/shakesService.js';
 import AppVersionLabel from './AppVersionLabel.jsx';
 import ProfileDetailView from './ProfileDetailView.jsx';
 import ProfileRow from './ProfileRow.jsx';
@@ -29,6 +30,8 @@ export default function UsersListView({ currentUserID }) {
   const [selection, setSelection] = useState(() => new Set());
   /** Up while the "are you sure" dialog for deleting the checked users is showing. */
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  /** Up while the "are you sure" dialog for clearing the checked users' shake stats is showing. */
+  const [isConfirmingClearShakes, setIsConfirmingClearShakes] = useState(false);
   const selectedID = route.name === 'user' ? route.id : null;
   const openProfile = (id) => push(`/user/${id}`);
 
@@ -119,7 +122,7 @@ export default function UsersListView({ currentUserID }) {
     return () => clearTimeout(timer);
   }, [banner]);
 
-  // Whether rows show checkboxes. Delete is the only action so far, and it's admin-only;
+  // Whether rows show checkboxes. Every action so far is admin-only;
   // widen this when actions any user can take are added to the menu.
   const canSelect = isAdmin;
 
@@ -145,6 +148,21 @@ export default function UsersListView({ currentUserID }) {
       else next.add(id);
       return next;
     });
+  }
+
+  /** The checked users, in list order. Clear Shake Stats includes the signed-in user. */
+  const selectedProfiles = useMemo(() => profiles.filter((p) => selection.has(p.id)), [profiles, selection]);
+
+  /** One request for all of them; the Shakes leaderboard picks up the deletes over Realtime. */
+  async function confirmClearShakes() {
+    const users = selectedProfiles;
+    setIsConfirmingClearShakes(false);
+    try {
+      await clearShakeStats(client, users.map((p) => p.id));
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage(`Clearing shake stats failed: ${error.message}`);
+    }
   }
 
   /** Deletes one at a time and keeps going past failures, so one bad row doesn't block the rest. */
@@ -205,6 +223,7 @@ export default function UsersListView({ currentUserID }) {
                   deletableCount={deletableSelection.length}
                   onSelectAll={() => setSelection(new Set(profiles.map((p) => p.id)))}
                   onDeselectAll={() => setSelection(new Set())}
+                  onClearShakes={() => setIsConfirmingClearShakes(true)}
                   onDelete={() => setIsConfirmingDelete(true)}
                 />
               )
@@ -272,6 +291,30 @@ export default function UsersListView({ currentUserID }) {
         </div>
       )}
 
+      {isConfirmingClearShakes && selectedProfiles.length > 0 && (
+        <div className="dialog-backdrop" onClick={() => setIsConfirmingClearShakes(false)}>
+          <div
+            className="dialog"
+            role="alertdialog"
+            aria-labelledby="clear-shakes-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 id="clear-shakes-title">
+              {selectedProfiles.length === 1
+                ? `Clear ${profileName(selectedProfiles[0])}'s shake stats?`
+                : `Clear shake stats for ${selectedProfiles.length} users?`}
+            </h2>
+            <p>Every recorded shake is removed, and they drop to the bottom of the leaderboard.</p>
+            <button className="button button-destructive button-large" onClick={confirmClearShakes}>
+              Clear Shake Stats
+            </button>
+            <button className="button button-bordered button-large" onClick={() => setIsConfirmingClearShakes(false)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {banner && (
         <div key={banner.id} className="banner" role="status">
           <Icon name={banner.icon} size={18} />
@@ -297,7 +340,7 @@ function Checkbox({ isSelected, name, onToggle }) {
 }
 
 /** Operations on the checked users, as v06's toolbar Menu. New ones go below the selection controls. */
-function ActionsMenu({ selectedCount, totalCount, deletableCount, onSelectAll, onDeselectAll, onDelete }) {
+function ActionsMenu({ selectedCount, totalCount, deletableCount, onSelectAll, onDeselectAll, onClearShakes, onDelete }) {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -337,6 +380,16 @@ function ActionsMenu({ selectedCount, totalCount, deletableCount, onSelectAll, o
             <button className="menu-item" role="menuitem" onClick={choose(onDeselectAll)} disabled={selectedCount === 0}>
               Deselect All
               <Icon name="circle" size={18} />
+            </button>
+            <div className="menu-divider" />
+            <button
+              className="menu-item menu-item-destructive"
+              role="menuitem"
+              onClick={choose(onClearShakes)}
+              disabled={selectedCount === 0}
+            >
+              {selectedCount === 0 ? 'Clear Shake Stats' : `Clear Shake Stats (${selectedCount})`}
+              <Icon name="phone-vibrate" size={18} />
             </button>
             <div className="menu-divider" />
             <button

@@ -62,6 +62,8 @@ function fakeSupabase() {
     shakes: [
       { id: crypto.randomUUID(), user_id: ADA, shake_count: 12, duration_ms: 3400, started_at: ago(90) },
       { id: crypto.randomUUID(), user_id: ADA, shake_count: 5, duration_ms: 1200, started_at: ago(30) },
+      // Cleared by the admin's Clear Shake Stats.
+      { id: crypto.randomUUID(), user_id: GUEST, shake_count: 3, duration_ms: 900, started_at: ago(120) },
     ],
     /** Storage objects in the `avatars` bucket, by path. */
     files: new Map(),
@@ -216,9 +218,12 @@ function fakeSupabase() {
       return json(route, (request.headers().accept ?? '').includes('pgrst.object') ? row : [row], 201);
     }
     if (at === 'DELETE /rest/v1/shake_sessions') {
-      const id = url.searchParams.get('id').replace('eq.', '');
-      db.shakes = db.shakes.filter((r) => r.id !== id);
-      push('DELETE', {}, { id }, 'shake_sessions');
+      // `.eq('id', …)` deletes one burst; `.in('user_id', […])` clears users' stats (as an admin).
+      const id = url.searchParams.get('id')?.replace('eq.', '');
+      const users = url.searchParams.get('user_id')?.replace(/^in\.\(|\)$/g, '').split(',').map((u) => u.replace(/"/g, ''));
+      const gone = db.shakes.filter((r) => (id ? r.id === id : users.includes(r.user_id)));
+      db.shakes = db.shakes.filter((r) => !gone.includes(r));
+      for (const r of gone) push('DELETE', {}, { id: r.id }, 'shake_sessions');
       return empty(route);
     }
 
@@ -330,6 +335,9 @@ async function main() {
 
     // Email code sign-in.
     await page.getByRole('heading', { name: 'HO Users' }).waitFor();
+    // The build number comes from the iOS app's Xcode project.
+    const versionLabel = await page.locator('.version-label').textContent();
+    assert(/^Version \d+\.\d+\.\d+ \(\d+\)$/.test(versionLabel), `version label: ${versionLabel}`);
     const emailButton = page.getByRole('button', { name: 'Email Me a Sign-In Code' });
     assert(await emailButton.isDisabled(), 'the email button should be disabled without an address');
     await shot(page, 'sign-in');
@@ -400,6 +408,24 @@ async function main() {
     assert((await page.getByRole('menuitem', { name: `Delete (${(await page.locator('.list-item').count()) - 1})`, exact: true }).count()) === 1, "Delete shouldn't count the admin");
     await page.getByRole('menuitem', { name: 'Deselect All', exact: true }).click();
     assert((await actions.textContent()) === 'Actions', 'Deselect All should clear the checks');
+
+    // Clear Shake Stats: the guest's bursts go, Ada's stay.
+    await page.getByRole('button', { name: 'Select Guest CDEF' }).click();
+    await actions.click();
+    await page.getByRole('menuitem', { name: 'Clear Shake Stats (1)', exact: true }).click();
+    await page.getByRole('heading', { name: "Clear Guest CDEF's shake stats?" }).waitFor();
+    await shot(page, 'clear-shakes-dialog');
+    await page.getByRole('button', { name: 'Cancel' }).click();
+    assert(db.shakes.some((r) => r.user_id === GUEST), 'Cancel should keep the shakes');
+    await actions.click();
+    await page.getByRole('menuitem', { name: 'Clear Shake Stats (1)', exact: true }).click();
+    await page.getByRole('button', { name: 'Clear Shake Stats' }).click();
+    await page.getByRole('heading', { name: "Clear Guest CDEF's shake stats?" }).waitFor({ state: 'detached' });
+    for (let i = 0; i < 50 && db.shakes.some((r) => r.user_id === GUEST); i += 1) await page.waitForTimeout(100);
+    assert(db.shakes.every((r) => r.user_id !== GUEST), "the guest's shakes should be cleared");
+    assert(db.shakes.filter((r) => r.user_id === ADA).length === 2, "Ada's shakes should stay");
+    await page.getByRole('button', { name: 'Deselect Guest CDEF' }).click();
+    console.log('ok  admin clear shake stats');
 
     await page.getByRole('button', { name: 'Select Guest CDEF' }).click();
     assert((await page.locator('.nav-title').textContent()) === 'Users', "a checkbox shouldn't open the profile");

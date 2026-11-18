@@ -35,6 +35,15 @@ export async function deleteSession(client, id) {
 }
 
 /**
+ * Deletes every burst of the given users, which drops them from `shake_totals`. RLS lets admins
+ * delete anyone's; anyone else only clears their own (other rows are skipped silently).
+ */
+export async function clearStats(client, userIDs) {
+  if (userIDs.length === 0) return;
+  unwrap(await client.from('shake_sessions').delete().in('user_id', userIDs));
+}
+
+/**
  * Calls `onChange` whenever any `shake_sessions` row is inserted or deleted, until the returned
  * function is called. The caller reloads, since the totals are computed by the view. `onStatus`
  * works as in `profilesService.observeChanges`.
