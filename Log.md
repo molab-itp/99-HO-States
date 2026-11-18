@@ -3664,3 +3664,100 @@ I added a **Source on GitHub** link to the main screen. It sits in its own secti
 The link goes to the `main` branch, and you're on `prep`. If HOS-Lobby isn't on `main` yet, the link will show GitHub's 404 page until you merge. Let me know if it should point somewhere else, like the repo root.
 
 *Time: 47s · Cost: $0.2612 (input 18, output 2.1k, cache write 17.4k, cache read 400.9k) · session $0.2612*
+
+---
+
+## User (11/18/2026, 9:30:00 AM)
+
+```
+in HOS-Lobby/HOS-Lobby UsersListView
+add menu option to clear shake stats
+```
+
+## Assistant
+
+Now the RLS policies — admins need permission to delete other users' sessions.
+
+Now the service method and the menu item.
+
+The build is still running. I'll wait for it to finish.
+
+The build is still running in the background, and I'll get a notification when it finishes. Until then, the changes compile only in theory.
+
+*Time: 2m 55s · Cost: $0.4254 (input 20, output 3.7k, cache write 34.2k, cache read 390.6k) · session $0.4254*
+
+---
+
+## User (11/18/2026, 9:33:11 AM)
+
+```
+<task-notification>
+<task-id>bcc8gmvfu</task-id>
+<tool-use-id>toolu_0128VqTWB17aG9NUkW9z93AG</tool-use-id>
+<output-file>/private/tmp/claude-502/-Users-jht2-Documents-projects--molab-repos-a-99-HO-States/3b78d0f2-1c8b-4362-a734-5bdefaed3dab/tasks/bcc8gmvfu.output</output-file>
+<status>completed</status>
+<summary>Background command "cd /Users/jht2/Documents/projects/_molab-repos/a/99-HO-States/HOS-Lobby/HOS-Lobby/HOS_Lobby/Views; python3 - &lt;&lt;'EOF'
+p='UsersListView.swift'
+s=open(p).read()
+def rep(old,new):
+    global s
+    assert s.count(old)==1, old
+    s=s.replace(old,new)
+
+rep('''    @State private var isConfirmingDelete = false
+''','''    @State private var isConfirmingDelete = false
+    /// Up while the "are you sure" dialog for clearing the checked users' shake stats is showing.
+    @State private v
+
+... [2499 characters truncated] ...
+
+       }
+    }
+
+    /// Keeps the list live''')
+open(p,'w').write(s)
+EOF
+cd ../../; xcodebuild -project HOS-Lobby.xcodeproj -scheme HOS-Lobby -destination 'generic/platform=iOS Simulator' -quiet build 2&gt;&amp;1 | grep -E "error|warning: .*UsersList|BUILD" | head -20; echo exit $?" completed (exit code 0)</summary>
+</task-notification>
+```
+
+## Assistant
+
+I added a **Clear Shake Stats** option to the Actions menu in Users, and the app builds without errors on the iOS Simulator. I haven't tried it in the running app. **The database change still needs to be pushed:** until you run `npx supabase db push`, clearing another user's stats will appear to work but remove nothing.
+
+**The menu option** ([UsersListView.swift](HOS-Lobby/HOS_Lobby/Views/UsersListView.swift)):
+- It sits in its own section above Delete in the Actions menu, which only admins see. It shows the number of checked users ("Clear Shake Stats (3)") and is greyed out when no one is checked.
+- It asks for confirmation first, worded "Clear Grace Hopper's shake stats?" or "Clear shake stats for 3 users?".
+- It deletes all the checked users' shake records in one request, and can include your own. The Shakes leaderboard updates live when the records are removed.
+- If it fails, the error appears at the top of the list, where other errors already show.
+
+**The service** ([ShakesService.swift](HOS-Lobby/HOS_Lobby/Services/ShakesService.swift)): a new `clearStats(userIDs:)` deletes every shake record belonging to the given users.
+
+**The database:** the old rule only let users delete their own shake records. Without a change, an admin clearing someone else's stats would silently remove nothing.
+- I updated the rule in [50_shakes.sql](supabase/schemas/50_shakes.sql) to also allow admins (`(select auth.uid()) = user_id or (select public.is_admin())`).
+- I wrote the matching migration by hand, as the README does for the first migration: [20261118120000_shake_sessions_admin_delete.sql](supabase/migrations/20261118120000_shake_sessions_admin_delete.sql). It drops the old rule and creates the new one. Running `db push` applies it.
+
+*Time: 9s · Cost: $0.0469 (input 6, output 826, cache write 911, cache read 115.4k) · session $0.4723*
+
+---
+
+## User (11/18/2026, 9:37:41 AM)
+
+```
+<ide_opened_file>The user opened the file /Users/jht2/Documents/projects/_molab-repos/a/99-HO-States/_prompts.txt in the IDE. This may or may not be related to the current task.</ide_opened_file>
+run supabase db push
+```
+
+## Assistant
+
+Linked. This CLI version uses `--linked` rather than `--remote`, so I'll do a dry run first.
+
+Only the new migration is pending. Pushing it now.
+
+The migration is applied to your hosted project (`jcoolgnracpgjncksopx`). Admins can now clear other users' shake stats from the Users screen.
+
+Two things came up along the way:
+- **This copy of the repo wasn't linked to Supabase.** Your earlier pushes ran from the other checkout (`projects/molab/99-HO-States`). I linked this one to the same project, the one in `Supabase.plist`. The link is stored in `supabase/.temp`, which git ignores.
+- **`--remote` doesn't work here.** The Supabase CLI version this checkout runs (v2.117.0) rejects it; the flag for the hosted project is `--linked`. I did a dry run first, and it showed only the new migration was waiting, so nothing else was applied.
+
+*Time: 43s · Cost: $0.1532 (input 16, output 1.5k, cache write 4.9k, cache read 424.6k) · session $0.6255*

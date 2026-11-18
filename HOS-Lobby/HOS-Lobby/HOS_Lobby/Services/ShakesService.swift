@@ -45,6 +45,17 @@ struct ShakesService {
         try await client.from("shake_sessions").delete().eq("id", value: id).execute()
     }
 
+    /// Deletes every burst of the given users, which drops them from `shake_totals`. RLS lets
+    /// admins delete anyone's; anyone else only clears their own (other rows are skipped silently).
+    func clearStats(userIDs: [UUID]) async throws {
+        guard !userIDs.isEmpty else { return }
+        try await client
+            .from("shake_sessions")
+            .delete()
+            .in("user_id", values: userIDs.map(\.uuidString))
+            .execute()
+    }
+
     /// Calls `onChange` whenever any `shake_sessions` row is inserted or deleted, until the task
     /// is cancelled. The caller reloads, since the totals are computed by the view.
     func observeChanges(_ onChange: @MainActor () -> Void) async throws {

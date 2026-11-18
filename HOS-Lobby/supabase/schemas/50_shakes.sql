@@ -26,10 +26,11 @@ create policy "Users can insert their own shake sessions"
   to authenticated
   with check ((select auth.uid()) = user_id);
 
-create policy "Users can delete their own shake sessions"
+-- Admins (`40_admins.sql`) can delete anyone's, to clear shake stats from the Users screen.
+create policy "Users can delete their own shake sessions, admins anyone's"
   on public.shake_sessions for delete
   to authenticated
-  using ((select auth.uid()) = user_id);
+  using ((select auth.uid()) = user_id or (select public.is_admin()));
 
 -- Live updates, so the leaderboard moves while it's open. db diff doesn't see publication
 -- membership: hand-copy a change here into a new migration.

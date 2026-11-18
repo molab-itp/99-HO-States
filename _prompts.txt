@@ -1441,3 +1441,8 @@ v0.186
 
 in HOS-Lobby/HOS-Lobby
 add link on main view to source repo
+
+v0.187
+
+in HOS-Lobby/HOS-Lobby UsersListView
+add menu option to clear shake stats

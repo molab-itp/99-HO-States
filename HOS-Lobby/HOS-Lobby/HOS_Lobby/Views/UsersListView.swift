@@ -16,6 +16,8 @@ struct UsersListView: View {
     @State private var selection: Set<UUID> = []
     /// Up while the "are you sure" dialog for deleting the checked users is showing.
     @State private var isConfirmingDelete = false
+    /// Up while the "are you sure" dialog for clearing the checked users' shake stats is showing.
+    @State private var isConfirmingClearShakes = false
 
     /// Set by previews, which show these instead of loading from Supabase.
     private var isPreview = false
@@ -37,8 +39,9 @@ struct UsersListView: View {
 
     private var service: ProfilesService { ProfilesService(client: auth.client) }
     private var photos: ProfilePhotoService { ProfilePhotoService(client: auth.client) }
+    private var shakes: ShakesService { ShakesService(client: auth.client) }
 
-    /// Whether rows show checkboxes. Delete is the only action so far, and it's admin-only;
+    /// Whether rows show checkboxes. Every action so far is admin-only;
     /// widen this when actions any user can take are added to the menu.
     private var canSelect: Bool { isAdmin }
 
@@ -113,6 +116,17 @@ struct UsersListView: View {
         } message: {
             Text("Their accounts, photos and saved data are removed for good.")
         }
+        .confirmationDialog(
+            clearShakesTitle,
+            isPresented: $isConfirmingClearShakes,
+            titleVisibility: .visible
+        ) {
+            Button("Clear Shake Stats", role: .destructive) {
+                Task { await clearShakeStats(selectedProfiles) }
+            }
+        } message: {
+            Text("Every recorded shake is removed, and they drop to the bottom of the leaderboard.")
+        }
         // Drop checks for users who are gone, e.g. deleted by another admin.
         .onChange(of: profiles) { _, newProfiles in
             selection.formIntersection(newProfiles.map(\.id))
@@ -182,6 +196,15 @@ struct UsersListView: View {
             }
             Section {
                 Button(role: .destructive) {
+                    isConfirmingClearShakes = true
+                } label: {
+                    Label(selection.isEmpty ? "Clear Shake Stats" : "Clear Shake Stats (\(selection.count))",
+                          systemImage: "iphone.gen3.radiowaves.left.and.right")
+                }
+                .disabled(selection.isEmpty)
+            }
+            Section {
+                Button(role: .destructive) {
                     isConfirmingDelete = true
                 } label: {
                     Label(deletableSelection.isEmpty ? "Delete" : "Delete (\(deletableSelection.count))",
@@ -199,6 +222,11 @@ struct UsersListView: View {
     private var deleteTitle: String {
         let users = deletableSelection
         return users.count == 1 ? "Delete \(users[0].name)?" : "Delete \(users.count) users?"
+    }
+
+    private var clearShakesTitle: String {
+        let users = selectedProfiles
+        return users.count == 1 ? "Clear \(users[0].name)'s shake stats?" : "Clear shake stats for \(users.count) users?"
     }
 
     private func reload() async {
@@ -231,6 +259,16 @@ struct UsersListView: View {
             }
         }
         errorMessage = failures.isEmpty ? nil : failures.joined(separator: "\n")
+    }
+
+    /// One request for all of them; the Shakes leaderboard picks up the deletes over Realtime.
+    private func clearShakeStats(_ users: [Profile]) async {
+        do {
+            try await shakes.clearStats(userIDs: users.map(\.id))
+            errorMessage = nil
+        } catch {
+            errorMessage = "Clearing shake stats failed: \(error.localizedDescription)"
+        }
     }
 
     /// Keeps the list live for as long as it's on screen, and announces what other users do.
