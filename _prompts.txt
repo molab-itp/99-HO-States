@@ -1472,3 +1472,11 @@ v0.190
 in HOS-Lobby/HOS-Lobby ios
 increment build version
 sync web to with ios
+
+v0.191
+
+in HOS-Lobby/HOS-Lobby
+web to match iOS at 0.8.
+
+
+

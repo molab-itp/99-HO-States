@@ -3910,3 +3910,26 @@ The two apps still show different version numbers: iOS uses 0.8 and web uses 0.7
 Nothing is committed yet. The changed files are the two above, `package-lock.json`, and your edit to `_prompts.txt`.
 
 *Time: 41s · Cost: $0.3164 (input 16, output 2.4k, cache write 25.1k, cache read 337.8k) · session $0.3164*
+
+---
+
+## User (11/18/2026, 1:39:12 PM)
+
+```
+in HOS-Lobby/HOS-Lobby
+web to match iOS at 0.8.
+```
+
+## Assistant
+
+The web app now shows **Version 0.8 (1022)**, the same as the iOS app. I ran a production build and both values are in the output.
+
+- **[vite.config.js](HOS-Lobby/web/vite.config.js):** the web app now reads its version (`MARKETING_VERSION`) from the iOS Xcode project, as it already did for the build number (`CURRENT_PROJECT_VERSION`). When you change the iOS version, the web app picks it up on its next build. If the project file can't be read, it falls back to the version in package.json.
+- **[package.json](HOS-Lobby/web/package.json) and package-lock.json:** changed 0.7.6 to 0.8.0. npm needs three-part version numbers, so the fallback is "0.8.0", not "0.8".
+- **[AppVersionLabel.jsx](HOS-Lobby/web/src/views/AppVersionLabel.jsx):** updated the comment to match.
+
+I haven't committed anything.
+
+[project.yml](HOS-Lobby/HOS-Lobby/project.yml) still says `MARKETING_VERSION: "0.6"` and `CURRENT_PROJECT_VERSION: 1`. If you ever regenerate the Xcode project from it with XcodeGen, the iOS app would go back to 0.6 (1), and the web app would follow. Want me to set it to 0.8 / 1022?
+
+*Time: 43s · Cost: $0.2924 (input 16, output 3.2k, cache write 20.6k, cache read 316.5k) · session $0.2924*
