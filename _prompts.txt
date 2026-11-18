@@ -1466,3 +1466,9 @@ and v07 to refer to iOS and web app
 in the README.md and anyother places
 versions of HOS-Lobby
 sync HOS-Lobby web with ios
+
+v0.190
+
+in HOS-Lobby/HOS-Lobby ios
+increment build version
+sync web to with ios

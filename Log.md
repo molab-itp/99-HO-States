@@ -3884,3 +3884,29 @@ I've replaced the v06/v07 names with "iOS app" and "web app", and the web app no
 - **Not rebuilt:** the HOS-USnA Swift and web files only had comments changed, so I didn't build them.
 
 *Time: 3m 03s · Cost: $1.2938 (input 56, output 15.8k, cache write 72.5k, cache read 1984.6k) · session $1.2938*
+
+---
+
+## User (11/18/2026, 1:00:27 PM)
+
+```
+in HOS-Lobby/HOS-Lobby ios
+increment build version
+sync web to with ios
+```
+
+## Assistant
+
+The shake-stats feature is already ported to web, so I'll follow the previous pattern: bump iOS build 1021→1022 and web version 0.7.5→0.7.6.
+
+I bumped the iOS build number from 1021 to 1022 and the web version from 0.7.5 to 0.7.6. The web app now shows **Version 0.7.6 (1022)**.
+
+- **iOS:** I changed `CURRENT_PROJECT_VERSION` to 1022 in both build configurations in [project.pbxproj](HOS-Lobby/HOS-Lobby/HOS-Lobby.xcodeproj/project.pbxproj).
+- **Web:** I bumped the version in [package.json](HOS-Lobby/web/package.json) and `package-lock.json`. The web build number is read from the Xcode project when the site is built, so it now matches iOS. A production build ran without errors and the bundle contains both `0.7.6` and `1022`.
+- **Features:** I compared the two apps and nothing new needed porting. The last iOS change ("Delete All Shakes", v0.188) was already added to web in the previous commit, v0.189.
+
+The two apps still show different version numbers: iOS uses 0.8 and web uses 0.7.x. Only the build number is shared. Tell me if you want web to match iOS at 0.8.
+
+Nothing is committed yet. The changed files are the two above, `package-lock.json`, and your edit to `_prompts.txt`.
+
+*Time: 41s · Cost: $0.3164 (input 16, output 2.4k, cache write 25.1k, cache read 337.8k) · session $0.3164*

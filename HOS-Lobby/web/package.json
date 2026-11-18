@@ -1,7 +1,7 @@
 {
   "name": "hos-lobby-web",
   "private": true,
-  "version": "0.7.5",
+  "version": "0.7.6",
   "type": "module",
   "description": "React (web) port of the HOS-Lobby iOS (SwiftUI) app.",
   "scripts": {
