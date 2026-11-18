@@ -86,15 +86,19 @@ HOS-Lobby/web/
       profile.js           Profile: the display name, list order, "5 minutes ago"
       profilePhoto.js      ProfilePhoto: JPEG re-encoding, crop and thumbnail, on a canvas
       userEvent.js         UserEvent: the banner text
+      shakeSession.js      ShakeSession: leaderboard ranking, "2.4 s" durations
     services/
       AuthContext.jsx      AuthModel, as a context: useAuth()
       profilesService.js   ProfilesService: profiles, Realtime, RPCs, the delete-user function
       profilePhotoService.js  ProfilePhotoService: the avatars bucket
+      shakesService.js     ShakesService: shake_sessions, the shake_totals view, Realtime
+      useShakeDetector.js  ShakeDetector, on the browser's devicemotion events
       appStateStore.js     AppStateStore: unused here, as in v06; the client for v05 to copy
     views/
-      RootView.jsx, SignInView.jsx, UsersListView.jsx, ProfileRow.jsx, ProfileDetailView.jsx,
-      PhotoCropView.jsx, SetupRequiredView.jsx, AppVersionLabel.jsx
-      useSelectedUser.js   the navigation path, kept in the address
+      RootView.jsx, SignInView.jsx, HomeView.jsx, UsersListView.jsx, ProfileRow.jsx,
+      ProfileDetailView.jsx, ShakesView.jsx, ShakeHistoryView.jsx, PhotoCropView.jsx,
+      SetupRequiredView.jsx, AppVersionLabel.jsx
+      useRoute.js          the navigation path, kept in the address
     components/            NavBar, Avatar, Spinner, Icon (Bootstrap Icons, as in v05)
 ```
 
@@ -108,8 +112,15 @@ HOS-Lobby/web/
 - **Refresh** is a button in the navigation bar, in place of pull-to-refresh. The list also
   reloads when the tab comes back to the front.
 - **Actions menu** (admins): a popover under the button stands in for SwiftUI's `Menu`.
-- **Page links:** a profile's address is `…/HOS-Lobby/web/#/user/<id>`, so the browser's Back button
-  returns to the list and a profile can be bookmarked.
+- **Page links:** every screen has its own address (`#/users`, `#/user/<id>`, `#/shakes`,
+  `#/shakes/<id>`; Home has none), so the browser's Back button works and any screen can be
+  bookmarked. Back from a bookmarked screen goes to its parent.
+- **Shakes** come from the browser's `devicemotion` events, with the same threshold and burst
+  timing as v06's Core Motion detector. iOS Safari asks first: the Shakes screen shows an
+  **Allow Motion** button, and the page must be served over HTTPS. Where no motion data arrives (a
+  desktop browser), each tap on the card, or the Space bar, counts as one shake, as Device ▸ Shake
+  does in the Simulator. Phones that support `navigator.vibrate` (not iPhones) buzz on each shake.
+- **Deleting a burst** in shake history is a trash button, in place of swipe to delete.
 - **Choosing a photo** uses the browser's file picker; on a phone that offers the photo library
   and the camera. HEIC photos only work in Safari, which is the only browser that decodes them.
   iOS Safari usually hands the page a JPEG anyway.

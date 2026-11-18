@@ -3599,3 +3599,49 @@ The two `WARN` lines are only deprecation notices about `config.toml` and don't 
 The setup steps in the README still say plain `npx supabase db push`; I can add `--remote` there if you like.
 
 *Time: 4s · Cost: $0.0317 (input 4, output 314, cache write 919, cache read 90.3k) · session $1.0698*
+
+---
+
+## User (11/18/2026, 7:19:11 AM)
+
+```
+in HOS-Lobby/HOS-Lobby
+update web version to match ios app
+```
+
+## Assistant
+
+Reading the existing web views now; plan is to add a Home landing page, a Shakes leaderboard (with browser motion-based shake detection), and a shake history view to the web port.
+
+Now writing the router and shake model/service.
+
+Now updating UsersListView to sit under Home (title "Users", Back, Actions on the trailing side, Sign Out moved to Home).
+
+Build passes. Now extending the smoke test with a fake `shake_sessions`/`shake_totals` and the new Home → Users / Shakes flow.
+
+Chromium now exposes `DeviceMotionEvent.requestPermission` too, so desktop got the iOS "Allow Motion" prompt. I'll only ask for permission on touch devices, and let the leaderboard subtitle wrap.
+
+Smoke test passes end to end. Checking the screenshots:
+
+All screens render as intended. Last steps: bump the web version and check the README for anything describing the old start screen.
+
+The web version in [HOS-Lobby/web](.) now matches the iOS app. The smoke test passes end to end, including new checks for the shake features. I haven't tried it on a real phone yet, so the motion sensor itself is untested.
+
+**What changed**
+- **Welcome screen:** after sign-in, the web app now opens on a "Welcome to HOS-Lobby" page with two choices, **Users** and **Shakes**. Sign Out moved here, as in the iOS app. See [HomeView.jsx](src/views/HomeView.jsx).
+- **Users:** this is the old starting screen, now titled "Users" with a Back button. The admin Actions menu moved to the right side of the bar, matching iOS.
+- **Shakes:** a "Your shaking" card shows the count while you shake, then your last burst and your all-time total. Below it is a leaderboard of all users, ranked the same way as on iOS and updated live. See [ShakesView.jsx](src/views/ShakesView.jsx).
+- **Shake history:** tapping a user shows their summary (total shakes, bursts, total time, biggest burst, last burst) and every burst they've recorded. On your own history, a trash button deletes a burst (iOS uses swipe to delete). See [ShakeHistoryView.jsx](src/views/ShakeHistoryView.jsx).
+- **Shake detection:** [useShakeDetector.js](src/services/useShakeDetector.js) reads the phone's motion sensor through the browser. It uses the same settings as the iOS detector: a shake is a jolt over 1.6 g, jolts closer than 0.2 s count as one shake, and a burst ends after 1.2 s without shaking.
+  - **iPhone Safari** asks permission first, so the card shows an **Allow Motion** button.
+  - **Desktop browsers** have no motion sensor, so a click on the card or the Space bar counts as one shake, like Device ▸ Shake in the Simulator.
+- **Web addresses:** every screen has its own address, so the browser's Back button works and any screen can be bookmarked: `#/users`, `#/user/<id>`, `#/shakes` and `#/shakes/<id>`. The new [useRoute.js](src/views/useRoute.js) handles this and replaces `useSelectedUser.js`.
+- **Version and docs:** the web version is now 0.7.4, and the README has the new files and a note on how the web differs from iOS.
+
+**Before you publish**
+- Try Shakes on a real iPhone. Allow Motion only works over HTTPS, so test on the GitHub Pages site rather than the local dev server.
+- The web app uses the `shake_sessions` table you pushed in v0.185 (`npx supabase db push --remote`). If that push didn't go through, Shakes will show a database error.
+
+Nothing is committed, so you can review the changes and run `bin/publish.sh` when ready.
+
+*Time: 5m 13s · Cost: $2.0144 (input 54, output 31.1k, cache write 104.8k, cache read 2765.4k) · session $2.0144*

@@ -58,6 +58,11 @@ function fakeSupabase() {
       profile(ADA, { email: 'ada@example.com', display_name: 'Ada Lovelace', caption: 'First programmer', last_seen_at: ago(5) }),
       profile(GUEST, { is_anonymous: true, last_seen_at: ago(60 * 26) }),
     ],
+    /** `shake_sessions` rows. */
+    shakes: [
+      { id: crypto.randomUUID(), user_id: ADA, shake_count: 12, duration_ms: 3400, started_at: ago(90) },
+      { id: crypto.randomUUID(), user_id: ADA, shake_count: 5, duration_ms: 1200, started_at: ago(30) },
+    ],
     /** Storage objects in the `avatars` bucket, by path. */
     files: new Map(),
     /** Who the page is signed in as. */
@@ -103,8 +108,8 @@ function fakeSupabase() {
     };
   }
 
-  /** Sends a `profiles` change to the page, as Realtime's Postgres Changes would. */
-  function push(type, record, oldRecord = {}) {
+  /** Sends a change to the page, as Realtime's Postgres Changes would. */
+  function push(type, record, oldRecord = {}, table = 'profiles') {
     for (const channel of db.channels) {
       channel.send([
         channel.joinRef,
@@ -115,7 +120,7 @@ function fakeSupabase() {
           ids: [1],
           data: {
             schema: 'public',
-            table: 'profiles',
+            table,
             commit_timestamp: new Date().toISOString(),
             type,
             columns: [],
@@ -173,6 +178,48 @@ function fakeSupabase() {
       // `.select().single()` asks for the updated row back, as one object.
       if (!(request.headers().prefer ?? '').includes('return=representation')) return empty(route);
       return json(route, (request.headers().accept ?? '').includes('pgrst.object') ? row : [row]);
+    }
+
+    // --- Shakes ---
+    if (at === 'GET /rest/v1/shake_totals') {
+      // What the `shake_totals` view computes.
+      const byUser = new Map();
+      for (const row of [...db.shakes].sort((a, b) => b.started_at.localeCompare(a.started_at))) {
+        const t = byUser.get(row.user_id);
+        if (t) {
+          t.session_count += 1;
+          t.total_shakes += row.shake_count;
+          t.total_duration_ms += row.duration_ms;
+        } else {
+          byUser.set(row.user_id, {
+            user_id: row.user_id,
+            session_count: 1,
+            total_shakes: row.shake_count,
+            total_duration_ms: row.duration_ms,
+            last_shake_count: row.shake_count,
+            last_duration_ms: row.duration_ms,
+            last_shake_at: row.started_at,
+          });
+        }
+      }
+      return json(route, [...byUser.values()].sort((a, b) => b.total_shakes - a.total_shakes));
+    }
+    if (at === 'GET /rest/v1/shake_sessions') {
+      const user = url.searchParams.get('user_id').replace('eq.', '');
+      const rows = db.shakes.filter((r) => r.user_id === user).sort((a, b) => b.started_at.localeCompare(a.started_at));
+      return json(route, rows);
+    }
+    if (at === 'POST /rest/v1/shake_sessions') {
+      const row = { id: crypto.randomUUID(), user_id: db.userID, ...request.postDataJSON() };
+      db.shakes.push(row);
+      push('INSERT', row, {}, 'shake_sessions');
+      return json(route, (request.headers().accept ?? '').includes('pgrst.object') ? row : [row], 201);
+    }
+    if (at === 'DELETE /rest/v1/shake_sessions') {
+      const id = url.searchParams.get('id').replace('eq.', '');
+      db.shakes = db.shakes.filter((r) => r.id !== id);
+      push('DELETE', {}, { id }, 'shake_sessions');
+      return empty(route);
     }
 
     // --- Storage ---
@@ -301,8 +348,14 @@ async function main() {
     assert(consoleErrors.length === 1 && consoleErrors[0].includes('403'), `console errors: ${consoleErrors}`);
     consoleErrors.length = 0;
     await page.getByLabel('Sign-in code').fill('123 456');
-    await page.locator('.nav-title', { hasText: 'HOS-Lobby' }).waitFor();
+    await page.getByRole('heading', { name: 'Welcome to HOS-Lobby' }).waitFor();
+    await shot(page, 'home');
     console.log('ok  email code sign-in');
+
+    // Home leads to the list.
+    await page.locator('.list-row', { hasText: 'Users' }).click();
+    await page.locator('.nav-title', { hasText: 'Users' }).waitFor();
+    assert(page.url().endsWith('#/users'), `the list's address is ${page.url()}`);
 
     // The list: most recently active first, guests named by their id.
     await page.locator('.list-item').nth(2).waitFor();
@@ -349,7 +402,7 @@ async function main() {
     assert((await actions.textContent()) === 'Actions', 'Deselect All should clear the checks');
 
     await page.getByRole('button', { name: 'Select Guest CDEF' }).click();
-    assert((await page.locator('.nav-title').textContent()) === 'HOS-Lobby', "a checkbox shouldn't open the profile");
+    assert((await page.locator('.nav-title').textContent()) === 'Users', "a checkbox shouldn't open the profile");
     await actions.click();
     await shot(page, 'actions-menu');
     await page.getByRole('menuitem', { name: 'Delete (1)', exact: true }).click();
@@ -371,7 +424,7 @@ async function main() {
     await page.locator('.detail-caption', { hasText: 'First programmer' }).waitFor();
     assert((await page.getByLabel('Caption').count()) === 0, "another user's caption can't be edited");
     await page.goBack();
-    await page.locator('.nav-title', { hasText: 'HOS-Lobby' }).waitFor();
+    await page.locator('.nav-title', { hasText: 'Users' }).waitFor();
 
     // My profile: pick a photo, crop it, upload.
     await page.locator('.list-row', { hasText: 'me@example.com' }).click();
@@ -469,16 +522,64 @@ async function main() {
     await page.reload();
     await page.locator('.nav-title', { hasText: 'me@example.com' }).waitFor();
     await page.getByRole('button', { name: 'Back' }).click();
-    await page.locator('.nav-title', { hasText: 'HOS-Lobby' }).waitFor();
+    await page.locator('.nav-title', { hasText: 'Users' }).waitFor();
     await page.locator('.profile-caption', { hasText: 'Hello from the web' }).waitFor();
-    assert(!page.url().includes('#'), `the list's address is ${page.url()}`);
+    assert(page.url().endsWith('#/users'), `the list's address is ${page.url()}`);
     console.log('ok  profile address');
+
+    // Shakes: no accelerometer in headless Chromium, so taps on the card count.
+    await page.getByRole('button', { name: 'Back' }).click();
+    await page.getByRole('heading', { name: 'Welcome to HOS-Lobby' }).waitFor();
+    await page.locator('.list-row', { hasText: 'Shakes' }).click();
+    await page.locator('.nav-title', { hasText: 'Shakes' }).waitFor();
+    assert(page.url().endsWith('#/shakes'), `the shakes address is ${page.url()}`);
+    await page.getByText('No accelerometer here').waitFor();
+    const leaders = async () => (await page.locator('.list-ranked .profile-name').allTextContents()).join('|');
+    await page.locator('.rank-total').first().waitFor();
+    assert((await leaders()).startsWith('Ada Lovelace|'), `leaderboard: ${await leaders()}`);
+    await page.getByText('Last: 5 in 1.2 s').waitFor();
+    const card = page.getByRole('button', { name: 'Shake', exact: true });
+    for (let i = 0; i < 20; i += 1) {
+      await card.click();
+      await page.waitForTimeout(250);
+    }
+    await page.locator('.recorder-count', { hasText: '20' }).waitFor();
+    await shot(page, 'shaking');
+    await page.getByText(/^Last: 20 shakes in /).waitFor();
+    await page.getByText('20 shakes total across 1 bursts').waitFor();
+    assert(db.shakes.filter((r) => r.user_id === ME).length === 1, 'the burst should be saved');
+    await page.waitForFunction(() => document.querySelector('.list-ranked .profile-name')?.textContent === 'me@example.com');
+    await shot(page, 'shakes');
+    console.log('ok  shake recording and leaderboard');
+
+    // Another user's history: read only.
+    await page.locator('.list-row', { hasText: 'Ada Lovelace' }).click();
+    await page.locator('.nav-title', { hasText: 'Ada Lovelace' }).waitFor();
+    await page.locator('.stat-row', { hasText: 'Total shakes' }).getByText('17').waitFor();
+    await page.locator('.stat-row', { hasText: 'Biggest burst' }).getByText('12 in 3.4 s').waitFor();
+    assert((await page.locator('.history-row').count()) === 2, 'two bursts');
+    assert((await page.locator('.history-delete').count()) === 0, "another user's bursts can't be deleted");
+    await shot(page, 'shake-history');
+    await page.getByRole('button', { name: 'Back' }).click();
+    // Mine: delete the burst, then reload the history page directly; Back leads to the leaderboard.
+    await page.locator('.list-row', { hasText: 'me@example.com' }).click();
+    await page.locator('.history-delete').click();
+    await page.getByRole('heading', { name: 'No shakes yet' }).waitFor();
+    assert(db.shakes.every((r) => r.user_id !== ME), 'the burst should be deleted');
+    await page.reload();
+    await page.locator('.nav-title', { hasText: 'me@example.com' }).waitFor();
+    await page.getByRole('button', { name: 'Back' }).click();
+    await page.locator('.nav-title', { hasText: 'Shakes' }).waitFor();
+    await page.getByRole('button', { name: 'Back' }).click();
+    await page.getByRole('heading', { name: 'Welcome to HOS-Lobby' }).waitFor();
+    console.log('ok  shake history');
 
     // Sign out, then back in as a guest.
     await page.getByRole('button', { name: 'Sign Out' }).click();
     await page.getByRole('heading', { name: 'HO Users' }).waitFor();
     await page.getByRole('button', { name: 'Continue as Guest' }).click();
-    await page.locator('.nav-title', { hasText: 'HOS-Lobby' }).waitFor();
+    await page.locator('.list-row', { hasText: 'Users' }).click();
+    await page.locator('.nav-title', { hasText: 'Users' }).waitFor();
     await page.locator('.list-item').first().waitFor();
     assert((await page.locator('.profile-name').first().textContent()) === 'Guest EEEE', 'the guest should top the list');
     assert((await page.locator('.list-check').count()) === 0, 'a guest is not an admin');
@@ -499,6 +600,9 @@ async function main() {
     await desktop.goto(url);
     await shot(desktop, 'sign-in-dark');
     await desktop.getByRole('button', { name: 'Continue as Guest' }).click();
+    await desktop.getByRole('heading', { name: 'Welcome to HOS-Lobby' }).waitFor();
+    await shot(desktop, 'home-dark');
+    await desktop.locator('.list-row', { hasText: 'Users' }).click();
     await desktop.locator('.list-item').first().waitFor();
     await shot(desktop, 'list-dark');
     await desktop.close();

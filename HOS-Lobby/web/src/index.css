@@ -862,3 +862,226 @@ fieldset:disabled .button {
   border-radius: 50%;
   background: #fff;
 }
+
+/* The Actions menu sits on the trailing side, so it opens leftward. */
+.nav-trailing .menu-popover {
+  left: auto;
+  right: 0;
+}
+
+/* .footnote section headers and footers of an inset-grouped List. */
+.section-header {
+  margin: 8px 0 -2px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--secondary-label);
+}
+
+.section-footer {
+  padding: 0 16px;
+  font-size: 13px;
+  color: var(--secondary-label);
+}
+
+/* --- HomeView --- */
+
+.home-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.home-hero h1 {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.home-hero-icon,
+.home-link-icon {
+  color: var(--tint);
+}
+
+.home-link .list-row {
+  gap: 16px;
+  padding-block: 12px;
+}
+
+.home-link + .home-link {
+  background-position: 56px 0;
+}
+
+.home-link-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.home-link-title {
+  font-weight: 600;
+}
+
+.home-link-subtitle {
+  font-size: 15px;
+  color: var(--secondary-label);
+}
+
+/* --- ShakesView --- */
+
+.recorder {
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--label);
+  text-align: center;
+}
+
+.recorder-tappable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.recorder-tappable:active {
+  background: var(--fill-pressed);
+}
+
+.recorder-icon {
+  color: var(--tint);
+  animation: recorder-pulse 2s ease-in-out infinite;
+}
+
+@keyframes recorder-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recorder-icon {
+    animation: none;
+  }
+}
+
+.recorder-count {
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--tint);
+}
+
+.recorder-hint {
+  font-size: 15px;
+  color: var(--secondary-label);
+}
+
+.recorder-last {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.recorder-total {
+  font-size: 12px;
+  color: var(--secondary-label);
+}
+
+.sensor-permission {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rank {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--secondary-label);
+}
+
+.rank-total {
+  margin-left: auto;
+  padding-left: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The separator starts at the name: past the rank and the 36px avatar. */
+.list-ranked .list-item + .list-item {
+  background-position: 100px 0;
+}
+
+/* --- ShakeHistoryView --- */
+
+.stat-row,
+.history-row {
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 16px;
+}
+
+.list .stat-row + .stat-row,
+.list-plain .list-item + .list-item {
+  background-position: 16px 0;
+}
+
+.stat-value {
+  margin-left: auto;
+  color: var(--secondary-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.history-when {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 15px;
+}
+
+.history-duration {
+  font-size: 12px;
+  color: var(--secondary-label);
+}
+
+.history-count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  margin-right: -8px;
+  border: none;
+  background: none;
+  color: var(--destructive);
+}
+
+.list-ranked .profile-row-text > .profile-active {
+  white-space: normal;
+}

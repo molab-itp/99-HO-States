@@ -1429,3 +1429,10 @@ failed to connect to postgres: failed to connect to `host=127.0.0.1 user=postgre
 Make sure Docker is running, then run: supabase start
 To use the linked project instead, pass --remote.
 
+cd /Users/jht2/Documents/projects/molab/99-HO-States/HOS-Lobby
+npx supabase db push --remote
+
+v0.186
+
+in HOS-Lobby/HOS-Lobby
+update web version to match ios app

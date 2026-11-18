@@ -10,10 +10,11 @@ import { deleteUser, fetchAll, isAdmin as fetchIsAdmin, observeChanges, touchLas
 import AppVersionLabel from './AppVersionLabel.jsx';
 import ProfileDetailView from './ProfileDetailView.jsx';
 import ProfileRow from './ProfileRow.jsx';
-import { useSelectedUser } from './useSelectedUser.js';
+import { useRoute } from './useRoute.js';
 
 export default function UsersListView({ currentUserID }) {
   const { client, signOut } = useAuth();
+  const { route, push, back } = useRoute();
   const [profiles, setProfilesState] = useState([]);
   const [errorMessage, setErrorMessage] = useState(null);
   /** Why live updates are off, if they are. */
@@ -28,7 +29,8 @@ export default function UsersListView({ currentUserID }) {
   const [selection, setSelection] = useState(() => new Set());
   /** Up while the "are you sure" dialog for deleting the checked users is showing. */
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
-  const [selectedID, openProfile, closeProfile] = useSelectedUser();
+  const selectedID = route.name === 'user' ? route.id : null;
+  const openProfile = (id) => push(`/user/${id}`);
 
   // Live changes are compared with the list as it is now, so it's also kept in a ref.
   const profilesRef = useRef(profiles);
@@ -170,8 +172,8 @@ export default function UsersListView({ currentUserID }) {
   const selected = selectedID ? profiles.find((p) => p.id === selectedID) : null;
   // A bookmarked profile that no longer exists (or one deleted while open) falls back to the list.
   useEffect(() => {
-    if (selectedID && hasLoaded && !selected) closeProfile();
-  }, [selectedID, hasLoaded, selected, closeProfile]);
+    if (selectedID && hasLoaded && !selected) back();
+  }, [selectedID, hasLoaded, selected, back]);
 
   const shownError = errorMessage ?? (liveError && `Live updates are off: ${liveError}`);
 
@@ -181,35 +183,31 @@ export default function UsersListView({ currentUserID }) {
         <ProfileDetailView
           profile={selected}
           isCurrentUser={selected.id === currentUserID}
-          onBack={closeProfile}
+          onBack={back}
           onProfileChanged={reload}
         />
       ) : (
         <>
           <NavBar
-            title="HOS-Lobby"
+            title="Users"
+            onBack={back}
             leading={
-              <>
-                {/* Pull-to-refresh, for a browser. */}
-                <button className="nav-button" onClick={reload} disabled={isReloading} aria-label="Refresh">
-                  <Icon name="arrow-clockwise" size={18} />
-                </button>
-                {canSelect && (
-                  <ActionsMenu
-                    selectedCount={selection.size}
-                    totalCount={profiles.length}
-                    deletableCount={deletableSelection.length}
-                    onSelectAll={() => setSelection(new Set(profiles.map((p) => p.id)))}
-                    onDeselectAll={() => setSelection(new Set())}
-                    onDelete={() => setIsConfirmingDelete(true)}
-                  />
-                )}
-              </>
+              /* Pull-to-refresh, for a browser. */
+              <button className="nav-button" onClick={reload} disabled={isReloading} aria-label="Refresh">
+                <Icon name="arrow-clockwise" size={18} />
+              </button>
             }
             trailing={
-              <button className="nav-button" onClick={signOut}>
-                Sign Out
-              </button>
+              canSelect && (
+                <ActionsMenu
+                  selectedCount={selection.size}
+                  totalCount={profiles.length}
+                  deletableCount={deletableSelection.length}
+                  onSelectAll={() => setSelection(new Set(profiles.map((p) => p.id)))}
+                  onDeselectAll={() => setSelection(new Set())}
+                  onDelete={() => setIsConfirmingDelete(true)}
+                />
+              )
             }
           />
           <div className="list-screen">

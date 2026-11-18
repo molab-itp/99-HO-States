@@ -1,7 +1,7 @@
 import Spinner from '../components/Spinner.jsx';
 import { useAuth } from '../services/AuthContext.jsx';
+import HomeView from './HomeView.jsx';
 import SignInView from './SignInView.jsx';
-import UsersListView from './UsersListView.jsx';
 
 export default function RootView() {
   const { state } = useAuth();
@@ -13,5 +13,5 @@ export default function RootView() {
     );
   }
   if (state.status === 'signedOut') return <SignInView />;
-  return <UsersListView currentUserID={state.user.id} />;
+  return <HomeView currentUserID={state.user.id} />;
 }
