@@ -1,6 +1,6 @@
 /* Design tokens follow Apple's Human Interface Guidelines system colors (systemBackground,
    systemGroupedBackground, label/secondaryLabel, separator), as in v05, so the page reads as the
-   SwiftUI screens it ports. --tint is system blue: v06 sets no AccentColor. */
+   SwiftUI screens it ports. --tint is system blue: the iOS app sets no AccentColor. */
 :root {
   color-scheme: light dark;
 
@@ -133,7 +133,7 @@ p {
   font-size: 11px;
 }
 
-/* v06's UserCountsView: two stats side by side, split by a 12-point Divider. */
+/* The iOS app's UserCountsView: two stats side by side, split by a 12-point Divider. */
 .user-counts {
   display: flex;
   align-items: center;
@@ -377,6 +377,10 @@ fieldset:disabled .button {
 
 .nav-button-strong {
   font-weight: 600;
+}
+
+.nav-button-destructive {
+  color: var(--destructive);
 }
 
 .nav-button:disabled {
@@ -913,6 +917,16 @@ fieldset:disabled .button {
 
 .home-link + .home-link {
   background-position: 56px 0;
+}
+
+/* A `Link` row: tinted, with no chevron. */
+.home-source {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  color: var(--tint);
+  text-decoration: none;
 }
 
 .home-link-text {

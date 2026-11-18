@@ -57,7 +57,7 @@ export default function UsersListView({ currentUserID }) {
     setIsReloading(false);
   }, [client, setProfiles]);
 
-  // On appear, and whenever the page comes back to the front (v06's `scenePhase == .active`).
+  // On appear, and whenever the page comes back to the front (the iOS app's `scenePhase == .active`).
   useEffect(() => {
     reload();
     const onVisibilityChange = () => {
@@ -231,7 +231,7 @@ export default function UsersListView({ currentUserID }) {
           />
           <div className="list-screen">
             {shownError && <p className="error-text list-error">{shownError}</p>}
-            {/* v06's section header. */}
+            {/* The iOS app's section header. */}
             <div className="list-header">
               <AppVersionLabel small />
               {hasLoaded && profiles.length > 0 && <UserCounts profiles={profiles} />}
@@ -339,7 +339,7 @@ function Checkbox({ isSelected, name, onToggle }) {
   );
 }
 
-/** Operations on the checked users, as v06's toolbar Menu. New ones go below the selection controls. */
+/** Operations on the checked users, as the iOS app's toolbar Menu. New ones go below the selection controls. */
 function ActionsMenu({ selectedCount, totalCount, deletableCount, onSelectAll, onDeselectAll, onClearShakes, onDelete }) {
   const [isOpen, setIsOpen] = useState(false);
 

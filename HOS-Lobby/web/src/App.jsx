@@ -10,7 +10,7 @@ import SetupRequiredView from './views/SetupRequiredView.jsx';
 const { config, error } = loadSupabaseConfig();
 const client = config
   ? createClient(config.url, config.publishableKey, {
-      // PKCE, as in v06: a sign-in link or Apple's redirect comes back with a one-time `?code=`,
+      // PKCE, as in the iOS app: a sign-in link or Apple's redirect comes back with a one-time `?code=`,
       // which only the browser that asked for it can exchange.
       auth: { flowType: 'pkce' },
     })

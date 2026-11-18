@@ -17,12 +17,12 @@ import AccountScreen from './account/AccountScreen.jsx';
 
 // Port of v2's `AccountSession.makeAuthModel()`: `null` until `.env.local` (or the Pages
 // workflow's repository variables) holds the Supabase project, which hides the Account feature
-// rather than showing v07's `SetupRequiredView`, since sign-in is optional here.
+// rather than showing the HOS-Lobby web app's `SetupRequiredView`, since sign-in is optional here.
 const { config: supabaseConfig, error: supabaseError } = loadSupabaseConfig();
 if (supabaseError) console.info(`Account disabled: ${supabaseError}`);
 const supabaseClient = supabaseConfig
   ? createClient(supabaseConfig.url, supabaseConfig.publishableKey, {
-      // PKCE, as in v07: a sign-in link or Apple's redirect comes back with a one-time `?code=`,
+      // PKCE, as in the HOS-Lobby web app: a sign-in link or Apple's redirect comes back with a one-time `?code=`,
       // which only the browser that asked for it can exchange.
       auth: { flowType: 'pkce' },
     })

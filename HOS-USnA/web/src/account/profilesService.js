@@ -1,7 +1,7 @@
-// Port of v2's Account/ProfilesService.swift (and Profile.swift): the calls v2 needs from v07's
+// Port of v2's Account/ProfilesService.swift (and Profile.swift): the calls v2 needs from the HOS-Lobby web app's
 // profilesService.js, plus `publicURL` from its profilePhotoService.js and `profileName` from
-// models/profile.js; keep v07 as the source of truth. Keeps the current user's `public.profiles`
-// row up to date, so v05 users show up in the v06/v07 lobby like anyone else, and lists everyone
+// models/profile.js; keep the HOS-Lobby web app as the source of truth. Keeps the current user's `public.profiles`
+// row up to date, so v05 users show up in the HOS-Lobby iOS and web apps like anyone else, and lists everyone
 // for the Account screen's Other Users. A profile is a `profiles` row as supabase-js returns it.
 
 /** supabase-js returns `{ data, error }` rather than throwing. */
@@ -28,7 +28,7 @@ export function profileName(profile) {
   return (
     profile.display_name ??
     profile.email ??
-    // Uppercase to match v06, where `UUID.uuidString` is.
+    // Uppercase to match the HOS-Lobby iOS app, where `UUID.uuidString` is.
     (profile.is_anonymous ? `Guest ${profile.id.slice(0, 4).toUpperCase()}` : 'Unknown user')
   );
 }

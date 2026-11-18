@@ -1,14 +1,15 @@
-# v07 — HOS-Lobby (React)
+# HOS-Lobby web app (React)
 
-A web port of the [v06](..) SwiftUI app (`HOS-Lobby.xcodeproj`), built with React + Vite and
-hosted on GitHub Pages at https://molab-itp.github.io/99-HO-States/HOS-Lobby/web/.
+A web port of the HOS-Lobby [iOS app](..) (SwiftUI, `HOS-Lobby.xcodeproj`), built with React +
+Vite and hosted on GitHub Pages at https://molab-itp.github.io/99-HO-States/HOS-Lobby/web/.
 
-It does what v06 does: sign in with a 6-digit code that Supabase Auth emails you, with Sign in
-with Apple, or as a guest; see every user who has signed on and when they were last active, live;
-set, crop and restore your profile photo; and, for admins, check users and delete them from an
-Actions menu, or clear their shake stats.
+It does what the iOS app does: sign in with a 6-digit code that Supabase Auth emails you, with
+Sign in with Apple, or as a guest; see every user who has signed on and when they were last
+active, live; set, crop and restore your profile photo; record phone shakes and see who has shaken
+the most; and, for admins, check users and delete them from an Actions menu, or clear their shake
+stats. The two apps are kept in sync: a feature added to one is ported to the other.
 
-It uses v06's Supabase project as it is. Nothing under [`HOS-Lobby/supabase/`](../supabase) changes,
+It uses the iOS app's Supabase project as it is. Nothing under [`HOS-Lobby/supabase/`](../supabase) changes,
 and a user sees the same list, photos and live banners in both apps.
 
 ## Running
@@ -16,7 +17,7 @@ and a user sees the same list, photos and live banners in both apps.
 ```sh
 cd HOS-Lobby/web
 npm install
-cp .env.example .env.local   # fill in the URL + publishable key, as in v06's Supabase.plist
+cp .env.example .env.local   # fill in the URL + publishable key, as in the iOS app's Supabase.plist
 npm run dev                  # http://localhost:5173
 ```
 
@@ -30,7 +31,7 @@ users. It checks the app, not the database, its policies or the email.
 
 ## One-time setup
 
-The app needs three things that v06 didn't. None of them is done yet.
+The app needs three things that the iOS app doesn't. None of them is done yet.
 
 ### 1. Repository variables, for the Pages build
 
@@ -49,13 +50,13 @@ meant to be public (it's in the page's JavaScript either way); RLS is what prote
 ### 2. Redirect URL
 
 **Authentication → URL Configuration → Redirect URLs**: add
-`https://molab-itp.github.io/99-HO-States/HOS-Lobby/web/`, next to the `http://localhost:5173` that v06's
+`https://molab-itp.github.io/99-HO-States/HOS-Lobby/web/`, next to the `http://localhost:5173` that the iOS app's
 setup lists for local development. Sign in with Apple returns to this address, and so would a sign-in link if a
 template ever adds one back. The email code and guest sign-in work without it.
 
 ### 3. Sign in with Apple, for the web
 
-v06's native flow needs only the app's bundle id. A web page goes through Apple's own sign-in
+The iOS app's native flow needs only the app's bundle id. A web page goes through Apple's own sign-in
 page instead, which needs more:
 
 1. At developer.apple.com → **Identifiers**, create a **Services ID** (e.g.
@@ -93,7 +94,7 @@ HOS-Lobby/web/
       profilePhotoService.js  ProfilePhotoService: the avatars bucket
       shakesService.js     ShakesService: shake_sessions, the shake_totals view, Realtime
       useShakeDetector.js  ShakeDetector, on the browser's devicemotion events
-      appStateStore.js     AppStateStore: unused here, as in v06; the client for v05 to copy
+      appStateStore.js     AppStateStore: unused here, as in the iOS app; the client for v05 to copy
     views/
       RootView.jsx, SignInView.jsx, HomeView.jsx, UsersListView.jsx, ProfileRow.jsx,
       ProfileDetailView.jsx, ShakesView.jsx, ShakeHistoryView.jsx, PhotoCropView.jsx,
@@ -102,7 +103,7 @@ HOS-Lobby/web/
     components/            NavBar, Avatar, Spinner, Icon (Bootstrap Icons, as in v05)
 ```
 
-## Differences from v06
+## Differences from the iOS app
 
 - **Sign in with Apple** leaves the page for Apple's and comes back, instead of the system sheet
   (see setup above).
@@ -116,7 +117,7 @@ HOS-Lobby/web/
   `#/shakes/<id>`; Home has none), so the browser's Back button works and any screen can be
   bookmarked. Back from a bookmarked screen goes to its parent.
 - **Shakes** come from the browser's `devicemotion` events, with the same threshold and burst
-  timing as v06's Core Motion detector. iOS Safari asks first: the Shakes screen shows an
+  timing as the iOS app's Core Motion detector. iOS Safari asks first: the Shakes screen shows an
   **Allow Motion** button, and the page must be served over HTTPS. Where no motion data arrives (a
   desktop browser), each tap on the card, or the Space bar, counts as one shake, as Device ▸ Shake
   does in the Simulator. Phones that support `navigator.vibrate` (not iPhones) buzz on each shake.
@@ -125,7 +126,7 @@ HOS-Lobby/web/
   and the camera. HEIC photos only work in Safari, which is the only browser that decodes them.
   iOS Safari usually hands the page a JPEG anyway.
 - **Photo size:** a photo longer than 4096 pixels on a side is scaled down to that, because
-  browsers limit how large a canvas can be. v06 keeps every pixel.
+  browsers limit how large a canvas can be. The iOS app keeps every pixel.
 - **Version label** shows `version` from `package.json` and, in parentheses, the iOS app's build number (`CURRENT_PROJECT_VERSION` in `HOS-Lobby.xcodeproj`, read by `vite.config.js`), so both apps report the same build.
 - **No magic-link scheme:** `hostates://auth-callback` is the iOS app's. Here a sign-in link
   would return to the page's own address.

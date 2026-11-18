@@ -58,7 +58,7 @@ export default function ShakesView({ currentUserID }) {
   );
 
   // Counts only while this screen is in front: not under a user's history, and not with the page
-  // in the background (v06's `scenePhase`).
+  // in the background (the iOS app's `scenePhase`).
   const detector = useShakeDetector({ active: isVisible && !historyID, onBurstEnded: save });
 
   useEffect(() => {
@@ -146,7 +146,7 @@ export default function ShakesView({ currentUserID }) {
 
 function Recorder({ detector, myTotals, isSaving }) {
   const { currentCount, isShaking, lastBurst, sensor } = detector;
-  // Without an accelerometer, the whole card is the shake button (Device ▸ Shake in v06's Simulator).
+  // Without an accelerometer, the whole card is the shake button (Device ▸ Shake in the iOS app's Simulator).
   const tappable = sensor === 'unavailable';
   const content = (
     <>
@@ -206,7 +206,7 @@ function Recorder({ detector, myTotals, isSaving }) {
   );
 }
 
-/** What's needed for motion to reach the page, under the recorder (v06's section footer). */
+/** What's needed for motion to reach the page, under the recorder (the iOS app's section footer). */
 function SensorFooter({ detector }) {
   if (detector.sensor === 'needsPermission') {
     return (

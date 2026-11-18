@@ -3830,3 +3830,57 @@ I added a trash button to `ShakeHistoryView` that deletes all of your shake stat
 The change is in [ShakeHistoryView.swift](HOS-Lobby/HOS_Lobby/Views/ShakeHistoryView.swift).
 
 *Time: 1m 33s · Cost: $0.2443 (input 12, output 1.7k, cache write 20.7k, cache read 225.6k) · session $0.2443*
+
+---
+
+## User (11/18/2026, 12:40:34 PM)
+
+```
+in HOS-Lobby/ update references to v06
+and v07 to refer to iOS and web app
+in the README.md and anyother places
+versions of HOS-Lobby
+sync HOS-Lobby web with ios
+```
+
+## Assistant
+
+Two web gaps vs iOS found: the "Source on GitHub" link (v0.186) and the "Delete All Shakes" button (v0.188). Checking the web's existing confirm/icon patterns before porting.
+
+Now porting the Delete All Shakes button to the web history screen.
+
+Now the CSS, the Home "Source on GitHub" link, and the smoke test.
+
+Fixing the misplaced assertion (it landed after the Back click).
+
+Smoke test passes. Let me glance at the new screens.
+
+Both new web pieces look right. Now the v06/v07 → iOS/web rename. Reading the web README in full first.
+
+HOS-Lobby is clean. Now the references outside it: HOS-USnA comments and the Pages workflow.
+
+Also updating the HOS-USnA web comments (including stale `v07/src/...` paths, which now live at `HOS-Lobby/web/src/...`). Leaving the historical log `Log-v2-signon.md` and `common.txt` alone.
+
+I've replaced the v06/v07 names with "iOS app" and "web app", and the web app now matches the iOS app again. The web build and its headless smoke test both pass, including new checks for the two web additions. Nothing is committed yet.
+
+**Web brought up to date with iOS.** The web app was missing two recent iOS features:
+- **Delete all shakes (iOS v0.188):** a red trash button at the top right of your own shake history. It asks "Delete all your shake stats?" first, then deletes every burst in one request. It's in [ShakeHistoryView.jsx](HOS-Lobby/web/src/views/ShakeHistoryView.jsx).
+- **"Source on GitHub" link (iOS v0.186):** a new row on the Home screen that links to the repo. It's in [HomeView.jsx](HOS-Lobby/web/src/views/HomeView.jsx).
+
+**Renaming v06 → "the iOS app" and v07 → "the web app":**
+- **[HOS-Lobby/README.md](HOS-Lobby/README.md):** the title and intro now describe one app with an iOS front end and a web front end, and `web/` is added to the folder tree.
+- **[web/README.md](HOS-Lobby/web/README.md):** retitled "HOS-Lobby web app (React)". It now mentions shakes and says the two apps are kept in sync, and "Differences from v06" is now "Differences from the iOS app".
+- **Other files:** comments in the web source, the smoke test, `index.html`, `package.json`, `.env.example` and `supabase/config.toml`.
+- **Outside HOS-Lobby:** the Pages workflow comments and step name, and the comments that referred to v06/v07 in HOS-USnA, both the Swift and web code. Old paths like `v07/src/...` now point to `HOS-Lobby/web/src/...`.
+
+**What I left alone:**
+- **The `/v07/` redirect** in [deploy-pages.yml](.github/workflows/deploy-pages.yml), because old links still go to that address.
+- **v05 and v2,** which are HOS-USnA's names, not HOS-Lobby's.
+- **History files:** `Log.md`, `Log-v2-signon.md`, `_prompts.txt` and `common.txt`.
+- **The web version number,** still `0.7.5` in `package.json`. That's a version number and it shows in the app's version label, so I didn't change it.
+
+**Things to check:**
+- **Button text:** the confirm button reads "Delete 1 Bursts" when there's only one burst, because I copied the iOS wording exactly. If you want it singular, both apps need the change.
+- **Not rebuilt:** the HOS-USnA Swift and web files only had comments changed, so I didn't build them.
+
+*Time: 3m 03s · Cost: $1.2938 (input 56, output 15.8k, cache write 72.5k, cache read 1984.6k) · session $1.2938*

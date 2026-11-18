@@ -46,7 +46,7 @@ jobs:
       # v05 lives in HOS-USnA/web (the web port of the HOS-USnA Swift app) and deploys to
       # /HOS-USnA/web/ (its Vite base in vite.config.js); old /v05/ addresses redirect there.
       # v05's optional Account (sign-in, export/import of app state) uses the same Supabase
-      # project as v07; without these it builds as before, with no Account button.
+      # project as the HOS-Lobby apps; without these it builds as before, with no Account button.
       - name: Build v05 (HOS-USnA/web)
         working-directory: HOS-USnA/web
         env:
@@ -56,13 +56,14 @@ jobs:
           npm ci
           npm run build
 
-      # v07 lives in HOS-Lobby/web (the web port of the HOS-Lobby Swift app) and deploys to
-      # /HOS-Lobby/web/ (its Vite base in vite.config.js); old /v07/ addresses redirect there.
+      # The HOS-Lobby web app (formerly v07) lives in HOS-Lobby/web (the web port of the HOS-Lobby
+      # iOS app) and deploys to /HOS-Lobby/web/ (its Vite base in vite.config.js); old /v07/
+      # addresses redirect there.
       # It talks to the HOS-Lobby Supabase project, whose URL and publishable key are baked into the
       # build. They come from repository variables (Settings > Secrets and variables > Actions >
       # Variables); the publishable key is public by design, so these aren't secrets. Without
       # them the build still succeeds and the page shows "Supabase not configured".
-      - name: Build v07 (HOS-Lobby/web)
+      - name: Build HOS-Lobby web app (HOS-Lobby/web)
         working-directory: HOS-Lobby/web
         env:
           VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
@@ -93,7 +94,7 @@ jobs:
           done
           mkdir -p _site/HOS-Lobby/web
           cp -r HOS-Lobby/web/dist/. _site/HOS-Lobby/web/
-          # Old v07 address: v07 routes with the hash (#/user/<id>), so one redirect page at /v07/
+          # Old /v07/ address: the web app routes with the hash (#/user/<id>), so one redirect page at /v07/
           # covers deep links; location.hash carries the route over.
           mkdir -p _site/v07
           url="/99-HO-States/HOS-Lobby/web/"

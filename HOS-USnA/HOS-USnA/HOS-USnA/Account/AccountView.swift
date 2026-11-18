@@ -211,7 +211,7 @@ struct AccountView: View {
     }
 
     /// The email, or the name Apple gave on first sign-in, or "Guest XXXX" as the HO Users lobby
-    /// shows it (`Profile.name` in v06).
+    /// shows it (`Profile.name` in the HOS-Lobby iOS app).
     static func displayName(of user: User) -> String {
         if let email = user.email, !email.isEmpty { return email }
         if case .string(let name)? = user.userMetadata["full_name"], !name.isEmpty { return name }

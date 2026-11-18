@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Builds the app's `AuthModel` from the bundled (gitignored) `Supabase.plist`. `nil` when the
 /// plist is missing or still holds the example values: v2 then simply has no Account feature,
-/// rather than showing v06's full-screen `SetupRequiredView`, since sign-in is optional here.
+/// rather than showing the HOS-Lobby iOS app's full-screen `SetupRequiredView`, since sign-in is optional here.
 enum AccountSession {
     static func makeAuthModel() -> AuthModel? {
         switch SupabaseConfig.load() {

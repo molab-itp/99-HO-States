@@ -1,10 +1,10 @@
 // The calls v2 needs from HOS-Lobby/HOS-Lobby/HOS_Lobby/Services/ProfilesService.swift, plus
-// `publicURL` from v06's ProfilePhotoService; keep v06 as the source of truth.
+// `publicURL` from the HOS-Lobby iOS app's ProfilePhotoService; keep it as the source of truth.
 import Foundation
 import Supabase
 
 /// Keeps the current user's `public.profiles` row (see `HOS-Lobby/supabase/schemas/10_profiles.sql`)
-/// up to date, so v2 users show up in the v06/v07 lobby like anyone else.
+/// up to date, so v2 users show up in the HOS-Lobby iOS and web apps like anyone else.
 struct ProfilesService {
     let client: SupabaseClient
 

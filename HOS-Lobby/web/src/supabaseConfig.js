@@ -1,6 +1,6 @@
 // Port of SupabaseConfig.swift. The project URL + publishable key come from Vite's env
 // (`.env.local`, gitignored, or the Pages workflow's repository variables) and are baked into the
-// build, where v06 reads them from the bundled `Supabase.plist`.
+// build, where the iOS app reads them from the bundled `Supabase.plist`.
 
 /**
  * Where the magic-link email and Sign in with Apple send the user back to: this app's own

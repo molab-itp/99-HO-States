@@ -4,7 +4,7 @@
 export const THUMB_PIXELS = 256;
 
 // Canvases have a size limit (about 16.7 million pixels in Safari on iOS), so a photo larger than
-// this on its long side is scaled down to it. v06 keeps the original pixel count.
+// this on its long side is scaled down to it. The iOS app keeps the original pixel count.
 const MAX_PIXELS = 4096;
 
 export class PhotoProcessingError extends Error {}

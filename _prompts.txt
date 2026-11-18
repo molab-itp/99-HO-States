@@ -1459,3 +1459,10 @@ v0.188
 in HOS-Lobby/HOS-Lobby ShakeHistoryView
 add button to delete shake stats
 
+v0.189
+
+in HOS-Lobby/ update references to v06
+and v07 to refer to iOS and web app
+in the README.md and anyother places
+versions of HOS-Lobby
+sync HOS-Lobby web with ios

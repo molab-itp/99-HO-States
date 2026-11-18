@@ -1,4 +1,4 @@
-// Port of v2's Account/SupabaseConfig.swift, copied from v07/src/supabaseConfig.js; keep v07 as
+// Port of v2's Account/SupabaseConfig.swift, copied from HOS-Lobby/web/src/supabaseConfig.js; keep the HOS-Lobby web app as
 // the source of truth. The project URL + publishable key come from Vite's env (`.env.local`,
 // gitignored, or the Pages workflow's repository variables) and are baked into the build.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Headless smoke test for the v07 React app: boots the Vite dev server in-process, drives it with
+// Headless smoke test for the HOS-Lobby web app: boots the Vite dev server in-process, drives it with
 // Playwright/Chromium through the main flows, and screenshots each step. Run with
 // `npm run smoke`. Exits non-zero (and prints them) if the page logs any console errors.
 //
@@ -287,7 +287,7 @@ async function startServer(env) {
   return createServer({
     root: rootDir,
     // An empty folder, so the developer's own `.env.local` is never picked up.
-    envDir: mkdtempSync(path.join(tmpdir(), 'v07-smoke-')),
+    envDir: mkdtempSync(path.join(tmpdir(), 'hos-lobby-web-smoke-')),
     server: { port: PORT, strictPort: true },
     logLevel: 'error',
   }).then((server) => server.listen());
@@ -374,7 +374,7 @@ async function main() {
     await page.getByText('ada@example.com').waitFor();
     await page.locator('.profile-caption', { hasText: 'First programmer' }).waitFor();
     await page.waitForFunction(() => !document.querySelector('.error-text'));
-    // v06.155's totals: the guest was last seen 26 hours ago.
+    // The iOS app's user totals (added in build .155): the guest was last seen 26 hours ago.
     const counts = async () => (await page.locator('.user-count').allTextContents()).join('|');
     assert((await counts()) === '3 Total Users|2 Active in 24h', `user counts: ${await counts()}`);
     await shot(page, 'list');
@@ -585,19 +585,36 @@ async function main() {
     await page.locator('.stat-row', { hasText: 'Biggest burst' }).getByText('12 in 3.4 s').waitFor();
     assert((await page.locator('.history-row').count()) === 2, 'two bursts');
     assert((await page.locator('.history-delete').count()) === 0, "another user's bursts can't be deleted");
+    assert((await page.getByRole('button', { name: 'Delete All Shakes' }).count()) === 0, "another user's stats can't be cleared");
     await shot(page, 'shake-history');
     await page.getByRole('button', { name: 'Back' }).click();
-    // Mine: delete the burst, then reload the history page directly; Back leads to the leaderboard.
+    // Mine: delete one burst, then Delete All the rest; reload the history page directly; Back leads
+    // to the leaderboard.
+    db.shakes.push({ id: crypto.randomUUID(), user_id: ME, shake_count: 3, duration_ms: 900, started_at: '2026-01-01T00:00:00Z' });
     await page.locator('.list-row', { hasText: 'me@example.com' }).click();
-    await page.locator('.history-delete').click();
+    await page.locator('.history-row').nth(1).waitFor();
+    await page.locator('.history-delete').first().click();
+    await page.waitForFunction(() => document.querySelectorAll('.history-row').length === 1);
+    assert(db.shakes.filter((r) => r.user_id === ME).length === 1, 'one burst should be deleted');
+    const deleteAll = page.getByRole('button', { name: 'Delete All Shakes' });
+    await deleteAll.click();
+    await page.getByRole('heading', { name: 'Delete all your shake stats?' }).waitFor();
+    await shot(page, 'clear-history-dialog');
+    await page.getByRole('button', { name: 'Cancel' }).click();
+    assert(db.shakes.some((r) => r.user_id === ME), 'Cancel should keep the shakes');
+    await deleteAll.click();
+    await page.getByRole('button', { name: 'Delete 1 Bursts' }).click();
     await page.getByRole('heading', { name: 'No shakes yet' }).waitFor();
-    assert(db.shakes.every((r) => r.user_id !== ME), 'the burst should be deleted');
+    assert(db.shakes.every((r) => r.user_id !== ME), 'Delete All should clear my shakes');
+    assert((await deleteAll.count()) === 0, 'Delete All should go with the last burst');
     await page.reload();
     await page.locator('.nav-title', { hasText: 'me@example.com' }).waitFor();
     await page.getByRole('button', { name: 'Back' }).click();
     await page.locator('.nav-title', { hasText: 'Shakes' }).waitFor();
     await page.getByRole('button', { name: 'Back' }).click();
     await page.getByRole('heading', { name: 'Welcome to HOS-Lobby' }).waitFor();
+    const source = await page.getByRole('link', { name: 'Source on GitHub' }).getAttribute('href');
+    assert(source === 'https://github.com/molab-itp/99-HO-States/tree/main/HOS-Lobby', `source link: ${source}`);
     console.log('ok  shake history');
 
     // Sign out, then back in as a guest.

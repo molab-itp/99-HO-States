@@ -1,5 +1,5 @@
 // Port of v2's Account/AuthModel.swift and AccountSession.swift, copied from
-// v07/src/services/AuthContext.jsx; keep v07 as the source of truth. Owns the Supabase client and
+// HOS-Lobby/web/src/services/AuthContext.jsx; keep the HOS-Lobby web app as the source of truth. Owns the Supabase client and
 // mirrors its auth session into React state. `useAuth()` is the `@Environment(AuthModel.self)`
 // stand-in, and is `null` when `.env.local` isn't set up, which hides the Account feature.
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
@@ -84,7 +84,7 @@ export function AuthProvider({ client, children }) {
 
       /**
        * Sign in with Apple, the web way: leaves for Apple's page, which returns here signed in.
-       * Needs this app's address in the dashboard's Redirect URLs, as well as v07's.
+       * Needs this app's address in the dashboard's Redirect URLs, as well as the HOS-Lobby web app's.
        */
       signInWithApple: () =>
         attempt(() => client.auth.signInWithOAuth({ provider: 'apple', options: { redirectTo: authRedirectURL() } })),

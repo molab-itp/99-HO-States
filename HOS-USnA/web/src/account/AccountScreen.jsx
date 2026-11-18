@@ -14,7 +14,7 @@ export function guestCode(user) {
 
 /**
  * The email, or the name Apple gave on first sign-in, or "Guest XXXX" as the HO Users lobby
- * shows it (`profileName` in v07).
+ * shows it (`profileName` in the HOS-Lobby web app).
  */
 export function displayName(user) {
   if (user.email) return user.email;

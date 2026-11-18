@@ -68,7 +68,7 @@ export function AuthProvider({ client, children }) {
 
       /**
        * Sign in with Apple, the web way: leaves for Apple's page, which returns here signed in.
-       * v06's native flow needs only the bundle id as a Client ID; this one also needs the Apple
+       * The iOS app's native flow needs only the bundle id as a Client ID; this one also needs the Apple
        * provider's Services ID, secret key and callback URL filled in on the Supabase dashboard
        * (see README). Supabase saves the name Apple sends on the first authorization as
        * `full_name`, which the `profiles` trigger copies to `display_name`.

@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext.jsx';
 const CODE_LENGTH = 6;
 
 /**
- * Port of v2's Account/SignInView.swift, copied from v07/src/views/SignInView.jsx; keep v07 as the
+ * Port of v2's Account/SignInView.swift, copied from HOS-Lobby/web/src/views/SignInView.jsx; keep the HOS-Lobby web app as the
  * source of truth. v2 changes: the title and prompt text, and no `AppVersionLabel` (Landing shows
  * the build). Email a 6-digit code, Sign in with Apple, or continue as a guest.
  */

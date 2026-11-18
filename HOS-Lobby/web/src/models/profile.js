@@ -10,7 +10,7 @@ export function profileName(profile) {
   return (
     profile.display_name ??
     profile.email ??
-    // Uppercase to match v06, where `UUID.uuidString` is.
+    // Uppercase to match the iOS app, where `UUID.uuidString` is.
     (profile.is_anonymous ? `Guest ${profile.id.slice(0, 4).toUpperCase()}` : 'Unknown user')
   );
 }

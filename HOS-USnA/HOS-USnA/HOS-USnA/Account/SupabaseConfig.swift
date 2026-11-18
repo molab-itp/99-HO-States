@@ -1,4 +1,4 @@
-// Copied from HOS-Lobby/HOS-Lobby/HOS_Lobby/SupabaseConfig.swift; keep v06 as the source of truth.
+// Copied from HOS-Lobby/HOS-Lobby/HOS_Lobby/SupabaseConfig.swift; keep the HOS-Lobby iOS app as the source of truth.
 import Foundation
 
 /// The project URL + publishable key, read from the bundled (gitignored) `Supabase.plist`.
@@ -6,7 +6,7 @@ struct SupabaseConfig {
     let url: URL
     let publishableKey: String
 
-    /// Where a magic-link email would send the user back to. Unlike v06, v2 doesn't register this
+    /// Where a magic-link email would send the user back to. Unlike the HOS-Lobby iOS app, v2 doesn't register this
     /// scheme (two apps claiming `hostates` would make iOS pick one at random): sign-in uses the
     /// 6-digit code, and the email templates carry no link. To turn the link on, register
     /// `hostates-usna` in the target's URL Types, add this URL to the Supabase dashboard's

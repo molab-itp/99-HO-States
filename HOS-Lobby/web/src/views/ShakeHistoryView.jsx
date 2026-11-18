@@ -1,5 +1,5 @@
 // Port of ShakeHistoryView.swift: one user's shake totals and every burst they've recorded.
-// Users can delete their own bursts.
+// Users can delete their own bursts, one at a time or all at once.
 import { useCallback, useEffect, useState } from 'react';
 import Icon from '../components/Icon.jsx';
 import NavBar from '../components/NavBar.jsx';
@@ -7,7 +7,7 @@ import Spinner from '../components/Spinner.jsx';
 import { profileName } from '../models/profile.js';
 import { formatDateTime, shakeDurationText } from '../models/shakeSession.js';
 import { useAuth } from '../services/AuthContext.jsx';
-import { deleteSession, fetchHistory } from '../services/shakesService.js';
+import { clearStats, deleteSession, fetchHistory } from '../services/shakesService.js';
 
 /** `onChange` is called after a delete, so the leaderboard catches up. */
 export default function ShakeHistoryView({ profile, isCurrentUser, onBack, onChange }) {
@@ -15,6 +15,7 @@ export default function ShakeHistoryView({ profile, isCurrentUser, onBack, onCha
   const [sessions, setSessions] = useState([]);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [isConfirmingClear, setIsConfirmingClear] = useState(false);
 
   const reload = useCallback(async () => {
     try {
@@ -41,6 +42,19 @@ export default function ShakeHistoryView({ profile, isCurrentUser, onBack, onCha
     await onChange();
   }
 
+  /** Every burst in one request, which also takes the user off the leaderboard. */
+  async function clearAll() {
+    setIsConfirmingClear(false);
+    setSessions([]);
+    try {
+      await clearStats(client, [profile.id]);
+    } catch (error) {
+      setErrorMessage(error.message);
+      await reload();
+    }
+    await onChange();
+  }
+
   const total = sessions.reduce((sum, s) => sum + s.shake_count, 0);
   const totalMS = sessions.reduce((sum, s) => sum + s.duration_ms, 0);
   const best = sessions.reduce((max, s) => (max == null || s.shake_count > max.shake_count ? s : max), null);
@@ -55,6 +69,18 @@ export default function ShakeHistoryView({ profile, isCurrentUser, onBack, onCha
           <button className="nav-button" onClick={reload} aria-label="Refresh">
             <Icon name="arrow-clockwise" size={18} />
           </button>
+        }
+        trailing={
+          isCurrentUser &&
+          sessions.length > 0 && (
+            <button
+              className="nav-button nav-button-destructive"
+              onClick={() => setIsConfirmingClear(true)}
+              aria-label="Delete All Shakes"
+            >
+              <Icon name="trash" size={18} />
+            </button>
+          )
         }
       />
       <div className="list-screen">
@@ -90,7 +116,7 @@ export default function ShakeHistoryView({ profile, isCurrentUser, onBack, onCha
                     <span className="history-duration">{shakeDurationText(session.duration_ms)}</span>
                   </span>
                   <span className="history-count">{session.shake_count} shakes</span>
-                  {/* v06 swipes to delete; a browser gets a button. */}
+                  {/* The iOS app swipes to delete; a browser gets a button. */}
                   {isCurrentUser && (
                     <button
                       className="history-delete"
@@ -106,6 +132,26 @@ export default function ShakeHistoryView({ profile, isCurrentUser, onBack, onCha
           </>
         )}
       </div>
+
+      {isConfirmingClear && sessions.length > 0 && (
+        <div className="dialog-backdrop" onClick={() => setIsConfirmingClear(false)}>
+          <div
+            className="dialog"
+            role="alertdialog"
+            aria-labelledby="clear-history-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 id="clear-history-title">Delete all your shake stats?</h2>
+            <p>This removes every burst you've recorded and takes you off the leaderboard.</p>
+            <button className="button button-destructive button-large" onClick={clearAll}>
+              Delete {sessions.length} Bursts
+            </button>
+            <button className="button button-bordered button-large" onClick={() => setIsConfirmingClear(false)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

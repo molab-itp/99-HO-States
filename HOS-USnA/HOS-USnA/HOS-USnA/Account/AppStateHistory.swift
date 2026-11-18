@@ -6,11 +6,11 @@ import Supabase
 /// date, `key = "history/<UTC time>"`, rather than overwriting one row. Rows are never updated or
 /// deleted here, so any earlier export can be rolled back to later. No migration needed: the
 /// table's key is already (user_id, app, key). `key = 'default'` is left for live sync (stage 2 in
-/// `Log-v2-signon.md`), and v07 reads only that key, so these rows don't affect it.
+/// `Log-v2-signon.md`), and the HOS-Lobby web app reads only that key, so these rows don't affect it.
 struct AppStateHistory {
     let client: SupabaseClient
 
-    /// Shared with v05/v07 (see v06's `AppStateStore`).
+    /// Shared with v05 and the HOS-Lobby web app (see the HOS-Lobby iOS app's `AppStateStore`).
     static let app = "ho-states"
     static let keyPrefix = "history/"
     /// Bump when `AppModel.Snapshot` changes incompatibly, and upgrade old rows on read.

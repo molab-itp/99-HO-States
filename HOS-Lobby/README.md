@@ -1,12 +1,14 @@
-# v06 — Supabase backend + email-code / Apple / guest sign-in (SwiftUI)
+# HOS-Lobby — Supabase backend + email-code / Apple / guest sign-in (iOS and web)
 
-`HOS-Lobby/` is a small SwiftUI app. You sign in either with a 6-digit code that Supabase
-Auth emails you, with Sign in with Apple, or as a guest with no email at all. It
+HOS-Lobby is a small app with two front ends on one database: the iOS app (SwiftUI, in
+`HOS-Lobby/`) and the [web app](web) (React, in `web/`). You sign in either with a 6-digit code
+that Supabase Auth emails you, with Sign in with Apple, or as a guest with no email at all. It
 lists every user who has signed on and when they were last active. It uses Supabase Auth on the
-Pro plan, plus a custom SMTP provider (Resend) for sending email. Apple sign-in is native (no web
-OAuth redirect).
+Pro plan, plus a custom SMTP provider (Resend) for sending email. In the iOS app, Apple sign-in is
+native (no web OAuth redirect).
 `supabase/` holds the database, which is set up so v2 (iOS) and v05 (web) can adopt it later.
-[v07](web) is the web port of this app, on the same database.
+The web app is a port of the iOS app and is kept in sync with it; see [web/README.md](web/README.md).
+The rest of this README describes the iOS app.
 
 ```
 HOS-Lobby/
@@ -17,7 +19,8 @@ HOS-Lobby/
     migrations/*.sql       ← generated from schemas/ (don't hand-edit, except auth.* triggers)
     functions/delete-user/ Edge Function: lets admins delete a user from the app
     seed.sql
-  HOS-Lobby/
+  web/                     the web app (React + Vite), on GitHub Pages
+  HOS-Lobby/               the iOS app
     HOS-Lobby.xcodeproj   folder-synced: files added under HOS_Lobby/ join the app
     project.yml            old xcodegen spec, retired (running it undoes folder mode)
     HOS_Lobby/         app sources; Supabase.plist (gitignored) holds URL + key

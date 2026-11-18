@@ -6,7 +6,7 @@
 // imports into the other.
 import { unwrap } from './profilesService.js';
 
-/** Shared with v2/v07 (see v06's `AppStateStore`). */
+/** Shared with v2 and the HOS-Lobby web app (see the HOS-Lobby iOS app's `AppStateStore`). */
 const APP = 'ho-states';
 const KEY_PREFIX = 'history/';
 /** Bump when the snapshot changes incompatibly, and upgrade old rows on read. */

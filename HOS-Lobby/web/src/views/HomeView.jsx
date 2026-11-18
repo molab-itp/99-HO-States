@@ -9,6 +9,8 @@ import ShakesView from './ShakesView.jsx';
 import UsersListView from './UsersListView.jsx';
 import { useRoute } from './useRoute.js';
 
+const SOURCE_REPO_URL = 'https://github.com/molab-itp/99-HO-States/tree/main/HOS-Lobby';
+
 export default function HomeView({ currentUserID }) {
   const { client, signOut } = useAuth();
   const { route, push } = useRoute();
@@ -56,6 +58,14 @@ export default function HomeView({ currentUserID }) {
             subtitle="Shake your phone and see who has shaken the most"
             onClick={() => push('/shakes')}
           />
+        </ul>
+        <ul className="list">
+          <li className="list-item">
+            <a className="home-source" href={SOURCE_REPO_URL} target="_blank" rel="noreferrer">
+              <Icon name="code-slash" size={20} />
+              Source on GitHub
+            </a>
+          </li>
         </ul>
       </div>
     </div>
