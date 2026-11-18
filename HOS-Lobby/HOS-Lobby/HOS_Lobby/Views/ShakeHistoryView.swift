@@ -11,6 +11,7 @@ struct ShakeHistoryView: View {
     @State private var sessions: [ShakeSession] = []
     @State private var hasLoaded = false
     @State private var errorMessage: String?
+    @State private var confirmingClear = false
 
     private var isPreview = false
 
@@ -79,6 +80,21 @@ struct ShakeHistoryView: View {
         }
         .navigationTitle(profile.name)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if isCurrentUser && !sessions.isEmpty {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Delete All Shakes", systemImage: "trash", role: .destructive) {
+                        confirmingClear = true
+                    }
+                }
+            }
+        }
+        .confirmationDialog("Delete all your shake stats?", isPresented: $confirmingClear,
+                            titleVisibility: .visible) {
+            Button("Delete \(sessions.count) Bursts", role: .destructive) { clearAll() }
+        } message: {
+            Text("This removes every burst you've recorded and takes you off the leaderboard.")
+        }
         .refreshable { await reload() }
         .task { await reload() }
     }
@@ -99,6 +115,20 @@ struct ShakeHistoryView: View {
             errorMessage = error.localizedDescription
         }
         hasLoaded = true
+    }
+
+    private func clearAll() {
+        sessions.removeAll()
+        guard !isPreview else { return }
+        Task {
+            do {
+                try await service.clearStats(userIDs: [profile.id])
+            } catch {
+                errorMessage = error.localizedDescription
+                await reload()
+            }
+            await onChange()
+        }
     }
 
     private func delete(at offsets: IndexSet) {

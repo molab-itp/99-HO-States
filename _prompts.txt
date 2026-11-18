@@ -1453,3 +1453,9 @@ in HOS-Lobby/HOS-Lobby ios
 increment build version
 and in web append build version to its version report
 sync web to with ios
+
+v0.188
+
+in HOS-Lobby/HOS-Lobby ShakeHistoryView
+add button to delete shake stats
+

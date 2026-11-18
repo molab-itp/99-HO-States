@@ -3809,3 +3809,24 @@ The iOS build is now 1021, and the web version label shows the build number. On 
 The web action depends on the v0.187 migration `20261118120000_shake_sessions_admin_delete.sql`, which lets admins delete other users' shakes. If that hasn't been pushed to Supabase yet, clearing another user's stats will appear to work but delete nothing.
 
 *Time: 2m 29s · Cost: $0.8056 (input 38, output 11.5k, cache write 45.6k, cache read 1056.0k) · session $0.8056*
+
+---
+
+## User (11/18/2026, 12:29:59 PM)
+
+```
+in HOS-Lobby/HOS-Lobby ShakeHistoryView
+add button to delete shake stats
+```
+
+## Assistant
+
+I added a trash button to `ShakeHistoryView` that deletes all of your shake stats, and the app builds without errors. I haven't tried it in the app yet.
+
+- **Button:** a trash icon in the top-right of the toolbar. It only appears on your own history, and only when you have at least one burst. This matches the swipe-to-delete rule, so you can't clear someone else's history from this screen.
+- **Confirmation:** tapping it asks "Delete all your shake stats?" and warns that this removes every burst you've recorded and takes you off the leaderboard. The confirm button says how many bursts will be deleted.
+- **Delete:** confirming clears the list straight away and deletes your bursts in one request, using the existing `ShakesService.clearStats(userIDs:)`. It then updates the leaderboard. If the request fails, the error appears at the top of the list and your history reloads.
+
+The change is in [ShakeHistoryView.swift](HOS-Lobby/HOS_Lobby/Views/ShakeHistoryView.swift).
+
+*Time: 1m 33s · Cost: $0.2443 (input 12, output 1.7k, cache write 20.7k, cache read 225.6k) · session $0.2443*
