@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// One user's shake totals and every burst they've recorded. Users can delete their own bursts.
+/// One user's shake totals and every burst they've recorded; tap a burst for its details. Users
+/// can delete their own bursts.
 struct ShakeHistoryView: View {
     let profile: Profile
     let isCurrentUser: Bool
@@ -50,22 +51,18 @@ struct ShakeHistoryView: View {
                     if let last = sessions.first {
                         stat("Last burst", "\(last.shakeCount) in \(last.duration.shakeDurationText)")
                     }
+                    if let strongest = sessions.compactMap(\.device?.peakAcceleration).max() {
+                        stat("Strongest jolt", strongest.gText)
+                    }
+                    if let favorite = favoritePattern {
+                        stat("Usual direction", favorite.label)
+                    }
                 }
                 Section("History") {
                     ForEach(sessions) { session in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(session.startedAt.formatted(date: .abbreviated, time: .standard))
-                                    .font(.subheadline)
-                                Text(session.duration.shakeDurationText)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Text("\(session.shakeCount) shakes")
-                                .font(.headline.monospacedDigit())
+                        NavigationLink(value: session) {
+                            HistoryRow(session: session)
                         }
-                        .accessibilityElement(children: .combine)
                     }
                     .onDelete(perform: isCurrentUser ? { offsets in delete(at: offsets) } : nil)
                 }
@@ -77,6 +74,9 @@ struct ShakeHistoryView: View {
             } else if sessions.isEmpty && errorMessage == nil {
                 ContentUnavailableView("No shakes yet", systemImage: "iphone.radiowaves.left.and.right")
             }
+        }
+        .navigationDestination(for: ShakeSession.self) { session in
+            ShakeSessionDetailView(session: session)
         }
         .navigationTitle(profile.name)
         .navigationBarTitleDisplayMode(.inline)
@@ -97,6 +97,13 @@ struct ShakeHistoryView: View {
         }
         .refreshable { await reload() }
         .task { await reload() }
+    }
+
+    /// The most common pattern among bursts that have one, other than undetermined.
+    private var favoritePattern: ShakePattern? {
+        let patterns = sessions.compactMap { $0.device?.shakePattern }.filter { $0 != .undetermined }
+        let counts = Dictionary(patterns.map { ($0, 1) }, uniquingKeysWith: +)
+        return counts.max { $0.value < $1.value }?.key
     }
 
     private func stat(_ title: String, _ value: String) -> some View {
@@ -144,6 +151,35 @@ struct ShakeHistoryView: View {
             }
             await onChange()
         }
+    }
+}
+
+private struct HistoryRow: View {
+    let session: ShakeSession
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(session.startedAt.formatted(date: .abbreviated, time: .standard))
+                    .font(.subheadline)
+                HStack(spacing: 6) {
+                    Text(session.duration.shakeDurationText)
+                    if let g = session.device?.averageAcceleration ?? session.device?.peakAcceleration {
+                        Text("· \(ShakeIntensity.label(for: g))")
+                    }
+                    if let pattern = session.device?.shakePattern {
+                        Image(systemName: pattern.systemImage)
+                            .accessibilityLabel(pattern.label)
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Text("\(session.shakeCount) shakes")
+                .font(.headline.monospacedDigit())
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 

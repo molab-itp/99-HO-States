@@ -3992,3 +3992,63 @@ npx supabase db push
 **The web app still works but is behind.** It needs no change to keep working once the column exists: its shakes save with an empty `{}`. It doesn't have the leader card, the jiggle or device data yet. I can port those to it next if you want the two to match again.
 
 *Time: 2m 58s · Cost: $0.8620 (input 28, output 15.2k, cache write 50.4k, cache read 770.8k) · session $0.8620*
+
+---
+
+## User (11/19/2026, 12:40:15 PM)
+
+```
+in HOS-Lobby/HOS-Lobby
+measure and save intensity of shake
+measure mostly up/down, left-right, circle, or undetermined
+add shake detail display to shake history
+to show per shake info
+```
+
+## Assistant
+
+Reading the shake code is done; I'm now writing the motion analysis (intensity + up/down/left-right/circle classification) and the per-burst detail screen.
+
+Now the detector: collect samples and per-shake jolts.
+
+Now the saved JSON fields and the save call.
+
+Now the history rows and a new per-burst detail screen.
+
+Updating preview samples so the detail screen previews with real-looking data, then building.
+
+Builds clean. Let me sanity-check the classifier with synthetic motion (line, circle, diagonal, noise).
+
+I added shake intensity and direction to the iOS app, plus a detail screen for each burst in the shake history. The app builds for the Simulator with no warnings or errors. I tested the direction logic on made-up motion data, but not on a real phone. I haven't seen the new screens running and I didn't commit anything.
+
+**No database change is needed.** The new values are stored in the `device` JSON column added last time, so there's no migration to push.
+
+**Intensity.** For each burst the app saves three numbers, all in g with gravity removed:
+- the strongest single jolt (already saved before this change),
+- the average strength of each shake,
+- the overall effort across the whole burst (RMS).
+
+The screens turn the average into a word: Gentle (under 2.2 g), Firm, Strong or Vigorous (4.5 g and up). These cutoffs are my guesses and are easy to change in [ShakeMotion.swift](HOS-Lobby/HOS-Lobby/HOS_Lobby/Services/ShakeMotion.swift).
+
+**Direction.** Each motion sample is split into three directions: up/down (along gravity), left/right (across the screen) and forward/back (toward or away from you). Because the split uses gravity, it doesn't matter how the phone is tilted or whether it's held sideways. A burst is labelled:
+- **up/down, left/right or forward/back** when that one direction has at least 60% of the motion. You listed only up/down and left-right; I added forward/back so that shaking toward and away from yourself isn't marked "undetermined". It can easily be folded into "undetermined" if you'd rather.
+- **circle** when the two main directions are fairly balanced and the motion keeps turning the same way.
+- **undetermined** otherwise, for example a diagonal back-and-forth or a random jumble.
+
+On made-up data, every case came out as expected: up/down, left/right, an upright circle, a flat circle, a diagonal and a jumble.
+
+**Per-shake info.** Each shake in a burst is also saved with its time from the start of the burst, its strongest jolt and its main direction. The list is capped at 300 shakes per burst.
+
+**Shake history.**
+- Each row now shows the intensity word and a direction icon, and tapping it opens the new detail screen ([ShakeSessionDetailView.swift](HOS-Lobby/HOS-Lobby/HOS_Lobby/Views/ShakeSessionDetailView.swift)).
+- The detail screen shows the burst, its intensity, its direction with a percentage bar for each direction, a list of every shake with a strength bar, and the location and device info saved last time.
+- The summary at the top now includes "Strongest jolt" and "Usual direction".
+- Bursts saved before this change simply leave out the parts they don't have.
+
+After a burst, the live recorder also shows something like "· Firm, up and down".
+
+In the Simulator there's no motion data, so bursts there have no intensity or direction. Each shake still gets a time.
+
+Besides the two new files, the changes are in [ShakeDetector.swift](HOS-Lobby/HOS-Lobby/HOS_Lobby/Services/ShakeDetector.swift), [ShakeDeviceInfo.swift](HOS-Lobby/HOS-Lobby/HOS_Lobby/Models/ShakeDeviceInfo.swift), [ShakeHistoryView.swift](HOS-Lobby/HOS-Lobby/HOS_Lobby/Views/ShakeHistoryView.swift), [ShakesView.swift](HOS-Lobby/HOS-Lobby/HOS_Lobby/Views/ShakesView.swift) and the preview data. The web app doesn't show any of this yet.
+
+*Time: 3m 52s · Cost: $1.0822 (input 30, output 23.3k, cache write 54.9k, cache read 888.0k) · session $1.0822*

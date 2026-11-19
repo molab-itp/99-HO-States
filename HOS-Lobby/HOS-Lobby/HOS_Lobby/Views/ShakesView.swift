@@ -140,6 +140,10 @@ struct ShakesView: View {
                 HStack(spacing: 4) {
                     if isSaving { ProgressView().controlSize(.mini) }
                     Text("Last: \(burst.count) shakes in \(burst.duration.shakeDurationText)")
+                    if let motion = burst.motion {
+                        Text("· \(ShakeIntensity.label(for: motion.averageAcceleration)),")
+                        Label(motion.pattern.label.lowercased(), systemImage: motion.pattern.systemImage)
+                    }
                 }
                 .font(.footnote.weight(.medium))
             } else if let totals = myTotals {
@@ -165,7 +169,7 @@ struct ShakesView: View {
                 shakeCount: burst.count,
                 durationMS: Int((burst.duration * 1000).rounded()),
                 startedAt: burst.startedAt,
-                device: .current(location: location.latest, peakAcceleration: burst.peakAcceleration)))
+                device: .current(location: location.latest, burst: burst)))
             errorMessage = nil
             await reload()
         } catch {

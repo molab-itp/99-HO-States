@@ -62,9 +62,25 @@ extension UIImage {
 #if DEBUG
 extension ShakeSession {
     static func samples(for userID: UUID) -> [ShakeSession] {
-        [(14, 3200, 120), (6, 1400, 3600), (22, 5100, 86_400)].map { count, ms, ago in
-            ShakeSession(id: UUID(), userID: userID, shakeCount: count, durationMS: ms,
-                         startedAt: .now.addingTimeInterval(-Double(ago)))
+        let patterns: [ShakePattern] = [.upDown, .circle, .leftRight]
+        return [(14, 3200, 120), (6, 1400, 3600), (22, 5100, 86_400)].enumerated().map { index, burst in
+            let (count, ms, ago) = burst
+            let step = Double(ms) / 1000 / Double(count - 1)
+            let shakes = (0..<count).map { i in
+                ShakeJolt(offset: Double(i) * step, peak: 1.8 + Double((i * 7) % 5) * 0.4,
+                          axis: ShakeAxis.allCases[(i % 4 == 3) ? 1 : 0].rawValue)
+            }
+            let device = ShakeDeviceInfo(
+                latitude: 40.6942, longitude: -73.9866, horizontalAccuracy: 12, altitude: 18,
+                peakAcceleration: shakes.compactMap(\.peak).max(), averageAcceleration: 2.6,
+                rmsAcceleration: 1.4, pattern: patterns[index].rawValue,
+                axisShare: ShakeAxisShare(upDown: 0.71, leftRight: 0.18, forwardBack: 0.11),
+                circularity: index == 1 ? 0.74 : 0.12, shakes: shakes,
+                model: "iPhone17,1", systemName: "iOS", systemVersion: "26.1",
+                appVersion: "0.8", appBuild: "1023", batteryLevel: 0.82, batteryState: "unplugged",
+                timeZone: "America/New_York")
+            return ShakeSession(id: UUID(), userID: userID, shakeCount: count, durationMS: ms,
+                                startedAt: .now.addingTimeInterval(-Double(ago)), device: device)
         }
     }
 }

@@ -27,6 +27,18 @@ struct ShakeDeviceInfo: Codable, Hashable, Sendable {
     // The burst itself.
     /// Strongest jolt in the burst, in g.
     var peakAcceleration: Double?
+    /// Mean of each shake's strongest jolt, in g.
+    var averageAcceleration: Double?
+    /// Root mean square acceleration over the burst, in g.
+    var rmsAcceleration: Double?
+    /// `ShakePattern` raw value: "up_down", "left_right", "forward_back", "circle" or
+    /// "undetermined". A string so a pattern added later doesn't break older app versions.
+    var pattern: String?
+    var axisShare: ShakeAxisShare?
+    /// 0–1, how consistently the motion turned one way.
+    var circularity: Double?
+    /// Each shake in the burst, in order.
+    var shakes: [ShakeJolt]?
 
     // The device.
     /// Hardware identifier, e.g. "iPhone17,1".
@@ -54,6 +66,12 @@ struct ShakeDeviceInfo: Codable, Hashable, Sendable {
         case floor, speed, course
         case locationTimestamp = "location_timestamp"
         case peakAcceleration = "peak_acceleration"
+        case averageAcceleration = "average_acceleration"
+        case rmsAcceleration = "rms_acceleration"
+        case pattern
+        case axisShare = "axis_share"
+        case circularity
+        case shakes
         case model
         case deviceKind = "device_kind"
         case systemName = "system_name"
@@ -68,17 +86,30 @@ struct ShakeDeviceInfo: Codable, Hashable, Sendable {
     }
 
     var hasLocation: Bool { latitude != nil && longitude != nil }
+    var shakePattern: ShakePattern? { pattern.flatMap(ShakePattern.init(rawValue:)) }
 }
 
 extension ShakeDeviceInfo {
-    /// A snapshot of this device now, plus `location` if there is one.
+    /// A snapshot of this device now, plus `location` if there is one, and the burst's motion.
     @MainActor
-    static func current(location: CLLocation?, peakAcceleration: Double?) -> ShakeDeviceInfo {
+    static func current(location: CLLocation?, burst: ShakeDetector.Burst) -> ShakeDeviceInfo {
         let device = UIDevice.current
         device.isBatteryMonitoringEnabled = true
         let info = Bundle.main.infoDictionary
         var result = ShakeDeviceInfo(
-            peakAcceleration: peakAcceleration.map { ($0 * 100).rounded() / 100 },
+            peakAcceleration: burst.peakAcceleration.map(rounded),
+            averageAcceleration: burst.motion.map { rounded($0.averageAcceleration) },
+            rmsAcceleration: burst.motion.map { rounded($0.rmsAcceleration) },
+            pattern: burst.motion?.pattern.rawValue,
+            axisShare: burst.motion.map {
+                ShakeAxisShare(upDown: rounded($0.axisShare.upDown),
+                               leftRight: rounded($0.axisShare.leftRight),
+                               forwardBack: rounded($0.axisShare.forwardBack))
+            },
+            circularity: burst.motion.map { rounded($0.circularity) },
+            shakes: burst.shakes.map {
+                ShakeJolt(offset: rounded($0.offset), peak: $0.peak.map(rounded), axis: $0.axis)
+            },
             model: hardwareIdentifier,
             deviceKind: device.model,
             systemName: device.systemName,
@@ -106,6 +137,9 @@ extension ShakeDeviceInfo {
         }
         return result
     }
+
+    /// Two decimals is plenty, and keeps the JSON small.
+    private static func rounded(_ value: Double) -> Double { (value * 100).rounded() / 100 }
 
     /// "iPhone17,1"; in the Simulator, the simulated model's identifier.
     private static let hardwareIdentifier: String = {

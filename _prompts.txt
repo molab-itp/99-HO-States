@@ -1515,7 +1515,8 @@ v0.193
 
 in HOS-Lobby/HOS-Lobby
 measure and save intensity of shake
-measure mostly up/down, left-right, circle,
-or undetermined
+measure mostly up/down, left-right, circle, or undetermined
+add shake detail display to shake history
+to show per shake info
 
 
