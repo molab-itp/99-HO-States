@@ -20,7 +20,7 @@ struct ShakesService {
     func fetchHistory(userID: UUID, limit: Int = 500) async throws -> [ShakeSession] {
         try await client
             .from("shake_sessions")
-            .select("id,user_id,shake_count,duration_ms,started_at")
+            .select("id,user_id,shake_count,duration_ms,started_at,device")
             .eq("user_id", value: userID)
             .order("started_at", ascending: false)
             .limit(limit)
@@ -34,7 +34,7 @@ struct ShakesService {
         try await client
             .from("shake_sessions")
             .insert(session)
-            .select("id,user_id,shake_count,duration_ms,started_at")
+            .select("id,user_id,shake_count,duration_ms,started_at,device")
             .single()
             .execute()
             .value

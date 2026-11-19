@@ -16,6 +16,8 @@ final class ShakeDetector {
         let count: Int
         let startedAt: Date
         let duration: TimeInterval
+        /// Strongest jolt in the burst, in g; nil for Simulator shakes.
+        var peakAcceleration: Double?
     }
 
     /// Shakes so far in the burst in progress (0 when idle).
@@ -37,6 +39,7 @@ final class ShakeDetector {
 
     @ObservationIgnored private let motion = CMMotionManager()
     @ObservationIgnored private var timeoutTask: Task<Void, Never>?
+    @ObservationIgnored private var currentPeak: Double?
 
     func start() {
         guard motion.isDeviceMotionAvailable, !motion.isDeviceMotionActive else { return }
@@ -44,7 +47,7 @@ final class ShakeDetector {
         motion.startDeviceMotionUpdates(to: .main) { [weak self] data, _ in
             guard let self, let a = data?.userAcceleration else { return }
             let magnitude = (a.x * a.x + a.y * a.y + a.z * a.z).squareRoot()
-            if magnitude > self.threshold { self.registerShake() }
+            if magnitude > self.threshold { self.registerShake(magnitude: magnitude) }
         }
     }
 
@@ -54,7 +57,9 @@ final class ShakeDetector {
         finishBurst()
     }
 
-    func registerShake(at now: Date = .now) {
+    func registerShake(at now: Date = .now, magnitude: Double? = nil) {
+        // Every jolt counts toward the peak, even ones too close together to be a new shake.
+        if let magnitude { currentPeak = max(currentPeak ?? 0, magnitude) }
         if let last = lastShakeAt, now.timeIntervalSince(last) < minGap { return }
         if currentStart == nil { currentStart = now }
         currentCount += 1
@@ -74,10 +79,12 @@ final class ShakeDetector {
             currentCount = 0
             currentStart = nil
             lastShakeAt = nil
+            currentPeak = nil
         }
         guard currentCount > 0, let start = currentStart else { return }
         let burst = Burst(count: currentCount, startedAt: start,
-                          duration: (lastShakeAt ?? start).timeIntervalSince(start))
+                          duration: (lastShakeAt ?? start).timeIntervalSince(start),
+                          peakAcceleration: currentPeak)
         lastBurst = burst
         onBurstEnded?(burst)
     }

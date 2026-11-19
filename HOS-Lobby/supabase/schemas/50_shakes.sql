@@ -9,6 +9,9 @@ create table public.shake_sessions (
   -- From the first shake of the burst to the last.
   duration_ms integer not null check (duration_ms >= 0),
   started_at timestamptz not null,
+  -- Where and on what the burst happened: location, altitude, device model, OS, app version, …
+  -- A JSON object so the app can add fields without a migration; every field is optional.
+  device jsonb not null default '{}'::jsonb check (jsonb_typeof(device) = 'object'),
   created_at timestamptz not null default now()
 );
 

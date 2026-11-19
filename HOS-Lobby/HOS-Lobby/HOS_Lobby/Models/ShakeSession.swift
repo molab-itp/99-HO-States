@@ -7,6 +7,8 @@ struct ShakeSession: Codable, Identifiable, Hashable, Sendable {
     let shakeCount: Int
     let durationMS: Int
     let startedAt: Date
+    /// Location, altitude and device details; nil when fetched without the `device` column.
+    var device: ShakeDeviceInfo? = nil
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -14,6 +16,7 @@ struct ShakeSession: Codable, Identifiable, Hashable, Sendable {
         case shakeCount = "shake_count"
         case durationMS = "duration_ms"
         case startedAt = "started_at"
+        case device
     }
 
     var duration: TimeInterval { TimeInterval(durationMS) / 1000 }
@@ -24,11 +27,13 @@ struct NewShakeSession: Encodable, Sendable {
     let shakeCount: Int
     let durationMS: Int
     let startedAt: Date
+    let device: ShakeDeviceInfo
 
     enum CodingKeys: String, CodingKey {
         case shakeCount = "shake_count"
         case durationMS = "duration_ms"
         case startedAt = "started_at"
+        case device
     }
 }
 

@@ -3933,3 +3933,62 @@ I haven't committed anything.
 [project.yml](HOS-Lobby/HOS-Lobby/project.yml) still says `MARKETING_VERSION: "0.6"` and `CURRENT_PROJECT_VERSION: 1`. If you ever regenerate the Xcode project from it with XcodeGen, the iOS app would go back to 0.6 (1), and the web app would follow. Want me to set it to 0.8 / 1022?
 
 *Time: 43s · Cost: $0.2924 (input 16, output 3.2k, cache write 20.6k, cache read 316.5k) · session $0.2924*
+
+---
+
+## User (11/19/2026, 12:23:35 PM)
+
+```
+in HOS-Lobby/HOS-Lobby
+update Leader board to show top person
+more prominently - increase to about %25 of screen size
+when shake count increase apply jiggle animation to leader
+for each shake store location, altitude and
+any other device data
+store in db as json to accommodate more fields
+to save with each shake that will be added later
+```
+
+## Assistant
+
+Now the Swift model for the device JSON and a location provider.
+
+Now the detector (peak g per burst), the model/service, and Info.plist location string.
+
+Now the leaderboard UI in ShakesView.
+
+Building to check it compiles.
+
+Build succeeds. Checking for warnings in the changed files:
+
+No warnings. One last check: whether the README describes the shake table.
+
+All three changes are in the iOS app and it builds for the Simulator with no warnings. I haven't run it, so I haven't seen the leader card or the jiggle on screen. I didn't commit anything.
+
+**Before you run it: apply the database change.** The app now reads and writes a new `device` column. Until that column exists on your Supabase project, saving a shake and opening someone's shake history will fail. From `HOS-Lobby/`, run:
+```sh
+npx supabase db push
+```
+
+**1. Bigger leader on the leaderboard.** The top person now gets a large card at the head of the Leaderboard section, about 25% of the screen height (at least 180 pt). It shows their photo with a gold ring and crown, their name, and their total in big digits; tapping it opens their history as before. Everyone else stays in the normal list, starting at rank 2. If nobody has shaken yet, there's no card and the list looks as it did.
+
+**2. Jiggle.** The card wobbles and pops each time the top total goes up: when the leader shakes more, when someone overtakes them, or when another user's shake arrives through live updates. It doesn't jiggle on the first load. One addition you didn't ask for: if *you* are the leader, it also jiggles on each shake while you're shaking, not only when the burst is saved.
+
+**3. Device data saved with each shake.**
+- **Database:** `shake_sessions` has a new column, `device`, holding a JSON object that defaults to `{}`. The change is in [50_shakes.sql](supabase/schemas/50_shakes.sql) plus a new migration, [20261119000000_shake_sessions_device.sql](supabase/migrations/20261119000000_shake_sessions_device.sql). New fields can be added later in the app alone, with no migration.
+- **What's saved:** [ShakeDeviceInfo.swift](HOS-Lobby/HOS_Lobby/Models/ShakeDeviceInfo.swift) records:
+  - latitude, longitude and accuracy
+  - altitude above sea level and its accuracy
+  - building floor, speed and heading, when available
+  - the strongest jolt in the burst, in g
+  - device model, iOS version, app version and build
+  - battery level and state, Low Power Mode
+  - region and time zone
+
+  Every field is optional, so older rows still load. To add a field later, add it to that file.
+- **Location:** [LocationTracker.swift](HOS-Lobby/HOS_Lobby/Services/LocationTracker.swift) tracks location only while the Shakes screen is open. The app asks for location access the first time you open it; the prompt text is in `Info.plist`. If someone declines, their shakes still save, just without location.
+- **Strongest jolt:** [ShakeDetector.swift](HOS-Lobby/HOS_Lobby/Services/ShakeDetector.swift) now tracks it for each burst. The other edited files are [ShakesView.swift](HOS-Lobby/HOS_Lobby/Views/ShakesView.swift), [ShakeSession.swift](HOS-Lobby/HOS_Lobby/Models/ShakeSession.swift) and [ShakesService.swift](HOS-Lobby/HOS_Lobby/Services/ShakesService.swift).
+
+**The web app still works but is behind.** It needs no change to keep working once the column exists: its shakes save with an empty `{}`. It doesn't have the leader card, the jiggle or device data yet. I can port those to it next if you want the two to match again.
+
+*Time: 2m 58s · Cost: $0.8620 (input 28, output 15.2k, cache write 50.4k, cache read 770.8k) · session $0.8620*

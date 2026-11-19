@@ -1478,5 +1478,44 @@ v0.191
 in HOS-Lobby/HOS-Lobby
 web to match iOS at 0.8.
 
+v0.192
+
+in HOS-Lobby/HOS-Lobby
+update Leader board to show top person
+more prominently - increase to about %25 of screen size
+when shake count increase apply jiggle animation to leader
+for each shake store location, altitude and
+any other device data
+store in db as json to accommodate more fields
+to save with each shake that will be added later
+
+npx supabase login
+# not needed
+npx supabase link --project-ref jcoolgnracpgjncksopx
+npx supabase db push --remote
+
+●  Selected project: jcoolgnracpgjncksopx
+Target: project ho-states-us (jcoolgnracpgjncksopx)
+Initialising login role...
+Remote migration versions not found in local migrations directory.
+
+Make sure your local git repo is up-to-date. If the error persists, try repairing the migration history table:
+supabase migration repair --status reverted 20260923000000 20260923120000 20260923200000 20260924000000 20261005000000 20261005010000 20261005020000 20261012000000 20261025000000 20261026000000 20261118000000 20261118120000 --remote=jcoolgnracpgjncksopx
+
+And update local migrations to match remote database:
+supabase db pull --remote=jcoolgnracpgjncksopx
+
+>> need to be this folder:
+cd HOS-Lobby/supabase
+
+npx supabase login
+npx supabase db push --remote
+
+v0.193
+
+in HOS-Lobby/HOS-Lobby
+measure and save intensity of shake
+measure mostly up/down, left-right, circle,
+or undetermined
 
 
