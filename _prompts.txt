@@ -1519,4 +1519,10 @@ measure mostly up/down, left-right, circle, or undetermined
 add shake detail display to shake history
 to show per shake info
 
+v0.194
 
+what is the use for supabase/.temp
+is it needed
+
+git rm -r supabase/.temp
+rm -rf supabase

@@ -4052,3 +4052,32 @@ In the Simulator there's no motion data, so bursts there have no intensity or di
 Besides the two new files, the changes are in [ShakeDetector.swift](HOS-Lobby/HOS-Lobby/HOS_Lobby/Services/ShakeDetector.swift), [ShakeDeviceInfo.swift](HOS-Lobby/HOS-Lobby/HOS_Lobby/Models/ShakeDeviceInfo.swift), [ShakeHistoryView.swift](HOS-Lobby/HOS-Lobby/HOS_Lobby/Views/ShakeHistoryView.swift), [ShakesView.swift](HOS-Lobby/HOS-Lobby/HOS_Lobby/Views/ShakesView.swift) and the preview data. The web app doesn't show any of this yet.
 
 *Time: 3m 52s · Cost: $1.0822 (input 30, output 23.3k, cache write 54.9k, cache read 888.0k) · session $1.0822*
+
+---
+
+## User (11/19/2026, 1:05:11 PM)
+
+```
+what is the use for supabase/.temp
+is it needed
+```
+
+## Assistant
+
+`supabase/.temp` is a local cache that the Supabase CLI writes when you run `supabase link`. It records which remote project the folder is linked to (the project ref `jcoolgnracpgjncksopx`, named "ho-states-us"), plus cached server versions and the pooler URL. Later commands like `db push` read it so they know which project to target.
+
+**Is it needed?** It's needed on your machine, but not in git. If it's deleted, running `supabase link --project-ref jcoolgnracpgjncksopx` recreates it. Supabase's default `.gitignore` excludes it.
+
+In your repo there are two copies:
+
+- **[HOS-Lobby/supabase/.temp](HOS-Lobby/supabase/.temp)** is the real one. It sits next to your Supabase project and is already ignored by [HOS-Lobby/supabase/.gitignore](HOS-Lobby/supabase/.gitignore). Keep it locally.
+- **[supabase/.temp](supabase/.temp)** at the repo root looks like a stray. The root `supabase/` folder has nothing else in it (no `config.toml`, no migrations), so `supabase link` was probably run once from the wrong directory. Its `linked-project.json` **is committed to git**. That file only holds project and org IDs, no secrets, but it doesn't belong in the repo.
+
+To clean up the root copy:
+```sh
+git rm -r supabase/.temp
+rm -rf supabase
+```
+After that, run Supabase CLI commands from `HOS-Lobby/`. Want me to do that and commit it?
+
+*Time: 13s · Cost: $0.1454 (input 6, output 1.1k, cache write 12.9k, cache read 102.0k) · session $0.1454*
