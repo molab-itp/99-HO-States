@@ -3,8 +3,8 @@ common.txt
 append this chat to Log.md with date and time stamp
 with approximate time cost
 
-sync web app in v05 with changes to v2
+sync web app in HOS-USnA/web with changes to HOS-USnA/HOS-USnA
 
-sync web app v07 with SwiftUI app v06
+sync web app HOS-Lobby/web with SwiftUI app HOS-Lobby/HOS-Lobby
 
 add an entry to Log.md

@@ -60,7 +60,39 @@ function fakeSupabase() {
     ],
     /** `shake_sessions` rows. */
     shakes: [
-      { id: crypto.randomUUID(), user_id: ADA, shake_count: 12, duration_ms: 3400, started_at: ago(90) },
+      {
+        id: crypto.randomUUID(),
+        user_id: ADA,
+        shake_count: 12,
+        duration_ms: 3400,
+        started_at: ago(90),
+        // What the iOS app saves with a burst (ShakeDeviceInfo.swift); the 5-shake one has none.
+        device: {
+          latitude: 40.6942,
+          longitude: -73.9866,
+          horizontal_accuracy: 12,
+          altitude: 18,
+          peak_acceleration: 3.4,
+          average_acceleration: 2.6,
+          rms_acceleration: 1.4,
+          pattern: 'up_down',
+          axis_share: { up_down: 0.71, left_right: 0.18, forward_back: 0.11 },
+          circularity: 0.12,
+          shakes: [
+            { t: 0, peak: 2.2, axis: 'up_down' },
+            { t: 0.31, peak: 3.4, axis: 'up_down' },
+            { t: 0.6, peak: 2.1, axis: 'left_right' },
+          ],
+          model: 'iPhone17,1',
+          system_name: 'iOS',
+          system_version: '26.1',
+          app_version: '0.8',
+          app_build: '1023',
+          battery_level: 0.82,
+          battery_state: 'unplugged',
+          time_zone: 'America/New_York',
+        },
+      },
       { id: crypto.randomUUID(), user_id: ADA, shake_count: 5, duration_ms: 1200, started_at: ago(30) },
       // Cleared by the admin's Clear Shake Stats.
       { id: crypto.randomUUID(), user_id: GUEST, shake_count: 3, duration_ms: 900, started_at: ago(120) },
@@ -337,7 +369,7 @@ async function main() {
     await page.getByRole('heading', { name: 'HO Users' }).waitFor();
     // The build number comes from the iOS app's Xcode project.
     const versionLabel = await page.locator('.version-label').textContent();
-    assert(/^Version \d+\.\d+\.\d+ \(\d+\)$/.test(versionLabel), `version label: ${versionLabel}`);
+    assert(/^Version \d+(\.\d+)+ \(\d+\)$/.test(versionLabel), `version label: ${versionLabel}`);
     const emailButton = page.getByRole('button', { name: 'Email Me a Sign-In Code' });
     assert(await emailButton.isDisabled(), 'the email button should be disabled without an address');
     await shot(page, 'sign-in');
@@ -560,10 +592,12 @@ async function main() {
     await page.locator('.nav-title', { hasText: 'Shakes' }).waitFor();
     assert(page.url().endsWith('#/shakes'), `the shakes address is ${page.url()}`);
     await page.getByText('No accelerometer here').waitFor();
-    const leaders = async () => (await page.locator('.list-ranked .profile-name').allTextContents()).join('|');
+    const leaders = async () =>
+      (await page.locator('.list-ranked .leader-name, .list-ranked .profile-name').allTextContents()).join('|');
     await page.locator('.rank-total').first().waitFor();
     assert((await leaders()).startsWith('Ada Lovelace|'), `leaderboard: ${await leaders()}`);
-    await page.getByText('Last: 5 in 1.2 s').waitFor();
+    await page.locator('.leader-card', { hasText: '17' }).waitFor();
+    await page.locator('.leader-card').getByText(/^shakes · last /).waitFor();
     const card = page.getByRole('button', { name: 'Shake', exact: true });
     for (let i = 0; i < 20; i += 1) {
       await card.click();
@@ -574,7 +608,12 @@ async function main() {
     await page.getByText(/^Last: 20 shakes in /).waitFor();
     await page.getByText('20 shakes total across 1 bursts').waitFor();
     assert(db.shakes.filter((r) => r.user_id === ME).length === 1, 'the burst should be saved');
-    await page.waitForFunction(() => document.querySelector('.list-ranked .profile-name')?.textContent === 'me@example.com');
+    const saved = db.shakes.find((r) => r.user_id === ME).device;
+    assert(saved?.shakes?.length === 20, `each shake should be saved with the burst: ${JSON.stringify(saved)}`);
+    assert(saved.app_version && saved.app_build && saved.time_zone, `device details: ${JSON.stringify(saved)}`);
+    assert(saved.peak_acceleration === undefined, 'tapped shakes have no acceleration');
+    // I overtook Ada, so I'm the leader card now.
+    await page.waitForFunction(() => document.querySelector('.list-ranked .leader-name')?.textContent === 'me@example.com');
     await shot(page, 'shakes');
     console.log('ok  shake recording and leaderboard');
 
@@ -586,7 +625,30 @@ async function main() {
     assert((await page.locator('.history-row').count()) === 2, 'two bursts');
     assert((await page.locator('.history-delete').count()) === 0, "another user's bursts can't be deleted");
     assert((await page.getByRole('button', { name: 'Delete All Shakes' }).count()) === 0, "another user's stats can't be cleared");
+    await page.locator('.stat-row', { hasText: 'Strongest jolt' }).getByText('3.40 g').waitFor();
+    await page.locator('.stat-row', { hasText: 'Usual direction' }).getByText('Up and down').waitFor();
+    await page.locator('.history-row').nth(1).getByText(/Firm/).waitFor();
     await shot(page, 'shake-history');
+    // A burst's details.
+    await page.locator('.history-row').nth(1).click();
+    await page.locator('.nav-title', { hasText: '12 Shakes' }).waitFor();
+    assert(/#\/shakes\/[^/]+\/[^/]+$/.test(page.url()), `the burst address is ${page.url()}`);
+    await page.locator('.stat-row', { hasText: 'Intensity' }).getByText('Firm').waitFor();
+    await page.locator('.stat-row', { hasText: 'Coordinates' }).getByText('40.69420, -73.98660').waitFor();
+    await page.locator('.stat-row', { hasText: 'Model' }).getByText('iPhone17,1').waitFor();
+    assert((await page.locator('.shake-row').count()) === 3, 'three shakes listed');
+    assert((await page.locator('.bar-strongest').count()) === 1, 'one strongest shake');
+    await shot(page, 'shake-session');
+    await page.getByRole('button', { name: 'Back' }).click();
+    await page.locator('.nav-title', { hasText: 'Ada Lovelace' }).waitFor();
+    // A burst saved without device details leaves those sections out.
+    await page.locator('.history-row').first().click();
+    await page.locator('.nav-title', { hasText: '5 Shakes' }).waitFor();
+    await page.getByText("Per-shake detail wasn't recorded for this burst.").waitFor();
+    assert((await page.locator('.section-header', { hasText: 'Location' }).count()) === 0, 'no location section');
+    await page.getByRole('button', { name: 'Back' }).click();
+    await page.locator('.nav-title', { hasText: 'Ada Lovelace' }).waitFor();
+    console.log('ok  shake details');
     await page.getByRole('button', { name: 'Back' }).click();
     // Mine: delete one burst, then Delete All the rest; reload the history page directly; Back leads
     // to the leaderboard.

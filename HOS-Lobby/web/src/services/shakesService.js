@@ -2,7 +2,7 @@
 // view (see `HOS-Lobby/supabase/schemas/50_shakes.sql`).
 import { unwrap } from './profilesService.js';
 
-const SESSION_COLUMNS = 'id,user_id,shake_count,duration_ms,started_at';
+const SESSION_COLUMNS = 'id,user_id,shake_count,duration_ms,started_at,device';
 
 /** Every user who has shaken, most shakes first. */
 export async function fetchTotals(client) {
@@ -22,7 +22,7 @@ export async function fetchHistory(client, userID, limit = 500) {
 }
 
 /**
- * Records a burst `{ shake_count, duration_ms, started_at }` for the signed-in user; `user_id`
+ * Records a burst `{ shake_count, duration_ms, started_at, device }` for the signed-in user; `user_id`
  * comes from the session's JWT.
  */
 export async function record(client, session) {

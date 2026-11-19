@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Saves where you were (and your altitude) with each burst of shakes you record.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

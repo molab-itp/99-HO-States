@@ -27,7 +27,7 @@ export default function HomeView({ currentUserID }) {
   }, [client]);
 
   if (route.name === 'users' || route.name === 'user') return <UsersListView currentUserID={currentUserID} />;
-  if (route.name === 'shakes' || route.name === 'shakeHistory') return <ShakesView currentUserID={currentUserID} />;
+  if (route.name === 'shakes' || route.name === 'shakeHistory' || route.name === 'shakeSession') return <ShakesView currentUserID={currentUserID} />;
 
   return (
     <div className="app-shell">

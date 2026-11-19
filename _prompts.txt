@@ -1526,3 +1526,25 @@ is it needed
 
 git rm -r supabase/.temp
 rm -rf supabase
+
+v0.195 
+
+increment build number for HOS-Lobby/HOS-Lobby
+sync web app HOS-Lobby/web with SwiftUI app HOS-Lobby/HOS-Lobby
+
+Something to check first: HOS_Lobby/Info.plist 
+shows as modified in your working tree, and I didn't touch it. 
+The change removes the location permission text 
+(NSLocationWhenInUseUsageDescription) that v0.192 added. 
+Without it, the iOS app's location request won't work, 
+so bursts will save without a location. 
+Xcode may have regenerated the file. I left it alone.
+
+>> now in signing & capabilities
+
+cd ./HOS-Lobby/web
+npm run dev
+
+Supabase not configured
+VITE_SUPABASE_URL isn't set to a valid URL. 
+Copy .env.example to .env.local, fill it in, then restart the dev server.

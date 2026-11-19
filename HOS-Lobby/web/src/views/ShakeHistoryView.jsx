@@ -1,16 +1,21 @@
-// Port of ShakeHistoryView.swift: one user's shake totals and every burst they've recorded.
-// Users can delete their own bursts, one at a time or all at once.
+// Port of ShakeHistoryView.swift: one user's shake totals and every burst they've recorded; tap a
+// burst for its details. Users can delete their own bursts, one at a time or all at once.
 import { useCallback, useEffect, useState } from 'react';
 import Icon from '../components/Icon.jsx';
 import NavBar from '../components/NavBar.jsx';
 import Spinner from '../components/Spinner.jsx';
 import { profileName } from '../models/profile.js';
+import { gText, intensityLabel, shakePattern } from '../models/shakeMotion.js';
 import { formatDateTime, shakeDurationText } from '../models/shakeSession.js';
 import { useAuth } from '../services/AuthContext.jsx';
 import { clearStats, deleteSession, fetchHistory } from '../services/shakesService.js';
+import ShakeSessionDetailView from './ShakeSessionDetailView.jsx';
 
-/** `onChange` is called after a delete, so the leaderboard catches up. */
-export default function ShakeHistoryView({ profile, isCurrentUser, onBack, onChange }) {
+/**
+ * `onChange` is called after a delete, so the leaderboard catches up. With `sessionID`, shows that
+ * burst's details instead (the iOS app's `navigationDestination`); `onOpenSession` opens one.
+ */
+export default function ShakeHistoryView({ profile, isCurrentUser, sessionID, onOpenSession, onBack, onChange }) {
   const { client } = useAuth();
   const [sessions, setSessions] = useState([]);
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -59,6 +64,20 @@ export default function ShakeHistoryView({ profile, isCurrentUser, onBack, onCha
   const totalMS = sessions.reduce((sum, s) => sum + s.duration_ms, 0);
   const best = sessions.reduce((max, s) => (max == null || s.shake_count > max.shake_count ? s : max), null);
   const last = sessions[0];
+  const peaks = sessions.map((s) => s.device?.peak_acceleration).filter((g) => g != null);
+  const strongest = peaks.length > 0 ? Math.max(...peaks) : null;
+  const favorite = favoritePattern(sessions);
+
+  if (sessionID) {
+    const session = sessions.find((s) => s.id === sessionID);
+    if (session) return <ShakeSessionDetailView session={session} onBack={onBack} />;
+    return (
+      <div className="app-shell">
+        <NavBar title="" onBack={onBack} />
+        <div className="unavailable">{hasLoaded ? <h1>No such burst</h1> : <Spinner large />}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell">
@@ -105,17 +124,18 @@ export default function ShakeHistoryView({ profile, isCurrentUser, onBack, onCha
               <Stat title="Total time shaking" value={shakeDurationText(totalMS)} />
               <Stat title="Biggest burst" value={`${best.shake_count} in ${shakeDurationText(best.duration_ms)}`} />
               <Stat title="Last burst" value={`${last.shake_count} in ${shakeDurationText(last.duration_ms)}`} />
+              {strongest != null && <Stat title="Strongest jolt" value={gText(strongest)} />}
+              {favorite && <Stat title="Usual direction" value={favorite.label} />}
             </ul>
 
             <h2 className="section-header">History</h2>
             <ul className="list list-plain">
               {sessions.map((session) => (
-                <li key={session.id} className="list-item history-row">
-                  <span className="history-when">
-                    <span>{formatDateTime(session.started_at)}</span>
-                    <span className="history-duration">{shakeDurationText(session.duration_ms)}</span>
-                  </span>
-                  <span className="history-count">{session.shake_count} shakes</span>
+                <li key={session.id} className="list-item history-item">
+                  <button className="list-row history-row" onClick={() => onOpenSession(session)}>
+                    <HistoryRow session={session} />
+                    <Icon className="list-chevron" name="chevron-right" size={14} />
+                  </button>
                   {/* The iOS app swipes to delete; a browser gets a button. */}
                   {isCurrentUser && (
                     <button
@@ -153,6 +173,40 @@ export default function ShakeHistoryView({ profile, isCurrentUser, onBack, onCha
         </div>
       )}
     </div>
+  );
+}
+
+/** The most common pattern among bursts that have one, other than undetermined. */
+function favoritePattern(sessions) {
+  const counts = new Map();
+  for (const session of sessions) {
+    const pattern = shakePattern(session.device?.pattern);
+    if (pattern && pattern.id !== 'undetermined') counts.set(pattern.id, (counts.get(pattern.id) ?? 0) + 1);
+  }
+  let best = null;
+  for (const [id, count] of counts) if (best == null || count > counts.get(best)) best = id;
+  return shakePattern(best);
+}
+
+function HistoryRow({ session }) {
+  const g = session.device?.average_acceleration ?? session.device?.peak_acceleration;
+  const pattern = shakePattern(session.device?.pattern);
+  return (
+    <>
+      <span className="history-when">
+        <span>{formatDateTime(session.started_at)}</span>
+        <span className="history-duration">
+          {shakeDurationText(session.duration_ms)}
+          {g != null && ` · ${intensityLabel(g)}`}
+          {pattern && (
+            <span role="img" aria-label={pattern.label}>
+              <Icon name={pattern.icon} size={11} />
+            </span>
+          )}
+        </span>
+      </span>
+      <span className="history-count">{session.shake_count} shakes</span>
+    </>
   );
 }
 

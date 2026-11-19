@@ -88,16 +88,20 @@ HOS-Lobby/web/
       profilePhoto.js      ProfilePhoto: JPEG re-encoding, crop and thumbnail, on a canvas
       userEvent.js         UserEvent: the banner text
       shakeSession.js      ShakeSession: leaderboard ranking, "2.4 s" durations
+      shakeMotion.js       ShakeMotion: intensity, direction (up/down, circles, …) of a burst
+      shakeDeviceInfo.js   ShakeDeviceInfo: location and device details saved with a burst
     services/
       AuthContext.jsx      AuthModel, as a context: useAuth()
       profilesService.js   ProfilesService: profiles, Realtime, RPCs, the delete-user function
       profilePhotoService.js  ProfilePhotoService: the avatars bucket
       shakesService.js     ShakesService: shake_sessions, the shake_totals view, Realtime
       useShakeDetector.js  ShakeDetector, on the browser's devicemotion events
+      useLocationTracker.js  LocationTracker, on navigator.geolocation
       appStateStore.js     AppStateStore: unused here, as in the iOS app; the client for v05 to copy
     views/
       RootView.jsx, SignInView.jsx, HomeView.jsx, UsersListView.jsx, ProfileRow.jsx,
-      ProfileDetailView.jsx, ShakesView.jsx, ShakeHistoryView.jsx, PhotoCropView.jsx,
+      ProfileDetailView.jsx, ShakesView.jsx, ShakeHistoryView.jsx, ShakeSessionDetailView.jsx,
+      PhotoCropView.jsx,
       SetupRequiredView.jsx, AppVersionLabel.jsx
       useRoute.js          the navigation path, kept in the address
     components/            NavBar, Avatar, Spinner, Icon (Bootstrap Icons, as in v05)
@@ -114,13 +118,18 @@ HOS-Lobby/web/
   reloads when the tab comes back to the front.
 - **Actions menu** (admins): a popover under the button stands in for SwiftUI's `Menu`.
 - **Page links:** every screen has its own address (`#/users`, `#/user/<id>`, `#/shakes`,
-  `#/shakes/<id>`; Home has none), so the browser's Back button works and any screen can be
+  `#/shakes/<id>`, `#/shakes/<id>/<burst id>`; Home has none), so the browser's Back button works and any screen can be
   bookmarked. Back from a bookmarked screen goes to its parent.
 - **Shakes** come from the browser's `devicemotion` events, with the same threshold and burst
   timing as the iOS app's Core Motion detector. iOS Safari asks first: the Shakes screen shows an
   **Allow Motion** button, and the page must be served over HTTPS. Where no motion data arrives (a
   desktop browser), each tap on the card, or the Space bar, counts as one shake, as Device ▸ Shake
   does in the Simulator. Phones that support `navigator.vibrate` (not iPhones) buzz on each shake.
+- **Burst details** saved in `shake_sessions.device` are what the browser can see: location by
+  `navigator.geolocation` (the browser asks once), its altitude saved as `ellipsoidal_altitude`
+  (the browser's is above the WGS 84 ellipsoid, not sea level), the OS and browser guessed from the
+  user agent (plus a web-only `browser` field), battery only in Chromium, and no hardware model
+  (except Chromium on Android) or Low Power Mode. Tapped shakes have no intensity or direction.
 - **Deleting a burst** in shake history is a trash button, in place of swipe to delete.
 - **Choosing a photo** uses the browser's file picker; on a phone that offers the photo library
   and the camera. HEIC photos only work in Safari, which is the only browser that decodes them.

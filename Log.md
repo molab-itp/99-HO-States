@@ -4081,3 +4081,93 @@ rm -rf supabase
 After that, run Supabase CLI commands from `HOS-Lobby/`. Want me to do that and commit it?
 
 *Time: 13s · Cost: $0.1454 (input 6, output 1.1k, cache write 12.9k, cache read 102.0k) · session $0.1454*
+
+---
+
+## User (11/19/2026, 1:09:39 PM)
+
+```
+increment build number for HOS-Lobby/HOS-Lobby
+sync web app HOS-Lobby/web with SwiftUI app HOS-Lobby/HOS-Lobby
+```
+
+## Assistant
+
+Bump build to 1023, then look at what Swift changed since the last web sync (v0.191).
+
+Now the web side's shake files.
+
+Large sync: v0.192 (leader card with jiggle, location) and v0.193 (shake intensity/direction, per-shake detail, session detail screen) need porting. Let me check the CSS and supporting components.
+
+Writing the motion model (port of ShakeMotion.swift).
+
+Now the detector: track per-shake peaks/axes and feed the analyzer.
+
+Now the device-info model and a geolocation tracker (web stand-ins for ShakeDeviceInfo.swift and LocationTracker.swift).
+
+Adding icons (Bootstrap paths; Bootstrap has no crown, so a simple hand-drawn one).
+
+Now routing for the burst detail screen.
+
+Now rewrite ShakesView with the leader card, location, and richer recorder line.
+
+Now ShakeHistoryView (new stats, richer rows, tap to open) and the new detail view.
+
+Now the CSS for the leader card, history rows, and detail view.
+
+Build passes. Quick sanity test of the motion analyzer, plus the smoke script.
+
+Info.plist shows modified — I didn't touch it; checking what changed.
+
+The Info.plist change (location usage string removed) isn't mine — I'll leave it and flag it. Now let me extend the smoke test to cover the leader card and burst detail.
+
+Pre-existing breakage from v0.191 (iOS version is "0.8", two parts). Loosening the regex:
+
+Expected: Ada is now the leader card, which (as on iOS) shows "shakes · last …" instead of the last-burst line. Updating that assertion.
+
+All passing. Let me look at the screenshots of the new screens.
+
+Screens render well. One fix: a long unbroken name (an email) gets clipped in the leader card, so let it wrap.
+
+I bumped the iOS build number to 1023 and ported the two iOS shake updates (v0.192 and v0.193) to the web app. The build and `npm run smoke` both pass. I checked the screenshots of the leaderboard, history and burst-detail screens, but haven't tried it on a real phone, so actual motion and location data are untested. Nothing is committed.
+
+**Something to check first:** `HOS_Lobby/Info.plist` shows as modified in your working tree, and I didn't touch it. The change removes the location permission text (`NSLocationWhenInUseUsageDescription`) that v0.192 added. Without it, the iOS app's location request won't work, so bursts will save without a location. Xcode may have regenerated the file. I left it alone.
+
+**Build number:** `CURRENT_PROJECT_VERSION` is now 1023 in both build configurations. The web version label reads it from the Xcode project, so it shows "Version 0.8 (1023)".
+
+**Changes to the web app:**
+- **Shakes screen:** the leader now gets a large card at the top: bigger photo with a gold ring and crown, large total. It jiggles and the crown bounces whenever the leader's total goes up, including while you shake if you're the leader. The location tracker runs while the screen is open. The "Last:" line now adds intensity and direction, e.g. "· Firm, up and down".
+- **Detector:** it now records each shake's strength and direction and works out the burst's overall pattern, using the same thresholds and rules as iOS.
+- **Saved data:** each burst is saved with the same `device` fields iOS uses. Because the web can see less:
+  - The browser's altitude is measured differently from iOS's, so it goes in `ellipsoidal_altitude`.
+  - Battery is only available in Chrome.
+  - There's no hardware model or Low Power Mode.
+  - I added a web-only `browser` field; the iOS app ignores it.
+- **History:** new "Strongest jolt" and "Usual direction" totals, intensity and a direction icon on each row, and tapping a row opens the burst.
+- **Burst detail screen (new):** sections for the burst, intensity, direction, each shake, location and device. Each burst has its own address (`#/shakes/<user>/<burst>`).
+- **Smoke test:** I added sample `device` data and new checks for the leader card, the saved burst data, the new history totals and both kinds of detail screen. I also fixed a check that had been failing since v0.191: it expected a version like "0.8.0", but the version is now "0.8".
+- **README:** the web README now lists the new files and the differences from iOS.
+
+Bootstrap Icons has no crown, so I drew a simple one for the leader card. I didn't add a `Log.md` entry or bump the version in `package.json`.
+
+*Time: 8m 17s · Cost: $2.6856 (input 76, output 39.8k, cache write 127.5k, cache read 4348.5k) · session $2.6856*
+
+---
+
+## User (11/19/2026, 1:20:46 PM)
+
+```
+<task-notification>
+<task-id>b73gfvifw</task-id>
+<tool-use-id>toolu_01EvTKcmFEmwh8TvwR1t7wng</tool-use-id>
+<output-file>/private/tmp/claude-502/-Users-jht2-Documents-projects--molab-repos-a-99-HO-States/5859ef57-d579-47b9-88e4-9a4399d99b93/tasks/b73gfvifw.output</output-file>
+<status>completed</status>
+<summary>Background command "Look for local Bootstrap Icons SVG sources" completed (exit code 0)</summary>
+</task-notification>
+```
+
+## Assistant
+
+That notice is the earlier file search for local Bootstrap Icons files finishing. It's no longer needed, since I took the icon shapes from the online package instead. Nothing has changed since my summary above.
+
+*Time: 2s · Cost: $0.0357 (input 4, output 83, cache write 387, cache read 154.4k) · session $2.7213*

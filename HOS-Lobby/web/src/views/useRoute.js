@@ -8,6 +8,8 @@ import { useCallback, useSyncExternalStore } from 'react';
 //   #/user/<id>        ProfileDetailView (its parent is #/users)
 //   #/shakes           ShakesView
 //   #/shakes/<id>      ShakeHistoryView (its parent is #/shakes)
+//   #/shakes/<id>/<sessionID>
+//                      ShakeSessionDetailView (its parent is #/shakes/<id>)
 
 const NAVIGATE = 'hos-navigate';
 
@@ -15,7 +17,10 @@ function parse(hash) {
   const parts = hash.replace(/^#\/?/, '').split('/').filter(Boolean);
   if (parts[0] === 'users') return { name: 'users' };
   if (parts[0] === 'user' && parts[1]) return { name: 'user', id: parts[1] };
-  if (parts[0] === 'shakes') return parts[1] ? { name: 'shakeHistory', id: parts[1] } : { name: 'shakes' };
+  if (parts[0] === 'shakes') {
+    if (parts[1] && parts[2]) return { name: 'shakeSession', id: parts[1], sessionID: parts[2] };
+    return parts[1] ? { name: 'shakeHistory', id: parts[1] } : { name: 'shakes' };
+  }
   return { name: 'home' };
 }
 
@@ -23,6 +28,7 @@ function parse(hash) {
 function parentPath(route) {
   if (route.name === 'user') return '/users';
   if (route.name === 'shakeHistory') return '/shakes';
+  if (route.name === 'shakeSession') return `/shakes/${route.id}`;
   return '';
 }
 
@@ -50,7 +56,7 @@ function go(path, replace) {
 }
 
 /**
- * Returns `{ route, push, back }`. `route` is `{ name, id? }`; `push('/shakes')` opens a screen;
+ * Returns `{ route, push, back }`. `route` is `{ name, id?, sessionID? }`; `push('/shakes')` opens a screen;
  * `back()` is the navigation bar's Back button: one step back in history if the screen was opened
  * from inside the app, otherwise (a bookmark or reload) a replace with the screen's parent.
  */
