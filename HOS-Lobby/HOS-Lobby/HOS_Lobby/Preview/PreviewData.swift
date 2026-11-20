@@ -5,12 +5,12 @@ import UIKit
 /// Sample data for SwiftUI previews. Nothing here touches the network: the client points at a
 /// host that's never reached, so photo URLs fall back to their placeholders.
 extension AuthModel {
-    static func preview(state: State = .signedOut, errorMessage: String? = nil) -> AuthModel {
-        let client = SupabaseClient(supabaseURL: URL(string: "https://preview.invalid")!, supabaseKey: "preview")
-        let model = AuthModel(client: client, state: state)
-        model.errorMessage = errorMessage
-        return model
-    }
+  static func preview(state: State = .signedOut, errorMessage: String? = nil) -> AuthModel {
+    let client = SupabaseClient(supabaseURL: URL(string: "https://preview.invalid")!, supabaseKey: "preview")
+    let model = AuthModel(client: client, state: state)
+    model.errorMessage = errorMessage
+    return model
+  }
 }
 
 extension Profile {
